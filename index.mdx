@@ -1,20 +1,75 @@
 ---
 title: "Introduction"
-description: "Welcome to your project"
+description: "Any API, one wallet, USD, no subscriptions."
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+AnyAPI is a unified marketplace for scraping and data APIs. Reach hundreds of
+APIs through **one interface and one key**, pay per request in **real US dollars**,
+and let AnyAPI normalize the response schema and fail over automatically when a
+provider errors.
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+No per-provider signups, no monthly plans, no juggling credentials. Top up a
+single wallet and start calling.
 
-<Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
-</Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
-</Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
-</Card>
+## Why AnyAPI
+
+<CardGroup cols={2}>
+  <Card title="One key, every API" icon="key">
+    A single AnyAPI key unlocks the whole catalog. Add an API to your app without
+    creating yet another account.
+  </Card>
+  <Card title="Pay per request, in USD" icon="dollar-sign">
+    No subscriptions. You're billed the winning provider's price in real dollars,
+    and only when a call succeeds.
+  </Card>
+  <Card title="Normalized responses" icon="shapes">
+    Every API returns the same shape across providers, so your code doesn't change
+    when the upstream does.
+  </Card>
+  <Card title="Automatic failover" icon="shield-check">
+    If a provider fails, AnyAPI retries the next one under the same request.
+    Failed calls are never charged.
+  </Card>
+</CardGroup>
+
+## How it works
+
+Every API is a single `POST` to `/v1/run/{sku}`: send the normalized input, get a
+normalized result.
+
+<Steps>
+  <Step title="Send a request">
+    Call `/v1/run/{sku}` with the SKU's normalized input and your API key.
+  </Step>
+  <Step title="AnyAPI routes it">
+    We validate your input, then run it against the best provider — failing over
+    to the next on error, all under one price reservation.
+  </Step>
+  <Step title="Get a normalized result">
+    You receive `{ output, provider, costUsd }`. You're charged `costUsd` only on
+    success.
+  </Step>
+</Steps>
+
+## Pricing
+
+Pricing is **pass-through**: you pay the winning provider's per-request price in
+USD, surfaced as `costUsd` on every response. There are no subscriptions and no
+charge for failed calls — if every provider errors, you pay nothing.
+
+## Get started
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Make your first call in under five minutes.
+  </Card>
+  <Card title="Connect over MCP" icon="robot" href="/mcp">
+    Give your AI agents the whole catalog through one MCP endpoint.
+  </Card>
+  <Card title="API Reference" icon="code" href="/v1/run/tiktok.profile">
+    Browse every API with typed request and response schemas.
+  </Card>
+  <Card title="Dashboard" icon="gauge" href="https://app.anyapi.dev">
+    Create keys, top up your wallet, and track usage.
+  </Card>
+</CardGroup>

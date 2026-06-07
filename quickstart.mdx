@@ -1,47 +1,106 @@
 ---
 title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+description: "From zero to your first AnyAPI call in five minutes."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
-
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+This guide takes you from signup to a live response. You'll create a key, top up
+your wallet, and run your first API.
 
 ## Prerequisites
 
-Before you begin, you must have:
-
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+- An AnyAPI account — sign up at [app.anyapi.dev](https://app.anyapi.dev).
+- A terminal with `curl` (or any HTTP client).
 
 ## Get started
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Create an API key">
+    In the [dashboard](https://app.anyapi.dev), open **API Keys** and create a new
+    key. Copy it somewhere safe — it's shown only once.
 
-    ```bash
-    npm install your-package
-    ```
+    New accounts start with a small free balance, so you can make your first calls
+    before topping up.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+  <Step title="Make your first call">
+    Every API is a single `POST` to `/v1/run/{sku}`. Pass your key with the
+    `X-API-Key` header (or `Authorization: Bearer`) and the SKU's normalized input
+    as the JSON body.
 
-    ```bash
-    your-cli init
+    <CodeGroup>
+    ```bash curl
+    curl -s https://api.anyapi.dev/v1/run/tiktok.profile \
+      -H "X-API-Key: YOUR_ANYAPI_KEY" \
+      -H "Content-Type: application/json" \
+      -d '{"handle":"cristiano"}'
     ```
+
+    ```python python
+    import requests
+
+    res = requests.post(
+        "https://api.anyapi.dev/v1/run/tiktok.profile",
+        headers={"X-API-Key": "YOUR_ANYAPI_KEY"},
+        json={"handle": "cristiano"},
+    )
+    print(res.json())
+    ```
+
+    ```javascript node
+    const res = await fetch("https://api.anyapi.dev/v1/run/tiktok.profile", {
+      method: "POST",
+      headers: {
+        "X-API-Key": "YOUR_ANYAPI_KEY",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ handle: "cristiano" }),
+    });
+    console.log(await res.json());
+    ```
+    </CodeGroup>
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
+  <Step title="Read the response">
+    You get a normalized envelope. `output` is the result, and `costUsd` is what
+    this call cost you in real dollars.
 
-    ```bash
-    your-cli start
+    ```json
+    {
+      "output": { "found": true, "data": { "handle": "cristiano", "followers": 0 } },
+      "provider": "AnyAPI",
+      "costUsd": 0.002
+    }
     ```
+
+    <Note>
+      A legitimate "not found" is a success: `output` is `{ "found": false, "data": null }`.
+      You're only charged when a call succeeds — failed calls cost nothing.
+    </Note>
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## Find an API
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
+You don't need to know SKUs ahead of time — list and search the catalog:
+
+```bash
+# List or search every available API
+curl -s "https://api.anyapi.dev/v1/apis?query=tiktok" -H "X-API-Key: YOUR_ANYAPI_KEY"
+
+# Inspect one API's input and output schemas
+curl -s https://api.anyapi.dev/v1/apis/tiktok.profile -H "X-API-Key: YOUR_ANYAPI_KEY"
+```
+
+The full catalog with typed schemas also lives in the [API Reference](/v1/run/tiktok.profile).
+
+## Check your balance
+
+```bash
+curl -s https://api.anyapi.dev/v1/balance -H "X-API-Key: YOUR_ANYAPI_KEY"
+```
+
+Top up any time from the [dashboard](https://app.anyapi.dev) — your wallet is a
+USD balance you draw down per request.
+
+<Tip>
+  Building an AI agent? Skip the per-endpoint wiring and connect the whole catalog
+  over MCP instead — see [Connect over MCP](/mcp).
 </Tip>

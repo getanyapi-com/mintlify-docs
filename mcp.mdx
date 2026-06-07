@@ -1,0 +1,193 @@
+---
+title: "MCP server"
+description: "Connect AI agents to every AnyAPI through one Model Context Protocol endpoint, one key, and a USD wallet."
+---
+
+AnyAPI ships a [Model Context Protocol](https://modelcontextprotocol.io) server so agents
+can discover and run any API in the catalog without bespoke integrations. Point your MCP
+client at one endpoint, authenticate with your AnyAPI key, and your agent gets a
+registry-driven tool surface that covers the entire catalog — no tool-per-API sprawl.
+
+| | |
+|---|---|
+| **Endpoint** | `https://api.anyapi.dev/mcp` |
+| **Transport** | Streamable HTTP |
+| **Auth** | AnyAPI key as a Bearer token |
+| **Tools** | `list_apis`, `get_api`, `run_api` |
+
+## Prerequisites
+
+- An AnyAPI key. Create one in the [dashboard](https://app.anyapi.dev) under **API keys**.
+- A funded USD wallet. `run_api` bills your wallet per successful request; discovery is free.
+- An MCP-capable client (Claude Code, Claude Desktop, Cursor, or any client that speaks
+  Streamable HTTP).
+
+<Note>
+  The MCP surface is **API-key only** — session tokens are not accepted. Send your key as
+  `Authorization: Bearer <your-key>`.
+</Note>
+
+## Connect
+
+<Tabs>
+  <Tab title="Claude Code">
+    Add the server with the CLI:
+
+    ```bash
+    claude mcp add anyapi \
+      --transport http \
+      https://api.anyapi.dev/mcp \
+      --header "Authorization: Bearer YOUR_ANYAPI_KEY"
+    ```
+
+    Confirm it registered:
+
+    ```bash
+    claude mcp list
+    ```
+  </Tab>
+  <Tab title="Claude Desktop">
+    Open **Settings → Developer → Edit Config** and add AnyAPI to `mcpServers`:
+
+    ```json
+    {
+      "mcpServers": {
+        "anyapi": {
+          "type": "http",
+          "url": "https://api.anyapi.dev/mcp",
+          "headers": {
+            "Authorization": "Bearer YOUR_ANYAPI_KEY"
+          }
+        }
+      }
+    }
+    ```
+
+    Restart Claude Desktop. The AnyAPI tools appear in the tools menu.
+  </Tab>
+  <Tab title="Cursor">
+    Add AnyAPI to `~/.cursor/mcp.json` (or your project's `.cursor/mcp.json`):
+
+    ```json
+    {
+      "mcpServers": {
+        "anyapi": {
+          "url": "https://api.anyapi.dev/mcp",
+          "headers": {
+            "Authorization": "Bearer YOUR_ANYAPI_KEY"
+          }
+        }
+      }
+    }
+    ```
+
+    Enable the server in **Settings → MCP**.
+  </Tab>
+  <Tab title="Any MCP client">
+    Configure a remote Streamable HTTP server with these values:
+
+    - **URL:** `https://api.anyapi.dev/mcp`
+    - **Header:** `Authorization: Bearer YOUR_ANYAPI_KEY`
+
+    Most clients accept the same JSON shape:
+
+    ```json
+    {
+      "mcpServers": {
+        "anyapi": {
+          "url": "https://api.anyapi.dev/mcp",
+          "headers": { "Authorization": "Bearer YOUR_ANYAPI_KEY" }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Tools
+
+The server exposes three generic tools. Discovery (`list_apis`, `get_api`) is free; only
+`run_api` touches your wallet.
+
+<AccordionGroup>
+  <Accordion title="list_apis — discover what's available" icon="magnifying-glass">
+    List APIs in the catalog as lightweight summaries (no schemas), optionally filtered.
+
+    **Input**
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `query` | string | no | Free-text filter over name and description |
+    | `category` | string | no | Category slug to filter by |
+
+    **Returns** an array of API summaries (SKU, name, category, description, price).
+    Call this first to find the SKU you want, then fetch its schema with `get_api`.
+  </Accordion>
+  <Accordion title="get_api — inspect input and output schemas" icon="file-lines">
+    Get the full definition of one API by SKU, including its normalized input and output
+    JSON schemas.
+
+    **Input**
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `sku_id` | string | yes | The API SKU slug to describe |
+
+    **Returns** the full API definition with input/output JSON schemas. Use the input
+    schema to build a valid payload for `run_api`.
+  </Accordion>
+  <Accordion title="run_api — execute an API" icon="bolt">
+    Execute an API by SKU with a normalized input payload. Requires a valid AnyAPI key.
+    Billed to your USD wallet on success only.
+
+    **Input**
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `sku_id` | string | yes | The API SKU slug to execute |
+    | `input` | object | yes | Normalized payload matching the API's input schema |
+
+    **Returns** the normalized `output` and the serving `provider` (always **AnyAPI**).
+    Each successful call is billed to your wallet at the API's per-request price in USD;
+    invalid input, insufficient funds, and total upstream failure are **not** charged.
+  </Accordion>
+</AccordionGroup>
+
+## How an agent uses it
+
+A typical flow chains the three tools — discover, inspect, run:
+
+<Steps>
+  <Step title="Discover">
+    The agent calls `list_apis` with a query (for example, "instagram") to find a matching
+    SKU.
+  </Step>
+  <Step title="Inspect">
+    It calls `get_api` with that `sku_id` to read the input schema and build a valid
+    payload.
+  </Step>
+  <Step title="Run">
+    It calls `run_api` with the `sku_id` and `input`. AnyAPI routes to a provider,
+    normalizes the response, falls back automatically on error, and returns the result.
+  </Step>
+</Steps>
+
+Because every API shares the same three tools and one normalized schema convention, an
+agent that learns this flow once can use the entire catalog.
+
+## Errors
+
+Tool failures come back as MCP tool errors with a short machine-readable prefix:
+
+| Prefix | Meaning | Billed |
+|---|---|---|
+| `unauthorized` | Missing or invalid AnyAPI key | No |
+| `sku_not_found` | The requested SKU does not exist | No |
+| `invalid_input` | Payload did not match the API's input schema | No |
+| `insufficient_credits` | Wallet balance too low — top up to run | No |
+| `all_providers_failed` | Every provider for this API failed | No (released) |
+| `no_providers` | The API has no enabled providers | No |
+
+<Tip>
+  Need help? Reach out at [support@anyapi.dev](mailto:support@anyapi.dev).
+</Tip>
