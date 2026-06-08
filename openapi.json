@@ -36,6 +36,371 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/v1/run/facebook.post": {
+      "post": {
+        "description": "Fetch a single Facebook post by URL with its text and engagement counts (likes, comments, shares, views), normalized across providers.",
+        "operationId": "facebook_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "url": {
+                    "description": "Full Facebook post URL.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "Facebook post input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "comments": {
+                                  "type": "integer"
+                                },
+                                "id": {
+                                  "type": "string"
+                                },
+                                "likes": {
+                                  "type": "integer"
+                                },
+                                "shares": {
+                                  "type": "integer"
+                                },
+                                "text": {
+                                  "type": "string"
+                                },
+                                "views": {
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "text",
+                                "likes",
+                                "comments",
+                                "shares",
+                                "views"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "Facebook post output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Facebook Post",
+        "tags": [
+          "facebook"
+        ]
+      }
+    },
+    "/v1/run/facebook.post_comments": {
+      "post": {
+        "description": "List the comments on a Facebook post by URL with cursor pagination (text, author, reactions, reply count), normalized across providers.",
+        "operationId": "facebook_post_comments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "anyOf": [
+                  {
+                    "required": [
+                      "url"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "feedbackId"
+                    ]
+                  }
+                ],
+                "properties": {
+                  "cursor": {
+                    "description": "Pagination cursor from a previous response's nextCursor.",
+                    "type": "string"
+                  },
+                  "feedbackId": {
+                    "description": "Facebook feedback id for the post (alternative to url).",
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "Full Facebook post URL.",
+                    "type": "string"
+                  }
+                },
+                "title": "Facebook post comments input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "comments": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "author": {
+                                        "type": "string"
+                                      },
+                                      "createdAt": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "reactions": {
+                                        "type": "integer"
+                                      },
+                                      "replies": {
+                                        "type": "integer"
+                                      },
+                                      "text": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "text",
+                                      "author",
+                                      "reactions",
+                                      "replies",
+                                      "createdAt"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "nextCursor": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "comments",
+                                "nextCursor"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "Facebook post comments output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Facebook Post Comments",
+        "tags": [
+          "facebook"
+        ]
+      }
+    },
     "/v1/run/facebook.profile": {
       "post": {
         "description": "Fetch a Facebook page's public profile (likes, followers, category, about, verification) by URL or handle, normalized across providers.",
@@ -219,6 +584,375 @@
         ]
       }
     },
+    "/v1/run/facebook.profile_posts": {
+      "post": {
+        "description": "List a Facebook page's recent posts by URL or page id with cursor pagination (text, author, permalink), normalized across providers.",
+        "operationId": "facebook_profile_posts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "anyOf": [
+                  {
+                    "required": [
+                      "url"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "pageId"
+                    ]
+                  }
+                ],
+                "properties": {
+                  "cursor": {
+                    "description": "Pagination cursor from a previous response.",
+                    "type": "string"
+                  },
+                  "pageId": {
+                    "description": "Facebook page id.",
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "Full Facebook page/profile URL.",
+                    "type": "string"
+                  }
+                },
+                "title": "Facebook profile posts input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "posts": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "author": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "text": {
+                                        "type": "string"
+                                      },
+                                      "url": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "text",
+                                      "url",
+                                      "author"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "posts"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "Facebook profile posts output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Facebook Profile Posts",
+        "tags": [
+          "facebook"
+        ]
+      }
+    },
+    "/v1/run/facebook.profile_reels": {
+      "post": {
+        "description": "List a Facebook page's reels by URL with cursor pagination (caption, view count, permalink, thumbnail), normalized across providers.",
+        "operationId": "facebook_profile_reels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cursor": {
+                    "description": "Pagination cursor from a previous response.",
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "Full Facebook page/profile URL.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "Facebook profile reels input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "reels": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "createdAt": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "thumbnail": {
+                                        "type": "string"
+                                      },
+                                      "url": {
+                                        "type": "string"
+                                      },
+                                      "views": {
+                                        "type": "integer"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "url",
+                                      "caption",
+                                      "views",
+                                      "thumbnail",
+                                      "createdAt"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "reels"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "Facebook profile reels output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Facebook Profile Reels",
+        "tags": [
+          "facebook"
+        ]
+      }
+    },
     "/v1/run/google.search": {
       "post": {
         "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. One call, billed per request in real dollars.",
@@ -233,13 +967,6 @@
                     "default": "us",
                     "description": "Two-letter country code for result localization (e.g. us, gb, de).",
                     "type": "string"
-                  },
-                  "num": {
-                    "default": 10,
-                    "description": "Number of organic results to return.",
-                    "maximum": 100,
-                    "minimum": 1,
-                    "type": "integer"
                   },
                   "query": {
                     "description": "The Google search query.",
@@ -575,6 +1302,188 @@
         ]
       }
     },
+    "/v1/run/instagram.post_comments": {
+      "post": {
+        "description": "List the comments on an Instagram post or reel by URL with cursor pagination (text, author, likes), normalized across providers.",
+        "operationId": "instagram_post_comments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cursor": {
+                    "description": "Pagination cursor from a previous response's nextCursor.",
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "Full Instagram post or reel URL.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "Instagram post comments input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "comments": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "author": {
+                                        "type": "string"
+                                      },
+                                      "createdAt": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "likes": {
+                                        "type": "integer"
+                                      },
+                                      "text": {
+                                        "type": "string"
+                                      },
+                                      "verified": {
+                                        "type": "boolean"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "text",
+                                      "author",
+                                      "verified",
+                                      "likes",
+                                      "createdAt"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "comments"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "Instagram post comments output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Instagram Post Comments",
+        "tags": [
+          "instagram"
+        ]
+      }
+    },
     "/v1/run/instagram.profile": {
       "post": {
         "description": "Fetch an Instagram account's public profile (followers, posts, bio, verification) by handle, normalized across providers with transparent failover.",
@@ -744,6 +1653,192 @@
           }
         },
         "summary": "Instagram Profile",
+        "tags": [
+          "instagram"
+        ]
+      }
+    },
+    "/v1/run/instagram.search_hashtag": {
+      "post": {
+        "description": "List recent Instagram posts under a hashtag (caption, type, media URL), normalized across providers with transparent failover.",
+        "operationId": "instagram_search_hashtag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cursor": {
+                    "description": "Pagination cursor from a previous response.",
+                    "type": "string"
+                  },
+                  "hashtag": {
+                    "description": "Hashtag to search, without the leading #.",
+                    "type": "string"
+                  },
+                  "mediaType": {
+                    "description": "Filter by media type (e.g. all, photo, video, reel).",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "hashtag"
+                ],
+                "title": "Instagram hashtag search input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "posts": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "displayUrl": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "shortcode": {
+                                        "type": "string"
+                                      },
+                                      "type": {
+                                        "type": "string"
+                                      },
+                                      "url": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "shortcode",
+                                      "type",
+                                      "url",
+                                      "caption",
+                                      "displayUrl"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "posts"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "Instagram hashtag search output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Instagram Hashtag Search",
         "tags": [
           "instagram"
         ]
@@ -935,6 +2030,209 @@
         ]
       }
     },
+    "/v1/run/instagram.user_reels": {
+      "post": {
+        "description": "List an Instagram account's reels by handle with cursor pagination (caption, plays, likes, comments), normalized across providers.",
+        "operationId": "instagram_user_reels",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "anyOf": [
+                  {
+                    "required": [
+                      "handle"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "userId"
+                    ]
+                  }
+                ],
+                "properties": {
+                  "cursor": {
+                    "description": "Pagination cursor (max_id) from a previous response's nextCursor.",
+                    "type": "string"
+                  },
+                  "handle": {
+                    "description": "Instagram handle.",
+                    "type": "string"
+                  },
+                  "userId": {
+                    "description": "Instagram user id (faster than handle when known).",
+                    "type": "string"
+                  }
+                },
+                "title": "Instagram user reels input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "nextCursor": {
+                                  "type": "string"
+                                },
+                                "reels": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "caption": {
+                                        "type": "string"
+                                      },
+                                      "comments": {
+                                        "type": "integer"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "likes": {
+                                        "type": "integer"
+                                      },
+                                      "shortcode": {
+                                        "type": "string"
+                                      },
+                                      "takenAt": {
+                                        "type": "integer"
+                                      },
+                                      "views": {
+                                        "type": "integer"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "shortcode",
+                                      "caption",
+                                      "views",
+                                      "likes",
+                                      "comments",
+                                      "takenAt"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "reels",
+                                "nextCursor"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "Instagram user reels output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Instagram User Reels",
+        "tags": [
+          "instagram"
+        ]
+      }
+    },
     "/v1/run/linkedin.company": {
       "post": {
         "description": "Fetch a LinkedIn company page (description, employee count, industry, website, logo) by company URL, normalized across providers with transparent failover.",
@@ -1105,6 +2403,351 @@
         ]
       }
     },
+    "/v1/run/linkedin.company_posts": {
+      "post": {
+        "description": "List a LinkedIn company page's recent posts by URL with page pagination (text, link, publish date), normalized across providers.",
+        "operationId": "linkedin_company_posts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "page": {
+                    "description": "Page number for pagination.",
+                    "minimum": 1,
+                    "type": "integer"
+                  },
+                  "url": {
+                    "description": "Full LinkedIn company page URL.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "LinkedIn company posts input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "posts": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "publishedAt": {
+                                        "type": "string"
+                                      },
+                                      "text": {
+                                        "type": "string"
+                                      },
+                                      "url": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "url",
+                                      "text",
+                                      "publishedAt"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "posts"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "LinkedIn company posts output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "LinkedIn Company Posts",
+        "tags": [
+          "linkedin"
+        ]
+      }
+    },
+    "/v1/run/linkedin.post": {
+      "post": {
+        "description": "Fetch a single LinkedIn post or article by URL (title, text, author, like and comment counts, publish date), normalized across providers.",
+        "operationId": "linkedin_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "url": {
+                    "description": "Full LinkedIn post or article URL.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "LinkedIn post input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "author": {
+                                  "type": "string"
+                                },
+                                "comments": {
+                                  "type": "integer"
+                                },
+                                "likes": {
+                                  "type": "integer"
+                                },
+                                "publishedAt": {
+                                  "type": "string"
+                                },
+                                "text": {
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string"
+                                },
+                                "url": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "url",
+                                "title",
+                                "text",
+                                "author",
+                                "likes",
+                                "comments",
+                                "publishedAt"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "LinkedIn post output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "LinkedIn Post",
+        "tags": [
+          "linkedin"
+        ]
+      }
+    },
     "/v1/run/linkedin.profile": {
       "post": {
         "description": "Fetch a LinkedIn member's public profile (name, location, followers, about) by profile URL, normalized across providers with transparent failover.",
@@ -1264,6 +2907,338 @@
         "summary": "LinkedIn Profile",
         "tags": [
           "linkedin"
+        ]
+      }
+    },
+    "/v1/run/linkedin.search_posts": {
+      "post": {
+        "description": "Search public LinkedIn posts by keyword (text, link, publish date), normalized across providers with transparent failover.",
+        "operationId": "linkedin_search_posts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cursor": {
+                    "description": "Pagination cursor from a previous response.",
+                    "type": "string"
+                  },
+                  "datePosted": {
+                    "description": "Filter by recency (e.g. past-24h, past-week, past-month).",
+                    "type": "string"
+                  },
+                  "query": {
+                    "description": "The post search query.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "query"
+                ],
+                "title": "LinkedIn post search input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "posts": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "publishedAt": {
+                                        "type": "string"
+                                      },
+                                      "text": {
+                                        "type": "string"
+                                      },
+                                      "url": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "url",
+                                      "text",
+                                      "publishedAt"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "posts"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "LinkedIn post search output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "LinkedIn Post Search",
+        "tags": [
+          "linkedin"
+        ]
+      }
+    },
+    "/v1/run/reddit.post_comments": {
+      "post": {
+        "description": "List the top-level comments on a Reddit post by URL (author, body, score, timestamp), normalized across providers with transparent failover.",
+        "operationId": "reddit_post_comments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cursor": {
+                    "description": "Cursor from a previous response for more comments.",
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "Full Reddit post URL.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "Reddit post comments input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "comments": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "author": {
+                                "type": "string"
+                              },
+                              "body": {
+                                "type": "string"
+                              },
+                              "createdUtc": {
+                                "type": "number"
+                              },
+                              "id": {
+                                "type": "string"
+                              },
+                              "url": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "author",
+                              "body",
+                              "url",
+                              "createdUtc"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "comments"
+                      ],
+                      "title": "Reddit post comments output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Reddit Post Comments",
+        "tags": [
+          "reddit"
         ]
       }
     },
@@ -2205,6 +4180,552 @@
         ]
       }
     },
+    "/v1/run/tiktok.search_users": {
+      "post": {
+        "description": "Search TikTok accounts by keyword (handle, nickname, follower count) with cursor pagination, normalized across providers.",
+        "operationId": "tiktok_search_users",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cursor": {
+                    "description": "Pagination cursor from a previous response's nextCursor.",
+                    "type": "string"
+                  },
+                  "query": {
+                    "description": "The keyword to search TikTok accounts for.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "query"
+                ],
+                "title": "TikTok user search input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "nextCursor": {
+                                  "type": "string"
+                                },
+                                "users": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "followers": {
+                                        "type": "integer"
+                                      },
+                                      "following": {
+                                        "type": "integer"
+                                      },
+                                      "handle": {
+                                        "type": "string"
+                                      },
+                                      "nickname": {
+                                        "type": "string"
+                                      },
+                                      "userId": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "handle",
+                                      "nickname",
+                                      "userId",
+                                      "followers",
+                                      "following"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "users",
+                                "nextCursor"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "TikTok user search output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "TikTok User Search",
+        "tags": [
+          "tiktok"
+        ]
+      }
+    },
+    "/v1/run/tiktok.video": {
+      "post": {
+        "description": "Fetch a single TikTok video by URL with its caption and engagement counts (views, likes, comments, shares, saves), normalized across providers with transparent failover.",
+        "operationId": "tiktok_video",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "region": {
+                    "description": "Two-letter country code for the proxy region (e.g. US, PH), used when a video is region-restricted.",
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "Full TikTok video URL.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "TikTok video input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "caption": {
+                                  "type": "string"
+                                },
+                                "comments": {
+                                  "type": "integer"
+                                },
+                                "id": {
+                                  "type": "string"
+                                },
+                                "likes": {
+                                  "type": "integer"
+                                },
+                                "region": {
+                                  "type": "string"
+                                },
+                                "saves": {
+                                  "type": "integer"
+                                },
+                                "shares": {
+                                  "type": "integer"
+                                },
+                                "views": {
+                                  "type": "integer"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "caption",
+                                "region",
+                                "views",
+                                "likes",
+                                "comments",
+                                "shares",
+                                "saves"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "TikTok video output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "TikTok Video",
+        "tags": [
+          "tiktok"
+        ]
+      }
+    },
+    "/v1/run/tiktok.video_comments": {
+      "post": {
+        "description": "List the comments on a TikTok video by URL with cursor pagination (text, author, likes, reply count), normalized across providers.",
+        "operationId": "tiktok_video_comments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cursor": {
+                    "description": "Pagination cursor from a previous response's nextCursor.",
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "Full TikTok video URL.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "TikTok video comments input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "comments": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "author": {
+                                        "type": "string"
+                                      },
+                                      "createdAt": {
+                                        "type": "integer"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "likes": {
+                                        "type": "integer"
+                                      },
+                                      "replies": {
+                                        "type": "integer"
+                                      },
+                                      "text": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "text",
+                                      "author",
+                                      "likes",
+                                      "replies",
+                                      "createdAt"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "nextCursor": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "comments",
+                                "nextCursor"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "TikTok video comments output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "TikTok Video Comments",
+        "tags": [
+          "tiktok"
+        ]
+      }
+    },
     "/v1/run/tiktok.video_transcript": {
       "post": {
         "description": "Fetch the spoken-word transcript of a TikTok video by URL, normalized across providers with transparent failover.",
@@ -3080,6 +5601,213 @@
         ]
       }
     },
+    "/v1/run/youtube.channel_videos": {
+      "post": {
+        "description": "List a YouTube channel's videos by handle or channel ID with cursor pagination (title, views, length, publish time), normalized across providers.",
+        "operationId": "youtube_channel_videos",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "anyOf": [
+                  {
+                    "required": [
+                      "handle"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "channelId"
+                    ]
+                  }
+                ],
+                "properties": {
+                  "channelId": {
+                    "description": "YouTube channel ID.",
+                    "type": "string"
+                  },
+                  "cursor": {
+                    "description": "Continuation token from a previous response for pagination.",
+                    "type": "string"
+                  },
+                  "handle": {
+                    "description": "YouTube channel handle, e.g. @mkbhd.",
+                    "type": "string"
+                  },
+                  "sort": {
+                    "description": "Sort order.",
+                    "enum": [
+                      "latest",
+                      "popular"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "title": "YouTube channel videos input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "nextCursor": {
+                                  "type": "string"
+                                },
+                                "videos": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "lengthText": {
+                                        "type": "string"
+                                      },
+                                      "publishedTime": {
+                                        "type": "string"
+                                      },
+                                      "title": {
+                                        "type": "string"
+                                      },
+                                      "url": {
+                                        "type": "string"
+                                      },
+                                      "views": {
+                                        "type": "integer"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "url",
+                                      "title",
+                                      "views",
+                                      "lengthText",
+                                      "publishedTime"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "videos",
+                                "nextCursor"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "YouTube channel videos output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "YouTube Channel Videos",
+        "tags": [
+          "youtube"
+        ]
+      }
+    },
     "/v1/run/youtube.search": {
       "post": {
         "description": "Search YouTube and get matching videos (title, channel, views, length, publish time) as normalized JSON, across providers with transparent failover.",
@@ -3461,6 +6189,196 @@
         ]
       }
     },
+    "/v1/run/youtube.video_comments": {
+      "post": {
+        "description": "List the comments on a YouTube video by URL with cursor pagination (text, author, likes, reply count), normalized across providers.",
+        "operationId": "youtube_video_comments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "cursor": {
+                    "description": "Continuation token from a previous response for pagination.",
+                    "type": "string"
+                  },
+                  "order": {
+                    "description": "Comment order (e.g. top, newest).",
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "Full YouTube video URL.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "YouTube video comments input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "creditsCharged": {
+                      "description": "Internal accounting unit (1 credit = $0.0001).",
+                      "type": "integer"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "comments": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "author": {
+                                        "type": "string"
+                                      },
+                                      "id": {
+                                        "type": "string"
+                                      },
+                                      "likes": {
+                                        "type": "integer"
+                                      },
+                                      "publishedTime": {
+                                        "type": "string"
+                                      },
+                                      "replies": {
+                                        "type": "integer"
+                                      },
+                                      "text": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id",
+                                      "text",
+                                      "author",
+                                      "likes",
+                                      "replies",
+                                      "publishedTime"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "nextCursor": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "comments",
+                                "nextCursor"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "YouTube video comments output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "creditsCharged",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "YouTube Video Comments",
+        "tags": [
+          "youtube"
+        ]
+      }
+    },
     "/v1/run/youtube.video_transcript": {
       "post": {
         "description": "Fetch the transcript/captions of a YouTube video by URL or ID, normalized across providers with transparent failover.",
@@ -3635,7 +6553,7 @@
   ],
   "servers": [
     {
-      "url": "https://api.anyapi.dev"
+      "url": "https://api.getanyapi.com"
     }
   ],
   "tags": [
