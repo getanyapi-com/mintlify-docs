@@ -57,6 +57,36 @@ Pricing is **pass-through**: you pay the winning provider's per-request price in
 USD, surfaced as `costUsd` on every response. There are no subscriptions and no
 charge for failed calls — if every provider errors, you pay nothing.
 
+## For AI agents
+
+If you are an AI agent (or are setting one up), AnyAPI's whole catalog is available
+through one [MCP server](/mcp) — no per-API integration needed:
+
+- **Endpoint:** `https://api.getanyapi.com/mcp` (Streamable HTTP)
+- **Auth:** `Authorization: Bearer <ANYAPI_KEY>` — required only for `run_api`;
+  `list_apis` and `get_api` (discovery) work without a key.
+- **Tools:** `list_apis` → `get_api` → `run_api`. Discover an API, read its input
+  JSON Schema, then execute it. Successful runs bill the wallet in USD (`costUsd`);
+  failed runs are never charged.
+
+```json
+{
+  "mcpServers": {
+    "anyapi": {
+      "url": "https://api.getanyapi.com/mcp",
+      "headers": { "Authorization": "Bearer YOUR_ANYAPI_KEY" }
+    }
+  }
+}
+```
+
+See the [MCP server page](/mcp) for per-client setup (Claude Code, Claude Desktop,
+Cursor, Codex) and the full tool reference. Agents can also use the plain REST
+surface — `GET /v1/apis` to discover, `POST /v1/run/{sku}` to execute (both
+authenticated) — documented in the [API Reference](/v1/run/tiktok.profile) and
+machine-readable at the public
+[`/openapi.json`](https://api.getanyapi.com/openapi.json).
+
 ## Get started
 
 <CardGroup cols={2}>
