@@ -1,0 +1,80 @@
+---
+title: "Agent skills"
+description: "Install the official AnyAPI skill so your coding agent knows how to discover, price, and run any API in the catalog."
+---
+
+AnyAPI ships an official [Agent Skill](https://agentskills.io) that teaches your agent
+the AnyAPI workflow — discover an API, read its schema, run it, and handle pricing and
+errors correctly. It complements the [MCP server](/mcp): **the skill teaches the
+workflow; MCP provides the live tools.** The skill also works without MCP by falling
+back to plain REST.
+
+| | |
+|---|---|
+| **Repo** | [`getanyapi-com/skills`](https://github.com/getanyapi-com/skills) |
+| **Skill** | `anyapi` |
+| **Works with** | Claude Code, Codex, Cursor, GitHub Copilot, and any agent supporting the Agent Skills spec |
+
+## Install
+
+<Tabs>
+  <Tab title="Any agent (skills CLI)">
+    Works with every agent that reads `.agents/skills/`:
+
+    ```bash
+    npx skills add getanyapi-com/skills
+    ```
+  </Tab>
+  <Tab title="Claude Code (plugin)">
+    Installs the skill **and** the AnyAPI MCP server in one step:
+
+    ```bash
+    claude plugin marketplace add getanyapi-com/skills
+    claude plugin install anyapi@anyapi
+    ```
+  </Tab>
+  <Tab title="Manual">
+    Copy the skill directory into your agent's skills folder:
+
+    ```bash
+    git clone https://github.com/getanyapi-com/skills
+    cp -r skills/skills/anyapi .agents/skills/   # or ~/.agents/skills/ or .claude/skills/
+    ```
+  </Tab>
+</Tabs>
+
+## Setup
+
+<Steps>
+  <Step title="Create an API key">
+    In the [dashboard](https://app.getanyapi.com) under **API keys**, and fund your USD
+    wallet.
+  </Step>
+  <Step title="Export it">
+    The skill reads the key from the environment — it never hardcodes credentials:
+
+    ```bash
+    export ANYAPI_API_KEY=your-key
+    ```
+  </Step>
+  <Step title="Ask for data">
+    Ask your agent for third-party data — "get the top posts in r/golang", "scrape this
+    TikTok profile" — and it will discover the right API, check the per-request USD
+    price, and run it.
+  </Step>
+</Steps>
+
+## What the skill covers
+
+- The **discover → inspect → run** flow over MCP or REST.
+- **Cost discipline:** per-request `priceUsd`, estimating bulk-job cost up front, and
+  checking the wallet balance.
+- **Result semantics:** the `{found, data}` envelope — a `found: false` is a successful
+  answer, not an error.
+- **Error handling:** every machine-readable error prefix and what the agent should do
+  about each (none are charged).
+
+<Tip>
+  Prefer giving your agent live tools instead of (or alongside) the skill? Connect the
+  [MCP server](/mcp) directly.
+</Tip>
