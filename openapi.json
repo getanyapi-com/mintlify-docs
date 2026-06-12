@@ -5268,6 +5268,331 @@
         ]
       }
     },
+    "/v1/run/web.map": {
+      "post": {
+        "description": "Map an entire website into a clean list of its URLs (with titles and descriptions) in a single call. Billed per request in real dollars.",
+        "operationId": "web_map",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "limit": {
+                    "default": 100,
+                    "description": "Maximum number of links to return.",
+                    "type": "integer"
+                  },
+                  "search": {
+                    "description": "Optional term that orders the returned links by relevance.",
+                    "type": "string"
+                  },
+                  "url": {
+                    "description": "The base URL of the site to map into a list of links.",
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "Web map input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "results": {
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "description": {
+                                        "type": "string"
+                                      },
+                                      "title": {
+                                        "type": "string"
+                                      },
+                                      "url": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "url",
+                                      "title",
+                                      "description"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "results"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "Web map output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Web Map",
+        "tags": [
+          "web"
+        ]
+      }
+    },
+    "/v1/run/web.scrape": {
+      "post": {
+        "description": "Scrape any web page and get its main content back as clean Markdown plus title and metadata. One call, billed per request in real dollars.",
+        "operationId": "web_scrape",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "url": {
+                    "description": "The URL of the page to scrape.",
+                    "format": "uri",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "title": "Web scrape input",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "costUsd": {
+                      "description": "Amount charged in USD.",
+                      "type": "number"
+                    },
+                    "output": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "data": {
+                          "oneOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "additionalProperties": false,
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "markdown": {
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "type": "string"
+                                },
+                                "url": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "url",
+                                "title",
+                                "description",
+                                "markdown"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "found": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "found",
+                        "data"
+                      ],
+                      "title": "Web scrape output",
+                      "type": "object"
+                    },
+                    "provider": {
+                      "description": "Always \"AnyAPI\".",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "output",
+                    "provider",
+                    "costUsd"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Normalized result."
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Input did not match the schema (no charge)."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Missing or invalid API key."
+          },
+          "402": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Insufficient wallet balance (no charge)."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unknown SKU."
+          },
+          "502": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Every provider failed (charge released)."
+          }
+        },
+        "summary": "Web Scrape",
+        "tags": [
+          "web"
+        ]
+      }
+    },
     "/v1/run/youtube.channel": {
       "post": {
         "description": "Fetch a YouTube channel's stats (subscribers, video count, total views, description) by handle or channel ID, normalized across providers.",
@@ -6404,6 +6729,10 @@
     {
       "name": "twitter",
       "x-group": "X (Twitter)"
+    },
+    {
+      "name": "web",
+      "x-group": "Web"
     },
     {
       "name": "youtube",
