@@ -46,16 +46,24 @@ normalized result.
     to the next on error, all under one price reservation.
   </Step>
   <Step title="Get a normalized result">
-    You receive `{ output, provider, costUsd }`. You're charged `costUsd` only on
-    success.
+    You receive `{ output, provider, costUsd, items }`. You're charged `costUsd`
+    only on success.
   </Step>
 </Steps>
 
 ## Pricing
 
-Pricing is **pass-through**: you pay the winning provider's per-request price in
-USD, surfaced as `costUsd` on every response. There are no subscriptions and no
-charge for failed calls — if every provider errors, you pay nothing.
+Pricing is **pass-through** in USD, surfaced as `costUsd` on every response. There
+are no subscriptions and no charge for failed calls — if every provider errors,
+you pay nothing.
+
+Most APIs are **priced per result**: a small base cost plus a per-item rate, so a
+call that returns 5 results costs less than one that returns 50. Set `limit` in
+your input to cap how many results you get (and what you pay); the response
+reports `items` — the count you were charged for. Each API's `baseUsd` and
+`perItemUsd` are listed in the catalog and via `get_api`, so you can budget a
+call before making it. Simple lookups that return a single record are priced flat
+per request.
 
 ## For AI agents
 

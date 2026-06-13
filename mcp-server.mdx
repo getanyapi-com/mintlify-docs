@@ -166,9 +166,11 @@ The server exposes three generic tools. Discovery (`list_apis`, `get_api`) is fr
     | `sku_id` | string | yes | The API SKU slug to execute |
     | `input` | object | yes | Normalized payload matching the API's input schema |
 
-    **Returns** the normalized `output` and the serving `provider` (always **AnyAPI**).
-    Each successful call is billed to your wallet at the API's per-request price in USD;
-    invalid input, insufficient funds, and total upstream failure are **not** charged.
+    **Returns** the normalized `output`, the serving `provider` (always **AnyAPI**),
+    `costUsd`, and `items` (the number of results charged for). Most APIs are priced
+    per result — `baseUsd + perItemUsd × items` — so cap results (and cost) with
+    `limit` in your input; simple lookups are flat per request. Invalid input,
+    insufficient funds, and total upstream failure are **not** charged.
   </Accordion>
 </AccordionGroup>
 
@@ -209,11 +211,17 @@ and `structuredContent` with these exact shapes:
       "category": "social",
       "name": "Reddit Search",
       "description": "Search Reddit posts across all subreddits by query, normalized across providers with transparent failover.",
-      "priceUsd": 0.003
+      "priceUsd": 0.003,
+      "baseUsd": 0.003,
+      "perItemUsd": 0
     }
   ]
 }
 ```
+
+`perItemUsd` is `0` here, so this API is **flat per request** (`priceUsd`). APIs
+priced per result report a non-zero `perItemUsd` and accept a `limit` in their
+input — then `costUsd = baseUsd + perItemUsd × items`.
 
 ```json
 // get_api {"sku_id": "reddit.search"} → structuredContent (schemas abridged)
@@ -221,6 +229,8 @@ and `structuredContent` with these exact shapes:
   "scraper": {
     "slug": "reddit.search",
     "priceUsd": 0.003,
+    "baseUsd": 0.003,
+    "perItemUsd": 0,
     "inputSchema": {
       "type": "object",
       "required": ["query"],
@@ -241,7 +251,8 @@ and `structuredContent` with these exact shapes:
 {
   "output":   { "posts": [ { "title": "…", "url": "…", "score": 123 } ] },
   "provider": "AnyAPI",
-  "costUsd":  0.003
+  "costUsd":  0.003,
+  "items":    25
 }
 ```
 
