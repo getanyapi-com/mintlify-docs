@@ -13,7 +13,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 | **Endpoint** | `https://api.getanyapi.com/mcp` |
 | **Transport** | Streamable HTTP |
 | **Auth** | AnyAPI key as a Bearer token |
-| **Tools** | `list_apis`, `get_api`, `run_api` |
+| **Tools** | `list_apis`, `get_api`, `run_api`, `get_balance` |
 
 ## Prerequisites
 
@@ -26,7 +26,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
   The MCP surface is **API-key only** — session tokens are not accepted. Send your key as
   `Authorization: Bearer <your-key>`. Discovery (`list_apis`, `get_api`) works **without a
   key**, so an agent can browse the catalog and read schemas before credentials are set up;
-  only `run_api` requires authentication.
+  `run_api` and `get_balance` require authentication.
 </Note>
 
 ## Connect
@@ -125,8 +125,8 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 ## Tools
 
-The server exposes three generic tools. Discovery (`list_apis`, `get_api`) is free; only
-`run_api` touches your wallet.
+The server exposes four generic tools. Discovery (`list_apis`, `get_api`) is free; only
+`run_api` touches your wallet. `get_balance` reports what's left in it.
 
 <AccordionGroup>
   <Accordion title="list_apis — discover what's available" icon="magnifying-glass">
@@ -171,6 +171,15 @@ The server exposes three generic tools. Discovery (`list_apis`, `get_api`) is fr
     per result — `baseUsd + perItemUsd × items` — so cap results (and cost) with
     `limit` in your input; simple lookups are flat per request. Invalid input,
     insufficient funds, and total upstream failure are **not** charged.
+  </Accordion>
+  <Accordion title="get_balance — check your wallet" icon="wallet">
+    Get the remaining wallet balance for the API key you authenticate with. Requires a
+    valid AnyAPI key; never charges.
+
+    **Input** — none.
+
+    **Returns** `balanceUsd`, the remaining wallet balance in USD. Use it to confirm
+    there are funds before a `run_api` call, or to surface the balance to a user.
   </Accordion>
 </AccordionGroup>
 
