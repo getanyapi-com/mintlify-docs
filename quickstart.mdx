@@ -8,14 +8,14 @@ your wallet, and run your first API.
 
 ## Prerequisites
 
-- An AnyAPI account — sign up at [app.getanyapi.com](https://app.getanyapi.com).
+- An AnyAPI account — sign up at [getanyapi.com](https://getanyapi.com/dashboard).
 - A terminal with `curl` (or any HTTP client).
 
 ## Get started
 
 <Steps>
   <Step title="Create an API key">
-    In the [dashboard](https://app.getanyapi.com), open **API Keys** and create a new
+    In the [dashboard](https://getanyapi.com/dashboard), open **API Keys** and create a new
     key. Copy it somewhere safe — it's shown only once.
 
     New accounts start with a small free balance, so you can make your first calls
@@ -57,6 +57,14 @@ your wallet, and run your first API.
     console.log(await res.json());
     ```
     </CodeGroup>
+
+    <Note>
+      Building an agent? `/v1/run/{sku}` accepts optional **query parameters** that
+      shrink the response so a large result doesn't flood your context window:
+      `fields` (keep only these keys), `max_items` (cap the rows), and `summary`
+      (outline only). They trim what's returned, never what you're billed. See the
+      [MCP server](/mcp-server) page for details.
+    </Note>
   </Step>
   <Step title="Read the response">
     You get a normalized envelope. `output` is the result, `costUsd` is what this
@@ -99,7 +107,7 @@ The full catalog with typed schemas also lives in the [API Reference](/api-refer
 curl -s https://api.getanyapi.com/v1/balance -H "X-API-Key: YOUR_ANYAPI_KEY"
 ```
 
-Top up any time from the [dashboard](https://app.getanyapi.com) — your wallet is a
+Top up any time from the [dashboard](https://getanyapi.com/dashboard) — your wallet is a
 USD balance you draw down per request.
 
 <Tip>

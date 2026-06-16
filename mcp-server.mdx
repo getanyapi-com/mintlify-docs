@@ -17,7 +17,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 ## Prerequisites
 
-- An AnyAPI key. Create one in the [dashboard](https://app.getanyapi.com) under **API keys**.
+- An AnyAPI key. Create one in the [dashboard](https://getanyapi.com/dashboard) under **API keys**.
 - A funded USD wallet. `run_api` bills your wallet per successful request; discovery is free.
 - An MCP-capable client (Claude Code, Claude Desktop, Cursor, Codex, or any client that
   speaks Streamable HTTP).
@@ -165,6 +165,13 @@ The server exposes four generic tools. Discovery (`list_apis`, `get_api`) is fre
     |---|---|---|---|
     | `sku_id` | string | yes | The API SKU slug to execute |
     | `input` | object | yes | Normalized payload matching the API's input schema |
+    | `fields` | string | no | Comma-separated keys (dotted paths like `author.name`) to keep on each result item. Trims the response, not the charge. |
+    | `max_items` | integer | no | Cap the number of result rows returned; a `_truncated` note reports how many were withheld. Trims the response, not the charge. |
+    | `summary` | boolean | no | Return only a structural outline (top-level keys and item counts) instead of the full data. Trims the response, not the charge. |
+
+    The last three are **opt-in response-budget controls** — they keep a large result
+    from flooding your context window. They change only what is returned to you, never
+    what you are billed (`costUsd` reflects the full result the API produced).
 
     **Returns** the normalized `output`, the serving `provider` (always **AnyAPI**),
     `costUsd`, and `items` (the number of results charged for). Most APIs are priced
