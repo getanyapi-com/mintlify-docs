@@ -1,0 +1,119 @@
+---
+title: "Let your agent onboard itself"
+description: "Point an AI agent at AnyAPI and it provisions its own key, reads the catalog, and starts calling APIs. You just prompt it — no manual signup, no copied credentials."
+---
+
+Most tools make *you* sign up, create a key, and paste it into your agent. AnyAPI flips
+that around: **the agent onboards itself.** It reads the machine-readable skill, mints its
+own spend-capped key, discovers the catalog, and makes the first call — all from a single
+prompt. You stay in control of the money; the agent does the setup.
+
+## The one thing you do
+
+Prompt your agent. That's the whole setup step:
+
+```text
+You have access to AnyAPI, a pay-per-call marketplace for scraping and data APIs.
+Read https://getanyapi.com/agent-onboarding/SKILL.md, onboard yourself, and make one
+real API call. Use you@example.com as your sponsor email. Report what you did.
+```
+
+Swap in your own email as the sponsor. The agent takes it from there.
+
+<Note>
+  Already have a funded account and want the agent to spend from it directly? Hand it an
+  [API key](https://getanyapi.com/dashboard/keys) instead and skip self-signup — see
+  [Agent skills](/agent-skills). Self-signup is for the zero-setup, agent-first path.
+</Note>
+
+## What the agent does on its own
+
+<Steps>
+  <Step title="Discovers AnyAPI">
+    It fetches the skill at `https://getanyapi.com/agent-onboarding/SKILL.md` (or the
+    structured `https://getanyapi.com/.well-known/anyapi.json`), which tells it the MCP
+    endpoint, the REST base, the tools, and how to get a key.
+  </Step>
+  <Step title="Mints its own key">
+    It posts to the public self-signup endpoint — no human, no dashboard:
+
+    ```bash
+    curl -X POST https://api.getanyapi.com/agent/signup \
+      -H "Content-Type: application/json" \
+      -d '{ "sponsorEmail": "you@example.com", "label": "my-agent" }'
+    ```
+
+    The response returns its key once, plus its limits:
+
+    ```json
+    {
+      "secret": "aa_live_…",
+      "keyId": "42",
+      "capUsd": 0.15,
+      "verificationStatus": "pending",
+      "claimToken": "…",
+      "claimUrl": "https://getanyapi.com/dashboard",
+      "expiresAt": "2026-06-23T00:00:00Z"
+    }
+    ```
+
+    `sponsorEmail` is optional but recommended — it's how you approve the agent later.
+  </Step>
+  <Step title="Starts working immediately">
+    The key works right away. The agent lists APIs, reads schemas, checks its USD balance,
+    and runs a real call over [MCP](/mcp-server) or REST — all priced in USD, pay per
+    request.
+  </Step>
+</Steps>
+
+## What it costs you to start
+
+Nothing up front. A self-signed-up key is **capped at a small USD amount** (the `capUsd`
+in the response) and its wallet starts with a matching credit, so the agent can prove it
+works without you spending anything. The cap is the agent's spending limit until you
+approve it. Exceeding it returns `402 key_cap_exceeded` — that's the signal it's time to
+fund the agent.
+
+<Warning>
+  An unapproved key **expires after 7 days** and stops working. Approve or claim it (below)
+  to make it permanent.
+</Warning>
+
+## Approving and funding the agent
+
+When the agent has proven useful, you give it a real budget. Two paths:
+
+<Tabs>
+  <Tab title="Claim it (recommended)">
+    The agent hands you its **claim token**. In the
+    [dashboard](https://getanyapi.com/dashboard/keys) under **API keys**, choose
+    **Claim agent key**, paste the token, and the key moves onto your account and loses its
+    cap. From then it spends from your wallet, which you top up in **Billing**.
+
+    This is the path that funds the agent — claiming ties the key to your account and your
+    payment method.
+  </Tab>
+  <Tab title="Approve by email">
+    If the agent signed up with your `sponsorEmail`, you get a verification email with
+    **Approve** and **Block** links. Approve vouches for the agent and lifts its cap;
+    Block revokes its key. Use this to confirm an agent is yours.
+  </Tab>
+</Tabs>
+
+<Note>
+  Funding happens by **claiming** the key into your account, then topping up your USD
+  wallet in [Billing](https://getanyapi.com/dashboard). There is no separate per-agent
+  wallet to top up — an agent either runs on its starter credit or on your funded account.
+</Note>
+
+## Why this is safe
+
+- The starter cap and wallet credit bound what an unapproved agent can spend.
+- Self-signup is rate-limited, and unapproved keys expire on their own.
+- You decide if and when to fund an agent. Until you claim it, it can only spend its small
+  starter amount.
+
+<Tip>
+  Give your agent the live tools too: connect the [MCP server](/mcp-server) so it can
+  discover and run APIs without writing HTTP by hand.
+</Tip>
