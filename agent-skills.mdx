@@ -11,10 +11,11 @@ back to plain REST.
 
 <Info>
   **Which page do you want?** This page is for **integrating AnyAPI into your app** — your
-  coding agent uses a [dashboard key](https://getanyapi.com/dashboard/keys) on your funded
-  account, and the app is the caller in production. If instead you're running an
-  **autonomous agent that calls AnyAPI itself at runtime**, it can provision its own key —
-  see [Let your agent onboard itself](/agent-self-signup).
+  coding agent runs against a key on your funded account (it can mint one for you and you
+  claim it, or you create one in the [dashboard](https://getanyapi.com/dashboard/keys)),
+  and the app is the caller in production. If instead you're running an **autonomous agent
+  that calls AnyAPI itself at runtime**, it provisions and holds its own key — see
+  [Let your agent onboard itself](/agent-self-signup).
 </Info>
 
 | | |
@@ -53,17 +54,30 @@ back to plain REST.
 
 ## Setup
 
+The skill handles the key for you. On first use it reads `ANYAPI_API_KEY`; if that's empty,
+it asks which email to tie the account to and mints a key — no dashboard trip.
+
 <Steps>
-  <Step title="Create an API key">
-    In the [dashboard](https://getanyapi.com/dashboard) under **API keys**, and fund your USD
-    wallet.
-  </Step>
-  <Step title="Export it">
+  <Step title="Already have a key? Export it">
     The skill reads the key from the environment — it never hardcodes credentials:
 
     ```bash
     export ANYAPI_API_KEY=your-key
     ```
+
+    No key yet? Skip this step — the skill provisions one on first use.
+  </Step>
+  <Step title="Let the skill provision a key">
+    With nothing in `ANYAPI_API_KEY`, the skill asks for your email and calls the public
+    self-signup endpoint, drops the new key into the environment, and starts working on a
+    small starter credit. It never prints the secret.
+  </Step>
+  <Step title="Claim it for the full credit">
+    The starter key is capped and expires in 7 days until you claim it. Sign in at the
+    [dashboard](https://getanyapi.com/dashboard/keys) with that email, open **API keys →
+    Claim agent key**, and paste the claim token the skill shows you. Claiming lifts the
+    cap, makes the key permanent, and adds your one-time **$1** account credit — the same
+    key keeps working, now on your funded wallet.
   </Step>
   <Step title="Ask for data">
     Ask your agent for third-party data — "get the top posts in r/golang", "scrape this

@@ -18,8 +18,24 @@ your wallet, and run your first API.
     In the [dashboard](https://getanyapi.com/dashboard), open **API Keys** and create a new
     key. Copy it somewhere safe — it's shown only once.
 
-    New accounts start with a small free balance, so you can make your first calls
-    before topping up.
+    New accounts get a one-time **$1** credit, so you can make your first calls before
+    topping up.
+
+    <Tip>
+      Prefer not to leave your terminal? Mint a key with one request — no dashboard, no
+      sign-in:
+
+      ```bash
+      curl -s -X POST https://api.getanyapi.com/agent/signup \
+        -H "Content-Type: application/json" \
+        -d '{ "sponsorEmail": "you@example.com", "label": "quickstart" }'
+      ```
+
+      The response includes your `aa_live_…` key (shown once) and a `claimToken`. It works
+      immediately on a small starter credit; to lift its cap, make it permanent, and add
+      the $1 credit, sign in at the dashboard with that email and claim it under **API keys
+      → Claim agent key**. See [Let your agent onboard itself](/agent-self-signup).
+    </Tip>
   </Step>
   <Step title="Make your first call">
     Every API is a single `POST` to `/v1/run/{sku}`. Pass your key with the
