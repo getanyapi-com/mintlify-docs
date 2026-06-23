@@ -1,0 +1,166 @@
+---
+title: "Pay per call with x402 and MPP"
+description: "Agents can pay AnyAPI inline per request with no account and no API key, settling on-chain via x402 (Base, USDC) or MPP (Tempo). The wallet is the identity."
+---
+
+Every AnyAPI endpoint accepts **inline crypto payment**. An agent with a funded wallet can
+call any of the 200+ APIs without signing up, creating a key, or holding a balance: it makes
+the request, gets a `402 Payment Required` with machine-readable payment instructions, pays,
+and retries. The wallet is the identity, and you pay per call in USD.
+
+Two payment rails are supported on the same endpoints:
+
+<CardGroup cols={2}>
+  <Card title="x402" icon="ethereum">
+    Settle in USDC on **Base** mainnet. Gasless: the facilitator sponsors gas, you sign an
+    authorization. Works with any standard x402 client.
+  </Card>
+  <Card title="MPP" icon="bolt">
+    Machine Payments Protocol, settling on **Tempo**. The buyer signs and broadcasts the
+    transfer, then replays the credential.
+  </Card>
+</CardGroup>
+
+<Info>
+  **Which path do you want?** This page is the **no-account** path: pay each call from a
+  crypto wallet, nothing to set up. If you would rather hold a USD balance and call with an
+  API key, see the [Quickstart](/quickstart) or let your
+  [agent onboard itself](/agent-self-signup). Both hit the same `/v1/run/{sku}` endpoints.
+</Info>
+
+## How inline payment works
+
+The flow is the standard HTTP 402 handshake, identical for both rails:
+
+<Steps>
+  <Step title="Call the endpoint">
+    Make a normal `POST https://api.getanyapi.com/v1/run/{sku}` with the SKU's JSON input and
+    no credentials.
+  </Step>
+  <Step title="Get a 402 with payment instructions">
+    AnyAPI responds `402 Payment Required`. The x402 challenge rides in the
+    `PAYMENT-REQUIRED` header (and the response body); the MPP challenge rides in the
+    `WWW-Authenticate: Payment` header. Each carries the price, the network, the asset, and
+    the address to pay.
+  </Step>
+  <Step title="Pay and retry">
+    Your client signs the payment and re-sends the request with the credential attached
+    (`PAYMENT-SIGNATURE` / `X-PAYMENT` for x402, `Authorization: Payment` for MPP). AnyAPI
+    verifies the payment, runs the API, and returns `200` with the result plus a receipt
+    header.
+  </Step>
+</Steps>
+
+A client library does all of this for you. You only write the original request.
+
+## Pay with x402 (Base, USDC)
+
+The simplest path is a standard x402 client such as
+[`x402-fetch`](https://www.npmjs.com/package/x402-fetch), which wraps `fetch` and handles the
+402, the signature, and the retry automatically. Point it at any SKU:
+
+<CodeGroup>
+```javascript Node (x402-fetch)
+import { wrapFetchWithPayment, createSigner, decodeXPaymentResponse } from "x402-fetch";
+
+// Your wallet's private key. It never leaves the process; the EIP-3009
+// authorization is signed locally and the facilitator sponsors gas.
+const signer = await createSigner("base", process.env.PRIVATE_KEY);
+
+// maxValue caps what the client will auto-pay per call (USDC atomic units).
+const fetchWithPay = wrapFetchWithPayment(fetch, signer, 50_000n); // 0.05 USDC
+
+const res = await fetchWithPay("https://api.getanyapi.com/v1/run/web.scrape", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ url: "https://example.com" }),
+});
+
+const data = await res.json();
+console.log(data.provider, data.costUsd, data.output);
+
+// Optional: the settlement receipt (on-chain tx hash).
+const receipt = res.headers.get("x-payment-response");
+if (receipt) console.log(decodeXPaymentResponse(receipt));
+```
+</CodeGroup>
+
+<Note>
+  **You only pay on success.** With x402, AnyAPI settles the payment *after* the API call
+  succeeds, so a failed run never charges you. The response includes `costUsd` (the USD
+  charged) and `provider: "AnyAPI"`.
+</Note>
+
+What the challenge advertises, if you implement the wire format yourself:
+
+- **Network:** Base mainnet (`eip155:8453`).
+- **Asset:** USDC (`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`).
+- **Price:** the per-call USD amount, in the challenge's `amount` (atomic units).
+- **Versions:** the v2 challenge is in the `PAYMENT-REQUIRED` header; the v1 challenge is in
+  the response body, so stock `x402-fetch` works out of the box. Pay back with
+  `PAYMENT-SIGNATURE` (v2) or `X-PAYMENT` (v1).
+
+## Pay with MPP (Tempo)
+
+The same endpoints accept Machine Payments Protocol on Tempo. Use the
+[`mppx`](https://www.npmjs.com/package/mppx) client, which signs and broadcasts the transfer,
+then replays the credential:
+
+<CodeGroup>
+```javascript Node (mppx)
+import { Mppx, tempo } from "mppx/client";
+import { Receipt } from "mppx";
+import { privateKeyToAccount } from "viem/accounts";
+
+const buyer = privateKeyToAccount(process.env.PRIVATE_KEY);
+
+const client = Mppx.create({
+  methods: [tempo.charge({
+    account: buyer,
+    expectedChainId: 4217,                       // Tempo mainnet
+    rpcUrl: { 4217: "https://rpc.tempo.xyz" },
+  })],
+  polyfill: false,
+});
+
+const res = await client.fetch("https://api.getanyapi.com/v1/run/web.scrape", {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ url: "https://example.com" }),
+});
+
+const data = await res.json();
+console.log(data.provider, data.costUsd, data.output);
+
+// The settlement receipt carries the on-chain reference.
+const receipt = Receipt.fromResponse(res);
+if (receipt?.reference) console.log(`https://explore.tempo.xyz/tx/${receipt.reference}`);
+```
+</CodeGroup>
+
+The MPP challenge arrives as a `WWW-Authenticate: Payment` header
+(`method="tempo", intent="charge"`); you settle on Tempo (chain id `4217`) and replay the
+credential in `Authorization: Payment`. AnyAPI returns the result with a `Payment-Receipt`
+header.
+
+## What you pay
+
+- **Per call, in USD.** Each endpoint is priced in real dollars, shown as the `amount` in the
+  402 challenge and as `costUsd` in the result. There is no subscription and no minimum.
+- **No balance to hold.** You pay straight from your wallet on each call; nothing is
+  pre-funded with AnyAPI.
+- **AnyAPI is the provider.** Responses report `provider: "AnyAPI"` and the USD cost, the same
+  normalized shape as a keyed call.
+
+<Tip>
+  Prices are low (many SKUs are a fraction of a cent), so set a sane per-call cap in your
+  client (`maxValue` for x402) and let the agent transact freely under it.
+</Tip>
+
+## Discovery
+
+AnyAPI's endpoints are listed in the **x402 Bazaar** (the Coinbase facilitator's discovery
+index) and on explorers like [x402scan](https://www.x402scan.com), so an agent can find a SKU,
+read its input and output schema, and pay it without you wiring anything up. You can also pull
+the full machine-readable spec at
+[`https://api.getanyapi.com/openapi.json`](https://api.getanyapi.com/openapi.json).
