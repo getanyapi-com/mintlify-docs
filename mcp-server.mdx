@@ -13,7 +13,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 | **Endpoint** | `https://api.getanyapi.com/mcp` |
 | **Transport** | Streamable HTTP |
 | **Auth** | AnyAPI key as a Bearer token |
-| **Tools** | `list_apis`, `get_api`, `run_api`, `get_balance` |
+| **Tools** | `list_apis`, `search_apis`, `get_api`, `run_api`, `get_balance` |
 
 ## Prerequisites
 
@@ -24,9 +24,9 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 <Note>
   The MCP surface is **API-key only** — session tokens are not accepted. Send your key as
-  `Authorization: Bearer <your-key>`. Discovery (`list_apis`, `get_api`) works **without a
-  key**, so an agent can browse the catalog and read schemas before credentials are set up;
-  `run_api` and `get_balance` require authentication.
+  `Authorization: Bearer <your-key>`. Discovery (`list_apis`, `search_apis`, `get_api`) works
+  **without a key**, so an agent can browse the catalog and read schemas before credentials are
+  set up; `run_api` and `get_balance` require authentication.
 </Note>
 
 ## Connect
@@ -125,22 +125,41 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 ## Tools
 
-The server exposes four generic tools. Discovery (`list_apis`, `get_api`) is free; only
-`run_api` touches your wallet. `get_balance` reports what's left in it.
+The server exposes five generic tools. Discovery (`list_apis`, `search_apis`, `get_api`) is
+free; only `run_api` touches your wallet. `get_balance` reports what's left in it.
 
 <AccordionGroup>
-  <Accordion title="list_apis — discover what's available" icon="magnifying-glass">
-    List APIs in the catalog as lightweight summaries (no schemas), optionally filtered.
+  <Accordion title="list_apis — browse the catalog" icon="list">
+    Browse APIs as lightweight summaries, optionally filtered. Summaries carry the SKU,
+    name, category, and USD pricing only - **no descriptions or schemas** - so listing the
+    whole catalog stays token-cheap. To find an API by keyword (with descriptions), use
+    `search_apis`; for one API's schemas, use `get_api`.
 
     **Input**
 
     | Field | Type | Required | Description |
     |---|---|---|---|
-    | `query` | string | no | Free-text filter over name and description |
+    | `query` | string | no | Free-text filter over name, slug, and description |
     | `category` | string | no | Category slug to filter by |
 
-    **Returns** an array of API summaries (SKU, name, category, description, price).
-    Call this first to find the SKU you want, then fetch its schema with `get_api`.
+    **Returns** an array of API summaries (`id`, `slug`, `name`, `category`, `priceUsd`,
+    `baseUsd`, `perItemUsd`).
+  </Accordion>
+  <Accordion title="search_apis — find an API by keyword" icon="magnifying-glass">
+    Search APIs by keyword across name, slug, and description, returning matches **with
+    their descriptions** (schemas omitted). This is the targeted lookup: use it to find the
+    right SKU before reading its schema with `get_api`.
+
+    **Input**
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `query` | string | yes | Free-text search over name, slug, and description |
+    | `category` | string | no | Category slug to narrow the search |
+    | `limit` | integer | no | Cap on matches returned (default 25) |
+
+    **Returns** `results` (API summaries including `description`) and `total`, the number
+    of APIs that matched before `limit` was applied, so you know whether to narrow further.
   </Accordion>
   <Accordion title="get_api — inspect input and output schemas" icon="file-lines">
     Get the full definition of one API by SKU, including its normalized input and output
@@ -192,12 +211,13 @@ The server exposes four generic tools. Discovery (`list_apis`, `get_api`) is fre
 
 ## How an agent uses it
 
-A typical flow chains the three tools — discover, inspect, run:
+A typical flow chains the tools - discover, inspect, run:
 
 <Steps>
   <Step title="Discover">
-    The agent calls `list_apis` with a query (for example, "instagram") to find a matching
-    SKU.
+    The agent calls `search_apis` with a query (for example, "instagram") to find a matching
+    SKU and read its description. (Use `list_apis` instead to browse the whole catalog as
+    lightweight summaries.)
   </Step>
   <Step title="Inspect">
     It calls `get_api` with that `sku_id` to read the input schema and build a valid
@@ -209,7 +229,7 @@ A typical flow chains the three tools — discover, inspect, run:
   </Step>
 </Steps>
 
-Because every API shares the same three tools and one normalized schema convention, an
+Because every API shares the same tools and one normalized schema convention, an
 agent that learns this flow once can use the entire catalog.
 
 ### Worked example
@@ -218,9 +238,9 @@ Discover Reddit APIs, inspect one, and run it. Tool results carry both a JSON te
 and `structuredContent` with these exact shapes:
 
 ```json
-// list_apis {"query": "reddit"} → structuredContent
+// search_apis {"query": "reddit"} → structuredContent
 {
-  "scrapers": [
+  "results": [
     {
       "id": "reddit.search",
       "slug": "reddit.search",
@@ -231,9 +251,14 @@ and `structuredContent` with these exact shapes:
       "baseUsd": 0.003,
       "perItemUsd": 0
     }
-  ]
+  ],
+  "total": 1
 }
 ```
+
+`list_apis` returns the same entries minus `description` (and wrapped in `scrapers`),
+so browsing the full catalog stays token-cheap; reach for it when you want to enumerate
+rather than search.
 
 `perItemUsd` is `0` here, so this API is **flat per request** (`priceUsd`). APIs
 priced per result report a non-zero `perItemUsd` and accept a `limit` in their
