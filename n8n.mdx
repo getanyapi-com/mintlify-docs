@@ -1,0 +1,146 @@
+---
+title: "n8n community node"
+description: "Run any AnyAPI endpoint inside an n8n workflow on one credential, billed per request in USD."
+---
+
+AnyAPI ships an official [n8n](https://n8n.io) community node so you can run any API
+in the catalog from inside a workflow. Add one credential, drop in the **AnyAPI** node,
+pick an API from a live dropdown, and pass its normalized input. The same node reaches the
+whole catalog, so a single workflow can fan out to many AnyAPI endpoints on one key and
+merge the results.
+
+| | |
+|---|---|
+| **Package** | [`n8n-nodes-anyapi`](https://www.npmjs.com/package/n8n-nodes-anyapi) |
+| **Source** | [github.com/getanyapi-com/n8n-nodes-anyapi](https://github.com/getanyapi-com/n8n-nodes-anyapi) |
+| **Node** | **AnyAPI** (operations: Run API, Get API Schema, List APIs, Get Balance) |
+| **Credential** | **AnyAPI API** (paste your key; Bearer auth) |
+
+## Prerequisites
+
+- An AnyAPI key. Create one in the [dashboard](https://getanyapi.com/dashboard) under **API keys**.
+- A funded USD wallet. **Run API** bills your wallet per successful request; discovery is free.
+  New accounts start with a small free credit, so you can test before topping up.
+- An n8n instance where you can install community nodes (self-hosted, or any plan that allows them).
+
+## Install
+
+<Steps>
+  <Step title="Open community nodes">
+    In n8n, go to **Settings > Community Nodes** and select **Install**.
+  </Step>
+  <Step title="Install the package">
+    Enter the package name and confirm:
+
+    ```
+    n8n-nodes-anyapi
+    ```
+
+    n8n downloads and installs the node. See the
+    [community nodes installation guide](https://docs.n8n.io/integrations/community-nodes/installation/)
+    for details.
+  </Step>
+  <Step title="Add the AnyAPI node">
+    In any workflow, search for **AnyAPI** in the node panel and add it.
+  </Step>
+</Steps>
+
+## Create the AnyAPI credential
+
+The node authenticates with one **AnyAPI API** credential.
+
+<Steps>
+  <Step title="Add a new credential">
+    On the AnyAPI node, create a new **AnyAPI API** credential.
+  </Step>
+  <Step title="Paste your key">
+    Paste your AnyAPI key into **API Key**. It is sent as `Authorization: Bearer <key>`.
+
+    Leave **Base URL** at its default, `https://api.getanyapi.com`. Change it only for a
+    self-hosted or staging gateway.
+  </Step>
+  <Step title="Save">
+    On save, n8n validates the key against the wallet balance endpoint. A valid key with a
+    reachable wallet passes; an invalid one is rejected before you build a workflow.
+  </Step>
+</Steps>
+
+## Operations
+
+The single **AnyAPI** node exposes four operations.
+
+<AccordionGroup>
+  <Accordion title="Run API - execute any API by SKU" icon="bolt">
+    Run an API by its SKU with a normalized JSON **Input** payload. The **API** dropdown loads
+    live from the public catalog, so every SKU is selectable and newly added providers appear
+    automatically without updating the node.
+
+    Returns the normalized `output`, the serving `provider` (always **AnyAPI**), the `costUsd`
+    of the call in real dollars, and `items` (the number of results charged for). You are billed
+    on success only.
+  </Accordion>
+  <Accordion title="Get API Schema - inspect input and output" icon="file-lines">
+    Fetch the input and output JSON Schema for one API. Use the input schema to build a valid
+    payload for **Run API**.
+  </Accordion>
+  <Accordion title="List APIs - browse the catalog" icon="list">
+    Browse the AnyAPI catalog, optionally narrowed with **Query** (free-text over name and
+    description) and **Category** (a category slug). Returns one item per matching API.
+  </Accordion>
+  <Accordion title="Get Balance - check your wallet" icon="wallet">
+    Return the remaining wallet balance in USD for the key on the credential. Never charges.
+  </Accordion>
+</AccordionGroup>
+
+## Response budget options (Run API)
+
+**Run API** has three optional controls under **Options** that shrink the response payload so a
+large result does not flood the next node. They change only what is returned to you, never what you
+are billed (`costUsd` reflects the full result the API produced):
+
+| Option | Effect |
+|---|---|
+| **Fields** | Comma-separated keys to keep on each result item. Dotted paths like `author.name` are allowed. |
+| **Max Items** | Cap the number of result items returned (`0` means no cap). |
+| **Summary Only** | Return only a structural outline instead of the full data. |
+
+## Worked example
+
+Add an **AnyAPI** node, select **Run API**, pick **Reddit Search** (`reddit.search`) from the
+**API** dropdown, and set **Input** to:
+
+```json
+{ "query": "apify alternative" }
+```
+
+Execute. The node returns the normalized envelope, including the exact `costUsd` of the call:
+
+```json
+{
+  "output": {
+    "posts": [
+      { "title": "Looking for an Apify alternative", "url": "https://reddit.com/...", "score": 128 }
+    ]
+  },
+  "provider": "AnyAPI",
+  "costUsd": 0.003,
+  "items": 25
+}
+```
+
+`provider` is always **AnyAPI** and `costUsd` is what the call cost you in real dollars. Pricing is
+pay per request in USD, with no subscription, and failed calls are never charged.
+
+## One key, many APIs
+
+Because every API shares one credential and the same response envelope (`output` plus `costUsd`),
+a single workflow can fan out across many AnyAPI endpoints (for example Google News, Trustpilot,
+Similarweb, Reddit, LinkedIn, Google Search, and X / Twitter), then merge them with a **Merge** node
+and hand the combined result to an AI Agent. Adding a sixth source is just another AnyAPI node on the
+same key.
+
+<Tip>
+  Prefer to call AnyAPI directly? The same catalog is available over plain REST (see the
+  [Quickstart](/quickstart)) and through one [MCP server](/mcp-server) for AI agents. Need help?
+  Reach out at [support@getanyapi.com](mailto:support@getanyapi.com).
+</Tip>
