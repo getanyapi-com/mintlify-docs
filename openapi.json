@@ -563,8 +563,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.030000",
-                        "min": "0.000000",
+                        "max": "0.030080",
+                        "min": "0.000080",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -1844,8 +1844,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.040000",
-                        "min": "0.000000",
+                        "max": "0.040020",
+                        "min": "0.000020",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -2606,8 +2606,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.058000",
-                        "min": "0.000000",
+                        "max": "0.058050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -2866,8 +2866,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.060000",
-                        "min": "0.000000",
+                        "max": "0.060100",
+                        "min": "0.000100",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -3366,8 +3366,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.067500",
-                        "min": "0.005000",
+                        "max": "0.048500",
+                        "min": "0.001000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -4131,8 +4131,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.075000",
-                        "min": "0.000000",
+                        "max": "0.059500",
+                        "min": "0.001000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -4406,8 +4406,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.100000",
-                        "min": "0.000000",
+                        "max": "0.100050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -15345,263 +15345,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.048000",
-                        "min": "0.000000",
-                        "mode": "dynamic"
-                    },
-                    "protocols": [
-                        {
-                            "x402": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            }
-                        },
-                        {
-                            "mpp": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            }
-                        }
-                    ]
-                }
-            }
-        },
-        "/v1/run/google.jobs": {
-            "post": {
-                "description": "Search Google Jobs listings by query and location \u2014 up to 20 normalized job postings per request at a flat USD price.",
-                "operationId": "google_jobs",
-                "parameters": [
-                    {
-                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
-                        "in": "query",
-                        "name": "fields",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
-                        "in": "query",
-                        "name": "max_items",
-                        "required": false,
-                        "schema": {
-                            "minimum": 0,
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
-                        "in": "query",
-                        "name": "summary",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "example": {
-                                "limit": 10,
-                                "location": "New York",
-                                "query": "software engineer"
-                            },
-                            "schema": {
-                                "additionalProperties": false,
-                                "example": {
-                                    "limit": 10,
-                                    "location": "New York",
-                                    "query": "software engineer"
-                                },
-                                "properties": {
-                                    "country": {
-                                        "description": "Two-letter country code to localize results (e.g. us).",
-                                        "type": "string"
-                                    },
-                                    "limit": {
-                                        "description": "Maximum number of results to return (1\u201320, default 20). You are billed per result returned, so a lower limit costs less.",
-                                        "maximum": 20,
-                                        "minimum": 1,
-                                        "type": "integer"
-                                    },
-                                    "location": {
-                                        "description": "Job location, ideally at the city level (e.g. Austin, Texas).",
-                                        "type": "string"
-                                    },
-                                    "query": {
-                                        "description": "The job search query.",
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "query"
-                                ],
-                                "title": "Google Jobs input",
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "costUsd": {
-                                            "description": "Amount charged in USD for this call.",
-                                            "type": "number"
-                                        },
-                                        "items": {
-                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
-                                            "type": "integer"
-                                        },
-                                        "output": {
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "data": {
-                                                    "oneOf": [
-                                                        {
-                                                            "type": "null"
-                                                        },
-                                                        {
-                                                            "additionalProperties": false,
-                                                            "properties": {
-                                                                "items": {
-                                                                    "description": "Job posting records: title, employer, location, listing source, description, and apply links.",
-                                                                    "items": {
-                                                                        "properties": {
-                                                                            "title": {
-                                                                                "type": "string"
-                                                                            },
-                                                                            "url": {
-                                                                                "type": "string"
-                                                                            }
-                                                                        },
-                                                                        "required": [
-                                                                            "title",
-                                                                            "url"
-                                                                        ],
-                                                                        "type": "object"
-                                                                    },
-                                                                    "type": "array"
-                                                                }
-                                                            },
-                                                            "required": [
-                                                                "items"
-                                                            ],
-                                                            "type": "object"
-                                                        }
-                                                    ]
-                                                },
-                                                "found": {
-                                                    "type": "boolean"
-                                                }
-                                            },
-                                            "required": [
-                                                "found",
-                                                "data"
-                                            ],
-                                            "title": "Google Jobs output",
-                                            "type": "object"
-                                        },
-                                        "provider": {
-                                            "description": "Always \"AnyAPI\".",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "output",
-                                        "provider",
-                                        "costUsd"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Normalized result."
-                    },
-                    "400": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
-                    },
-                    "401": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Missing or invalid API key."
-                    },
-                    "402": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Insufficient wallet balance (no charge)."
-                    },
-                    "404": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
-                    },
-                    "429": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The upstream was rate limited, retry shortly (no charge)."
-                    },
-                    "502": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Every provider failed with a server/transport error (charge released)."
-                    }
-                },
-                "summary": "Google Jobs",
-                "tags": [
-                    "google"
-                ],
-                "x-payment-info": {
-                    "price": {
-                        "currency": "USD",
-                        "max": "0.160000",
-                        "min": "0.000000",
+                        "max": "0.048050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -17184,8 +16929,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.026000",
-                        "min": "0.000000",
+                        "max": "0.026050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -17439,8 +17184,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.025000",
-                        "min": "0.000000",
+                        "max": "0.020210",
+                        "min": "0.000210",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -22530,7 +22275,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.399000",
+                        "max": "0.102000",
                         "min": "0.099000",
                         "mode": "dynamic"
                     },
@@ -24073,8 +23818,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.020000",
-                        "min": "0.000000",
+                        "max": "0.030050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -26575,7 +26320,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.031000",
+                        "max": "0.081000",
                         "min": "0.001000",
                         "mode": "dynamic"
                     },
@@ -27078,8 +26823,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.150000",
-                        "min": "0.000000",
+                        "max": "0.206000",
+                        "min": "0.080000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -27335,8 +27080,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.060000",
-                        "min": "0.000000",
+                        "max": "0.060050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -27577,8 +27322,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.002000",
-                        "min": "0.000000",
+                        "max": "0.002050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -27837,8 +27582,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.040000",
-                        "min": "0.000000",
+                        "max": "0.040050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -28094,8 +27839,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.060000",
-                        "min": "0.000000",
+                        "max": "0.060050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -43585,8 +43330,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.050000",
-                        "min": "0.000000",
+                        "max": "0.050050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -46428,7 +46173,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.400000",
+                        "max": "0.200000",
                         "min": "0.000000",
                         "mode": "dynamic"
                     },
@@ -47208,7 +46953,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.010000",
+                        "max": "0.003680",
                         "min": "0.000000",
                         "mode": "dynamic"
                     },
@@ -48175,7 +47920,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.005000",
+                        "max": "0.001580",
                         "min": "0.000000",
                         "mode": "dynamic"
                     },
@@ -48412,8 +48157,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.003000",
-                        "min": "0.000000",
+                        "max": "0.003050",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -48648,8 +48393,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.000900",
-                        "min": "0.000000",
+                        "max": "0.000950",
+                        "min": "0.000050",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -53993,8 +53738,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.022500",
-                        "min": "0.000000",
+                        "max": "0.023000",
+                        "min": "0.000500",
                         "mode": "dynamic"
                     },
                     "protocols": [
