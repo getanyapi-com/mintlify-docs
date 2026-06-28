@@ -2370,6 +2370,735 @@
                 }
             }
         },
+        "/v1/run/bluesky.post": {
+            "post": {
+                "description": "Get a single Bluesky post by URL - text, author handle, like, reply, and repost counts as clean JSON, billed per request in USD.",
+                "operationId": "bluesky_post",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "url": "https://bsky.app/profile/bsky.app/post/3l6oveex3ii2l"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "url": "https://bsky.app/profile/bsky.app/post/3l6oveex3ii2l"
+                                },
+                                "properties": {
+                                    "url": {
+                                        "description": "Bluesky post URL, e.g. \"https://bsky.app/profile/bsky.app/post/3l6oveex3ii2l\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "Bluesky post input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "authorHandle": {
+                                                                    "type": "string"
+                                                                },
+                                                                "createdAt": {
+                                                                    "type": "string"
+                                                                },
+                                                                "likes": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "replies": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "reposts": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "text": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "text",
+                                                                "authorHandle",
+                                                                "likes",
+                                                                "replies",
+                                                                "reposts",
+                                                                "createdAt"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Bluesky post output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Bluesky Post",
+                "tags": [
+                    "bluesky"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/bluesky.profile": {
+            "post": {
+                "description": "Get a Bluesky user's public profile by handle - display name, bio, follower and post counts as clean JSON, billed per request in USD.",
+                "operationId": "bluesky_profile",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "handle": "bsky.app"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "handle": "bsky.app"
+                                },
+                                "properties": {
+                                    "handle": {
+                                        "description": "Bluesky handle, e.g. \"bsky.app\" or \"jay.bsky.team\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "handle"
+                                ],
+                                "title": "Bluesky profile input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "description": {
+                                                                    "type": "string"
+                                                                },
+                                                                "displayName": {
+                                                                    "type": "string"
+                                                                },
+                                                                "followers": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "following": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "handle": {
+                                                                    "type": "string"
+                                                                },
+                                                                "postsCount": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "handle",
+                                                                "displayName",
+                                                                "description",
+                                                                "followers",
+                                                                "following",
+                                                                "postsCount"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Bluesky profile output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Bluesky Profile",
+                "tags": [
+                    "bluesky"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/bluesky.user_posts": {
+            "post": {
+                "description": "List a Bluesky account's recent posts (text, author handle, like, reply, and repost counts) by handle as clean JSON, normalized across providers, billed per request in USD.",
+                "operationId": "bluesky_user_posts",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "handle": "bsky.app"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "handle": "bsky.app"
+                                },
+                                "properties": {
+                                    "handle": {
+                                        "description": "Bluesky handle, e.g. \"bsky.app\" or \"jay.bsky.team\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "handle"
+                                ],
+                                "title": "Bluesky user posts input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "posts": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "authorHandle": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "createdAt": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "likes": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "replies": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "reposts": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "text": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "text",
+                                                                            "authorHandle",
+                                                                            "likes",
+                                                                            "replies",
+                                                                            "reposts",
+                                                                            "createdAt"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "posts"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Bluesky user posts output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Bluesky User Posts",
+                "tags": [
+                    "bluesky"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/booking.search": {
             "post": {
                 "description": "Search Booking.com stays by destination and dates and get hotel results (name, price, review score, location) as normalized JSON with flat per-request USD pricing.",
@@ -17452,6 +18181,978 @@
                         "max": "0.058000",
                         "min": "0.008000",
                         "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/hackernews.profile": {
+            "post": {
+                "description": "Get a Hacker News user's public profile by username - karma, bio, and account details as clean JSON, billed per request in USD.",
+                "operationId": "hackernews_profile",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "handle": "pg"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "handle": "pg"
+                                },
+                                "properties": {
+                                    "handle": {
+                                        "description": "Hacker News username, e.g. \"pg\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "handle"
+                                ],
+                                "title": "Hacker News profile input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "bio": {
+                                                                    "type": "string"
+                                                                },
+                                                                "karma": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "username": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "username",
+                                                                "bio",
+                                                                "karma"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Hacker News profile output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Hacker News Profile",
+                "tags": [
+                    "hackernews"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/hackernews.search": {
+            "post": {
+                "description": "Search Hacker News by keyword - matching stories with title, link, author, points, and comment count as clean JSON, billed per request in USD.",
+                "operationId": "hackernews_search",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "query": "ai"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "query": "ai"
+                                },
+                                "properties": {
+                                    "query": {
+                                        "description": "Search keyword, e.g. \"ai\".",
+                                        "type": "string"
+                                    },
+                                    "tags": {
+                                        "description": "Optional result filter, e.g. \"story\" or \"comment\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "query"
+                                ],
+                                "title": "Hacker News search input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "results": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "author": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "comments": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "id": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "points": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "publishedAt": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "title": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "url": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id",
+                                                                            "title",
+                                                                            "url",
+                                                                            "author",
+                                                                            "points",
+                                                                            "comments",
+                                                                            "publishedAt"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "results"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Hacker News search output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Hacker News Search",
+                "tags": [
+                    "hackernews"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/hackernews.story": {
+            "post": {
+                "description": "Get a Hacker News story by id - title, link, author, points, and comment count as clean JSON, billed per request in USD.",
+                "operationId": "hackernews_story",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "id": "47340079"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "id": "47340079"
+                                },
+                                "properties": {
+                                    "id": {
+                                        "description": "Hacker News story id, e.g. \"47340079\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "id"
+                                ],
+                                "title": "Hacker News story input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "author": {
+                                                                    "type": "string"
+                                                                },
+                                                                "comments": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "points": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "publishedAt": {
+                                                                    "type": "string"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "url": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "title",
+                                                                "url",
+                                                                "author",
+                                                                "points",
+                                                                "comments",
+                                                                "publishedAt"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Hacker News story output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Hacker News Story",
+                "tags": [
+                    "hackernews"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/hackernews.story_comments": {
+            "post": {
+                "description": "List the comments on a Hacker News story by id - text, author, and timestamp as clean JSON, billed per request in USD.",
+                "operationId": "hackernews_story_comments",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "id": "47340079"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "id": "47340079"
+                                },
+                                "properties": {
+                                    "id": {
+                                        "description": "Hacker News story id, e.g. \"47340079\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "id"
+                                ],
+                                "title": "Hacker News story comments input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "comments": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "author": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "id": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "parentId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "publishedAt": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "text": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id",
+                                                                            "parentId",
+                                                                            "author",
+                                                                            "text",
+                                                                            "publishedAt"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "comments"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Hacker News story comments output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Hacker News Story Comments",
+                "tags": [
+                    "hackernews"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -43618,6 +45319,771 @@
                 }
             }
         },
+        "/v1/run/truthsocial.post": {
+            "post": {
+                "description": "Get a single Truth Social post by its URL - text, author, engagement (likes, comments, shares), and timestamp as clean JSON, billed per request in USD.",
+                "operationId": "truthsocial_post",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "url": "https://truthsocial.com/@realDonaldTrump/posts/116824551176646175"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "url": "https://truthsocial.com/@realDonaldTrump/posts/116824551176646175"
+                                },
+                                "properties": {
+                                    "url": {
+                                        "description": "Full Truth Social post URL, e.g. \"https://truthsocial.com/@realDonaldTrump/posts/116824551176646175\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "Truth Social post input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "comments": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "displayName": {
+                                                                    "type": "string"
+                                                                },
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "likes": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "publishedAt": {
+                                                                    "type": "string"
+                                                                },
+                                                                "shares": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "text": {
+                                                                    "type": "string"
+                                                                },
+                                                                "username": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "text",
+                                                                "username",
+                                                                "displayName",
+                                                                "likes",
+                                                                "comments",
+                                                                "shares",
+                                                                "publishedAt"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Truth Social post output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Truth Social Post",
+                "tags": [
+                    "truthsocial"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/truthsocial.profile": {
+            "post": {
+                "description": "Get a Truth Social account's public profile by handle - display name, bio, follower/following counts, and post count as clean JSON, billed per request in USD.",
+                "operationId": "truthsocial_profile",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "handle": "realDonaldTrump"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "handle": "realDonaldTrump"
+                                },
+                                "properties": {
+                                    "handle": {
+                                        "description": "Truth Social handle without the @, e.g. \"realDonaldTrump\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "handle"
+                                ],
+                                "title": "Truth Social profile input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "avatarUrl": {
+                                                                    "type": "string"
+                                                                },
+                                                                "bio": {
+                                                                    "type": "string"
+                                                                },
+                                                                "displayName": {
+                                                                    "type": "string"
+                                                                },
+                                                                "followers": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "following": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "id": {
+                                                                    "type": "string"
+                                                                },
+                                                                "joinedAt": {
+                                                                    "type": "string"
+                                                                },
+                                                                "postsCount": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "private": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "url": {
+                                                                    "type": "string"
+                                                                },
+                                                                "username": {
+                                                                    "type": "string"
+                                                                },
+                                                                "verified": {
+                                                                    "type": "boolean"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "username",
+                                                                "displayName",
+                                                                "bio",
+                                                                "avatarUrl",
+                                                                "url",
+                                                                "verified",
+                                                                "private",
+                                                                "followers",
+                                                                "following",
+                                                                "postsCount",
+                                                                "joinedAt"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Truth Social profile output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Truth Social Profile",
+                "tags": [
+                    "truthsocial"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/truthsocial.user_posts": {
+            "post": {
+                "description": "List a Truth Social account's recent posts by handle - text, engagement (likes, comments, shares), and timestamps as clean JSON, billed per request in USD.",
+                "operationId": "truthsocial_user_posts",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "handle": "realDonaldTrump"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "handle": "realDonaldTrump"
+                                },
+                                "properties": {
+                                    "handle": {
+                                        "description": "Truth Social handle without the @, e.g. \"realDonaldTrump\".",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "handle"
+                                ],
+                                "title": "Truth Social user posts input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "posts": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "comments": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "id": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "likes": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "publishedAt": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "shares": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "text": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "url": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id",
+                                                                            "url",
+                                                                            "text",
+                                                                            "likes",
+                                                                            "comments",
+                                                                            "shares",
+                                                                            "publishedAt"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "posts"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Truth Social user posts output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Truth Social User Posts",
+                "tags": [
+                    "truthsocial"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.003250",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/twitter.community": {
             "post": {
                 "description": "Fetch a Twitter/X community's public details (name, description, member count, join policy) by URL, normalized across providers with transparent failover.",
@@ -53803,6 +56269,10 @@
             "x-group": "Appstore"
         },
         {
+            "name": "bluesky",
+            "x-group": "Bluesky"
+        },
+        {
             "name": "booking",
             "x-group": "Booking"
         },
@@ -53869,6 +56339,10 @@
         {
             "name": "google-shopping",
             "x-group": "Google Shopping"
+        },
+        {
+            "name": "hackernews",
+            "x-group": "Hackernews"
         },
         {
             "name": "importyeti",
@@ -53961,6 +56435,10 @@
         {
             "name": "trustpilot",
             "x-group": "Trustpilot"
+        },
+        {
+            "name": "truthsocial",
+            "x-group": "Truthsocial"
         },
         {
             "name": "twitter",
