@@ -1,0 +1,111 @@
+---
+title: "Pagination"
+description: "Walk large result sets one cheap page at a time, or get everything in a single call."
+---
+
+Some APIs return more results than fit in one response: an account's followers, a
+search with thousands of hits. AnyAPI gives every one of them the **same** pagination
+contract, so you learn it once and it works everywhere.
+
+## The one rule
+
+Ask for up to `limit` items. If the response's `data.nextCursor` is **not null**, there
+is more, so call again with it as `cursor`. When `nextCursor` is `null`, you have reached
+the end.
+
+That single loop works for every paginated API and never changes:
+
+<CodeGroup>
+```python python
+import requests
+
+URL = "https://api.getanyapi.com/v1/run/instagram.followers"
+HEADERS = {"X-API-Key": "YOUR_ANYAPI_KEY"}
+
+def all_followers(username):
+    results, cursor = [], None
+    while True:
+        body = {"username": username, "limit": 50}
+        if cursor:
+            body["cursor"] = cursor
+        data = requests.post(URL, headers=HEADERS, json=body).json()["output"]["data"]
+        results += data["items"]
+        cursor = data.get("nextCursor")
+        if not cursor:            # null -> done
+            return results
+```
+
+```javascript node
+const URL = "https://api.getanyapi.com/v1/run/instagram.followers";
+const HEADERS = { "X-API-Key": "YOUR_ANYAPI_KEY", "Content-Type": "application/json" };
+
+async function allFollowers(username) {
+  const results = [];
+  let cursor = null;
+  do {
+    const body = { username, limit: 50, ...(cursor && { cursor }) };
+    const res = await fetch(URL, { method: "POST", headers: HEADERS, body: JSON.stringify(body) });
+    const { data } = (await res.json()).output;
+    results.push(...data.items);
+    cursor = data.nextCursor;     // null -> done
+  } while (cursor);
+  return results;
+}
+```
+
+```bash curl
+# First page
+curl -s https://api.getanyapi.com/v1/run/instagram.followers \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" -H "Content-Type: application/json" \
+  -d '{"username":"natgeo","limit":50}'
+
+# Next page: pass the nextCursor from the previous response back as cursor
+curl -s https://api.getanyapi.com/v1/run/instagram.followers \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" -H "Content-Type: application/json" \
+  -d '{"username":"natgeo","limit":50,"cursor":"PASTE_nextCursor_HERE"}'
+```
+</CodeGroup>
+
+## What the fields mean
+
+- **`limit`** is the most items you want in **this** response: a page cap, not a grand
+  total. You always get up to one page; follow `nextCursor` for more.
+- **`cursor`** is an opaque token from a previous response's `nextCursor`. Pass it to
+  continue, or omit it to start from the first page. Do not parse or build it yourself: it
+  is sealed and tied to one walk.
+- **`nextCursor`** is in the response at `output.data.nextCursor`. A non-null value means
+  there is more; `null` means you have reached the end of this walk.
+
+<Note>
+  Each paginated API returns a fixed page size (often around 50). A walk is one consistent
+  enumeration: keep following the cursor and you will see every result, in order, without
+  duplicates. If a cursor ever comes back rejected, it has expired, just start the walk
+  again from the first page.
+</Note>
+
+## Get everything in one call
+
+If you cannot loop, for a spreadsheet import, a no-code tool, or a one-shot job, set
+**`requireSinglePage: true`** to receive up to `limit` items in a single response instead
+of cheap pages. A bulk provider serves it, so it costs more, and a very large `limit` may
+be rejected with a clear message asking you to lower it or paginate.
+
+```bash curl
+curl -s https://api.getanyapi.com/v1/run/instagram.followers \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" -H "Content-Type: application/json" \
+  -d '{"username":"natgeo","limit":500,"requireSinglePage":true}'
+```
+
+## Cost
+
+Paging is the cheap path: each page is a flat, low per-request price, so walking a few
+pages costs far less than one big bulk call. `requireSinglePage` trades that for
+convenience at a higher price. Either way you pay only for what you receive, in real USD:
+your exact `costUsd` is on every response.
+
+<Tip>
+  Not sure whether an API paginates? Inspect its schema with
+  `curl https://api.getanyapi.com/v1/apis/instagram.followers`. An input that accepts
+  `cursor` and `requireSinglePage`, plus an output with `nextCursor`, means it supports
+  this contract.
+</Tip>
