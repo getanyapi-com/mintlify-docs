@@ -1351,7 +1351,7 @@
         },
         "/v1/run/amazon.product": {
             "post": {
-                "description": "Fetch full Amazon product details \u2014 title, price, images, ratings, variants, and attributes \u2014 from a product URL, with transparent per-request USD pricing.",
+                "description": "Fetch full Amazon product details (title, brand, price when in stock, images, ratings, review count, variants, and attributes) from a product URL, with transparent per-request USD pricing.",
                 "operationId": "amazon_product",
                 "parameters": [
                     {
@@ -1436,11 +1436,34 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Product detail records: title, brand, price, images, ratings, variant details, and attributes.",
+                                                                    "description": "Product detail records: title, url, asin, brand, price amount (when in stock), images, rating, review count, and (passed through) variant details and attributes.",
                                                                     "items": {
                                                                         "properties": {
                                                                             "asin": {
                                                                                 "type": "string"
+                                                                            },
+                                                                            "brand": {
+                                                                                "description": "Manufacturer or brand name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "images": {
+                                                                                "description": "High-resolution product image URLs.",
+                                                                                "items": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "priceAmount": {
+                                                                                "description": "Current price as a numeric amount. Absent when the listing has no buyable price (out of stock).",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Average customer star rating, 0 to 5.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewCount": {
+                                                                                "description": "Total number of customer reviews.",
+                                                                                "type": "integer"
                                                                             },
                                                                             "title": {
                                                                                 "type": "string"
@@ -1967,10 +1990,30 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Search result product records: title, price, rating, review count, thumbnail, and product URL.",
+                                                                    "description": "Search result product records: title, ASIN, price amount, currency, rating, review count, and thumbnail.",
                                                                     "items": {
                                                                         "properties": {
                                                                             "asin": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "currency": {
+                                                                                "description": "Currency symbol or code for the price.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "priceAmount": {
+                                                                                "description": "Current price as a numeric amount.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Average star rating.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewCount": {
+                                                                                "description": "Number of customer reviews.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "thumbnail": {
+                                                                                "description": "Product thumbnail image URL.",
                                                                                 "type": "string"
                                                                             },
                                                                             "title": {
@@ -13824,6 +13867,7 @@
                                                             "type": "null"
                                                         },
                                                         {
+                                                            "description": "GitHub user identity and basic public stats; richer profile fields (company, blog, location, twitterUsername, type, publicGists, createdAt) are returned when available.",
                                                             "properties": {
                                                                 "avatarUrl": {
                                                                     "type": "string"
@@ -13873,17 +13917,10 @@
                                                                 "login",
                                                                 "name",
                                                                 "bio",
-                                                                "company",
-                                                                "blog",
-                                                                "location",
-                                                                "twitterUsername",
                                                                 "avatarUrl",
-                                                                "type",
                                                                 "publicRepos",
-                                                                "publicGists",
                                                                 "followers",
-                                                                "following",
-                                                                "createdAt"
+                                                                "following"
                                                             ],
                                                             "type": "object"
                                                         }
@@ -17686,7 +17723,7 @@
         },
         "/v1/run/google_finance.quote": {
             "post": {
-                "description": "Fetch a live Google Finance quote for any stock, index, currency pair, or crypto symbol \u2014 price, change, market data, price history, and related news \u2014 with transparent per-request USD pricing.",
+                "description": "Fetch a live Google Finance quote for any stock, index, currency pair, or crypto symbol: name, current price, the absolute and percent change for the requested window, quote currency, and the intraday price-history points (price, date, and per-interval volume), with transparent per-request USD pricing.",
                 "operationId": "google_finance_quote",
                 "parameters": [
                     {
@@ -17786,14 +17823,51 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Quote records: symbol, current price, change, market stats, price-history points for the requested window, and related news.",
+                                                                    "description": "Quote records: symbol, name, current price, the absolute and percent change for the requested window, quote currency, and the intraday price-history points (price, date, and per-interval volume) for that window.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "change": {
+                                                                                "description": "Absolute price change over the requested window, in the quote currency.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "changePercent": {
+                                                                                "description": "Percent price change over the requested window.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "currency": {
+                                                                                "description": "ISO currency the quote is priced in (e.g. USD).",
+                                                                                "type": "string"
+                                                                            },
                                                                             "name": {
                                                                                 "type": "string"
                                                                             },
                                                                             "price": {
                                                                                 "type": "number"
+                                                                            },
+                                                                            "priceHistory": {
+                                                                                "description": "Intraday price-history points for the requested window.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "currency": {
+                                                                                            "description": "Currency of this point's price.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "date": {
+                                                                                            "description": "Timestamp of this point.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "price": {
+                                                                                            "description": "Price at this point.",
+                                                                                            "type": "number"
+                                                                                        },
+                                                                                        "volume": {
+                                                                                            "description": "Traded volume for this interval.",
+                                                                                            "type": "number"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
                                                                             },
                                                                             "symbol": {
                                                                                 "type": "string"
@@ -20563,14 +20637,30 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Follower records: username, full name, profile picture, and verification/privacy flags.",
+                                                                    "description": "Follower records: id, handle, full name, profile picture URL, and verification/privacy flags.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "fullName": {
+                                                                                "description": "Follower's display name (may be empty).",
+                                                                                "type": "string"
+                                                                            },
                                                                             "handle": {
                                                                                 "type": "string"
                                                                             },
                                                                             "id": {
                                                                                 "type": "string"
+                                                                            },
+                                                                            "private": {
+                                                                                "description": "Whether the follower's account is private.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "profilePicUrl": {
+                                                                                "description": "URL of the follower's profile picture.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "verified": {
+                                                                                "description": "Whether the follower's account is verified.",
+                                                                                "type": "boolean"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -20808,14 +20898,30 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Followed-account records: username, full name, profile picture, and verification/privacy flags.",
+                                                                    "description": "Followed-account records: numeric id, handle, full name, profile picture URL, and verified/private flags.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "fullName": {
+                                                                                "description": "Account display name.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "handle": {
                                                                                 "type": "string"
                                                                             },
                                                                             "id": {
                                                                                 "type": "string"
+                                                                            },
+                                                                            "private": {
+                                                                                "description": "Whether the account is private.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "profilePicUrl": {
+                                                                                "description": "URL of the account's profile picture.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "verified": {
+                                                                                "description": "Whether the account has a verified badge.",
+                                                                                "type": "boolean"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -26186,10 +26292,19 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Employee records: name, job title, location, and LinkedIn profile URL.",
+                                                                    "description": "Employee records: name, job title, location text, and LinkedIn profile URL.",
                                                                     "items": {
+                                                                        "description": "An employee: name, job title (headline), location text, public handle, and LinkedIn profile URL.",
                                                                         "properties": {
                                                                             "handle": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "jobTitle": {
+                                                                                "description": "The employee's current role or headline at the company.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "locationText": {
+                                                                                "description": "The employee's location as a single string (city, region, country).",
                                                                                 "type": "string"
                                                                             },
                                                                             "name": {
@@ -26938,13 +27053,34 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Job records: title, company, location, posting date, description, seniority, and apply link.",
+                                                                    "description": "Job records: title and listing URL, plus (when present) company, location, posting date, description, and seniority.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "company": {
+                                                                                "description": "Hiring company name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "description": {
+                                                                                "description": "Full job description text.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "location": {
+                                                                                "description": "Job location (city, region).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "postedAt": {
+                                                                                "description": "When the job was posted, as an ISO 8601 timestamp.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "seniority": {
+                                                                                "description": "Seniority / experience level (e.g. Entry level, Mid-Senior, Not Applicable).",
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
                                                                                 "type": "string"
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical LinkedIn job listing URL.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
@@ -28295,7 +28431,7 @@
         },
         "/v1/run/linkedin.search_profiles": {
             "post": {
-                "description": "Search LinkedIn profiles by keyword with optional location and job-title filters, returning detailed profile records at a flat USD price per request.",
+                "description": "Search LinkedIn profiles by keyword with optional location and job-title filters. Each match returns a full profile record: name, headline, location, current position, work experience, and education, plus the profile URL, handle, and id. Flat USD price per request.",
                 "operationId": "linkedin_search_profiles",
                 "parameters": [
                     {
@@ -28396,16 +28532,43 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Profile records: name, headline, location, current position, experience, education, and profile URL.",
+                                                                    "description": "Matched profile records. Each carries the profile URL, handle, and id, plus first/last name, headline, location, current position, full work experience, and education. Upstream extras (about, skills, languages, certifications, connections, profile picture, and more) pass through too.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "currentPosition": {
+                                                                                "description": "Current role(s), passed through from the upstream. Typically a list of objects with job title, company, dates, and description; shape can vary by profile."
+                                                                            },
+                                                                            "education": {
+                                                                                "description": "Education history, passed through from the upstream. Typically a list of objects with school, degree, and field of study; shape can vary by profile."
+                                                                            },
+                                                                            "experience": {
+                                                                                "description": "Full work history, passed through from the upstream. Typically a list of objects with job title, company, dates, and description; shape can vary by profile."
+                                                                            },
+                                                                            "firstName": {
+                                                                                "description": "Member's first name.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "handle": {
+                                                                                "description": "Public profile identifier (the vanity slug in the URL).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "headline": {
+                                                                                "description": "Profile headline (the tagline under the name).",
                                                                                 "type": "string"
                                                                             },
                                                                             "id": {
+                                                                                "description": "LinkedIn member URN id for the profile.",
                                                                                 "type": "string"
                                                                             },
+                                                                            "lastName": {
+                                                                                "description": "Member's last name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "location": {
+                                                                                "description": "Member's location, passed through from the upstream. Typically an object with the displayed location text and country code; shape can vary by profile."
+                                                                            },
                                                                             "url": {
+                                                                                "description": "Canonical LinkedIn profile URL.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
@@ -33874,11 +34037,74 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Profile records: username, display name, bio, subscriber count, avatar, and recent public stories or spotlight content.",
+                                                                    "description": "Profile records: public profile URL, handle, display name, bio, subscriber count, avatar, and recent public stories.",
                                                                     "items": {
+                                                                        "description": "A public Snapchat profile: url, handle, displayName, bio, subscribers, avatarUrl, and recent public stories.",
                                                                         "properties": {
+                                                                            "avatarUrl": {
+                                                                                "description": "URL of the profile avatar image.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "bio": {
+                                                                                "description": "The profile's public bio / description text.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "displayName": {
+                                                                                "description": "The profile's public display name.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "handle": {
                                                                                 "type": "string"
+                                                                            },
+                                                                            "stories": {
+                                                                                "description": "Recent public stories, each with its snaps (media items).",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "id": {
+                                                                                            "description": "Story identifier.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "snaps": {
+                                                                                            "description": "The snaps (media items) in this story.",
+                                                                                            "items": {
+                                                                                                "properties": {
+                                                                                                    "id": {
+                                                                                                        "description": "Snap identifier.",
+                                                                                                        "type": "string"
+                                                                                                    },
+                                                                                                    "mediaUrl": {
+                                                                                                        "description": "Full-resolution media URL.",
+                                                                                                        "type": "string"
+                                                                                                    },
+                                                                                                    "previewUrl": {
+                                                                                                        "description": "Preview/thumbnail media URL.",
+                                                                                                        "type": "string"
+                                                                                                    },
+                                                                                                    "timestamp": {
+                                                                                                        "description": "Snap timestamp (ISO 8601).",
+                                                                                                        "type": "string"
+                                                                                                    }
+                                                                                                },
+                                                                                                "type": "object"
+                                                                                            },
+                                                                                            "type": "array"
+                                                                                        },
+                                                                                        "storyTitle": {
+                                                                                            "description": "Story title.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "thumbnailUrl": {
+                                                                                            "description": "Story thumbnail image URL.",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "subscribers": {
+                                                                                "description": "Public subscriber count.",
+                                                                                "type": "integer"
                                                                             },
                                                                             "url": {
                                                                                 "type": "string"
