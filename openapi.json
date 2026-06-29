@@ -20590,11 +20590,19 @@
                                     "username": "nasa"
                                 },
                                 "properties": {
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of followers.",
+                                        "type": "string"
+                                    },
                                     "limit": {
-                                        "description": "Number of followers to return (50-1000, default 50). The upstream requires at least 50; you are billed per result returned, so a lower limit costs less.",
+                                        "description": "How many followers you want (50-1000). By default results come back in cheap pages of up to ~50: follow the response's nextCursor for more. With requireSinglePage true, up to this many are returned in one (pricier) call.",
                                         "maximum": 1000,
                                         "minimum": 50,
                                         "type": "integer"
+                                    },
+                                    "requireSinglePage": {
+                                        "description": "Set true to get up to limit followers in a single response instead of cheap pages, served by a bulk provider at a higher price.",
+                                        "type": "boolean"
                                     },
                                     "username": {
                                         "description": "The Instagram username, user ID, or profile URL whose followers to list (e.g. natgeo).",
@@ -20670,6 +20678,13 @@
                                                                         "type": "object"
                                                                     },
                                                                     "type": "array"
+                                                                },
+                                                                "nextCursor": {
+                                                                    "description": "Opaque cursor for the next page of followers, or null when this lane has no more. Pass it back as cursor to continue.",
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
                                                                 }
                                                             },
                                                             "required": [
@@ -20773,10 +20788,9 @@
                 ],
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.003250",
                         "currency": "USD",
-                        "max": "1.300000",
-                        "min": "0.000000",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -20851,11 +20865,19 @@
                                     "username": "nasa"
                                 },
                                 "properties": {
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page.",
+                                        "type": "string"
+                                    },
                                     "limit": {
-                                        "description": "Number of accounts to return (50-1000, default 50). The upstream requires at least 50; you are billed per result returned, so a lower limit costs less.",
+                                        "description": "How many accounts you want (50-1000). By default results come back in cheap pages of up to ~50: follow the response's nextCursor for more. With requireSinglePage true, up to this many are returned in one (pricier) call.",
                                         "maximum": 1000,
                                         "minimum": 50,
                                         "type": "integer"
+                                    },
+                                    "requireSinglePage": {
+                                        "description": "Set true to get up to limit accounts in a single response instead of cheap pages, served by a bulk provider at a higher price.",
+                                        "type": "boolean"
                                     },
                                     "username": {
                                         "description": "The Instagram username, user ID, or profile URL whose following list to fetch (e.g. natgeo).",
@@ -20931,6 +20953,13 @@
                                                                         "type": "object"
                                                                     },
                                                                     "type": "array"
+                                                                },
+                                                                "nextCursor": {
+                                                                    "description": "Opaque cursor for the next page of accounts, or null when this lane has no more. Pass it back as cursor to continue.",
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
                                                                 }
                                                             },
                                                             "required": [
@@ -21034,10 +21063,9 @@
                 ],
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.003250",
                         "currency": "USD",
-                        "max": "1.300000",
-                        "min": "0.000000",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -23299,10 +23327,9 @@
                 ],
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.003250",
                         "currency": "USD",
-                        "max": "0.038000",
-                        "min": "0.000000",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -28532,7 +28559,7 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Matched profile records. Each carries the profile URL, handle, and id, plus first/last name, headline, location, current position, full work experience, and education. Upstream extras (about, skills, languages, certifications, connections, profile picture, and more) pass through too.",
+                                                                    "description": "Matched profile records. Each carries the profile URL, handle, and id. Depending on the match, records may also include first/last name, headline, location, current position, work experience, and education, plus upstream extras (about, skills, languages, certifications, connections, profile picture, and more) that pass through.",
                                                                     "items": {
                                                                         "properties": {
                                                                             "currentPosition": {
@@ -28682,10 +28709,9 @@
                 ],
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.003250",
                         "currency": "USD",
-                        "max": "0.206000",
-                        "min": "0.080000",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -38700,7 +38726,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.052000",
+                        "amount": "0.003250",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -39736,10 +39762,9 @@
                 ],
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.003250",
                         "currency": "USD",
-                        "max": "0.060000",
-                        "min": "0.000000",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -45250,10 +45275,9 @@
                 ],
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.003250",
                         "currency": "USD",
-                        "max": "0.050050",
-                        "min": "0.000050",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -48741,14 +48765,11 @@
                                                                             "url",
                                                                             "text",
                                                                             "createdAt",
-                                                                            "lang",
                                                                             "likes",
                                                                             "retweets",
                                                                             "replies",
-                                                                            "quotes",
                                                                             "views",
                                                                             "bookmarks",
-                                                                            "isReply",
                                                                             "isPinned"
                                                                         ],
                                                                         "type": "object"
@@ -51109,7 +51130,7 @@
         },
         "/v1/run/yelp.search": {
             "post": {
-                "description": "Search Yelp for businesses by keyword and location \u2014 up to 20 listings with ratings, categories, and core business info per flat-priced request.",
+                "description": "Search Yelp for businesses by keyword and location: up to 20 listings with ratings, categories, and core business info per flat-priced request.",
                 "operationId": "yelp_search",
                 "parameters": [
                     {
@@ -51158,7 +51179,7 @@
                                 },
                                 "properties": {
                                     "limit": {
-                                        "description": "Maximum number of results to return (1\u201320, default 20). You are billed per result returned, so a lower limit costs less.",
+                                        "description": "Maximum number of results to return (1 to 20, default 20).",
                                         "maximum": 20,
                                         "minimum": 1,
                                         "type": "integer"
@@ -51499,8 +51520,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.020000",
-                        "min": "0.010000",
+                        "max": "0.050000",
+                        "min": "0.040000",
                         "mode": "dynamic"
                     },
                     "protocols": [
