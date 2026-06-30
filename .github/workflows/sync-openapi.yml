@@ -1,0 +1,48 @@
+name: sync-openapi
+
+# Keeps the committed openapi.json in sync with the live gateway spec, which is
+# generated from the registry and is the source of truth. Mintlify deploys this
+# repo on push, so a commit here ships the refreshed API reference. Triggers:
+#   - repository_dispatch (catalog-changed): fired by the gateway deploy in
+#     kev1n/anyapi right after a successful prod rollout - near-instant sync.
+#   - schedule: a safety net so the snapshot can never drift far, no matter how
+#     the catalog changed (PR, hotfix, manual DB edit).
+#   - workflow_dispatch: manual run.
+on:
+  repository_dispatch:
+    types: [catalog-changed]
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-openapi
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: regenerate from live gateway
+        run: curl -fsS https://api.getanyapi.com/openapi.json | python3 -m json.tool > openapi.json
+
+      - name: sanity check (refuse a truncated/broken spec)
+        run: |
+          python3 -c "import json,sys; d=json.load(open('openapi.json')); n=len(d.get('paths',{})); print('paths:',n); sys.exit(1) if n < 100 else None"
+
+      - name: commit if changed
+        run: |
+          if git diff --quiet openapi.json; then
+            echo "openapi.json already in sync"
+            exit 0
+          fi
+          git config user.name "openapi-sync[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add openapi.json
+          git commit -m "chore(openapi): sync from live gateway"
+          git push
