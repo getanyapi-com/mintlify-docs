@@ -4050,11 +4050,11 @@
                                 },
                                 "properties": {
                                     "checkIn": {
-                                        "description": "Check-in date in YYYY-MM-DD format, UTC (e.g. 2026-07-01).",
+                                        "description": "Check-in date in YYYY-MM-DD format (e.g. 2026-07-01). Defaults to tomorrow.",
                                         "type": "string"
                                     },
                                     "checkOut": {
-                                        "description": "Check-out date in YYYY-MM-DD format, UTC (e.g. 2026-07-05).",
+                                        "description": "Check-out date in YYYY-MM-DD format (e.g. 2026-07-05). Defaults to the day after check-in.",
                                         "type": "string"
                                     },
                                     "currency": {
@@ -4063,13 +4063,13 @@
                                         "type": "string"
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (1\u201320, default 20). You are billed per result returned, so a lower limit costs less.",
+                                        "description": "Maximum number of hotels to return (1-20, default 20). You are billed per result returned, so a lower limit costs less.",
                                         "maximum": 20,
                                         "minimum": 1,
                                         "type": "integer"
                                     },
                                     "query": {
-                                        "description": "Destination to search for stays in (e.g. Paris).",
+                                        "description": "Destination city to search for stays in (e.g. Paris).",
                                         "type": "string"
                                     }
                                 },
@@ -4109,22 +4109,72 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Hotel result records: name, address, price, review score, star rating, and room details.",
+                                                                    "description": "Hotel result records: name, price, review score, star rating, address, and location.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "price": {
+                                                                            "address": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "city": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "country": {
+                                                                                "description": "ISO country code.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "currency": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Booking.com hotel identifier.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Primary hotel photo URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "latitude": {
                                                                                 "type": "number"
                                                                             },
-                                                                            "title": {
+                                                                            "location": {
+                                                                                "description": "Neighborhood or area label.",
                                                                                 "type": "string"
+                                                                            },
+                                                                            "longitude": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "name": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "price": {
+                                                                                "description": "Total stay price in the requested currency.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "pricePerNight": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Guest review score (0-10).",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewScore": {
+                                                                                "description": "Guest review score (0-10).",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewsCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "stars": {
+                                                                                "description": "Star rating class (1-5).",
+                                                                                "type": "integer"
                                                                             },
                                                                             "url": {
                                                                                 "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
-                                                                            "url",
-                                                                            "price"
+                                                                            "name",
+                                                                            "url"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -4233,8 +4283,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.058050",
-                        "min": "0.000050",
+                        "max": "0.092000",
+                        "min": "0.002000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -18273,7 +18323,7 @@
         },
         "/v1/run/google_finance.quote": {
             "post": {
-                "description": "Fetch a live Google Finance quote for any stock, index, currency pair, or crypto symbol: name, current price, the absolute and percent change for the requested window, quote currency, and the intraday price-history points (price, date, and per-interval volume), with transparent per-request USD pricing.",
+                "description": "Fetch a live quote for any stock, index, ETF, mutual fund, currency pair, or crypto symbol: name, current price, the absolute and percent change on the day, quote currency, exchange and market state, plus intraday and reference figures (open, day high/low, previous close, volume, market cap, and the 52-week range) with transparent per-request USD pricing.",
                 "operationId": "google_finance_quote",
                 "parameters": [
                     {
@@ -18318,22 +18368,7 @@
                                 },
                                 "properties": {
                                     "symbol": {
-                                        "description": "The symbol to quote in Google Finance format: ticker:exchange for stocks and indexes (e.g. GOOGL:NASDAQ, .DJI:INDEXDJX) or pair format for crypto and currencies (e.g. BTC-USD, EUR-USD).",
-                                        "type": "string"
-                                    },
-                                    "window": {
-                                        "default": "1D",
-                                        "description": "Time window for the returned price history (e.g. 1D for intraday, 1Y for one year).",
-                                        "enum": [
-                                            "1D",
-                                            "5D",
-                                            "1M",
-                                            "6M",
-                                            "YTD",
-                                            "1Y",
-                                            "5Y",
-                                            "MAX"
-                                        ],
+                                        "description": "The symbol to quote. US stocks use a plain ticker (e.g. AAPL, TSLA); non-US stocks add a market suffix (e.g. VOW3.DE, BABA.HK, BARC.L); indices use a caret (e.g. ^GSPC, ^DJI); crypto and currencies use pair form (e.g. BTC-USD, EURUSD=X); mutual funds and futures use their symbol (e.g. VFIAX, ES=F). Common alternate forms are accepted and normalized (e.g. AAPL:NASDAQ, .DJI, BTC/USD). Exact symbols only, not a company-name search.",
                                         "type": "string"
                                     }
                                 },
@@ -18373,54 +18408,92 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Quote records: symbol, name, current price, the absolute and percent change for the requested window, quote currency, and the intraday price-history points (price, date, and per-interval volume) for that window.",
+                                                                    "description": "The quote for the requested symbol: name, current price, day change (absolute and percent), quote currency, exchange and market state, plus intraday and reference figures. Up to one element (empty when the symbol did not resolve).",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "ask": {
+                                                                                "description": "Current ask price.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "assetType": {
+                                                                                "description": "Instrument class (e.g. EQUITY, ETF, CRYPTOCURRENCY, CURRENCY, INDEX, MUTUALFUND, FUTURE).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "averageVolume": {
+                                                                                "description": "Average daily trading volume.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "bid": {
+                                                                                "description": "Current bid price.",
+                                                                                "type": "number"
+                                                                            },
                                                                             "change": {
-                                                                                "description": "Absolute price change over the requested window, in the quote currency.",
+                                                                                "description": "Absolute price change on the day, in the quote currency.",
                                                                                 "type": "number"
                                                                             },
                                                                             "changePercent": {
-                                                                                "description": "Percent price change over the requested window.",
+                                                                                "description": "Percent price change on the day.",
                                                                                 "type": "number"
                                                                             },
                                                                             "currency": {
                                                                                 "description": "ISO currency the quote is priced in (e.g. USD).",
                                                                                 "type": "string"
                                                                             },
-                                                                            "name": {
-                                                                                "type": "string"
-                                                                            },
-                                                                            "price": {
+                                                                            "dayHigh": {
+                                                                                "description": "Highest price so far in the current session.",
                                                                                 "type": "number"
                                                                             },
-                                                                            "priceHistory": {
-                                                                                "description": "Intraday price-history points for the requested window.",
-                                                                                "items": {
-                                                                                    "properties": {
-                                                                                        "currency": {
-                                                                                            "description": "Currency of this point's price.",
-                                                                                            "type": "string"
-                                                                                        },
-                                                                                        "date": {
-                                                                                            "description": "Timestamp of this point.",
-                                                                                            "type": "string"
-                                                                                        },
-                                                                                        "price": {
-                                                                                            "description": "Price at this point.",
-                                                                                            "type": "number"
-                                                                                        },
-                                                                                        "volume": {
-                                                                                            "description": "Traded volume for this interval.",
-                                                                                            "type": "number"
-                                                                                        }
-                                                                                    },
-                                                                                    "type": "object"
-                                                                                },
-                                                                                "type": "array"
+                                                                            "dayLow": {
+                                                                                "description": "Lowest price so far in the current session.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "exchange": {
+                                                                                "description": "Exchange the instrument trades on (e.g. NasdaqGS).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "fiftyTwoWeekHigh": {
+                                                                                "description": "Highest price over the trailing 52 weeks.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "fiftyTwoWeekLow": {
+                                                                                "description": "Lowest price over the trailing 52 weeks.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "marketCap": {
+                                                                                "description": "Market capitalization in the quote currency.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "marketState": {
+                                                                                "description": "Current market state (e.g. REGULAR, PRE, POST, CLOSED).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "name": {
+                                                                                "description": "Instrument or company name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "open": {
+                                                                                "description": "Opening price for the current session.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "previousClose": {
+                                                                                "description": "Previous session close price.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "price": {
+                                                                                "description": "Current price in the quote currency.",
+                                                                                "type": "number"
                                                                             },
                                                                             "symbol": {
+                                                                                "description": "Resolved ticker symbol for the quote.",
                                                                                 "type": "string"
+                                                                            },
+                                                                            "timestamp": {
+                                                                                "description": "Timestamp of the quote (ISO 8601).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "volume": {
+                                                                                "description": "Traded volume for the current session.",
+                                                                                "type": "number"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -18534,8 +18607,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.020210",
-                        "min": "0.000210",
+                        "max": "0.002000",
+                        "min": "0.000500",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -30041,18 +30114,71 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Review records: reviewer, star rating, review text, publish date, and owner response where present.",
+                                                                    "description": "Review records: reviewer, star rating, review text (empty when the reviewer left only a rating), publish date, likes, and owner response where present.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "author": {
+                                                                                "description": "Reviewer display name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "isLocalGuide": {
+                                                                                "description": "Whether the reviewer is a Google Local Guide.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "likes": {
+                                                                                "description": "Number of likes on the review.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "origin": {
+                                                                                "description": "Source of the review (e.g. Google).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "ownerResponse": {
+                                                                                "description": "Owner's reply text; empty when there is none.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "ownerResponseAt": {
+                                                                                "description": "ISO 8601 timestamp of the owner's reply; empty when there is none.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "placeId": {
+                                                                                "description": "Google Maps place id the review belongs to.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "publishedAgo": {
+                                                                                "description": "Human-relative publish time (e.g. '7 hours ago').",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "publishedAt": {
+                                                                                "description": "ISO 8601 timestamp the review was published.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "rating": {
+                                                                                "description": "Star rating the reviewer gave (1-5).",
                                                                                 "type": "number"
                                                                             },
+                                                                            "reviewId": {
+                                                                                "description": "Stable Google review id.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "reviewerId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "reviewerReviewsCount": {
+                                                                                "description": "Total number of reviews the reviewer has written.",
+                                                                                "type": "integer"
+                                                                            },
                                                                             "text": {
+                                                                                "description": "Review text; empty string when the reviewer left only a star rating.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "Direct URL to the review on Google Maps.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
-                                                                            "text"
+                                                                            "reviewId"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -34414,7 +34540,7 @@
         },
         "/v1/run/sec.filings": {
             "post": {
-                "description": "List a public company's SEC EDGAR filings \u2014 form type, filing date, accession number, and document links \u2014 by ticker, company name, or CIK, with optional form-type and date filters, billed per request in USD.",
+                "description": "List a public company's SEC EDGAR filings - form type, filing date, accession number, and document links - by ticker, company name, or CIK, with optional form-type and date filters, billed per request in USD.",
                 "operationId": "sec_filings",
                 "parameters": [
                     {
@@ -34469,17 +34595,17 @@
                                         "type": "string"
                                     },
                                     "form": {
-                                        "description": "Filter filings by SEC form type (e.g. 10-K, 10-Q, 8-K, S-1, DEF 14A); omit for all forms.",
+                                        "description": "Filter filings by SEC form type (e.g. 10-K, 10-Q, 8-K, 4, DEF 14A, S-1, 13F-HR); omit for all forms.",
                                         "type": "string"
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (1\u201325, default 25). You are billed per result returned, so a lower limit costs less.",
+                                        "description": "Maximum number of filings to return (1-25, default 25). You are billed per result returned, so a lower limit costs less.",
                                         "maximum": 25,
                                         "minimum": 1,
                                         "type": "integer"
                                     },
                                     "ticker": {
-                                        "description": "Company identifier: a ticker (e.g. AAPL), company name (Apple Inc), domain (apple.com), or CIK (0000320193).",
+                                        "description": "Company stock ticker symbol, e.g. AAPL, MSFT, or TSLA.",
                                         "type": "string"
                                     }
                                 },
@@ -34522,16 +34648,33 @@
                                                                     "description": "Filing records: company and CIK, form type, filing date, accession number, and document links.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "accessionNumber": {
+                                                                                "description": "SEC accession number uniquely identifying the filing.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "cik": {
+                                                                                "description": "SEC Central Index Key for the filer.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "companyName": {
                                                                                 "type": "string"
                                                                             },
+                                                                            "filingDate": {
+                                                                                "description": "Date the filing was filed, YYYY-MM-DD.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "form": {
+                                                                                "description": "SEC form type, e.g. 10-K, 10-Q, 8-K.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "url": {
+                                                                                "description": "Direct link to the primary filing document on sec.gov.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
                                                                             "url",
-                                                                            "companyName"
+                                                                            "accessionNumber"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -34640,8 +34783,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.020000",
-                        "min": "0.010000",
+                        "max": "0.012000",
+                        "min": "0.002000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -52111,8 +52254,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.003050",
-                        "min": "0.000050",
+                        "max": "0.004500",
+                        "min": "0.003500",
                         "mode": "dynamic"
                     },
                     "protocols": [
