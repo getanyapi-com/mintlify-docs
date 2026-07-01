@@ -39547,16 +39547,16 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "adId": "7642386438915309575"
+                                "adId": "7648493525660270600"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "adId": "7642386438915309575"
+                                    "adId": "7648493525660270600"
                                 },
                                 "properties": {
                                     "adId": {
-                                        "description": "TikTok Top Ads material/ad ID, or a Top Ads detail URL (e.g. 7642386438915309575).",
+                                        "description": "TikTok Top Ads material/ad ID, or a Top Ads detail URL (e.g. 7648493525660270600).",
                                         "type": "string"
                                     }
                                 },
@@ -50673,7 +50673,11 @@
                                                                                 "type": "string"
                                                                             },
                                                                             "paymentVerified": {
-                                                                                "type": "boolean"
+                                                                                "description": "Whether the client's payment method is verified; null when Upwork reports it as unknown.",
+                                                                                "type": [
+                                                                                    "boolean",
+                                                                                    "null"
+                                                                                ]
                                                                             },
                                                                             "postedAt": {
                                                                                 "description": "ISO 8601 posting date.",
@@ -53442,243 +53446,6 @@
                         "amount": "0.002000",
                         "currency": "USD",
                         "mode": "fixed"
-                    },
-                    "protocols": [
-                        {
-                            "x402": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            }
-                        },
-                        {
-                            "mpp": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            }
-                        }
-                    ]
-                }
-            }
-        },
-        "/v1/run/youtube.channel_email": {
-            "post": {
-                "description": "Look up the business email behind a YouTube channel by handle, URL, or channel ID, with transparent per-request USD pricing.",
-                "operationId": "youtube_channel_email",
-                "parameters": [
-                    {
-                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
-                        "in": "query",
-                        "name": "fields",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
-                        "in": "query",
-                        "name": "max_items",
-                        "required": false,
-                        "schema": {
-                            "minimum": 0,
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
-                        "in": "query",
-                        "name": "summary",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "example": {
-                                "channel": "@mkbhd"
-                            },
-                            "schema": {
-                                "additionalProperties": false,
-                                "example": {
-                                    "channel": "@mkbhd"
-                                },
-                                "properties": {
-                                    "channel": {
-                                        "description": "YouTube channel URL, handle starting with @, or 24-character channel ID (e.g. @MrBeast).",
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "channel"
-                                ],
-                                "title": "YouTube channel email input",
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "costUsd": {
-                                            "description": "Amount charged in USD for this call.",
-                                            "type": "number"
-                                        },
-                                        "items": {
-                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
-                                            "type": "integer"
-                                        },
-                                        "output": {
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "data": {
-                                                    "oneOf": [
-                                                        {
-                                                            "type": "null"
-                                                        },
-                                                        {
-                                                            "additionalProperties": false,
-                                                            "properties": {
-                                                                "items": {
-                                                                    "description": "Channel email records: channel name, handle, and the discovered business email address.",
-                                                                    "items": {
-                                                                        "properties": {
-                                                                            "email": {
-                                                                                "type": "string"
-                                                                            },
-                                                                            "status": {
-                                                                                "type": "string"
-                                                                            }
-                                                                        },
-                                                                        "required": [
-                                                                            "email",
-                                                                            "status"
-                                                                        ],
-                                                                        "type": "object"
-                                                                    },
-                                                                    "type": "array"
-                                                                }
-                                                            },
-                                                            "required": [
-                                                                "items"
-                                                            ],
-                                                            "type": "object"
-                                                        }
-                                                    ]
-                                                },
-                                                "found": {
-                                                    "type": "boolean"
-                                                }
-                                            },
-                                            "required": [
-                                                "found",
-                                                "data"
-                                            ],
-                                            "title": "YouTube channel email output",
-                                            "type": "object"
-                                        },
-                                        "provider": {
-                                            "description": "Always \"AnyAPI\".",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "output",
-                                        "provider",
-                                        "costUsd"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Normalized result."
-                    },
-                    "400": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
-                    },
-                    "401": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Missing or invalid API key."
-                    },
-                    "402": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Insufficient wallet balance (no charge)."
-                    },
-                    "404": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
-                    },
-                    "429": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The upstream was rate limited, retry shortly (no charge)."
-                    },
-                    "502": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Every provider failed with a server/transport error (charge released)."
-                    }
-                },
-                "summary": "YouTube Channel Email",
-                "tags": [
-                    "youtube"
-                ],
-                "x-payment-info": {
-                    "price": {
-                        "currency": "USD",
-                        "max": "0.120000",
-                        "min": "0.000000",
-                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
