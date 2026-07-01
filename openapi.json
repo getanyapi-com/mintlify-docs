@@ -40,6 +40,804 @@
     },
     "openapi": "3.1.0",
     "paths": {
+        "/v1/run/ahrefs.backlinks": {
+            "post": {
+                "description": "Get the referring pages linking to a domain or URL, each with the source page, anchor text, linking domain rating, and page title. Transparent per-request USD pricing.",
+                "operationId": "ahrefs_backlinks",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "mode": "subdomains",
+                                "url": "ahrefs.com"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "mode": "subdomains",
+                                    "url": "ahrefs.com"
+                                },
+                                "properties": {
+                                    "mode": {
+                                        "default": "subdomains",
+                                        "description": "Match scope: \"exact\" for the given URL only, or \"subdomains\" to include the domain and its subdomains.",
+                                        "enum": [
+                                            "exact",
+                                            "subdomains"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "url": {
+                                        "description": "The domain or page URL to find backlinks for (e.g. \"ahrefs.com\").",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "Ahrefs backlinks input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "items": {
+                                                                    "description": "Referring pages that link to the domain or URL.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "anchor": {
+                                                                                "description": "Anchor text of the link.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "contextAfter": {
+                                                                                "description": "Text immediately after the anchor on the referring page.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "contextBefore": {
+                                                                                "description": "Text immediately before the anchor on the referring page.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "domainRating": {
+                                                                                "description": "Ahrefs Domain Rating (0-100) of the linking domain.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "title": {
+                                                                                "description": "Title of the referring page.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "urlFrom": {
+                                                                                "description": "URL of the referring page that contains the link.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "urlTo": {
+                                                                                "description": "Target URL the link points to.",
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "urlFrom"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "items"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Ahrefs backlinks output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Ahrefs Backlinks",
+                "tags": [
+                    "ahrefs"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.019500",
+                        "min": "0.019500",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/ahrefs.keyword_ideas": {
+            "post": {
+                "description": "Get related keyword suggestions for any seed term, each with an Ahrefs difficulty and search-volume bucket. Transparent per-request USD pricing.",
+                "operationId": "ahrefs_keyword_ideas",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "country": "us",
+                                "keyword": "coffee"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "country": "us",
+                                    "keyword": "coffee"
+                                },
+                                "properties": {
+                                    "country": {
+                                        "default": "us",
+                                        "description": "Two-letter country code that scopes the suggestions (e.g. us, gb, de).",
+                                        "type": "string"
+                                    },
+                                    "keyword": {
+                                        "description": "The seed keyword to expand into related suggestions (e.g. \"coffee\").",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "keyword"
+                                ],
+                                "title": "Ahrefs keyword ideas input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "items": {
+                                                                    "description": "Keyword-idea records: the seed keyword and its related keyword suggestions, each with an Ahrefs difficulty and search-volume bucket.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "country": {
+                                                                                "description": "Two-letter country code the suggestions are scoped to.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "ideas": {
+                                                                                "description": "Related keyword suggestions for the seed term.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "difficulty": {
+                                                                                            "description": "Relative Ahrefs difficulty bucket (a letter such as E, M, or H), not an exact number.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "keyword": {
+                                                                                            "description": "The suggested related keyword.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "updatedAt": {
+                                                                                            "description": "Timestamp the suggestion metrics were last updated.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "volume": {
+                                                                                            "description": "Relative search-volume bucket (a letter grade), not an exact number.",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "required": [
+                                                                                        "keyword"
+                                                                                    ],
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "searchEngine": {
+                                                                                "description": "Search engine the suggestions are drawn from (e.g. Google).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "sourceKeyword": {
+                                                                                "description": "The seed keyword the suggestions were expanded from.",
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "sourceKeyword"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "items"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Ahrefs keyword ideas output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Ahrefs Keyword Ideas",
+                "tags": [
+                    "ahrefs"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.019500",
+                        "min": "0.001500",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/ahrefs.keywords": {
+            "post": {
+                "description": "Get the Ahrefs keyword-difficulty metrics for any search term: the difficulty score (0-100) and the number of referring domains a page needs to rank in the top 10 - as normalized JSON with transparent per-request USD pricing.",
+                "operationId": "ahrefs_keywords",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "country": "us",
+                                "keyword": "seo tools"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "country": "us",
+                                    "keyword": "seo tools"
+                                },
+                                "properties": {
+                                    "country": {
+                                        "default": "us",
+                                        "description": "Two-letter country code that scopes volume and difficulty (e.g. us, gb, de).",
+                                        "type": "string"
+                                    },
+                                    "keyword": {
+                                        "description": "The search term to analyze (e.g. \"seo tools\").",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "keyword"
+                                ],
+                                "title": "Ahrefs keyword metrics input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "items": {
+                                                                    "description": "Keyword-difficulty records: the difficulty score and the referring-domain gap needed to rank in the top 10.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "country": {
+                                                                                "description": "Two-letter country code the metrics are scoped to.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "difficulty": {
+                                                                                "description": "Ahrefs Keyword Difficulty, 0-100.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "keyword": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "referringDomainsToRank": {
+                                                                                "description": "Estimated number of referring domains a page needs to rank in the top 10 for this keyword.",
+                                                                                "type": "integer"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "keyword"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "items"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Ahrefs keyword difficulty output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Ahrefs Keyword Difficulty",
+                "tags": [
+                    "ahrefs"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.019500",
+                        "min": "0.001500",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/ahrefs.overview": {
             "post": {
                 "description": "Get an SEO overview for any domain or URL \u2014 authority score and estimated organic traffic \u2014 with transparent per-request USD pricing.",
@@ -34051,6 +34849,330 @@
                 }
             }
         },
+        "/v1/run/semrush.keywords": {
+            "post": {
+                "description": "Semrush keyword research for any term: monthly search volume, CPC, competition, keyword difficulty, plus related keywords and question keywords. Transparent per-request USD pricing.",
+                "operationId": "semrush_keywords",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "database": "us",
+                                "keyword": "best running shoes"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "database": "us",
+                                    "keyword": "best running shoes"
+                                },
+                                "properties": {
+                                    "database": {
+                                        "default": "us",
+                                        "description": "Two-letter Semrush regional database that scopes the metrics (e.g. us, uk, de).",
+                                        "type": "string"
+                                    },
+                                    "keyword": {
+                                        "description": "The search term to research (e.g. \"best running shoes\").",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "keyword"
+                                ],
+                                "title": "Semrush keyword research input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "items": {
+                                                                    "description": "Keyword-research records: search volume, CPC, competition, keyword difficulty, plus related keywords and question keywords for the researched term.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "competition": {
+                                                                                "description": "Paid-search competition density, 0 to 1.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "cpcUsd": {
+                                                                                "description": "Average cost per click in USD.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "database": {
+                                                                                "description": "Two-letter Semrush regional database the metrics are scoped to.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "intents": {
+                                                                                "description": "Search-intent labels for the keyword (e.g. commercial, informational).",
+                                                                                "items": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "keyword": {
+                                                                                "description": "The researched search term.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "keywordDifficulty": {
+                                                                                "description": "Semrush Keyword Difficulty, 0 to 100.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "organicResultsCount": {
+                                                                                "description": "Number of organic results Google returns for the keyword.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "questions": {
+                                                                                "description": "Question-phrased keyword variations with their own volume and difficulty.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "keyword": {
+                                                                                            "description": "The question keyword.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "keywordDifficulty": {
+                                                                                            "description": "Semrush Keyword Difficulty for the question keyword, 0 to 100.",
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "searchVolume": {
+                                                                                            "description": "Average monthly search volume for the question keyword.",
+                                                                                            "type": "integer"
+                                                                                        }
+                                                                                    },
+                                                                                    "required": [
+                                                                                        "keyword"
+                                                                                    ],
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "referringDomainsMedian": {
+                                                                                "description": "Median number of referring domains across the ranking pages.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "relatedKeywords": {
+                                                                                "description": "Related keyword suggestions with their own volume and difficulty.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "keyword": {
+                                                                                            "description": "The related keyword.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "keywordDifficulty": {
+                                                                                            "description": "Semrush Keyword Difficulty for the related keyword, 0 to 100.",
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "searchVolume": {
+                                                                                            "description": "Average monthly search volume for the related keyword.",
+                                                                                            "type": "integer"
+                                                                                        }
+                                                                                    },
+                                                                                    "required": [
+                                                                                        "keyword"
+                                                                                    ],
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "searchVolume": {
+                                                                                "description": "Average monthly search volume in the selected database.",
+                                                                                "type": "integer"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "keyword"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "items"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Semrush keyword research output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Semrush Keyword Research",
+                "tags": [
+                    "semrush"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.015000",
+                        "min": "0.000000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/snapchat.profile": {
             "post": {
                 "description": "Fetch a Snapchat user's public profile by username \u2014 display name, bio, subscriber count, and recent public content \u2014 with transparent per-request USD pricing.",
@@ -56572,6 +57694,10 @@
         {
             "name": "sec",
             "x-group": "Sec"
+        },
+        {
+            "name": "semrush",
+            "x-group": "Semrush"
         },
         {
             "name": "snapchat",
