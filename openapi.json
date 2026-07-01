@@ -445,6 +445,53 @@
                                                                     "description": "Listing records: name, nightly price, rating, location, host info, and availability details.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "hostName": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Airbnb listing identifier.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Primary listing image URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "isAvailable": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "isSuperhost": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "latitude": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "location": {
+                                                                                "description": "Location subtitle.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "longitude": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "personCapacity": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "price": {
+                                                                                "description": "Nightly price label.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "propertyType": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Guest satisfaction rating (0-5).",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewsCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "roomType": {
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
                                                                                 "type": "string"
                                                                             },
@@ -453,8 +500,9 @@
                                                                             }
                                                                         },
                                                                         "required": [
-                                                                            "title",
-                                                                            "url"
+                                                                            "id",
+                                                                            "url",
+                                                                            "title"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -3526,14 +3574,52 @@
                                                                     "description": "Cryptocurrency listing records: rank, name, symbol, price, market cap, trading volume, and 24h price change.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "ath": {
+                                                                                "description": "All-time high.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "atl": {
+                                                                                "description": "All-time low.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "circulatingSupply": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "high24h": {
+                                                                                "type": "number"
+                                                                            },
                                                                             "id": {
+                                                                                "description": "CoinMarketCap identifier.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "lastUpdated": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "low24h": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "marketCap": {
                                                                                 "type": "number"
                                                                             },
                                                                             "name": {
                                                                                 "type": "string"
                                                                             },
+                                                                            "price": {
+                                                                                "description": "Latest price in the primary quote currency (USD).",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "slug": {
+                                                                                "type": "string"
+                                                                            },
                                                                             "symbol": {
                                                                                 "type": "string"
+                                                                            },
+                                                                            "totalSupply": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "volume24h": {
+                                                                                "description": "24h trading volume.",
+                                                                                "type": "number"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -5151,10 +5237,24 @@
                                                                     "description": "Email lookup records: the discovered email address, verification status, and the matched person and company details.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "domain": {
+                                                                                "type": "string"
+                                                                            },
                                                                             "email": {
+                                                                                "description": "Discovered email address, or empty when none was found.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "firstName": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "isDeliverable": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "lastName": {
                                                                                 "type": "string"
                                                                             },
                                                                             "status": {
+                                                                                "description": "Lookup status (e.g. found, not_found).",
                                                                                 "type": "string"
                                                                             }
                                                                         },
@@ -5388,10 +5488,36 @@
                                                                     "description": "Verification records: the email address with its deliverability verdict and syntax, domain, and mailbox check details.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "catchAll": {
+                                                                                "description": "Domain accepts all addresses.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "disposable": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "domain": {
+                                                                                "type": "string"
+                                                                            },
                                                                             "email": {
                                                                                 "type": "string"
                                                                             },
+                                                                            "free": {
+                                                                                "description": "Free email provider.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "reason": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "role": {
+                                                                                "description": "Role-based address (e.g. info@).",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "score": {
+                                                                                "description": "Confidence score (0-100).",
+                                                                                "type": "integer"
+                                                                            },
                                                                             "status": {
+                                                                                "description": "Deliverability verdict (e.g. valid, risky, invalid).",
                                                                                 "type": "string"
                                                                             }
                                                                         },
@@ -16125,10 +16251,23 @@
                                                                     "description": "Article records: headline, source name, article link, and publish time.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "publishedAt": {
+                                                                                "description": "Publish time.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "snippet": {
+                                                                                "description": "Article snippet when available.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "source": {
+                                                                                "description": "Publisher name.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
                                                                                 "type": "string"
                                                                             },
                                                                             "url": {
+                                                                                "description": "Article link.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
@@ -19237,14 +19376,59 @@
                                                                     "description": "Job listing records: title, employer, location, salary when available, job type, posting date, and description.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "city": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "company": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "country": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "datePublished": {
+                                                                                "description": "ISO 8601 publish date.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "description": {
+                                                                                "description": "Plain-text job description.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "expired": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "jobId": {
+                                                                                "description": "Indeed job key.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "postalCode": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "salaryCurrency": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "salaryMax": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "salaryMin": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "salaryUnit": {
+                                                                                "description": "Salary period, e.g. YEAR or HOUR.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "state": {
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
                                                                                 "type": "string"
                                                                             },
                                                                             "url": {
+                                                                                "description": "Indeed job posting URL.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
+                                                                            "jobId",
                                                                             "title",
                                                                             "url"
                                                                         ],
@@ -20769,7 +20953,22 @@
                                                                     "description": "Hashtag analytics records: hashtag name, total post count, and related hashtag suggestions.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "difficulty": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "id": {
+                                                                                "type": "string"
+                                                                            },
                                                                             "name": {
+                                                                                "description": "Hashtag (without #).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "postsCount": {
+                                                                                "description": "Total posts using the hashtag.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "postsFormatted": {
+                                                                                "description": "Human-formatted post count (e.g. 793.54 M).",
                                                                                 "type": "string"
                                                                             },
                                                                             "url": {
@@ -36391,11 +36590,49 @@
                                                                     "description": "Post records: title, subtitle, URL, publish date, paywall status, word count, engagement (reactions, comments, restacks), author profile, publication info, and full article HTML when requested.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "authorHandle": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorName": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "commentCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "description": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Cover image URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "isPaid": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "postId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "postType": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "publishedAt": {
+                                                                                "description": "ISO 8601 publish date.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "reactionCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "subtitle": {
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
                                                                                 "type": "string"
                                                                             },
                                                                             "url": {
                                                                                 "type": "string"
+                                                                            },
+                                                                            "wordcount": {
+                                                                                "type": "integer"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -44781,10 +45018,23 @@
                                                                     "description": "Review records for the place: rating, title, review text, publish date, trip type, and reviewer details.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "publishedAt": {
+                                                                                "description": "Publish date.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "rating": {
+                                                                                "description": "Star rating (typically 1-5).",
                                                                                 "type": "number"
                                                                             },
                                                                             "text": {
+                                                                                "description": "Review body text.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "title": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "Canonical review URL.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
@@ -45292,11 +45542,28 @@
                                                                     "description": "Review records: star rating, review title and text, date, reviewer name and country, and company reply when present.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "publishedAt": {
+                                                                                "description": "Publish date (ISO 8601).",
+                                                                                "type": "string"
+                                                                            },
                                                                             "rating": {
+                                                                                "description": "Star rating (1-5).",
                                                                                 "type": "number"
                                                                             },
                                                                             "text": {
+                                                                                "description": "Review body text.",
                                                                                 "type": "string"
+                                                                            },
+                                                                            "title": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "Canonical review URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "verified": {
+                                                                                "description": "Whether the reviewer is verified.",
+                                                                                "type": "boolean"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -47870,14 +48137,54 @@
                                                                     "description": "Tweet records: text, author profile, timestamp, and engagement metrics (likes, retweets, replies, views).",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "authorName": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorUsername": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorVerified": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "bookmarkCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "conversationId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "createdAt": {
+                                                                                "description": "Tweet creation time.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "id": {
                                                                                 "type": "string"
+                                                                            },
+                                                                            "isReply": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "lang": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "likeCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "quoteCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "replyCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "retweetCount": {
+                                                                                "type": "integer"
                                                                             },
                                                                             "text": {
                                                                                 "type": "string"
                                                                             },
                                                                             "url": {
                                                                                 "type": "string"
+                                                                            },
+                                                                            "viewCount": {
+                                                                                "type": "integer"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -48887,14 +49194,65 @@
                                                                     "description": "Job records: title, description, budget or hourly rate, required skills, posted date, and client details.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "budget": {
+                                                                                "description": "Fixed budget or hourly range.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "clientLocation": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "clientRating": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "clientTotalSpent": {
+                                                                                "description": "Client lifetime spend (USD).",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "description": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "experienceLevel": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "jobId": {
+                                                                                "description": "Upwork job identifier.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "jobType": {
+                                                                                "description": "Fixed or Hourly.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "paymentVerified": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "postedAt": {
+                                                                                "description": "ISO 8601 posting date.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "proposals": {
+                                                                                "description": "Number of proposals submitted.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "tags": {
+                                                                                "description": "Skill tags.",
+                                                                                "items": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "type": [
+                                                                                    "array",
+                                                                                    "null"
+                                                                                ]
+                                                                            },
                                                                             "title": {
                                                                                 "type": "string"
                                                                             },
                                                                             "url": {
+                                                                                "description": "Upwork job posting URL.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
+                                                                            "jobId",
                                                                             "title",
                                                                             "url"
                                                                         ],
