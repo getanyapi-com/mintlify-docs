@@ -840,7 +840,7 @@
         },
         "/v1/run/ahrefs.overview": {
             "post": {
-                "description": "Get an SEO overview for any domain or URL \u2014 authority score and estimated organic traffic \u2014 with transparent per-request USD pricing.",
+                "description": "Get an SEO authority overview for any domain or URL: Domain Rating, total backlinks, and referring domains - as normalized JSON with transparent per-request USD pricing.",
                 "operationId": "ahrefs_overview",
                 "parameters": [
                     {
@@ -876,23 +876,16 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "country": "us",
                                 "mode": "subdomains",
                                 "url": "ahrefs.com"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "country": "us",
                                     "mode": "subdomains",
                                     "url": "ahrefs.com"
                                 },
                                 "properties": {
-                                    "country": {
-                                        "default": "us",
-                                        "description": "Two-letter country code that scopes traffic data.",
-                                        "type": "string"
-                                    },
                                     "mode": {
                                         "default": "subdomains",
                                         "description": "Analysis scope: subdomains covers the whole domain, exact matches only the given URL.",
@@ -903,7 +896,7 @@
                                         "type": "string"
                                     },
                                     "url": {
-                                        "description": "The domain or page URL to analyze (e.g. example.com).",
+                                        "description": "The domain or page URL to analyze (e.g. ahrefs.com).",
                                         "type": "string"
                                     }
                                 },
@@ -943,54 +936,40 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Domain overview records: the requested domain plus its estimated organic search-traffic metrics, history, country breakdown, and top pages/keywords.",
+                                                                    "description": "Domain authority records: the requested domain plus its Domain Rating, total backlinks, and referring-domain counts.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "backlinks": {
+                                                                                "description": "Total number of backlinks pointing to the domain.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "dofollowBacklinksPct": {
+                                                                                "description": "Percentage (0-100) of backlinks that are dofollow.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "dofollowReferringDomainsPct": {
+                                                                                "description": "Percentage (0-100) of referring domains that provide a dofollow link.",
+                                                                                "type": "integer"
+                                                                            },
                                                                             "domain": {
+                                                                                "description": "The domain or URL the metrics are scoped to.",
                                                                                 "type": "string"
+                                                                            },
+                                                                            "domainRating": {
+                                                                                "description": "Ahrefs Domain Rating, 0-100, measuring backlink-profile strength.",
+                                                                                "type": "number"
                                                                             },
                                                                             "mode": {
+                                                                                "description": "Analysis scope used: subdomains (whole domain) or exact (the given URL only).",
                                                                                 "type": "string"
                                                                             },
-                                                                            "type": {
-                                                                                "type": "string"
-                                                                            },
-                                                                            "website_overall_search_traffic": {
-                                                                                "type": [
-                                                                                    "integer",
-                                                                                    "number",
-                                                                                    "null"
-                                                                                ]
-                                                                            },
-                                                                            "website_overall_search_traffic_history": {
-                                                                                "type": [
-                                                                                    "array",
-                                                                                    "null"
-                                                                                ]
-                                                                            },
-                                                                            "website_overall_search_traffic_last_month": {
-                                                                                "type": [
-                                                                                    "integer",
-                                                                                    "number",
-                                                                                    "null"
-                                                                                ]
-                                                                            },
-                                                                            "website_traffic": {
-                                                                                "type": [
-                                                                                    "object",
-                                                                                    "null"
-                                                                                ]
-                                                                            },
-                                                                            "website_traffic_by_country": {
-                                                                                "type": [
-                                                                                    "array",
-                                                                                    "null"
-                                                                                ]
+                                                                            "referringDomains": {
+                                                                                "description": "Number of unique referring domains linking to the domain.",
+                                                                                "type": "integer"
                                                                             }
                                                                         },
                                                                         "required": [
-                                                                            "domain",
-                                                                            "type"
+                                                                            "domain"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -35138,6 +35117,371 @@
                     }
                 },
                 "summary": "Semrush Keyword Research",
+                "tags": [
+                    "semrush"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.015000",
+                        "min": "0.000000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/semrush.overview": {
+            "post": {
+                "description": "a Semrush SEO overview for any domain: Authority Score, organic and paid traffic, keyword and backlink counts, top country, and the domain's top organic keywords. Transparent per-request USD pricing.",
+                "operationId": "semrush_overview",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "database": "us",
+                                "domain": "ahrefs.com"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "database": "us",
+                                    "domain": "ahrefs.com"
+                                },
+                                "properties": {
+                                    "database": {
+                                        "default": "us",
+                                        "description": "Two-letter Semrush regional database that scopes the metrics (e.g. us, uk, de).",
+                                        "type": "string"
+                                    },
+                                    "domain": {
+                                        "description": "The domain to analyze (e.g. ahrefs.com).",
+                                        "type": "string"
+                                    },
+                                    "includeMoz": {
+                                        "default": false,
+                                        "description": "Add Moz Domain Authority and Spam Score to the response.",
+                                        "type": "boolean"
+                                    }
+                                },
+                                "required": [
+                                    "domain"
+                                ],
+                                "title": "Semrush domain overview input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "items": {
+                                                                    "description": "Domain overview records: Authority Score, organic and paid traffic, keyword and backlink counts, top country, and the domain's top organic keywords.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "aiVisibility": {
+                                                                                "description": "Semrush AI visibility metric for the domain.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "authorityScore": {
+                                                                                "description": "Semrush Authority Score, 0-100.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "backlinks": {
+                                                                                "description": "Total number of backlinks pointing at the domain.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "database": {
+                                                                                "description": "Two-letter Semrush regional database the metrics are scoped to.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "domain": {
+                                                                                "description": "The analyzed domain.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "followBacklinks": {
+                                                                                "description": "Number of dofollow backlinks.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "mozDomainAuthority": {
+                                                                                "description": "Moz Domain Authority, 0-100 (only when includeMoz is true).",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "mozSpamScore": {
+                                                                                "description": "Moz Spam Score as a percentage string (only when includeMoz is true).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "nofollowBacklinks": {
+                                                                                "description": "Number of nofollow backlinks.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "organicKeywords": {
+                                                                                "description": "Number of keywords the domain ranks for organically.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "organicTraffic": {
+                                                                                "description": "Estimated monthly organic search traffic.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "organicTrafficCostUsd": {
+                                                                                "description": "Estimated USD value of the organic traffic.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "paidKeywords": {
+                                                                                "description": "Number of keywords the domain bids on.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "paidTraffic": {
+                                                                                "description": "Estimated monthly paid search traffic.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "paidTrafficCostUsd": {
+                                                                                "description": "Estimated USD value of the paid traffic.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "referringDomains": {
+                                                                                "description": "Number of unique domains linking to the domain.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "topCountry": {
+                                                                                "description": "Two-letter code of the country sending the most traffic.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "topCountryTraffic": {
+                                                                                "description": "Estimated monthly traffic from the top country.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "topKeywords": {
+                                                                                "description": "The domain's top organic keywords with position, volume, and value.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "cpcUsd": {
+                                                                                            "description": "Average cost per click in USD.",
+                                                                                            "type": "number"
+                                                                                        },
+                                                                                        "intents": {
+                                                                                            "description": "Search intents associated with the keyword.",
+                                                                                            "items": {
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "type": "array"
+                                                                                        },
+                                                                                        "keyword": {
+                                                                                            "description": "The organic keyword.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "keywordDifficulty": {
+                                                                                            "description": "Semrush Keyword Difficulty, 0-100.",
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "position": {
+                                                                                            "description": "Current SERP position for this keyword.",
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "searchVolume": {
+                                                                                            "description": "Monthly search volume for this keyword.",
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "traffic": {
+                                                                                            "description": "Estimated monthly traffic this keyword drives to the domain.",
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "url": {
+                                                                                            "description": "The ranking URL on the domain.",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "required": [
+                                                                                        "keyword"
+                                                                                    ],
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "totalTraffic": {
+                                                                                "description": "Estimated total monthly traffic across organic and paid.",
+                                                                                "type": "integer"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "domain"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "items"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Semrush domain overview output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Semrush Domain Overview",
                 "tags": [
                     "semrush"
                 ],
