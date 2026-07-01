@@ -23891,10 +23891,10 @@
                 }
             }
         },
-        "/v1/run/instagram.stories": {
+        "/v1/run/instagram.stories_full": {
             "post": {
-                "description": "Fetch the currently live stories of public Instagram accounts \u2014 media URLs, type, and timestamps \u2014 in one call. Priced per username (a flat run fee is shared across the batch), so request several usernames at once to lower the cost per account. Up to 100 usernames per request.",
-                "operationId": "instagram_stories",
+                "description": "Fetch public Instagram accounts' currently live stories with the full record - media (image and video), type, dimensions, posting time, 24h expiry, and caption. Priced per username (a flat run fee is shared across the batch), so request several at once to lower the cost per account. Up to 100 usernames per request.",
+                "operationId": "instagram_stories_full",
                 "parameters": [
                     {
                         "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
@@ -23930,7 +23930,6 @@
                         "application/json": {
                             "example": {
                                 "usernames": [
-                                    "nasa",
                                     "natgeo"
                                 ]
                             },
@@ -23938,13 +23937,12 @@
                                 "additionalProperties": false,
                                 "example": {
                                     "usernames": [
-                                        "nasa",
                                         "natgeo"
                                     ]
                                 },
                                 "properties": {
                                     "usernames": {
-                                        "description": "Public Instagram usernames whose live stories to fetch. You are billed per username in the batch, and the one-time run fee is shared across them, so requesting several usernames at once lowers the cost per account.",
+                                        "description": "Instagram usernames/handles (without the @). A flat run fee is shared across the batch, so request several at once to lower the cost per account. Up to 100 usernames per request.",
                                         "items": {
                                             "type": "string"
                                         },
@@ -23956,7 +23954,7 @@
                                 "required": [
                                     "usernames"
                                 ],
-                                "title": "Instagram stories input",
+                                "title": "Instagram Stories (full) input",
                                 "type": "object"
                             }
                         }
@@ -23989,11 +23987,52 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Story records across the requested accounts: each carries the owner username, media type, image/video URL, posting time, expiry, and story metadata.",
+                                                                    "description": "Story records across the requested accounts, each with full media, type, dimensions, posting + expiry time, and caption.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "id": {
+                                                                            "caption": {
+                                                                                "description": "Story caption text, when present.",
                                                                                 "type": "string"
+                                                                            },
+                                                                            "code": {
+                                                                                "description": "Instagram media shortcode.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "expiresAt": {
+                                                                                "description": "Expiry time, 24h after posting (Unix seconds).",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "height": {
+                                                                                "description": "Media pixel height.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Story identifier.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "imageUrl": {
+                                                                                "description": "Direct URL to the story image (highest resolution).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "mediaType": {
+                                                                                "description": "Media type: 1 = image, 2 = video.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "postedAt": {
+                                                                                "description": "Posting time (Unix seconds).",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "username": {
+                                                                                "description": "Owner username.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "videoUrl": {
+                                                                                "description": "Direct URL to the story video, when the story is a video.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "width": {
+                                                                                "description": "Media pixel width.",
+                                                                                "type": "integer"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -24019,7 +24058,7 @@
                                                 "found",
                                                 "data"
                                             ],
-                                            "title": "Instagram stories output",
+                                            "title": "Instagram Stories (full) output",
                                             "type": "object"
                                         },
                                         "provider": {
@@ -24099,7 +24138,7 @@
                         "description": "Every provider failed with a server/transport error (charge released)."
                     }
                 },
-                "summary": "Instagram Stories",
+                "summary": "Instagram Stories (full)",
                 "tags": [
                     "instagram"
                 ],
@@ -24109,6 +24148,255 @@
                         "max": "0.102000",
                         "min": "0.099000",
                         "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/instagram.stories_thin": {
+            "post": {
+                "description": "Fetch a public Instagram account's currently live stories - media URL, owner, and posting time - by username. Lightweight projection; for media type, dimensions, and the 24h expiry time use instagram.stories_full.",
+                "operationId": "instagram_stories_thin",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "username": "natgeo"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "username": "natgeo"
+                                },
+                                "properties": {
+                                    "username": {
+                                        "description": "Instagram username/handle to fetch currently live stories for (without the @).",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "username"
+                                ],
+                                "title": "Instagram Stories (basic) input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "items": {
+                                                                    "description": "The account's currently live stories, each with its media URL, owner, posting time, and permalink.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "id": {
+                                                                                "description": "Story identifier.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "mediaUrl": {
+                                                                                "description": "Direct URL to the story image or video.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "permalink": {
+                                                                                "description": "Public link to the story.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "postedAt": {
+                                                                                "description": "Posting time (Unix seconds).",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "username": {
+                                                                                "description": "Owner username.",
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "items"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "Instagram Stories (basic) output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Instagram Stories (basic)",
+                "tags": [
+                    "instagram"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.016250",
+                        "currency": "USD",
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
