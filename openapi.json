@@ -4800,251 +4800,6 @@
                 }
             }
         },
-        "/v1/run/contacts.scrape": {
-            "post": {
-                "description": "Extract contact details \u2014 emails, phone numbers, and social media profiles \u2014 from any website, crawling up to 10 pages per flat-priced request.",
-                "operationId": "contacts_scrape",
-                "parameters": [
-                    {
-                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
-                        "in": "query",
-                        "name": "fields",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
-                        "in": "query",
-                        "name": "max_items",
-                        "required": false,
-                        "schema": {
-                            "minimum": 0,
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
-                        "in": "query",
-                        "name": "summary",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "example": {
-                                "limit": 5,
-                                "url": "https://www.toptal.com"
-                            },
-                            "schema": {
-                                "additionalProperties": false,
-                                "example": {
-                                    "limit": 5,
-                                    "url": "https://www.toptal.com"
-                                },
-                                "properties": {
-                                    "limit": {
-                                        "description": "Maximum number of results to return (1\u201310, default 10). You are billed per result returned, so a lower limit costs less.",
-                                        "maximum": 10,
-                                        "minimum": 1,
-                                        "type": "integer"
-                                    },
-                                    "url": {
-                                        "description": "The website URL to crawl for contact details (e.g. https://example.com).",
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "url"
-                                ],
-                                "title": "Website contact scraper input",
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "costUsd": {
-                                            "description": "Amount charged in USD for this call.",
-                                            "type": "number"
-                                        },
-                                        "items": {
-                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
-                                            "type": "integer"
-                                        },
-                                        "output": {
-                                            "additionalProperties": false,
-                                            "properties": {
-                                                "data": {
-                                                    "oneOf": [
-                                                        {
-                                                            "type": "null"
-                                                        },
-                                                        {
-                                                            "additionalProperties": false,
-                                                            "properties": {
-                                                                "items": {
-                                                                    "description": "Contact records per site: emails, phone numbers, and social media profile links discovered on the crawled pages.",
-                                                                    "items": {
-                                                                        "properties": {
-                                                                            "domain": {
-                                                                                "type": "string"
-                                                                            },
-                                                                            "url": {
-                                                                                "type": "string"
-                                                                            }
-                                                                        },
-                                                                        "required": [
-                                                                            "url",
-                                                                            "domain"
-                                                                        ],
-                                                                        "type": "object"
-                                                                    },
-                                                                    "type": "array"
-                                                                }
-                                                            },
-                                                            "required": [
-                                                                "items"
-                                                            ],
-                                                            "type": "object"
-                                                        }
-                                                    ]
-                                                },
-                                                "found": {
-                                                    "type": "boolean"
-                                                }
-                                            },
-                                            "required": [
-                                                "found",
-                                                "data"
-                                            ],
-                                            "title": "Website contact scraper output",
-                                            "type": "object"
-                                        },
-                                        "provider": {
-                                            "description": "Always \"AnyAPI\".",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "output",
-                                        "provider",
-                                        "costUsd"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Normalized result."
-                    },
-                    "400": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
-                    },
-                    "401": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Missing or invalid API key."
-                    },
-                    "402": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Insufficient wallet balance (no charge)."
-                    },
-                    "404": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
-                    },
-                    "429": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The upstream was rate limited, retry shortly (no charge)."
-                    },
-                    "502": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Every provider failed with a server/transport error (charge released)."
-                    }
-                },
-                "summary": "Website Contact Scraper",
-                "tags": [
-                    "contacts"
-                ],
-                "x-payment-info": {
-                    "price": {
-                        "currency": "USD",
-                        "max": "0.016000",
-                        "min": "0.001000",
-                        "mode": "dynamic"
-                    },
-                    "protocols": [
-                        {
-                            "x402": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            }
-                        },
-                        {
-                            "mpp": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            }
-                        }
-                    ]
-                }
-            }
-        },
         "/v1/run/dexscreener.tokens": {
             "post": {
                 "description": "List trending tokens on any blockchain from DEX Screener \u2014 price, liquidity, volume, transactions, and market cap \u2014 sorted how you want, as normalized JSON with transparent per-request USD pricing.",
@@ -10591,8 +10346,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.009300",
-                        "min": "0.001000",
+                        "max": "0.011000",
+                        "min": "0.010000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -29849,7 +29604,7 @@
         },
         "/v1/run/maps.place": {
             "post": {
-                "description": "Fetch full details for a single Google Maps place by place ID \u2014 name, address, opening hours, rating, and more \u2014 with transparent per-request USD pricing.",
+                "description": "Look up a place on Google Maps by name or search query (optionally scoped to a location) and get the best-matching place with full details - address, phone, website, rating, hours, and coordinates - as normalized JSON priced per request in USD.",
                 "operationId": "maps_place",
                 "parameters": [
                     {
@@ -29885,12 +29640,14 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4"
+                                "location": "San Francisco, CA",
+                                "query": "Blue Bottle Coffee"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4"
+                                    "location": "San Francisco, CA",
+                                    "query": "Blue Bottle Coffee"
                                 },
                                 "properties": {
                                     "language": {
@@ -29898,15 +29655,19 @@
                                         "description": "Two-letter language code for the result details (e.g. en).",
                                         "type": "string"
                                     },
-                                    "placeId": {
-                                        "description": "The Google Maps place ID to look up (e.g. ChIJj61dQgK6j4AR4GeTYWZsKWw).",
+                                    "location": {
+                                        "description": "Optional free-text location to scope the search, ideally city plus state or country (e.g. San Francisco, CA). Narrows the query to the best match in that area.",
+                                        "type": "string"
+                                    },
+                                    "query": {
+                                        "description": "The business name or search text to look up, as you would type it into the Google Maps search bar (e.g. Blue Bottle Coffee).",
                                         "type": "string"
                                     }
                                 },
                                 "required": [
-                                    "placeId"
+                                    "query"
                                 ],
-                                "title": "Google Maps place input",
+                                "title": "Google Maps place lookup input",
                                 "type": "object"
                             }
                         }
@@ -29939,13 +29700,93 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "The matching place record: name, address, coordinates, opening hours, rating, review count, and contact details.",
+                                                                    "description": "The best-matching place for the query, with full details: name, address, contact info, category, rating, opening hours, and coordinates. Up to one element (empty when nothing matched).",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "address": {
+                                                                                "description": "Full formatted street address.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "category": {
+                                                                                "description": "Primary Google Maps category (e.g. Coffee shop).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "city": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "countryCode": {
+                                                                                "description": "Two-letter country code.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "hours": {
+                                                                                "description": "Opening hours by day: each element is an object with the day name and its hours.",
+                                                                                "items": {
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "URL of the primary place photo.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "latitude": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "longitude": {
+                                                                                "type": "number"
+                                                                            },
                                                                             "name": {
+                                                                                "description": "Business or place name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "neighborhood": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "permanentlyClosed": {
+                                                                                "description": "Whether the place is permanently closed.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "phone": {
+                                                                                "description": "Formatted phone number.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "placeId": {
+                                                                                "description": "Google Maps place id.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "plusCode": {
+                                                                                "description": "Google Plus Code for the location.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "postalCode": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "priceLevel": {
+                                                                                "description": "Price level indicator (e.g. a price range).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Average star rating.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewsCount": {
+                                                                                "description": "Total number of reviews.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "state": {
+                                                                                "description": "State or region name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "street": {
+                                                                                "description": "Street portion of the address.",
                                                                                 "type": "string"
                                                                             },
                                                                             "url": {
+                                                                                "description": "Google Maps URL for the place.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "website": {
+                                                                                "description": "Business website URL.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
@@ -29973,7 +29814,7 @@
                                                 "found",
                                                 "data"
                                             ],
-                                            "title": "Google Maps place output",
+                                            "title": "Google Maps place lookup output",
                                             "type": "object"
                                         },
                                         "provider": {
@@ -30053,15 +29894,15 @@
                         "description": "Every provider failed with a server/transport error (charge released)."
                     }
                 },
-                "summary": "Google Maps Place",
+                "summary": "Google Maps Place Lookup",
                 "tags": [
                     "maps"
                 ],
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.002050",
-                        "min": "0.000050",
+                        "max": "0.009000",
+                        "min": "0.003000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -32448,8 +32289,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.024750",
-                        "min": "0.000000",
+                        "max": "0.120000",
+                        "min": "0.105000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -57626,7 +57467,7 @@
         },
         "/v1/run/zillow.search": {
             "post": {
-                "description": "Search Zillow for-sale, rental, or sold listings by location (city, ZIP, or address) and get matching properties (price, address, beds, baths, status) as normalized JSON with flat per-request USD pricing.",
+                "description": "Search Zillow for-sale, rental, or sold listings by location (city, ZIP, or address) and get matching properties (price, address, beds, baths, living area, status, Zestimate) as normalized JSON with per-request USD pricing that scales with the number of results.",
                 "operationId": "zillow_search",
                 "parameters": [
                     {
@@ -57731,18 +57572,92 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Property listing records: address, price, beds, baths, living area, status, and listing metadata.",
+                                                                    "description": "Property listing records matching the search: address, price, beds, baths, living area, property type, status, Zestimate, and coordinates.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "title": {
+                                                                            "baths": {
+                                                                                "description": "Number of bathrooms.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "beds": {
+                                                                                "description": "Number of bedrooms.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "city": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "currency": {
+                                                                                "description": "ISO currency code of the price (e.g. usd).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "daysOnZillow": {
+                                                                                "description": "Days the listing has been on Zillow.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "URL of the primary listing photo.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "latitude": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "livingArea": {
+                                                                                "description": "Interior living area in square feet.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "longitude": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "lotSize": {
+                                                                                "description": "Lot size in square feet.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "price": {
+                                                                                "description": "List price in the listing currency.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "propertyType": {
+                                                                                "description": "Property type (e.g. singleFamily, condo, townhouse).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "rentZestimate": {
+                                                                                "description": "Zillow estimated monthly rent.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "state": {
+                                                                                "description": "Two-letter state code.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "status": {
+                                                                                "description": "Listing status (e.g. forSale, forRent, sold).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "streetAddress": {
+                                                                                "description": "Street address of the property.",
                                                                                 "type": "string"
                                                                             },
                                                                             "url": {
+                                                                                "description": "Absolute Zillow listing URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "yearBuilt": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "zestimate": {
+                                                                                "description": "Zillow estimated market value.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "zipcode": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "zpid": {
+                                                                                "description": "Zillow property id (zpid).",
                                                                                 "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
-                                                                            "url"
+                                                                            "url",
+                                                                            "zpid"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -57851,7 +57766,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.023000",
+                        "max": "0.075500",
                         "min": "0.000500",
                         "mode": "dynamic"
                     },
@@ -57930,10 +57845,6 @@
         {
             "name": "congress",
             "x-group": "Congress"
-        },
-        {
-            "name": "contacts",
-            "x-group": "Contacts"
         },
         {
             "name": "dexscreener",
