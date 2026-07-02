@@ -1,0 +1,110 @@
+---
+title: "API keys & spend controls"
+description: "Create keys with spend limits, reset windows, and expirations; track per-key usage; recharge your wallet automatically."
+---
+
+Every request authenticates with an API key, and every key spends your one wallet. This
+page covers the controls that keep that safe: per-key spend limits, expirations, the
+disable switch, per-key usage analytics, and automatic wallet top-ups.
+
+Manage everything at [dashboard → API keys](https://getanyapi.com/dashboard/keys), or use
+the endpoints below with any key or session.
+
+## Create a key
+
+`POST /v1/api-keys` mints a key. The secret is returned exactly once.
+
+```bash
+curl -s -X POST https://api.getanyapi.com/v1/api-keys \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Production",
+    "limitUsd": 25,
+    "limitInterval": "monthly",
+    "expiresIn": "90d"
+  }'
+```
+
+All fields except `name` are optional:
+
+| Field | Meaning |
+| --- | --- |
+| `limitUsd` | Spend ceiling in USD. Omit (or `null`) for unlimited. |
+| `limitInterval` | How often the limit resets: `daily`, `weekly`, or `monthly` (UTC calendar windows; weeks start Monday). Omit for a lifetime limit. Requires `limitUsd`. |
+| `expiresIn` | `1h`, `1d`, `7d`, `30d`, `90d`, `180d`, `1y`, or `never` (default). Fixed at creation. |
+
+A request that would take the key past its limit is rejected with **402** and the message
+`this API key has reached its spend limit` — nothing is charged. The wallet balance still
+applies independently.
+
+## Update, disable, delete
+
+`POST /v1/api-keys/{id}` patches a key. Send only what you want to change:
+
+```bash
+# Lower the limit to $5/day
+curl -s -X POST https://api.getanyapi.com/v1/api-keys/42 \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" -H "Content-Type: application/json" \
+  -d '{ "limitUsd": 5, "limitInterval": "daily" }'
+
+# Remove the limit
+curl -s -X POST ... -d '{ "limitUsd": null }'
+
+# Temporarily disable (reversible)
+curl -s -X POST ... -d '{ "disabled": true }'
+```
+
+- The limit pair travels together: changing `limitInterval` requires `limitUsd` in the
+  same request, and `"limitUsd": null` clears both.
+- A **disabled** key fails every request with **401** (`this API key is disabled`) until
+  you re-enable it with `{ "disabled": false }`.
+- An **expired** key fails with **401** (`this API key has expired`); expiry cannot be
+  changed after creation — mint a new key instead.
+- `DELETE /v1/api-keys/{id}` revokes a key permanently. This cannot be undone.
+
+## Per-key usage
+
+`GET /v1/api-keys/{id}/usage?days=7|30|90` returns one key's spend: totals, a per-API
+breakdown, a daily series, and calendar totals for today, this week, and this month —
+all in USD.
+
+```json
+{
+  "todayUsd": 0.42,
+  "thisWeekUsd": 1.1,
+  "thisMonthUsd": 3.21,
+  "periodLabel": "Last 30 days",
+  "totalRequests": 90,
+  "totalCostUsd": 3.21,
+  "byApi": [{ "api": "Tiktok Profile", "requests": 50, "costUsd": 2.0 }],
+  "daily": [{ "label": "Jun 3", "requests": 4, "costUsd": 0.1 }]
+}
+```
+
+The key list (`GET /v1/api-keys`) also carries each key's 30-day `usage30d`
+(`{ requests, costUsd }`) plus its current-window `spentUsd` against `limitUsd`.
+
+## Auto top-up
+
+Keep your wallet from running dry: when your balance falls below a threshold, AnyAPI
+charges your saved card for a fixed amount, automatically.
+
+```bash
+# Read the current settings
+curl -s https://api.getanyapi.com/v1/billing/auto-topup \
+  -H "X-API-Key: YOUR_ANYAPI_KEY"
+
+# Enable: when the balance drops below $5, top up $20
+curl -s -X POST https://api.getanyapi.com/v1/billing/auto-topup \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" -H "Content-Type: application/json" \
+  -d '{ "enabled": true, "thresholdUsd": 5, "amountUsd": 20 }'
+```
+
+- Enabling requires a saved card: make one top-up first and choose to save your payment
+  method at checkout (`hasPaymentMethod` on the GET tells you where you stand).
+- Amounts are whole dollars; `amountUsd` respects the same minimum as a manual top-up.
+- Auto top-ups appear in your [transactions](https://getanyapi.com/dashboard/billing)
+  like any other top-up. Burst protection prevents duplicate charges, and repeated card
+  failures pause the feature rather than retrying forever.
+- Configure it in the dashboard under **Credits → Auto top-up**.
