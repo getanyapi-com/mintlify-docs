@@ -1,0 +1,73 @@
+---
+title: "Pricing, fees & payouts"
+description: "How operator pricing works on AnyAPI: you set the customer price in USD, the platform takes a commission per sale, and earnings pay out to your bank through Stripe — free, from $50."
+---
+
+Everything on the seller side is denominated in USD. You set a price, customers pay it,
+and every earnings row itemizes your share and the platform fee.
+
+## You set the price
+
+When you register an endpoint you set the **customer list price in USD per 1,000
+requests** (minimum $0.01/1k). Routing is cheapest-first among healthy endpoints on the
+same API, so your price is your lever for traffic: price lower to win more requests,
+higher to earn more per request.
+
+### Changing your price
+
+From the endpoint's page in the [dashboard](https://getanyapi.com/dashboard/sell/endpoints)
+(or `POST /v1/operator/endpoints/{id}/price`):
+
+- **Decreases apply immediately.**
+- **Increases apply after a 24-hour delay**, so customers are never surprised
+  mid-integration.
+- At most **2 price changes per endpoint per rolling 24 hours**.
+
+## The commission split
+
+AnyAPI takes a per-sale commission from your profile's commission rate (`commissionBps`,
+default 1000 basis points = 10%). Don't assume the default — read your rate from your
+[operator profile](https://getanyapi.com/dashboard/sell) or `GET /v1/operator/profile`.
+
+Worked example at a $5.00/1k list price and the default 10% commission:
+
+| | Per 1,000 requests |
+| --- | --- |
+| Customer pays | $5.00 |
+| Platform fee (10%) | $0.50 |
+| **You earn** | **$4.50** |
+
+## When earnings become withdrawable
+
+- **Earnings accrue on confirmed sales** — every request your endpoint wins and serves
+  successfully, including free-tier-funded and agent-paid traffic.
+- Accrued earnings show as **Pending** in
+  [Earnings](https://getanyapi.com/dashboard/sell/earnings).
+- **Months finalize 7 days after they end.** Finalized earnings move to your **Available**
+  balance, which is withdrawable.
+
+## Payouts
+
+Payouts run through Stripe. Connect a payout account once from
+[Earnings → Set up payouts](https://getanyapi.com/dashboard/sell/earnings) — identity
+verification, bank details, and tax forms are all handled on Stripe's hosted flow.
+
+| Rule | Value |
+| --- | --- |
+| Withdrawal fee | Free |
+| Minimum withdrawal | $50 |
+| First payout | Unlocks 30 days after operator approval |
+| Method | Bank transfer via Stripe |
+
+Request a withdrawal from the dashboard or `POST /v1/operator/payouts` with
+`{"amountUsd": 50}`. It shows as **Pending** in your payout history until it settles, then
+**Paid**. A failed transfer shows **Failed** with the reason, and the amount returns to
+your available balance.
+
+## Quality affects earnings
+
+Only healthy endpoints receive traffic. If your error rate spikes or quality drops, the
+endpoint is paused automatically (shown as *Paused (quality)* in the dashboard) and stops
+earning until automatic re-tests restore it. Failed requests never earn: a non-2xx,
+invalid output, or timeout fails over to another provider at no cost to the customer and
+no earning to you.

@@ -1,0 +1,247 @@
+---
+title: "The operator endpoint contract"
+description: "The exact request your endpoint receives from AnyAPI, how to verify the signature, and the response it must return — with copy-paste verification code in TypeScript, Python, and Go."
+---
+
+Your endpoint serves one catalog API. AnyAPI sends it signed POST requests in that API's
+canonical input format; your endpoint answers in the canonical output format. This page is
+the whole contract.
+
+## The request you receive
+
+AnyAPI POSTs the API's input as JSON to your registered path (default `/run`):
+
+```http
+POST /run HTTP/1.1
+Host: scraper.example.com
+Content-Type: application/json
+X-AnyAPI-Operator: op_9f2kd83m
+X-AnyAPI-Timestamp: 1767312000
+X-AnyAPI-Nonce: 3f9c2ab84d1e07c6b52a91f0d4e8a713
+X-AnyAPI-Signature: 8d1f0a5b9c3e...
+
+{"query": "best pizza brooklyn", "limit": 10}
+```
+
+The body always matches the API's **input JSON Schema**. Read it (and the output schema)
+from the catalog:
+
+```bash
+curl https://api.getanyapi.com/v1/apis/{sku} \
+  -H "Authorization: Bearer aa_live_..."
+```
+
+The response includes `inputSchema` and `outputSchema` — the same schemas the
+compatibility checks and the live trial judge against. The register dialog in the
+[dashboard](https://getanyapi.com/dashboard/sell/endpoints) shows them too.
+
+Redirects are never followed, so answer directly at the registered URL.
+
+## Verifying the signature (required)
+
+Every request carries four headers:
+
+| Header | Value |
+| --- | --- |
+| `X-AnyAPI-Operator` | your operator id |
+| `X-AnyAPI-Timestamp` | unix seconds |
+| `X-AnyAPI-Nonce` | random 128-bit hex, unique per request |
+| `X-AnyAPI-Signature` | HMAC-SHA256, lowercase hex |
+
+Recompute the signature over the canonical string — five dot-joined parts:
+
+```text
+<timestamp>.<nonce>.<method>.<path>.<sha256hex(body)>
+```
+
+where `method` is `POST`, `path` is your registered path, and `sha256hex(body)` is the
+lowercase-hex SHA-256 of the raw body bytes. HMAC-SHA256 that string with the signing
+secret you got at registration, compare against the header in constant time, reject
+timestamps older than about 5 minutes, and remember nonces for that window to block
+replays. Reject failures with 401 and never process an unverified body.
+
+<CodeGroup>
+
+```typescript verify.ts
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
+
+const FRESH_SECONDS = 300;
+const seenNonces = new Map<string, number>(); // nonce -> expiry (use Redis in production)
+
+export function verify(
+  secret: string,
+  headers: Record<string, string>,
+  method: string,
+  path: string,
+  rawBody: Buffer,
+): boolean {
+  const ts = headers['x-anyapi-timestamp'];
+  const nonce = headers['x-anyapi-nonce'];
+  const sig = headers['x-anyapi-signature'];
+  if (!ts || !nonce || !sig) return false;
+
+  const age = Math.abs(Date.now() / 1000 - Number(ts));
+  if (!Number.isFinite(age) || age > FRESH_SECONDS) return false;
+
+  const now = Date.now() / 1000;
+  for (const [n, exp] of seenNonces) if (exp < now) seenNonces.delete(n);
+  if (seenNonces.has(nonce)) return false;
+  seenNonces.set(nonce, now + FRESH_SECONDS);
+
+  const bodyHash = createHash('sha256').update(rawBody).digest('hex');
+  const canonical = `${ts}.${nonce}.${method}.${path}.${bodyHash}`;
+  const expected = createHmac('sha256', secret).update(canonical).digest('hex');
+
+  const a = Buffer.from(sig, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+```
+
+```python verify.py
+import hashlib
+import hmac
+import time
+
+FRESH_SECONDS = 300
+seen_nonces: dict[str, float] = {}  # nonce -> expiry (use Redis in production)
+
+
+def verify(secret: str, headers: dict, method: str, path: str, raw_body: bytes) -> bool:
+    ts = headers.get("x-anyapi-timestamp", "")
+    nonce = headers.get("x-anyapi-nonce", "")
+    sig = headers.get("x-anyapi-signature", "")
+    if not ts or not nonce or not sig:
+        return False
+
+    try:
+        if abs(time.time() - int(ts)) > FRESH_SECONDS:
+            return False
+    except ValueError:
+        return False
+
+    now = time.time()
+    for n in [n for n, exp in seen_nonces.items() if exp < now]:
+        del seen_nonces[n]
+    if nonce in seen_nonces:
+        return False
+    seen_nonces[nonce] = now + FRESH_SECONDS
+
+    body_hash = hashlib.sha256(raw_body).hexdigest()
+    canonical = f"{ts}.{nonce}.{method}.{path}.{body_hash}"
+    expected = hmac.new(secret.encode(), canonical.encode(), hashlib.sha256).hexdigest()
+    return hmac.compare_digest(sig, expected)
+```
+
+```go verify.go
+package main
+
+import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
+	"math"
+	"net/http"
+	"strconv"
+	"sync"
+	"time"
+)
+
+const freshSeconds = 300
+
+var (
+	nonceMu sync.Mutex
+	nonces  = map[string]time.Time{} // nonce -> expiry (use Redis in production)
+)
+
+func verify(secret string, r *http.Request, path string, rawBody []byte) bool {
+	ts := r.Header.Get("X-AnyAPI-Timestamp")
+	nonce := r.Header.Get("X-AnyAPI-Nonce")
+	sig := r.Header.Get("X-AnyAPI-Signature")
+	if ts == "" || nonce == "" || sig == "" {
+		return false
+	}
+
+	sec, err := strconv.ParseInt(ts, 10, 64)
+	if err != nil || math.Abs(time.Since(time.Unix(sec, 0)).Seconds()) > freshSeconds {
+		return false
+	}
+
+	nonceMu.Lock()
+	now := time.Now()
+	for n, exp := range nonces {
+		if exp.Before(now) {
+			delete(nonces, n)
+		}
+	}
+	_, replay := nonces[nonce]
+	nonces[nonce] = now.Add(freshSeconds * time.Second)
+	nonceMu.Unlock()
+	if replay {
+		return false
+	}
+
+	bodyHash := sha256.Sum256(rawBody)
+	canonical := ts + "." + nonce + "." + r.Method + "." + path + "." + hex.EncodeToString(bodyHash[:])
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte(canonical))
+	expected := hex.EncodeToString(mac.Sum(nil))
+	return subtle.ConstantTimeCompare([]byte(sig), []byte(expected)) == 1
+}
+```
+
+</CodeGroup>
+
+<Note>
+  Rotating the secret (dashboard → endpoint → Rotate secret, or
+  `POST /v1/operator/endpoints/{id}/rotate-secret`) starts a 24-hour window where both the
+  old and new secret verify, so you can roll your deployment without dropping requests.
+</Note>
+
+## The response you must return
+
+Reply `2xx` with JSON that validates against the API's output schema. The envelope is
+always:
+
+```json
+{
+  "found": true,
+  "data": { ... }
+}
+```
+
+- **Extra fields are welcome; missing declared fields fail.** You can return more than the
+  schema declares (it's preserved for the customer), but every declared field must be
+  present.
+- **No result is not an error.** When the entity legitimately doesn't exist, return the
+  schema's `found: false` shape with a 2xx — that's a valid, billable answer.
+- A non-2xx status, output that doesn't validate, or a timeout counts as a failed attempt:
+  the request fails over to another provider, you don't earn it, and repeated failures
+  pause the endpoint.
+
+## Budgets
+
+| Budget | Limit |
+| --- | --- |
+| Response time | 15 seconds |
+| Response body | 8 MB |
+| Transport | HTTPS on port 443, public host, no embedded credentials |
+
+## What the compatibility checks test
+
+When you run the checks from the dashboard (or
+`POST /v1/operator/endpoints/{id}/conformance`), AnyAPI fires the API's schema examples at
+your endpoint as signed requests and verifies, per request:
+
+1. HTTP 2xx
+2. Output validates against the output schema
+3. `found: true` for the example inputs
+4. Answer within the 15-second budget
+5. Body under the 8 MB cap
+
+Every check must pass to enter the live trial. A failed run returns the per-check report
+so you can fix and rerun — unlimited retries.
+
+During the live trial, mirrored requests additionally carry `X-AnyAPI-Trial: 1` so you
+can tell trial traffic from paid traffic in your logs.
