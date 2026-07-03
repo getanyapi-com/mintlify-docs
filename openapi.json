@@ -28408,7 +28408,7 @@
         },
         "/v1/run/linkedin.profile": {
             "post": {
-                "description": "Fetch a LinkedIn member's public profile (name, location, followers, about) by profile URL, normalized across providers with transparent failover.",
+                "description": "Fetch a LinkedIn member's public profile by URL: name, location, followers, about, plus experience, education, recent posts, and published articles.",
                 "operationId": "linkedin_profile",
                 "parameters": [
                     {
@@ -28494,8 +28494,77 @@
                                                                 "about": {
                                                                     "type": "string"
                                                                 },
+                                                                "articles": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "headline": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "publishedAt": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "url": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "headline"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                },
                                                                 "avatarUrl": {
                                                                     "type": "string"
+                                                                },
+                                                                "connections": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "education": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "endYear": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "school": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "schoolUrl": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "startYear": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "school"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                },
+                                                                "experience": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "company": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "companyUrl": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "endYear": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "startYear": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "company"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
                                                                 },
                                                                 "followers": {
                                                                     "type": "integer"
@@ -28505,14 +28574,45 @@
                                                                 },
                                                                 "name": {
                                                                     "type": "string"
+                                                                },
+                                                                "recentPosts": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "activityType": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "id": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "publishedAt": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "text": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "url": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
                                                                 }
                                                             },
                                                             "required": [
                                                                 "name",
                                                                 "location",
                                                                 "followers",
+                                                                "connections",
                                                                 "about",
-                                                                "avatarUrl"
+                                                                "avatarUrl",
+                                                                "experience",
+                                                                "education",
+                                                                "recentPosts",
+                                                                "articles"
                                                             ],
                                                             "type": "object"
                                                         }
