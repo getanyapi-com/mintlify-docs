@@ -26876,7 +26876,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.001000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -28150,7 +28150,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.001000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -28708,7 +28708,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.001000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -33540,7 +33540,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.001000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -33784,7 +33784,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.001000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -34622,6 +34622,1640 @@
                         "max": "0.013450",
                         "min": "0.002700",
                         "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/rednote.note": {
+            "post": {
+                "description": "Look up a RedNote (Xiaohongshu) note by note ID and return normalized note details.",
+                "operationId": "rednote_note",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "noteId": "66f2a24f000000002c02cf57"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "noteId": "66f2a24f000000002c02cf57"
+                                },
+                                "properties": {
+                                    "noteId": {
+                                        "description": "RedNote (Xiaohongshu) note ID.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "noteId"
+                                ],
+                                "title": "RedNote (Xiaohongshu) Note input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "authorImage": {
+                                                                    "type": "string"
+                                                                },
+                                                                "authorNickname": {
+                                                                    "type": "string"
+                                                                },
+                                                                "authorRedId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "authorUserId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "collectCount": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "commentCount": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "createdAt": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string"
+                                                                },
+                                                                "image": {
+                                                                    "type": "string"
+                                                                },
+                                                                "language": {
+                                                                    "type": "string"
+                                                                },
+                                                                "likeCount": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "noteId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "shareCount": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "title": {
+                                                                    "type": "string"
+                                                                },
+                                                                "type": {
+                                                                    "type": "string"
+                                                                },
+                                                                "updatedAt": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "url": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "noteId"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "RedNote (Xiaohongshu) Note output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "RedNote (Xiaohongshu) Note",
+                "tags": [
+                    "rednote"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.010000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/rednote.note_comments": {
+            "post": {
+                "description": "List comments on a RedNote (Xiaohongshu) note and return normalized comment records with pagination.",
+                "operationId": "rednote_note_comments",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "noteId": "68dd422c0000000203019829"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "noteId": "68dd422c0000000203019829"
+                                },
+                                "properties": {
+                                    "cursor": {
+                                        "description": "Pagination cursor from the previous response.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "noteId": {
+                                        "description": "RedNote (Xiaohongshu) note ID.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "noteId"
+                                ],
+                                "title": "RedNote (Xiaohongshu) Note Comments input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "comments": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "commentId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "createdAt": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "image": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "ipLocation": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "likeCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "nickname": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "noteId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "redId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "replyCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "text": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "userId": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "commentId"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                },
+                                                                "nextCursor": {
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "comments",
+                                                                "nextCursor"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "RedNote (Xiaohongshu) Note Comments output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "RedNote (Xiaohongshu) Note Comments",
+                "tags": [
+                    "rednote"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.010000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/rednote.profile": {
+            "post": {
+                "description": "Look up a RedNote (Xiaohongshu) profile by user ID and return normalized profile details.",
+                "operationId": "rednote_profile",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "userId": "56b0a4491c07df6365277af7"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "userId": "56b0a4491c07df6365277af7"
+                                },
+                                "properties": {
+                                    "userId": {
+                                        "description": "RedNote (Xiaohongshu) user ID.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "userId"
+                                ],
+                                "title": "RedNote (Xiaohongshu) Profile input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "collectedCount": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string"
+                                                                },
+                                                                "followers": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "following": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "gender": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "image": {
+                                                                    "type": "string"
+                                                                },
+                                                                "likedCount": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "location": {
+                                                                    "type": "string"
+                                                                },
+                                                                "nickname": {
+                                                                    "type": "string"
+                                                                },
+                                                                "postedNotes": {
+                                                                    "type": "integer"
+                                                                },
+                                                                "redId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "shareUrl": {
+                                                                    "type": "string"
+                                                                },
+                                                                "userId": {
+                                                                    "type": "string"
+                                                                },
+                                                                "verified": {
+                                                                    "type": "boolean"
+                                                                },
+                                                                "verifyType": {
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "userId"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "RedNote (Xiaohongshu) profile output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "RedNote (Xiaohongshu) Profile",
+                "tags": [
+                    "rednote"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.010000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/rednote.search": {
+            "post": {
+                "description": "Search RedNote (Xiaohongshu) notes by keyword and return normalized note records with pagination.",
+                "operationId": "rednote_search",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "query": "coffee",
+                                "sort": "general"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "query": "coffee",
+                                    "sort": "general"
+                                },
+                                "properties": {
+                                    "cursor": {
+                                        "description": "Pagination cursor from the previous response.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "query": {
+                                        "description": "Keyword to search for on RedNote (Xiaohongshu).",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "sort": {
+                                        "default": "general",
+                                        "description": "Sort order for matching notes.",
+                                        "enum": [
+                                            "general",
+                                            "hot",
+                                            "time"
+                                        ],
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "query"
+                                ],
+                                "title": "RedNote (Xiaohongshu) Search input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "nextCursor": {
+                                                                    "type": "string"
+                                                                },
+                                                                "notes": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "authorImage": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorNickname": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorRedId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorUserId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "collectCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "commentCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "createdAt": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "description": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "likeCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "noteId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "shareCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "title": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "xsecToken": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "noteId"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "notes",
+                                                                "nextCursor"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "RedNote (Xiaohongshu) search output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "RedNote (Xiaohongshu) Search",
+                "tags": [
+                    "rednote"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.010000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/rednote.search_users": {
+            "post": {
+                "description": "Search RedNote (Xiaohongshu) users by keyword and return normalized user records with pagination.",
+                "operationId": "rednote_search_users",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "query": "coffee"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "query": "coffee"
+                                },
+                                "properties": {
+                                    "cursor": {
+                                        "description": "Pagination cursor from the previous response.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "query": {
+                                        "description": "Keyword to search for on RedNote (Xiaohongshu).",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "query"
+                                ],
+                                "title": "RedNote (Xiaohongshu) User Search input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "nextCursor": {
+                                                                    "type": "string"
+                                                                },
+                                                                "users": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "description": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "link": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "name": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "redId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "subtitle": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "userId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "verified": {
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "verifyType": {
+                                                                                "type": "integer"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "userId"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "users",
+                                                                "nextCursor"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "RedNote (Xiaohongshu) User Search output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "RedNote (Xiaohongshu) User Search",
+                "tags": [
+                    "rednote"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.010000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/rednote.user_notes": {
+            "post": {
+                "description": "List notes posted by a RedNote (Xiaohongshu) user and return normalized note records with pagination.",
+                "operationId": "rednote_user_notes",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "userId": "56b0a4491c07df6365277af7"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "userId": "56b0a4491c07df6365277af7"
+                                },
+                                "properties": {
+                                    "cursor": {
+                                        "description": "Pagination cursor from the previous response.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "userId": {
+                                        "description": "RedNote (Xiaohongshu) user ID.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "userId"
+                                ],
+                                "title": "RedNote (Xiaohongshu) User Notes input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "nextCursor": {
+                                                                    "type": "string"
+                                                                },
+                                                                "notes": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "authorImage": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorNickname": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorUserId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "collectCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "commentCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "createdAt": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "description": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "likeCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "noteId": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "shareCount": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "title": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": {
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "noteId"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "notes",
+                                                                "nextCursor"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "RedNote (Xiaohongshu) user notes output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "RedNote (Xiaohongshu) User Notes",
+                "tags": [
+                    "rednote"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.010000",
+                        "currency": "USD",
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -41937,7 +43571,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.001000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -42427,7 +44061,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.001000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -49315,7 +50949,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.001000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -57965,6 +59599,10 @@
         {
             "name": "redfin",
             "x-group": "Redfin"
+        },
+        {
+            "name": "rednote",
+            "x-group": "Rednote"
         },
         {
             "name": "sec",
