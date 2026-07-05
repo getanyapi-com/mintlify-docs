@@ -1,0 +1,127 @@
+---
+title: "RedNote (Xiaohongshu)"
+description: "Search notes and users, read notes and comments, and pull profiles from RedNote (Xiaohongshu) on one AnyAPI key, billed per request in USD."
+---
+
+RedNote, known in China as Xiaohongshu (小红书), is a lifestyle and social
+commerce platform. AnyAPI exposes six normalized RedNote endpoints so you can
+search notes and users, read a single note and its comments, and pull a
+creator's profile and posted notes, all on **one key** and billed per request
+in **US dollars**. Responses share the same normalized shape as the rest of the
+catalog, and AnyAPI fails over automatically when an upstream errors.
+
+## Endpoints
+
+Every RedNote endpoint starts at **$0.01 per request** ($10 per 1,000). Discovery
+is free; you only pay for a successful `run`.
+
+| Endpoint | What it does |
+|---|---|
+| [`rednote.search`](/api-reference/rednote/rednote-search) | Search notes by keyword; paginated note records. |
+| [`rednote.search_users`](/api-reference/rednote/rednote-search-users) | Search users by keyword; paginated user records. |
+| [`rednote.note`](/api-reference/rednote/rednote-note) | Look up a single note by note ID. |
+| [`rednote.note_comments`](/api-reference/rednote/rednote-note-comments) | List comments on a note; paginated comment records. |
+| [`rednote.profile`](/api-reference/rednote/rednote-profile) | Look up a profile by user ID. |
+| [`rednote.user_notes`](/api-reference/rednote/rednote-user-notes) | List notes posted by a user; paginated note records. |
+
+## Quickstart
+
+Search notes by keyword. Pass your key as `X-API-Key` and the SKU input as JSON.
+
+<CodeGroup>
+
+```bash cURL
+curl -s https://api.getanyapi.com/v1/run/rednote.search \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "matcha latte"}'
+```
+
+```python Python
+import requests
+
+res = requests.post(
+    "https://api.getanyapi.com/v1/run/rednote.search",
+    headers={"X-API-Key": "YOUR_ANYAPI_KEY"},
+    json={"query": "matcha latte"},
+)
+print(res.json())
+```
+
+```javascript Node
+const res = await fetch("https://api.getanyapi.com/v1/run/rednote.search", {
+  method: "POST",
+  headers: {
+    "X-API-Key": "YOUR_ANYAPI_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ query: "matcha latte" }),
+});
+console.log(await res.json());
+```
+
+</CodeGroup>
+
+A successful response returns the normalized note records under `output.data`,
+plus the request's USD cost and the `provider` (always `AnyAPI`):
+
+```json
+{
+  "provider": "AnyAPI",
+  "costUsd": 0.01,
+  "items": 20,
+  "output": {
+    "found": true,
+    "data": {
+      "notes": [
+        {
+          "noteId": "6xxxxxxxxxxxxxxxxxxxxxxx",
+          "title": "My go-to matcha latte",
+          "description": "Recipe + the tools I use ...",
+          "authorNickname": "matchamaven",
+          "authorUserId": "5xxxxxxxxxxxxxxxxxxxxxxx",
+          "likeCount": 4213,
+          "commentCount": 88,
+          "collectCount": 1902,
+          "image": "https://.../cover.jpg",
+          "createdAt": 1719763200
+        }
+      ],
+      "nextCursor": "eyJ..."
+    }
+  }
+}
+```
+
+## Pagination
+
+The search and list endpoints (`rednote.search`, `rednote.search_users`,
+`rednote.note_comments`, `rednote.user_notes`) return a `nextCursor` when more
+records are available. Pass it back as `cursor` to fetch the next page; a missing
+or empty `nextCursor` means you have reached the end. See
+[Pagination](/pagination) for the full contract.
+
+```bash
+curl -s https://api.getanyapi.com/v1/run/rednote.search \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "matcha latte", "cursor": "eyJ..."}'
+```
+
+## Discovery
+
+You do not need to hardcode SKUs. List and inspect the RedNote endpoints from
+the catalog:
+
+```bash
+# Find the RedNote endpoints
+curl -s "https://api.getanyapi.com/v1/apis?query=rednote" -H "X-API-Key: YOUR_ANYAPI_KEY"
+
+# Inspect one endpoint's typed input and output schema
+curl -s https://api.getanyapi.com/v1/apis/rednote.search -H "X-API-Key: YOUR_ANYAPI_KEY"
+```
+
+<Card title="API Reference" icon="code" href="/api-reference/rednote/rednote-search">
+  Typed request and response schemas for every RedNote endpoint, with a live
+  Playground.
+</Card>
