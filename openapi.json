@@ -51993,7 +51993,7 @@
         },
         "/v1/run/twitter.user_tweets": {
             "post": {
-                "description": "Get an X (Twitter) account's latest tweets by handle, newest first (reverse-chronological, replies included) \u2014 not just the popular ones \u2014 up to 1000 per call, with engagement, views, and language, normalized across providers.",
+                "description": "Get an X (Twitter) account's latest tweets by handle, newest first (reverse-chronological, replies included) - not just the popular ones - up to 1000 per call, with engagement, views, and language, normalized across providers with cursor pagination.",
                 "operationId": "twitter_user_tweets",
                 "parameters": [
                     {
@@ -52039,16 +52039,24 @@
                                     "limit": 20
                                 },
                                 "properties": {
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of tweets.",
+                                        "type": "string"
+                                    },
                                     "handle": {
                                         "description": "Twitter/X handle without the leading @.",
                                         "type": "string"
                                     },
                                     "limit": {
                                         "default": 20,
-                                        "description": "Maximum number of latest tweets to return, newest first (1-1000). You are billed per tweet returned.",
+                                        "description": "How many tweets you want (1-1000), newest first. By default results may come back in cheap pages of ~20: follow the response's nextCursor for more. With requireSinglePage true, up to this many are returned in one (pricier) call.",
                                         "maximum": 1000,
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "requireSinglePage": {
+                                        "description": "Set true to get up to limit tweets in a single response instead of cheap pages, served by a bulk provider at a higher price.",
+                                        "type": "boolean"
                                     }
                                 },
                                 "required": [
@@ -52089,6 +52097,13 @@
                                                         {
                                                             "additionalProperties": false,
                                                             "properties": {
+                                                                "nextCursor": {
+                                                                    "description": "Opaque cursor for the next page of tweets, or null when this lane has no more. Pass it back as cursor to continue.",
+                                                                    "type": [
+                                                                        "string",
+                                                                        "null"
+                                                                    ]
+                                                                },
                                                                 "tweets": {
                                                                     "items": {
                                                                         "properties": {
@@ -52250,10 +52265,9 @@
                 ],
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.001000",
                         "currency": "USD",
-                        "max": "0.200000",
-                        "min": "0.000000",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
