@@ -1,16 +1,16 @@
 ---
 title: "Let your agent onboard itself"
-description: "Point an AI agent at AnyAPI and it provisions its own key, reads the catalog, and starts calling APIs. You just prompt it — no manual signup, no copied credentials."
+description: "Point an AI agent at AnyAPI and it provisions its own key, reads the catalog, and starts calling APIs. You just prompt it - no manual signup, no copied credentials."
 ---
 
 Most tools make *you* sign up, create a key, and paste it into your agent. AnyAPI flips
 that around: **the agent onboards itself.** It reads the machine-readable skill, mints its
-own spend-capped key, discovers the catalog, and makes the first call — all from a single
+own spend-capped key, discovers the catalog, and makes the first call - all from a single
 prompt. You stay in control of the money; the agent does the setup.
 
 <Info>
   **Which page do you want?** This page is for an **autonomous agent that calls AnyAPI at
-  runtime** — it provisions its own key. If instead a coding agent is **integrating AnyAPI
+  runtime** - it provisions its own key. If instead a coding agent is **integrating AnyAPI
   into an app you'll ship**, the app is the caller: create a normal
   [dashboard key](https://getanyapi.com/dashboard/keys) on your funded account and see
   [Agent skills](/agent-skills). Self-signup keys are capped and expire in 7 days, so they
@@ -31,7 +31,7 @@ Swap in your own email as the sponsor. The agent takes it from there.
 
 <Note>
   Already have a funded account and want the agent to spend from it directly? Hand it an
-  [API key](https://getanyapi.com/dashboard/keys) instead and skip self-signup — see
+  [API key](https://getanyapi.com/dashboard/keys) instead and skip self-signup - see
   [Agent skills](/agent-skills). Self-signup is for the zero-setup, agent-first path.
 </Note>
 
@@ -44,7 +44,7 @@ Swap in your own email as the sponsor. The agent takes it from there.
     endpoint, the REST base, the tools, and how to get a key.
   </Step>
   <Step title="Mints its own key">
-    It posts to the public self-signup endpoint — no human, no dashboard:
+    It posts to the public self-signup endpoint - no human, no dashboard:
 
     ```bash
     curl -X POST https://api.getanyapi.com/agent/signup \
@@ -66,11 +66,20 @@ Swap in your own email as the sponsor. The agent takes it from there.
     }
     ```
 
-    `sponsorEmail` is optional but recommended — it's how you approve the agent later.
+    `sponsorEmail` is optional but recommended - it's how you approve the agent later.
+
+    CLI shortcut:
+
+    ```bash
+    npx -y anyapi-cli@latest signup --email you@example.com --label my-agent
+    ```
+
+    `anyapi signup` calls the same endpoint, saves the starter key locally, and prints
+    the claim guidance.
   </Step>
   <Step title="Starts working immediately">
     The key works right away. The agent lists APIs, reads schemas, checks its USD balance,
-    and runs a real call over [MCP](/mcp-server) or REST — all priced in USD, pay per
+    and runs a real call over [MCP](/mcp-server) or REST - all priced in USD, pay per
     request.
   </Step>
 </Steps>
@@ -80,7 +89,7 @@ Swap in your own email as the sponsor. The agent takes it from there.
 Nothing up front. A self-signed-up key is **capped at a small USD amount** (the `capUsd`
 in the response) and its wallet starts with a matching credit, so the agent can prove it
 works without you spending anything. The cap is the agent's spending limit until you
-claim it onto your account. Exceeding it returns `402 key_cap_exceeded` — that's the signal
+claim it onto your account. Exceeding it returns `402 key_cap_exceeded` - that's the signal
 it's time to fund the agent.
 
 <Warning>
@@ -99,13 +108,13 @@ When the agent has proven useful, you give it a real budget. Two paths:
     **Claim agent key**, paste the token, and the key moves onto your account and loses its
     cap. From then it spends from your wallet, which you top up in **Billing**.
 
-    This is the path that funds the agent — claiming ties the key to your account and your
+    This is the path that funds the agent - claiming ties the key to your account and your
     payment method.
   </Tab>
   <Tab title="Approve by email">
     If the agent signed up with your `sponsorEmail`, you get a verification email with
     **Approve** and **Block** links. Approve vouches for the agent and keeps its key from
-    expiring; Block revokes it. It does **not** raise the cap or add funds — claiming (left)
+    expiring; Block revokes it. It does **not** raise the cap or add funds - claiming (left)
     is the path that funds the agent and lifts the cap.
   </Tab>
 </Tabs>
@@ -113,7 +122,7 @@ When the agent has proven useful, you give it a real budget. Two paths:
 <Note>
   Funding happens by **claiming** the key into your account, then topping up your USD
   wallet in [Billing](https://getanyapi.com/dashboard). There is no separate per-agent
-  wallet to top up — an agent either runs on its starter credit or on your funded account.
+  wallet to top up - an agent either runs on its starter credit or on your funded account.
 </Note>
 
 ## Why this is safe

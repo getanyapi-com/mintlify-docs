@@ -1,0 +1,108 @@
+---
+title: "CLI"
+description: "Install the official AnyAPI CLI, manage auth, discover APIs, and run SKUs from your terminal."
+---
+
+The official AnyAPI CLI is the npm package `anyapi-cli` with the `anyapi` binary.
+Use it to install agent skills, register MCP, mint or store a key, discover APIs, and
+run SKUs from a terminal.
+
+## Install
+
+Run the one-line setup:
+
+```bash
+npx -y anyapi-cli@latest init
+```
+
+`anyapi init` installs the AnyAPI agent skills into detected agents, offers MCP
+registration, and runs signup if no key is available.
+
+For a global binary:
+
+```bash
+npm i -g anyapi-cli
+anyapi init
+```
+
+Repo: [github.com/getanyapi-com/cli](https://github.com/getanyapi-com/cli)
+
+## Commands
+
+| Command | What it does |
+| --- | --- |
+| `anyapi signup [--email <email>] [--label <label>] [--show-key]` | Creates a capped starter key, saves it locally, and prints claim guidance. The secret is hidden unless you pass `--show-key`. |
+| `anyapi login --api-key aa_live_...` | Stores an existing dashboard key locally. |
+| `anyapi search <query>` | Searches the public catalog and prints matching SKUs, names, and USD price terms. |
+| `anyapi list [--category <category>]` | Lists catalog APIs, optionally filtered by category. |
+| `anyapi describe <sku>` | Prints the authenticated API definition, including schemas and USD pricing. |
+| `anyapi run <sku> --input '<json>' [-i file] [--fields a,b] [--max-items N] [--summary] [-o path] [--json]` | Runs an API with JSON input. |
+| `anyapi balance` | Prints the remaining USD balance for the active key. |
+| `anyapi claim` | Reprints stored claim guidance for a self-signed-up key. |
+| `anyapi init [--all] [--yes]` | Installs bundled agent skills and shows or applies MCP setup snippets. |
+| `anyapi setup skills` | Installs only the bundled skills. |
+
+## Authentication
+
+The CLI resolves auth in this order:
+
+1. `--api-key` flag
+2. `ANYAPI_API_KEY` environment variable
+3. `~/.anyapi/config.json`
+4. Interactive self-signup for commands that require auth
+
+Application code should read `ANYAPI_API_KEY`. Do not make production app code depend
+on `~/.anyapi/config.json`.
+
+## Self-signup
+
+Use `anyapi signup` to call the same self-signup endpoint documented in
+[Let your agent onboard itself](/agent-self-signup):
+
+```bash
+npx -y anyapi-cli@latest signup --email you@example.com --label my-agent
+```
+
+This creates a capped starter key, stores it in `~/.anyapi/config.json`, and prints the
+claim URL. It does not print the secret key unless you pass `--show-key`. The starter
+key has a small USD cap and a 7-day claim window until a human claims it.
+
+## Run output
+
+By default, `anyapi run` writes JSON to:
+
+```text
+.anyapi/<sku>-<timestamp>.json
+```
+
+The command prints the output path, `costUsd`, and item count. Use `--json` to print the
+response JSON to stdout instead, or `-o path` to choose the output file.
+
+## Context-budget flags
+
+Use these flags when a result would be too large for an agent context window:
+
+| Flag | Effect |
+| --- | --- |
+| `--fields a,b` | Keeps only selected keys on each result item. |
+| `--max-items N` | Caps returned rows. |
+| `--summary` | Returns a structural outline instead of the bulk data. |
+
+These flags trim only what is returned to you. They do not change the amount charged.
+`costUsd` reflects the full result the API produced.
+
+## 402 and claim handling
+
+A starter key is capped until a human claims or funds it. If a run returns
+`402 key_cap_exceeded`, run:
+
+```bash
+anyapi claim
+```
+
+Send the claim URL and claim token to the human. After they claim the key in the
+[dashboard](https://getanyapi.com/dashboard/keys), the same key continues working on
+their funded wallet.
+
+If the wallet balance is too low, top up from the
+[dashboard](https://getanyapi.com/dashboard).
