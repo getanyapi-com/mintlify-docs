@@ -3310,6 +3310,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The result wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -3321,12 +3322,42 @@
                                                                     "description": "Review records: star rating, review title and text, reviewer nickname, app version, and review date.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "rating": {
-                                                                                "type": "number"
-                                                                            },
-                                                                            "text": {
+                                                                            "author": {
+                                                                                "description": "Reviewer nickname.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the review was posted.",
+                                                                                "type": "number",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "helpfulVotes": {
+                                                                                "description": "Number of helpful votes on the review.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Review identifier.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Star rating, 1 to 5.",
+                                                                                "type": "number",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "text": {
+                                                                                "description": "Review body text.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "title": {
+                                                                                "description": "Review title.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "version": {
+                                                                                "description": "App version the review was left on.",
+                                                                                "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -3347,6 +3378,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one review record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -4917,6 +4949,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The result wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -4928,17 +4961,58 @@
                                                                     "description": "Disclosure records: member name and chamber, stock ticker, transaction type, amount range, and transaction/report dates.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "id": {
+                                                                            "amountRange": {
+                                                                                "description": "Disclosed dollar amount range for the transaction.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "assetName": {
+                                                                                "description": "Full name of the traded asset.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "name": {
+                                                                            "chamber": {
+                                                                                "description": "Congressional chamber, e.g. House or Senate.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "firstName": {
+                                                                                "description": "Member's first name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Stable disclosure record identifier.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "lastName": {
+                                                                                "description": "Member's last name.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "owner": {
+                                                                                "description": "Trade owner code, e.g. SP (spouse), JT (joint), DC (dependent child).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "reportedUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Date the transaction was reported/disclosed.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "stateDistrict": {
+                                                                                "description": "Member's state and district, e.g. PA11.",
+                                                                                "type": "string"
                                                                             },
                                                                             "symbol": {
+                                                                                "description": "Stock ticker symbol of the traded asset.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "tradedUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Date the transaction occurred.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "transactionType": {
+                                                                                "description": "Transaction type code, e.g. P (purchase), S (sale).",
+                                                                                "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -4959,6 +5033,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one disclosure record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -5182,6 +5257,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The result wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -5190,19 +5266,68 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Token listing records: token name and symbol, pair, price, liquidity, volume, transaction counts, and price change.",
+                                                                    "description": "Token listing records: token name and symbol, price, liquidity, volume, transaction/maker counts, price change, market cap, and the DEX Screener pair URL.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "ageHours": {
+                                                                                "description": "Age of the token pair in hours.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Token logo image URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "liquidityUsd": {
+                                                                                "description": "Total pool liquidity in USD.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "makerCount": {
+                                                                                "description": "Number of distinct makers over the selected timeframe.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "marketCapUsd": {
+                                                                                "description": "Token market capitalization in USD.",
+                                                                                "type": "number"
+                                                                            },
                                                                             "name": {
+                                                                                "description": "Token full name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "poolAddress": {
+                                                                                "description": "On-chain address of the liquidity pool.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "price": {
+                                                                                "description": "Current token price in USD.",
+                                                                                "type": "number",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "priceChange1h": {
+                                                                                "description": "Fractional price change over the past hour.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "priceChange24h": {
+                                                                                "description": "Fractional price change over the past 24 hours.",
                                                                                 "type": "number"
                                                                             },
                                                                             "symbol": {
+                                                                                "description": "Token ticker symbol.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "transactionCount": {
+                                                                                "description": "Number of transactions over the selected timeframe.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "DEX Screener URL for the trading pair.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "volumeUsd": {
+                                                                                "description": "Trading volume in USD over the selected timeframe.",
+                                                                                "type": "number"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -5223,6 +5348,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one token record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -16801,6 +16927,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The result wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -16812,13 +16939,37 @@
                                                                     "description": "Image result records: image URL, dimensions, title, and the source page it appears on.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "height": {
+                                                                                "description": "Full image height in pixels.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "source": {
+                                                                                "description": "Host domain of the page the image appears on.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "sourceUrl": {
+                                                                                "description": "URL of the page the image appears on.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "thumbnailUrl": {
+                                                                                "description": "URL to a thumbnail of the image.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
+                                                                                "description": "Image result title.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Direct URL to the full-size image.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "width": {
+                                                                                "description": "Full image width in pixels.",
+                                                                                "type": "integer"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -16839,6 +16990,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one image result was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -18423,6 +18575,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The result wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -18434,13 +18587,65 @@
                                                                     "description": "Ad records from the Transparency Center: advertiser, ad format, creative details, preview URL, and first/last shown dates.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "id": {
+                                                                            "advertiser": {
+                                                                                "description": "Advertiser display name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "url": {
+                                                                            "advertiserId": {
+                                                                                "description": "Google Ads advertiser identifier.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "firstShownUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the ad was first shown.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "format": {
+                                                                                "description": "Ad format, e.g. TEXT, IMAGE, VIDEO.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Google Ads creative identifier.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "lastShownUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the ad was last shown.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "numServedDays": {
+                                                                                "description": "Number of days the ad has been served.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "previewUrl": {
+                                                                                "description": "URL to a rendered preview of the creative.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "Ads Transparency Center URL for the creative.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "variations": {
+                                                                                "description": "Creative variations for the ad, each with image, headline, and body text where present.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "headline": {
+                                                                                            "description": "Creative headline text.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "imageUrl": {
+                                                                                            "description": "Creative image URL.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "text": {
+                                                                                            "description": "Creative body/description text.",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -18461,6 +18666,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one ad record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -32896,6 +33102,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The result wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -32907,12 +33114,42 @@
                                                                     "description": "Review records: star rating, review text, reviewer name, app version, helpfulness votes, and review date.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "rating": {
-                                                                                "type": "number"
-                                                                            },
-                                                                            "text": {
+                                                                            "author": {
+                                                                                "description": "Reviewer display name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the review was posted.",
+                                                                                "type": "number",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "helpfulVotes": {
+                                                                                "description": "Number of helpful votes on the review.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Review identifier.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Star rating, 1 to 5.",
+                                                                                "type": "number",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "text": {
+                                                                                "description": "Review body text.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "title": {
+                                                                                "description": "Review title, when the store provides one.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "version": {
+                                                                                "description": "App version the review was left on.",
+                                                                                "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -32933,6 +33170,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one review record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -33165,6 +33403,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The result wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -33176,17 +33415,65 @@
                                                                     "description": "Prediction-market records: market question, outcomes with current prices, volume, liquidity, and end date.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "endsUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the market resolves/ends.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "eventTitle": {
+                                                                                "description": "Title of the parent event grouping this market.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "id": {
+                                                                                "description": "Polymarket market identifier.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "image": {
+                                                                                "description": "Event image URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "liquidityUsd": {
+                                                                                "description": "Available liquidity in USD.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "outcomes": {
+                                                                                "description": "Market outcomes with their current implied prices.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "name": {
+                                                                                            "description": "Outcome label, e.g. Yes or No.",
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "price": {
+                                                                                            "description": "Current implied probability price for the outcome (0 to 1).",
+                                                                                            "type": "number"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "status": {
+                                                                                "description": "Market status, e.g. active or closed.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
+                                                                                "description": "The market question.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Polymarket URL for the market event.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "volume24hUsd": {
+                                                                                "description": "Traded volume in USD over the past 24 hours.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "volumeUsd": {
+                                                                                "description": "Total traded volume in USD.",
+                                                                                "type": "number"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -33208,6 +33495,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one market record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -37315,6 +37603,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The result wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -37337,18 +37626,35 @@
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "companyName": {
+                                                                                "description": "Filer company name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "filingDate": {
-                                                                                "description": "Date the filing was filed, YYYY-MM-DD.",
-                                                                                "type": "string",
+                                                                            "description": {
+                                                                                "description": "Primary document description, e.g. the form label.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "filedUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Date the filing was filed.",
+                                                                                "type": "number",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "filingUrl": {
+                                                                                "description": "Link to the filing index/folder on sec.gov.",
+                                                                                "type": "string"
                                                                             },
                                                                             "form": {
                                                                                 "description": "SEC form type, e.g. 10-K, 10-Q, 8-K.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "reportedUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Period-of-report date for the filing.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "ticker": {
+                                                                                "description": "Stock ticker symbol of the filer, when known.",
+                                                                                "type": "string"
                                                                             },
                                                                             "url": {
                                                                                 "description": "Direct link to the primary filing document on sec.gov.",
@@ -37374,6 +37680,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one filing record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -54952,6 +55259,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The result wrapper, or null when nothing was captured.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -54964,10 +55272,12 @@
                                                                     "items": {
                                                                         "properties": {
                                                                             "image": {
+                                                                                "description": "Link to the captured screenshot image.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "The final page URL that was captured.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -54989,6 +55299,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when a screenshot was captured.",
                                                     "type": "boolean"
                                                 }
                                             },
