@@ -1519,6 +1519,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "Search result wrapper, or null when nothing matched.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -1527,14 +1528,52 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Matching Alibaba wholesale listings: title, price range, minimum order quantity, supplier name, and listing URL.",
+                                                                    "description": "Matching Alibaba wholesale listings.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "countryCode": {
+                                                                                "description": "Supplier country ISO code, e.g. \"CN\".",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Primary product image URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "moq": {
+                                                                                "description": "Minimum order quantity text, e.g. \"Min. order: 1 piece\".",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "priceText": {
+                                                                                "description": "Price or price range as displayed, e.g. \"$40.80-45.80\" (Alibaba lists ranges, not a single numeric value).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "promotionPrice": {
+                                                                                "description": "Discounted promotional price when the listing is on sale; empty otherwise.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Average buyer review score, 0-5; 0 when the listing has no reviews.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewCount": {
+                                                                                "description": "Number of buyer reviews; 0 when none.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "supplierName": {
+                                                                                "description": "Supplier / company name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "supplierYears": {
+                                                                                "description": "Gold Supplier tenure text, e.g. \"3 yrs\"; empty when not a Gold Supplier.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
+                                                                                "description": "Listing title as shown on Alibaba (may contain the supplier's inline markup).",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical product detail page URL (tracking query params stripped).",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -1557,6 +1596,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when the search returned at least one listing.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -2067,6 +2107,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "Best-sellers wrapper, or null when the category returned nothing.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -2075,18 +2116,53 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Best-seller product records: category rank, title, price, rating, thumbnail, and product URL.",
+                                                                    "description": "Best-seller product records ordered by category rank.",
                                                                     "items": {
                                                                         "properties": {
                                                                             "asin": {
+                                                                                "description": "Amazon Standard Identification Number.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "categoryName": {
+                                                                                "description": "Best Sellers category name the product ranks in.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "currency": {
+                                                                                "description": "Price currency symbol or code, e.g. \"$\".",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Primary product thumbnail image URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "offersCount": {
+                                                                                "description": "Number of available offers; 0 when unknown.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "price": {
+                                                                                "description": "Listed price; 0 when no offer is available.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "rank": {
+                                                                                "description": "Best-seller rank within the category (1 = top).",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Average star rating, 0-5; 0 when unrated.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewsCount": {
+                                                                                "description": "Number of customer reviews; 0 when none.",
+                                                                                "type": "integer"
+                                                                            },
                                                                             "title": {
+                                                                                "description": "Product title.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical product detail page URL (tracking query params stripped).",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -2110,6 +2186,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when the category returned at least one best-seller.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -2312,6 +2389,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "Product wrapper, or null when the URL resolved to no product.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -2320,10 +2398,11 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Product detail records: title, url, asin, brand, price amount (when in stock), images, rating, review count, and (passed through) variant details and attributes.",
+                                                                    "description": "Product detail records (one per requested product URL).",
                                                                     "items": {
                                                                         "properties": {
                                                                             "asin": {
+                                                                                "description": "Amazon Standard Identification Number.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
@@ -2332,31 +2411,68 @@
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "category": {
+                                                                                "description": "Category breadcrumb path, e.g. \"Health & Household > Household Supplies\".",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "condition": {
+                                                                                "description": "Item condition, e.g. \"New\"; empty when not reported.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "currency": {
+                                                                                "description": "Price currency symbol or code, e.g. \"$\".",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "description": {
+                                                                                "description": "Product description text; empty when the listing has none.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "features": {
+                                                                                "description": "Bullet-point feature list from the listing.",
+                                                                                "items": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Primary product image URL.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
                                                                             "images": {
                                                                                 "description": "High-resolution product image URLs.",
                                                                                 "items": {
                                                                                     "type": "string"
                                                                                 },
-                                                                                "type": "array",
-                                                                                "x-anyapi-must-populate": true
+                                                                                "type": "array"
                                                                             },
-                                                                            "priceAmount": {
-                                                                                "description": "Current price as a numeric amount. Absent when the listing has no buyable price (out of stock).",
+                                                                            "inStock": {
+                                                                                "description": "True when the product is purchasable.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "price": {
+                                                                                "description": "Current buy-box price as a numeric amount; 0 when the listing has no buyable price (out of stock).",
                                                                                 "type": "number"
                                                                             },
                                                                             "rating": {
-                                                                                "description": "Average customer star rating, 0 to 5.",
+                                                                                "description": "Average customer star rating, 0-5; 0 when unrated.",
                                                                                 "type": "number"
                                                                             },
-                                                                            "reviewCount": {
-                                                                                "description": "Total number of customer reviews.",
+                                                                            "reviewsCount": {
+                                                                                "description": "Total number of customer reviews; 0 when none.",
                                                                                 "type": "integer"
                                                                             },
+                                                                            "sellerName": {
+                                                                                "description": "Name of the seller fulfilling the buy box.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
+                                                                                "description": "Product title.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical product detail page URL (tracking query params stripped).",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -2380,6 +2496,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when the product was found.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -2542,13 +2659,13 @@
                         "application/json": {
                             "example": {
                                 "limit": 3,
-                                "product": "B07FZ8S74R"
+                                "product": "B07PXGQC1Q"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
                                     "limit": 3,
-                                    "product": "B07FZ8S74R"
+                                    "product": "B07PXGQC1Q"
                                 },
                                 "properties": {
                                     "limit": {
@@ -2628,6 +2745,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "Reviews wrapper, or null when the product returned no reviews.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -2636,15 +2754,37 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Customer review records: star rating, title, review text, date, reviewer, and verified-purchase status.",
+                                                                    "description": "Customer review records.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "rating": {
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. 0 when the review date is not reported in a parseable form.",
                                                                                 "type": "number"
                                                                             },
+                                                                            "helpfulVotes": {
+                                                                                "description": "Number of \"helpful\" votes the review received; 0 when none.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Star rating the reviewer gave, 1-5; 0 when not reported.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewer": {
+                                                                                "description": "Reviewer display name; empty when withheld.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "text": {
+                                                                                "description": "Full review body text.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "title": {
+                                                                                "description": "Review headline / title; empty when the review has none.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "verifiedPurchase": {
+                                                                                "description": "True when Amazon marks the review a verified purchase.",
+                                                                                "type": "boolean"
                                                                             }
                                                                         },
                                                                         "required": [
@@ -2665,6 +2805,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one review was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -2874,6 +3015,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "Search result wrapper, or null when nothing matched.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -2882,35 +3024,52 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Search result product records: title, ASIN, price amount, currency, rating, review count, and thumbnail.",
+                                                                    "description": "Matching Amazon product records.",
                                                                     "items": {
                                                                         "properties": {
                                                                             "asin": {
+                                                                                "description": "Amazon Standard Identification Number; use it with the Amazon Products by ASIN SKU for full detail.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "currency": {
-                                                                                "description": "Currency symbol or code for the price.",
+                                                                                "description": "Price currency symbol or code, e.g. \"$\".",
                                                                                 "type": "string"
                                                                             },
-                                                                            "priceAmount": {
-                                                                                "description": "Current price as a numeric amount.",
+                                                                            "image": {
+                                                                                "description": "Primary product thumbnail image URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "isSponsored": {
+                                                                                "description": "True when the result is a sponsored placement.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "listPrice": {
+                                                                                "description": "Pre-discount list price when on sale; 0 when not discounted.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "offersCount": {
+                                                                                "description": "Number of available offers; 0 when unknown.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "position": {
+                                                                                "description": "1-based position of the result on the search page.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "price": {
+                                                                                "description": "Current price as a numeric amount; 0 when no offer is available.",
                                                                                 "type": "number"
                                                                             },
                                                                             "rating": {
-                                                                                "description": "Average star rating.",
+                                                                                "description": "Average star rating, 0-5; 0 when unrated.",
                                                                                 "type": "number"
                                                                             },
-                                                                            "reviewCount": {
-                                                                                "description": "Number of customer reviews.",
+                                                                            "reviewsCount": {
+                                                                                "description": "Number of customer reviews; 0 when none.",
                                                                                 "type": "integer"
                                                                             },
-                                                                            "thumbnail": {
-                                                                                "description": "Product thumbnail image URL.",
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
-                                                                            },
                                                                             "title": {
+                                                                                "description": "Product title.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -2933,6 +3092,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when the search returned at least one product.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -18851,6 +19011,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "Search result wrapper, or null when nothing matched.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -18859,14 +19020,65 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Matching product offers: title, price, store name, rating, shipping info, and product link.",
+                                                                    "description": "Matching Google Shopping product offers.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "brand": {
+                                                                                "description": "Product brand; empty when not reported.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "currency": {
+                                                                                "description": "Price currency code, e.g. \"USD\"; empty when not reported.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "discountPercent": {
+                                                                                "description": "Discount label when on sale, e.g. \"23% OFF\"; empty otherwise.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Primary product image URL.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "listPrice": {
+                                                                                "description": "Pre-discount list price as a numeric amount; 0 when not on sale or reported only as text.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "listPriceText": {
+                                                                                "description": "Pre-discount list price as displayed, e.g. \"$130\"; empty when not applicable.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "price": {
+                                                                                "description": "Current price as a numeric amount; 0 when the lane reports price only as text (see priceText).",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "priceText": {
+                                                                                "description": "Current price as displayed, e.g. \"$99.99\"; empty when the lane reports a numeric price instead.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "productId": {
+                                                                                "description": "Provider product identifier.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Average product rating, 0-5; 0 when unrated.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewsCount": {
+                                                                                "description": "Number of ratings / reviews; 0 when none reported.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "seller": {
+                                                                                "description": "Store / seller name offering the product, e.g. \"Target\".",
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
+                                                                                "description": "Product title.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Google Shopping product page URL (query retained; it encodes the product identity).",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -18889,6 +19101,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when the search returned at least one product offer.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -53700,6 +53913,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "Product wrapper, or null when the URL resolved to no product.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -53708,14 +53922,73 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Product detail records: title, price, availability, rating, review count, images, and specifications.",
+                                                                    "description": "Product detail records (one per requested product URL).",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "title": {
+                                                                            "availability": {
+                                                                                "description": "Stock status, e.g. \"IN_STOCK\".",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "brand": {
+                                                                                "description": "Brand name; empty when not reported.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "description": {
+                                                                                "description": "Short product description; empty when the listing has none.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Primary product image URL.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "images": {
+                                                                                "description": "All product image URLs.",
+                                                                                "items": {
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "itemId": {
+                                                                                "description": "Walmart US item id (usItemId).",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "model": {
+                                                                                "description": "Manufacturer model number; empty when not reported.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "priceText": {
+                                                                                "description": "Current price as displayed, e.g. \"$125.00\"; empty when unavailable (Walmart returns a formatted string, not a numeric value).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "productId": {
+                                                                                "description": "Walmart internal product id.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Average customer rating, 0-5; 0 when unrated.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "reviewsCount": {
+                                                                                "description": "Number of customer reviews; 0 when none.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "sellerName": {
+                                                                                "description": "Name of the seller fulfilling the offer.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "title": {
+                                                                                "description": "Product title.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "upc": {
+                                                                                "description": "Universal Product Code; empty when not reported.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "url": {
+                                                                                "description": "Canonical Walmart product page URL (condition query param retained, as it selects the offer).",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -53738,6 +54011,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when the product was found.",
                                                     "type": "boolean"
                                                 }
                                             },
