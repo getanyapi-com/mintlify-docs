@@ -39361,6 +39361,1743 @@
                 }
             }
         },
+        "/v1/run/seo.domain_rank_overview": {
+            "post": {
+                "description": "Get AnyAPI SEO domain ranking, organic traffic, and paid traffic metrics as normalized JSON with USD pricing.",
+                "operationId": "seo_domain_rank_overview",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "language": "en",
+                                "location": 2840,
+                                "target": "ahrefs.com"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "language": "en",
+                                    "location": 2840,
+                                    "target": "ahrefs.com"
+                                },
+                                "properties": {
+                                    "language": {
+                                        "default": "en",
+                                        "description": "Language code for SEO domain metrics.",
+                                        "type": "string"
+                                    },
+                                    "location": {
+                                        "default": 2840,
+                                        "description": "Location code for SEO domain metrics. The default is the United States.",
+                                        "type": "integer"
+                                    },
+                                    "target": {
+                                        "description": "Domain to analyze, without a protocol or leading www.",
+                                        "maxLength": 253,
+                                        "minLength": 3,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "target"
+                                ],
+                                "title": "SEO Domain Rank Overview input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "properties": {
+                                                                "domain": {
+                                                                    "description": "Analyzed domain.",
+                                                                    "type": "string",
+                                                                    "x-anyapi-must-populate": true
+                                                                },
+                                                                "language": {
+                                                                    "description": "Language code the metrics are scoped to.",
+                                                                    "type": "string"
+                                                                },
+                                                                "location": {
+                                                                    "description": "Location code the metrics are scoped to.",
+                                                                    "type": "integer"
+                                                                },
+                                                                "organicKeywords": {
+                                                                    "description": "Number of organic search results where the domain appears.",
+                                                                    "type": "integer"
+                                                                },
+                                                                "organicPos1": {
+                                                                    "description": "Number of organic search results where the domain ranks first.",
+                                                                    "type": "integer"
+                                                                },
+                                                                "organicPos2To3": {
+                                                                    "description": "Number of organic search results where the domain ranks second or third.",
+                                                                    "type": "integer"
+                                                                },
+                                                                "organicPos4To10": {
+                                                                    "description": "Number of organic search results where the domain ranks fourth through tenth.",
+                                                                    "type": "integer"
+                                                                },
+                                                                "organicTraffic": {
+                                                                    "description": "Estimated monthly organic search traffic.",
+                                                                    "type": "number"
+                                                                },
+                                                                "organicTrafficCostUsd": {
+                                                                    "description": "Estimated USD value of the organic search traffic.",
+                                                                    "type": "number"
+                                                                },
+                                                                "paidKeywords": {
+                                                                    "description": "Number of paid search results where the domain appears.",
+                                                                    "type": "integer"
+                                                                },
+                                                                "paidPos1": {
+                                                                    "description": "Number of paid search results where the domain ranks first.",
+                                                                    "type": "integer"
+                                                                },
+                                                                "paidPos2To3": {
+                                                                    "description": "Number of paid search results where the domain ranks second or third.",
+                                                                    "type": "integer"
+                                                                },
+                                                                "paidPos4To10": {
+                                                                    "description": "Number of paid search results where the domain ranks fourth through tenth.",
+                                                                    "type": "integer"
+                                                                },
+                                                                "paidTraffic": {
+                                                                    "description": "Estimated monthly paid search traffic.",
+                                                                    "type": "number"
+                                                                },
+                                                                "paidTrafficCostUsd": {
+                                                                    "description": "Estimated USD value of the paid search traffic.",
+                                                                    "type": "number"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "domain"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "SEO Domain Rank Overview output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "SEO Domain Rank Overview",
+                "tags": [
+                    "seo"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.012000",
+                        "min": "0.012000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/seo.keyword_ideas": {
+            "post": {
+                "description": "Find AnyAPI SEO keyword ideas from seed terms with volume, CPC, competition, difficulty, and intent as normalized JSON with USD pricing.",
+                "operationId": "seo_keyword_ideas",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "keywords": [
+                                    "seo tools"
+                                ],
+                                "language": "en",
+                                "limit": 5,
+                                "location": 2840
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "keywords": [
+                                        "seo tools"
+                                    ],
+                                    "language": "en",
+                                    "limit": 5,
+                                    "location": 2840
+                                },
+                                "properties": {
+                                    "keywords": {
+                                        "description": "Seed SEO keywords used to generate related keyword ideas.",
+                                        "items": {
+                                            "minLength": 3,
+                                            "type": "string"
+                                        },
+                                        "maxItems": 200,
+                                        "minItems": 1,
+                                        "type": "array"
+                                    },
+                                    "language": {
+                                        "default": "en",
+                                        "description": "Language code for SEO metrics.",
+                                        "type": "string"
+                                    },
+                                    "limit": {
+                                        "default": 5,
+                                        "description": "Maximum number of keyword ideas to return. You are billed per returned result, so a lower limit costs less.",
+                                        "maximum": 1000,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "location": {
+                                        "default": 2840,
+                                        "description": "Location code for SEO metrics. The default is the United States.",
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "keywords"
+                                ],
+                                "title": "SEO Keyword Ideas input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "ideas": {
+                                                                    "description": "SEO keyword idea records.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "competition": {
+                                                                                "description": "Paid-search competition level for the keyword idea.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "cpc": {
+                                                                                "description": "Average paid-search cost per click in USD.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "keyword": {
+                                                                                "description": "Keyword idea phrase.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "keywordDifficulty": {
+                                                                                "description": "Estimated organic ranking difficulty on a 0-100 scale.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "searchIntent": {
+                                                                                "description": "Primary SEO search intent for the keyword idea.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "searchVolume": {
+                                                                                "description": "Average monthly search volume for the keyword idea.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "updatedUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "keyword"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "ideas"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "SEO Keyword Ideas output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "SEO Keyword Ideas",
+                "tags": [
+                    "seo"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.132000",
+                        "min": "0.012000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/seo.keyword_overview": {
+            "post": {
+                "description": "Get AnyAPI SEO keyword metrics including search volume, CPC, competition, difficulty, and search intent as normalized JSON with USD pricing.",
+                "operationId": "seo_keyword_overview",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "keywords": [
+                                    "seo tools"
+                                ],
+                                "language": "en",
+                                "location": 2840
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "keywords": [
+                                        "seo tools"
+                                    ],
+                                    "language": "en",
+                                    "location": 2840
+                                },
+                                "properties": {
+                                    "keywords": {
+                                        "description": "SEO keywords to analyze.",
+                                        "items": {
+                                            "maxLength": 80,
+                                            "minLength": 3,
+                                            "type": "string"
+                                        },
+                                        "maxItems": 700,
+                                        "minItems": 1,
+                                        "type": "array"
+                                    },
+                                    "language": {
+                                        "default": "en",
+                                        "description": "Language code for SEO metrics.",
+                                        "type": "string"
+                                    },
+                                    "location": {
+                                        "default": 2840,
+                                        "description": "Location code for SEO metrics. The default is the United States.",
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "keywords"
+                                ],
+                                "title": "SEO Keyword Overview input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "keywords": {
+                                                                    "description": "SEO keyword metric records.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "bidHigh": {
+                                                                                "description": "Upper bound of the estimated paid-search top-of-page bid in USD.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "bidLow": {
+                                                                                "description": "Lower bound of the estimated paid-search top-of-page bid in USD.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "competition": {
+                                                                                "description": "Paid-search competition level for the keyword.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "cpc": {
+                                                                                "description": "Average paid-search cost per click in USD.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "keyword": {
+                                                                                "description": "Keyword phrase.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "keywordDifficulty": {
+                                                                                "description": "Estimated organic ranking difficulty on a 0-100 scale.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "monthlySearches": {
+                                                                                "description": "Monthly search-volume history for the keyword.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "month": {
+                                                                                            "description": "Calendar month number for the monthly search-volume record.",
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "searchVolume": {
+                                                                                            "description": "Search volume for the month.",
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "year": {
+                                                                                            "description": "Calendar year for the monthly search-volume record.",
+                                                                                            "type": "integer"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "searchIntent": {
+                                                                                "description": "Primary SEO search intent for the keyword.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "searchVolume": {
+                                                                                "description": "Average monthly search volume for the keyword.",
+                                                                                "type": "integer",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "updatedUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "keyword"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "keywords"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "SEO Keyword Overview output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "SEO Keyword Overview",
+                "tags": [
+                    "seo"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.096000",
+                        "min": "0.012000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/seo.keyword_suggestions": {
+            "post": {
+                "description": "Find AnyAPI SEO keyword suggestions from a seed term with volume, CPC, competition, difficulty, and intent as normalized JSON with USD pricing.",
+                "operationId": "seo_keyword_suggestions",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "keyword": "seo tools",
+                                "language": "en",
+                                "limit": 5,
+                                "location": 2840
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "keyword": "seo tools",
+                                    "language": "en",
+                                    "limit": 5,
+                                    "location": 2840
+                                },
+                                "properties": {
+                                    "keyword": {
+                                        "description": "Seed SEO keyword used to generate keyword suggestions.",
+                                        "maxLength": 80,
+                                        "minLength": 3,
+                                        "type": "string"
+                                    },
+                                    "language": {
+                                        "default": "en",
+                                        "description": "Language code for SEO metrics.",
+                                        "type": "string"
+                                    },
+                                    "limit": {
+                                        "default": 5,
+                                        "description": "Maximum number of keyword suggestions to return. You are billed per returned result, so a lower limit costs less.",
+                                        "maximum": 1000,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "location": {
+                                        "default": 2840,
+                                        "description": "Location code for SEO metrics. The default is the United States.",
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "keyword"
+                                ],
+                                "title": "SEO Keyword Suggestions input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "suggestions": {
+                                                                    "description": "SEO keyword suggestion records.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "competition": {
+                                                                                "description": "Paid-search competition level for the keyword suggestion.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "cpc": {
+                                                                                "description": "Average paid-search cost per click in USD.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "keyword": {
+                                                                                "description": "Keyword suggestion phrase.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "keywordDifficulty": {
+                                                                                "description": "Estimated organic ranking difficulty on a 0-100 scale.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "searchIntent": {
+                                                                                "description": "Primary SEO search intent for the keyword suggestion.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "searchVolume": {
+                                                                                "description": "Average monthly search volume for the keyword suggestion.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "updatedUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "keyword"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "suggestions"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "SEO Keyword Suggestions output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "SEO Keyword Suggestions",
+                "tags": [
+                    "seo"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.132000",
+                        "min": "0.012000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/seo.related_keywords": {
+            "post": {
+                "description": "Find AnyAPI SEO related keywords from a seed term with volume, CPC, competition, difficulty, and intent as normalized JSON with USD pricing.",
+                "operationId": "seo_related_keywords",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "keyword": "seo tools",
+                                "language": "en",
+                                "limit": 5,
+                                "location": 2840
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "keyword": "seo tools",
+                                    "language": "en",
+                                    "limit": 5,
+                                    "location": 2840
+                                },
+                                "properties": {
+                                    "keyword": {
+                                        "description": "Seed SEO keyword used to find related keywords.",
+                                        "maxLength": 80,
+                                        "minLength": 3,
+                                        "type": "string"
+                                    },
+                                    "language": {
+                                        "default": "en",
+                                        "description": "Language code for SEO metrics.",
+                                        "type": "string"
+                                    },
+                                    "limit": {
+                                        "default": 5,
+                                        "description": "Maximum number of related keywords to return. You are billed per returned result, so a lower limit costs less.",
+                                        "maximum": 1000,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "location": {
+                                        "default": 2840,
+                                        "description": "Location code for SEO metrics. The default is the United States.",
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "keyword"
+                                ],
+                                "title": "SEO Related Keywords input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "relatedKeywords": {
+                                                                    "description": "SEO related keyword records.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "competition": {
+                                                                                "description": "Paid-search competition level for the related keyword.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "cpc": {
+                                                                                "description": "Average paid-search cost per click in USD.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "depth": {
+                                                                                "description": "Related-keyword graph depth from the seed keyword.",
+                                                                                "type": "integer",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "keyword": {
+                                                                                "description": "Related keyword phrase.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "keywordDifficulty": {
+                                                                                "description": "Estimated organic ranking difficulty on a 0-100 scale.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "searchIntent": {
+                                                                                "description": "Primary SEO search intent for the related keyword.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "searchVolume": {
+                                                                                "description": "Average monthly search volume for the related keyword.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "updatedUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "keyword"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "relatedKeywords"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "SEO Related Keywords output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "SEO Related Keywords",
+                "tags": [
+                    "seo"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.132000",
+                        "min": "0.012000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/seo.search_intent": {
+            "post": {
+                "description": "Classify AnyAPI SEO keyword search intent as normalized JSON with USD pricing.",
+                "operationId": "seo_search_intent",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "keywords": [
+                                    "seo tools"
+                                ],
+                                "language": "en"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "keywords": [
+                                        "seo tools"
+                                    ],
+                                    "language": "en"
+                                },
+                                "properties": {
+                                    "keywords": {
+                                        "description": "SEO keywords to classify by search intent.",
+                                        "items": {
+                                            "maxLength": 80,
+                                            "minLength": 3,
+                                            "type": "string"
+                                        },
+                                        "maxItems": 1000,
+                                        "minItems": 1,
+                                        "type": "array"
+                                    },
+                                    "language": {
+                                        "default": "en",
+                                        "description": "Language code for search intent classification.",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "keywords"
+                                ],
+                                "title": "SEO Search Intent input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "intents": {
+                                                                    "description": "SEO keyword search intent records.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "intent": {
+                                                                                "description": "Primary SEO search intent for the keyword.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "keyword": {
+                                                                                "description": "Keyword phrase.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "keyword",
+                                                                            "intent"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "intents"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "SEO Search Intent output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "SEO Search Intent",
+                "tags": [
+                    "seo"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.132000",
+                        "min": "0.012000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/snapchat.profile": {
             "post": {
                 "description": "Fetch a Snapchat user's public profile by username \u2014 display name, bio, subscriber count, and recent public content \u2014 with transparent per-request USD pricing.",
@@ -62583,6 +64320,10 @@
         {
             "name": "semrush",
             "x-group": "Semrush"
+        },
+        {
+            "name": "seo",
+            "x-group": "Seo"
         },
         {
             "name": "snapchat",
