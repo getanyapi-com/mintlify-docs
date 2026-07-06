@@ -9113,24 +9113,32 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Follower or following records: profile name, profile URL, and picture for each account.",
+                                                                    "description": "Follower or following records for the target page/profile.",
                                                                     "items": {
                                                                         "properties": {
                                                                             "id": {
+                                                                                "description": "The account's numeric Facebook ID, as a string.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "image": {
+                                                                                "description": "URL of the account's profile picture, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "name": {
+                                                                                "description": "The account's public display name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical URL of the account's Facebook profile, with tracking query params stripped.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
                                                                         },
                                                                         "required": [
                                                                             "id",
+                                                                            "name",
                                                                             "url"
                                                                         ],
                                                                         "type": "object"
@@ -9147,6 +9155,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether the page/profile was found and returned follower or following records.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -10489,31 +10498,46 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Page contact records: page name, email, phone, website, physical address, and category.",
+                                                                    "description": "Contact record for the requested Facebook Page (one item).",
                                                                     "items": {
                                                                         "properties": {
                                                                             "address": {
+                                                                                "description": "The page's public physical address. Empty when the page lists none.",
                                                                                 "type": "string"
                                                                             },
                                                                             "category": {
+                                                                                "description": "The page's primary category (e.g. \"Seafood Restaurant\").",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "email": {
+                                                                                "description": "The page's public contact email. Empty when the page lists none.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "followers": {
+                                                                                "description": "The page's follower count.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "URL of the page's profile picture, with tracking query params stripped. Empty when the upstream omits it.",
                                                                                 "type": "string"
                                                                             },
                                                                             "phone": {
+                                                                                "description": "The page's public phone number. Empty when the page lists none.",
                                                                                 "type": "string"
                                                                             },
                                                                             "title": {
+                                                                                "description": "The page's public name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical URL of the Facebook Page, with tracking query params stripped.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "website": {
+                                                                                "description": "The page's public website URL. Empty when the page lists none.",
                                                                                 "type": "string"
                                                                             }
                                                                         },
@@ -10535,6 +10559,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether the page was found and returned contact records.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -13143,19 +13168,51 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Page profile records: page name, category, follower/like counts, contact details, and page URL.",
+                                                                    "description": "Matching Facebook Page records for the query.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "category": {
+                                                                                "description": "The page's primary category (e.g. \"Sportswear Store\"). Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "followers": {
+                                                                                "description": "The page's follower count.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "The page's numeric Facebook ID, as a string.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "URL of the page's profile picture, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "likes": {
+                                                                                "description": "The page's like count.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "phone": {
+                                                                                "description": "The page's public phone number. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "title": {
+                                                                                "description": "The page's public name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical URL of the Facebook Page, with tracking query params stripped.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "website": {
+                                                                                "description": "The page's public website URL. Empty when the upstream omits it.",
+                                                                                "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
+                                                                            "id",
                                                                             "title",
                                                                             "url"
                                                                         ],
@@ -13173,6 +13230,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether any matching pages were returned for the query.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -13395,21 +13453,57 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Post records: post text, author, timestamp, engagement counts (reactions, comments, shares), and post URL.",
+                                                                    "description": "Matching public Facebook post records for the query.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "text": {
+                                                                            "authorName": {
+                                                                                "description": "Display name of the post's author. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorUrl": {
+                                                                                "description": "Canonical profile URL of the post's author, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "commentCount": {
+                                                                                "description": "Total number of comments on the post.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "The post's numeric Facebook ID, as a string.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "image": {
+                                                                                "description": "URL of the post's primary image, with tracking query params stripped. Empty for text-only or video posts.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "reactionCount": {
+                                                                                "description": "Total number of reactions on the post.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "shareCount": {
+                                                                                "description": "Total number of shares/reshares of the post.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "text": {
+                                                                                "description": "The post's text/message. Empty for media-only posts with no caption.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "url": {
+                                                                                "description": "Canonical URL of the post, with tracking query params stripped.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
                                                                         },
                                                                         "required": [
+                                                                            "id",
                                                                             "url",
-                                                                            "text"
+                                                                            "text",
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -13425,6 +13519,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether any matching posts were returned for the query.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -21704,30 +21799,34 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Follower records: id, handle, full name, profile picture URL, and verification/privacy flags.",
+                                                                    "description": "Follower records for the target account.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "fullName": {
-                                                                                "description": "Follower's display name (may be empty).",
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
-                                                                            },
                                                                             "handle": {
+                                                                                "description": "The follower's username, without the @ prefix.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "id": {
+                                                                                "description": "The follower's numeric Instagram user ID, as a string.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "URL of the follower's profile picture, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "name": {
+                                                                                "description": "The follower's display name. Empty when the account has none.",
+                                                                                "type": "string"
                                                                             },
                                                                             "private": {
                                                                                 "description": "Whether the follower's account is private.",
                                                                                 "type": "boolean"
                                                                             },
-                                                                            "profilePicUrl": {
-                                                                                "description": "URL of the follower's profile picture.",
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
+                                                                            "url": {
+                                                                                "description": "Canonical URL of the follower's profile, with tracking query params stripped. Empty when the lane does not return it.",
+                                                                                "type": "string"
                                                                             },
                                                                             "verified": {
                                                                                 "description": "Whether the follower's account is verified.",
@@ -21744,7 +21843,7 @@
                                                                     "x-anyapi-must-populate": true
                                                                 },
                                                                 "nextCursor": {
-                                                                    "description": "Opaque cursor for the next page of followers, or null when this lane has no more. Pass it back as cursor to continue.",
+                                                                    "description": "Opaque cursor for the next page of followers, or null/empty when this lane has no more. Pass it back as cursor to continue.",
                                                                     "type": [
                                                                         "string",
                                                                         "null"
@@ -21759,6 +21858,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether the account was found and returned follower records.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -21984,33 +22084,37 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Followed-account records: numeric id, handle, full name, profile picture URL, and verified/private flags.",
+                                                                    "description": "Records for the accounts the target user follows.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "fullName": {
-                                                                                "description": "Account display name.",
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
-                                                                            },
                                                                             "handle": {
+                                                                                "description": "The followed account's username, without the @ prefix.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "id": {
+                                                                                "description": "The followed account's numeric Instagram user ID, as a string.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "URL of the followed account's profile picture, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "name": {
+                                                                                "description": "The followed account's display name. Empty when the account has none.",
+                                                                                "type": "string"
                                                                             },
                                                                             "private": {
-                                                                                "description": "Whether the account is private.",
+                                                                                "description": "Whether the followed account is private.",
                                                                                 "type": "boolean"
                                                                             },
-                                                                            "profilePicUrl": {
-                                                                                "description": "URL of the account's profile picture.",
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
+                                                                            "url": {
+                                                                                "description": "Canonical URL of the followed account's profile, with tracking query params stripped. Empty when the lane does not return it.",
+                                                                                "type": "string"
                                                                             },
                                                                             "verified": {
-                                                                                "description": "Whether the account has a verified badge.",
+                                                                                "description": "Whether the followed account is verified.",
                                                                                 "type": "boolean"
                                                                             }
                                                                         },
@@ -22024,7 +22128,7 @@
                                                                     "x-anyapi-must-populate": true
                                                                 },
                                                                 "nextCursor": {
-                                                                    "description": "Opaque cursor for the next page of accounts, or null when this lane has no more. Pass it back as cursor to continue.",
+                                                                    "description": "Opaque cursor for the next page of results, or null/empty when this lane has no more. Pass it back as cursor to continue.",
                                                                     "type": [
                                                                         "string",
                                                                         "null"
@@ -22039,6 +22143,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether the account was found and returned following records.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -23772,17 +23877,80 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Transcript records: full transcript text, timed segments, detected language, and source video metadata.",
+                                                                    "description": "Transcript record for the requested reel (one item), with the full transcript text, timed segments, and source video metadata.",
                                                                     "items": {
                                                                         "properties": {
-                                                                            "text": {
+                                                                            "caption": {
+                                                                                "description": "The reel's caption text. Empty when the reel has no caption.",
                                                                                 "type": "string"
                                                                             },
-                                                                            "url": {
+                                                                            "commentCount": {
+                                                                                "description": "Number of comments on the reel.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "durationSeconds": {
+                                                                                "description": "Video duration in seconds.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "The reel's numeric Instagram media ID, as a string.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "language": {
+                                                                                "description": "Detected spoken language (ISO 639-1 code, e.g. \"en\"). Empty when the upstream omits it.",
                                                                                 "type": "string"
+                                                                            },
+                                                                            "likeCount": {
+                                                                                "description": "Number of likes on the reel.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "ownerUsername": {
+                                                                                "description": "Username of the reel's owner, without the @ prefix. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "segments": {
+                                                                                "description": "Time-aligned transcript segments, each with its text and start/end offsets in seconds.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "end": {
+                                                                                            "description": "Segment end offset in seconds from the start of the video.",
+                                                                                            "type": "number"
+                                                                                        },
+                                                                                        "start": {
+                                                                                            "description": "Segment start offset in seconds from the start of the video.",
+                                                                                            "type": "number"
+                                                                                        },
+                                                                                        "text": {
+                                                                                            "description": "The segment's transcribed text.",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "text": {
+                                                                                "description": "The full speech transcript. Empty when the reel has no detectable spoken audio.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "Canonical URL of the reel, with tracking query params stripped.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "viewCount": {
+                                                                                "description": "Number of video views.",
+                                                                                "type": "integer"
                                                                             }
                                                                         },
                                                                         "required": [
+                                                                            "id",
                                                                             "url",
                                                                             "text"
                                                                         ],
@@ -23800,6 +23968,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether the reel was found and transcribed.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -24349,21 +24518,57 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Matching search results: user profiles, hashtags, or places with names, follower/post counts, and profile links.",
+                                                                    "description": "Matching Instagram profile records for the query.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "bio": {
+                                                                                "description": "The account's bio text. Empty when the account has none.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "followers": {
+                                                                                "description": "The account's follower count. May be 0 when the lane does not return it in search results.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "following": {
+                                                                                "description": "The number of accounts the account follows. May be 0 when the lane does not return it in search results.",
+                                                                                "type": "integer"
+                                                                            },
                                                                             "handle": {
+                                                                                "description": "The account's username, without the @ prefix.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "url": {
+                                                                            "id": {
+                                                                                "description": "The account's numeric Instagram user ID, as a string.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "URL of the account's profile picture, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "name": {
+                                                                                "description": "The account's display name. Empty when the account has none.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "postsCount": {
+                                                                                "description": "The account's post count. May be 0 when the lane does not return it in search results.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "Canonical URL of the account's profile, with tracking query params stripped.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "verified": {
+                                                                                "description": "Whether the account is verified.",
+                                                                                "type": "boolean"
                                                                             }
                                                                         },
                                                                         "required": [
-                                                                            "url",
-                                                                            "handle"
+                                                                            "id",
+                                                                            "handle",
+                                                                            "url"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -24379,6 +24584,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether any matching profiles were returned for the query.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -39242,19 +39448,16 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Profile records: public profile URL, handle, display name, bio, subscriber count, avatar, and recent public stories.",
+                                                                    "description": "Profile record for the requested Snapchat username (one item).",
                                                                     "items": {
-                                                                        "description": "A public Snapchat profile: url, handle, displayName, bio, subscribers, avatarUrl, and recent public stories.",
                                                                         "properties": {
-                                                                            "avatarUrl": {
-                                                                                "description": "URL of the profile avatar image.",
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
-                                                                            },
                                                                             "bio": {
-                                                                                "description": "The profile's public bio / description text.",
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
+                                                                                "description": "The profile's public bio / description text. Empty when the profile has none.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "category": {
+                                                                                "description": "The profile's category (e.g. \"Government Org\"). Empty when the upstream omits it.",
+                                                                                "type": "string"
                                                                             },
                                                                             "displayName": {
                                                                                 "description": "The profile's public display name.",
@@ -39262,48 +39465,28 @@
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "handle": {
+                                                                                "description": "The profile's Snapchat username (add-me handle).",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "image": {
+                                                                                "description": "URL of the profile avatar image, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "stories": {
-                                                                                "description": "Recent public stories, each with its snaps (media items).",
+                                                                                "description": "Recent public stories on the profile.",
                                                                                 "items": {
                                                                                     "properties": {
                                                                                         "id": {
                                                                                             "description": "Story identifier.",
                                                                                             "type": "string"
                                                                                         },
-                                                                                        "snaps": {
-                                                                                            "description": "The snaps (media items) in this story.",
-                                                                                            "items": {
-                                                                                                "properties": {
-                                                                                                    "id": {
-                                                                                                        "description": "Snap identifier.",
-                                                                                                        "type": "string"
-                                                                                                    },
-                                                                                                    "mediaUrl": {
-                                                                                                        "description": "Full-resolution media URL.",
-                                                                                                        "type": "string"
-                                                                                                    },
-                                                                                                    "previewUrl": {
-                                                                                                        "description": "Preview/thumbnail media URL.",
-                                                                                                        "type": "string"
-                                                                                                    },
-                                                                                                    "timestamp": {
-                                                                                                        "description": "Snap timestamp (ISO 8601).",
-                                                                                                        "type": "string"
-                                                                                                    }
-                                                                                                },
-                                                                                                "type": "object"
-                                                                                            },
-                                                                                            "type": "array"
-                                                                                        },
                                                                                         "storyTitle": {
-                                                                                            "description": "Story title.",
+                                                                                            "description": "Story title. Empty when the story has no title.",
                                                                                             "type": "string"
                                                                                         },
                                                                                         "thumbnailUrl": {
-                                                                                            "description": "Story thumbnail image URL.",
+                                                                                            "description": "Story thumbnail image URL, with tracking query params stripped.",
                                                                                             "type": "string"
                                                                                         }
                                                                                     },
@@ -39316,12 +39499,19 @@
                                                                                 "type": "integer"
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical public profile URL, with tracking query params stripped.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "website": {
+                                                                                "description": "The profile's linked website URL. Empty when the profile has none.",
+                                                                                "type": "string"
                                                                             }
                                                                         },
                                                                         "required": [
-                                                                            "url"
+                                                                            "url",
+                                                                            "handle",
+                                                                            "displayName"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -39337,6 +39527,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether the profile was found.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -40373,25 +40564,51 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Play-count records: track, album, or artist metadata with stream counts and statistics.",
+                                                                    "description": "Play-count records for the requested Spotify entity (one per track).",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "albumName": {
+                                                                                "description": "Name of the album the track belongs to. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "artistName": {
+                                                                                "description": "Name of the primary artist. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "durationMs": {
+                                                                                "description": "Track duration in milliseconds.",
+                                                                                "type": "integer"
+                                                                            },
                                                                             "id": {
+                                                                                "description": "The Spotify entity ID.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "name": {
+                                                                                "description": "The track (or entity) name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "playCount": {
+                                                                                "description": "Total number of streams/plays for the track.",
+                                                                                "type": "integer",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "type": {
+                                                                                "description": "The Spotify entity type (e.g. \"track\").",
+                                                                                "type": "string"
+                                                                            },
                                                                             "url": {
+                                                                                "description": "Canonical open.spotify.com URL for the entity, with tracking query params stripped.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
                                                                         },
                                                                         "required": [
                                                                             "id",
-                                                                            "name"
+                                                                            "name",
+                                                                            "url",
+                                                                            "playCount"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -40407,6 +40624,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether the track/album/artist was found and returned play-count records.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -45022,26 +45240,56 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Video records: creator, caption, hashtags, play/like/share/comment counts, and video URL.",
+                                                                    "description": "Recent TikTok video records for the hashtag.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "authorHandle": {
+                                                                                "description": "Username of the video's creator, without the @ prefix. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "commentCount": {
+                                                                                "description": "Number of comments on the video.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            },
                                                                             "id": {
+                                                                                "description": "The video's numeric TikTok ID, as a string.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "URL of the video's cover/thumbnail image, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "likeCount": {
+                                                                                "description": "Number of likes on the video.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "playCount": {
+                                                                                "description": "Number of views/plays of the video.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "shareCount": {
+                                                                                "description": "Number of shares of the video.",
+                                                                                "type": "integer"
                                                                             },
                                                                             "text": {
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
+                                                                                "description": "The video caption text. Empty for videos with no caption.",
+                                                                                "type": "string"
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical tiktok.com URL of the video, with tracking query params stripped.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
                                                                         },
                                                                         "required": [
                                                                             "id",
-                                                                            "text",
-                                                                            "url"
+                                                                            "url",
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -45057,6 +45305,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether any videos were returned for the hashtag.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -53412,25 +53661,61 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Reply records: reply text, author profile, timestamp, and engagement metrics.",
+                                                                    "description": "Reply records for the requested post.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "authorHandle": {
+                                                                                "description": "Screen name / handle of the reply's author, without the @ prefix.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "authorName": {
+                                                                                "description": "Display name of the reply's author. Empty when the upstream omits it.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            },
                                                                             "id": {
+                                                                                "description": "The reply's numeric tweet ID, as a string.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "likeCount": {
+                                                                                "description": "Number of likes on this reply.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "quoteCount": {
+                                                                                "description": "Number of quote tweets of this reply.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "replyCount": {
+                                                                                "description": "Number of replies to this reply.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "repostCount": {
+                                                                                "description": "Number of reposts/retweets of this reply.",
+                                                                                "type": "integer"
                                                                             },
                                                                             "text": {
+                                                                                "description": "The reply's text. Empty for media-only replies with no text.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "Canonical x.com URL of the reply, with tracking query params stripped.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "url": {
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
+                                                                            "viewCount": {
+                                                                                "description": "Number of views of this reply.",
+                                                                                "type": "integer"
                                                                             }
                                                                         },
                                                                         "required": [
+                                                                            "id",
                                                                             "url",
-                                                                            "text"
+                                                                            "text",
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -53446,6 +53731,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "Whether the post was found and returned reply records.",
                                                     "type": "boolean"
                                                 }
                                             },
