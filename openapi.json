@@ -4459,17 +4459,19 @@
                                                                     "items": {
                                                                         "properties": {
                                                                             "ath": {
-                                                                                "description": "All-time high.",
+                                                                                "description": "All-time high price in USD.",
                                                                                 "type": "number"
                                                                             },
                                                                             "atl": {
-                                                                                "description": "All-time low.",
+                                                                                "description": "All-time low price in USD.",
                                                                                 "type": "number"
                                                                             },
                                                                             "circulatingSupply": {
+                                                                                "description": "Circulating supply (coin count).",
                                                                                 "type": "number"
                                                                             },
                                                                             "high24h": {
+                                                                                "description": "24h high price in USD.",
                                                                                 "type": "number"
                                                                             },
                                                                             "id": {
@@ -4482,9 +4484,11 @@
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "low24h": {
+                                                                                "description": "24h low price in USD.",
                                                                                 "type": "number"
                                                                             },
                                                                             "marketCap": {
+                                                                                "description": "Market capitalization in USD.",
                                                                                 "type": "number"
                                                                             },
                                                                             "name": {
@@ -4492,7 +4496,7 @@
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "price": {
-                                                                                "description": "Latest price in the primary quote currency (USD).",
+                                                                                "description": "Latest price in USD.",
                                                                                 "type": "number"
                                                                             },
                                                                             "slug": {
@@ -4504,10 +4508,11 @@
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "totalSupply": {
+                                                                                "description": "Total supply (coin count).",
                                                                                 "type": "number"
                                                                             },
                                                                             "volume24h": {
-                                                                                "description": "24h trading volume.",
+                                                                                "description": "24h trading volume in USD.",
                                                                                 "type": "number"
                                                                             }
                                                                         },
@@ -54759,7 +54764,7 @@
         },
         "/v1/run/yahoo_finance.quote": {
             "post": {
-                "description": "Look up a stock or ETF by ticker symbol and get its Yahoo Finance quote \u2014 price, market cap, volume, and key stats \u2014 as normalized JSON with transparent per-request USD pricing.",
+                "description": "Look up a stock or ETF by ticker symbol and get its Yahoo Finance quote (price, market cap, volume, and key stats) as normalized JSON with transparent per-request USD pricing.",
                 "operationId": "yahoo_finance_quote",
                 "parameters": [
                     {
@@ -54844,15 +54849,51 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Quote records for the ticker: current price, market cap, volume, day range, and key financial stats.",
+                                                                    "description": "Quote records for the ticker: current price, day range, volume, and market cap.",
                                                                     "items": {
                                                                         "properties": {
+                                                                            "change": {
+                                                                                "description": "Absolute price change from the previous close.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "changePercent": {
+                                                                                "description": "Percent price change from the previous close (e.g. 3.14 means +3.14%).",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "dayHigh": {
+                                                                                "description": "Highest trade price during the current session.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "dayLow": {
+                                                                                "description": "Lowest trade price during the current session.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "marketCap": {
+                                                                                "description": "Total market capitalization in the security's native currency.",
+                                                                                "type": "integer"
+                                                                            },
                                                                             "name": {
+                                                                                "description": "The security's display name, e.g. \"Apple Inc.\".",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "price": {
+                                                                            "previousClose": {
+                                                                                "description": "The previous session's closing price.",
                                                                                 "type": "number"
+                                                                            },
+                                                                            "price": {
+                                                                                "description": "The latest trade price in the security's native currency.",
+                                                                                "type": "number",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "symbol": {
+                                                                                "description": "The resolved ticker symbol for the quote, e.g. \"AAPL\".",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "volume": {
+                                                                                "description": "Number of shares traded during the current session.",
+                                                                                "type": "integer"
                                                                             }
                                                                         },
                                                                         "required": [
