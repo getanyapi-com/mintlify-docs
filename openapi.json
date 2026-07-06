@@ -22638,8 +22638,9 @@
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "createdAt": {
-                                                                                "type": "string",
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "id": {
@@ -22663,7 +22664,7 @@
                                                                             "author",
                                                                             "verified",
                                                                             "likes",
-                                                                            "createdAt"
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -25550,8 +25551,9 @@
                                                                             "comments": {
                                                                                 "type": "integer"
                                                                             },
-                                                                            "createdAt": {
-                                                                                "type": "string"
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
                                                                             },
                                                                             "id": {
                                                                                 "type": "string",
@@ -25571,7 +25573,7 @@
                                                                             "caption",
                                                                             "likes",
                                                                             "comments",
-                                                                            "createdAt"
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -25826,6 +25828,10 @@
                                                                             "comments": {
                                                                                 "type": "integer"
                                                                             },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            },
                                                                             "id": {
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
@@ -25836,9 +25842,6 @@
                                                                             "shortcode": {
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
-                                                                            },
-                                                                            "takenAt": {
-                                                                                "type": "integer"
                                                                             },
                                                                             "views": {
                                                                                 "type": "integer"
@@ -25851,7 +25854,7 @@
                                                                             "views",
                                                                             "likes",
                                                                             "comments",
-                                                                            "takenAt"
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -33142,49 +33145,69 @@
                                         "output": {
                                             "additionalProperties": false,
                                             "properties": {
-                                                "comments": {
-                                                    "items": {
-                                                        "properties": {
-                                                            "author": {
-                                                                "description": "Commenter username, without the u/ prefix.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "body": {
-                                                                "description": "Comment text, as Markdown.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "createdUtc": {
-                                                                "description": "Comment creation time as a UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
-                                                                "type": "number"
-                                                            },
-                                                            "id": {
-                                                                "description": "Reddit comment ID (base-36, without the t1_ prefix).",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "url": {
-                                                                "description": "Permalink to the comment on reddit.com.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            }
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
                                                         },
-                                                        "required": [
-                                                            "id",
-                                                            "author",
-                                                            "body",
-                                                            "url",
-                                                            "createdUtc"
-                                                        ],
-                                                        "type": "object"
-                                                    },
-                                                    "type": "array",
-                                                    "x-anyapi-must-populate": true
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "comments": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "author": {
+                                                                                "description": "Commenter username, without the u/ prefix.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "body": {
+                                                                                "description": "Comment text, as Markdown.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Reddit comment ID (base-36, without the t1_ prefix).",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "Permalink to the comment on reddit.com.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id",
+                                                                            "author",
+                                                                            "body",
+                                                                            "url",
+                                                                            "createdUtc"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "comments"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
                                                 }
                                             },
                                             "required": [
-                                                "comments"
+                                                "found",
+                                                "data"
                                             ],
                                             "title": "Reddit post comments output",
                                             "type": "object"
@@ -33643,76 +33666,96 @@
                                         "output": {
                                             "additionalProperties": false,
                                             "properties": {
-                                                "nextCursor": {
-                                                    "description": "Cursor for the next page of results; pass it back as the `cursor` input to fetch the following page. Empty string when there are no more results.",
-                                                    "type": "string"
-                                                },
-                                                "posts": {
-                                                    "items": {
-                                                        "properties": {
-                                                            "author": {
-                                                                "description": "Author username, without the u/ prefix.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "createdUtc": {
-                                                                "description": "Post creation time as a UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
-                                                                "type": "number"
-                                                            },
-                                                            "id": {
-                                                                "description": "Reddit post ID (base-36, without the t3_ prefix).",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "numComments": {
-                                                                "description": "Total number of comments on the post.",
-                                                                "type": "integer"
-                                                            },
-                                                            "permalink": {
-                                                                "description": "Canonical reddit.com thread path for the post (e.g. \"/r/golang/comments/abc123/...\"). Differs from url, which is the destination link. Empty if the upstream omits it.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "score": {
-                                                                "description": "Net score (upvotes minus downvotes) at fetch time.",
-                                                                "type": "integer"
-                                                            },
-                                                            "subreddit": {
-                                                                "description": "Subreddit name, without the r/ prefix.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "title": {
-                                                                "description": "Post title.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "url": {
-                                                                "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts).",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            }
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
                                                         },
-                                                        "required": [
-                                                            "id",
-                                                            "title",
-                                                            "author",
-                                                            "score",
-                                                            "numComments",
-                                                            "url",
-                                                            "permalink",
-                                                            "createdUtc",
-                                                            "subreddit"
-                                                        ],
-                                                        "type": "object"
-                                                    },
-                                                    "type": "array",
-                                                    "x-anyapi-must-populate": true
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "nextCursor": {
+                                                                    "description": "Cursor for the next page of results; pass it back as the `cursor` input to fetch the following page. Empty string when there are no more results.",
+                                                                    "type": "string"
+                                                                },
+                                                                "posts": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "author": {
+                                                                                "description": "Author username, without the u/ prefix.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Reddit post ID (base-36, without the t3_ prefix).",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "numComments": {
+                                                                                "description": "Total number of comments on the post.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "permalink": {
+                                                                                "description": "Canonical reddit.com thread path for the post (e.g. \"/r/golang/comments/abc123/...\"). Differs from url, which is the destination link. Empty if the upstream omits it.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "score": {
+                                                                                "description": "Net score (upvotes minus downvotes) at fetch time.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "subreddit": {
+                                                                                "description": "Subreddit name, without the r/ prefix.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "title": {
+                                                                                "description": "Post title.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts).",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id",
+                                                                            "title",
+                                                                            "author",
+                                                                            "score",
+                                                                            "numComments",
+                                                                            "url",
+                                                                            "permalink",
+                                                                            "createdUtc",
+                                                                            "subreddit"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "posts",
+                                                                "nextCursor"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
                                                 }
                                             },
                                             "required": [
-                                                "posts",
-                                                "nextCursor"
+                                                "found",
+                                                "data"
                                             ],
                                             "title": "Reddit search output",
                                             "type": "object"
@@ -34191,77 +34234,97 @@
                                         "output": {
                                             "additionalProperties": false,
                                             "properties": {
-                                                "nextCursor": {
-                                                    "description": "Cursor for the next page of results; pass it back as the `after` input to fetch the following page. Empty string when there are no more results.",
-                                                    "type": "string"
-                                                },
-                                                "posts": {
-                                                    "items": {
-                                                        "properties": {
-                                                            "author": {
-                                                                "description": "Author username, without the u/ prefix.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "createdUtc": {
-                                                                "description": "Post creation time as a UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
-                                                                "type": "number",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "id": {
-                                                                "description": "Reddit post ID (base-36, without the t3_ prefix).",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "numComments": {
-                                                                "description": "Total number of comments on the post.",
-                                                                "type": "integer"
-                                                            },
-                                                            "permalink": {
-                                                                "description": "Canonical reddit.com thread path for the post (e.g. \"/r/golang/comments/abc123/...\"). Differs from url, which is the destination link. Empty if the upstream omits it.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "score": {
-                                                                "description": "Net score (upvotes minus downvotes) at fetch time.",
-                                                                "type": "integer"
-                                                            },
-                                                            "subreddit": {
-                                                                "description": "Subreddit name, without the r/ prefix.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "title": {
-                                                                "description": "Post title.",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            },
-                                                            "url": {
-                                                                "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts).",
-                                                                "type": "string",
-                                                                "x-anyapi-must-populate": true
-                                                            }
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
                                                         },
-                                                        "required": [
-                                                            "id",
-                                                            "title",
-                                                            "author",
-                                                            "score",
-                                                            "numComments",
-                                                            "url",
-                                                            "permalink",
-                                                            "createdUtc",
-                                                            "subreddit"
-                                                        ],
-                                                        "type": "object"
-                                                    },
-                                                    "type": "array",
-                                                    "x-anyapi-must-populate": true
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "nextCursor": {
+                                                                    "description": "Cursor for the next page of results; pass it back as the `after` input to fetch the following page. Empty string when there are no more results.",
+                                                                    "type": "string"
+                                                                },
+                                                                "posts": {
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "author": {
+                                                                                "description": "Author username, without the u/ prefix.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Reddit post ID (base-36, without the t3_ prefix).",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "numComments": {
+                                                                                "description": "Total number of comments on the post.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "permalink": {
+                                                                                "description": "Canonical reddit.com thread path for the post (e.g. \"/r/golang/comments/abc123/...\"). Differs from url, which is the destination link. Empty if the upstream omits it.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "score": {
+                                                                                "description": "Net score (upvotes minus downvotes) at fetch time.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "subreddit": {
+                                                                                "description": "Subreddit name, without the r/ prefix.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "title": {
+                                                                                "description": "Post title.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts).",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id",
+                                                                            "title",
+                                                                            "author",
+                                                                            "score",
+                                                                            "numComments",
+                                                                            "url",
+                                                                            "permalink",
+                                                                            "createdUtc",
+                                                                            "subreddit"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "posts",
+                                                                "nextCursor"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
                                                 }
                                             },
                                             "required": [
-                                                "posts",
-                                                "nextCursor"
+                                                "found",
+                                                "data"
                                             ],
                                             "title": "Reddit subreddit posts output",
                                             "type": "object"
@@ -42625,8 +42688,9 @@
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "createdAt": {
-                                                                                "type": "integer"
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
                                                                             },
                                                                             "id": {
                                                                                 "type": "string",
@@ -42645,7 +42709,7 @@
                                                                             "text",
                                                                             "author",
                                                                             "likes",
-                                                                            "createdAt"
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -44416,8 +44480,9 @@
                                                                             "comments": {
                                                                                 "type": "integer"
                                                                             },
-                                                                            "createdAt": {
-                                                                                "type": "string",
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "id": {
@@ -44442,7 +44507,7 @@
                                                                             "views",
                                                                             "likes",
                                                                             "comments",
-                                                                            "createdAt"
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -44684,8 +44749,9 @@
                                                                             "comments": {
                                                                                 "type": "integer"
                                                                             },
-                                                                            "createdAt": {
-                                                                                "type": "integer"
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
                                                                             },
                                                                             "id": {
                                                                                 "type": "string",
@@ -44709,7 +44775,7 @@
                                                                             "likes",
                                                                             "comments",
                                                                             "shares",
-                                                                            "createdAt"
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -46304,8 +46370,9 @@
                                                                             "comments": {
                                                                                 "type": "integer"
                                                                             },
-                                                                            "createdAt": {
-                                                                                "type": "integer",
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "id": {
@@ -46340,7 +46407,7 @@
                                                                             "likes",
                                                                             "comments",
                                                                             "shares",
-                                                                            "createdAt"
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -46824,8 +46891,9 @@
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "createdAt": {
-                                                                                "type": "integer"
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
                                                                             },
                                                                             "id": {
                                                                                 "type": "string",
@@ -46848,7 +46916,7 @@
                                                                             "author",
                                                                             "likes",
                                                                             "replies",
-                                                                            "createdAt"
+                                                                            "createdUtc"
                                                                         ],
                                                                         "type": "object"
                                                                     },
@@ -50586,8 +50654,9 @@
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "createdAt": {
-                                                                                "type": "string",
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "favoriteCount": {
@@ -50614,7 +50683,7 @@
                                                                         "required": [
                                                                             "id",
                                                                             "text",
-                                                                            "createdAt",
+                                                                            "createdUtc",
                                                                             "favoriteCount",
                                                                             "replyCount",
                                                                             "retweetCount",
@@ -51955,9 +52024,9 @@
                                                                             "conversationId": {
                                                                                 "type": "string"
                                                                             },
-                                                                            "createdAt": {
-                                                                                "description": "Tweet creation time.",
-                                                                                "type": "string",
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "id": {
@@ -52228,8 +52297,9 @@
                                                                 "bookmarks": {
                                                                     "type": "integer"
                                                                 },
-                                                                "createdAt": {
-                                                                    "type": "string",
+                                                                "createdUtc": {
+                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                    "type": "number",
                                                                     "x-anyapi-must-populate": true
                                                                 },
                                                                 "id": {
@@ -52266,7 +52336,7 @@
                                                                 "quotes",
                                                                 "bookmarks",
                                                                 "views",
-                                                                "createdAt"
+                                                                "createdUtc"
                                                             ],
                                                             "type": "object"
                                                         }
@@ -52733,8 +52803,9 @@
                                                                             "bookmarks": {
                                                                                 "type": "integer"
                                                                             },
-                                                                            "createdAt": {
-                                                                                "type": "string",
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "id": {
@@ -52778,7 +52849,7 @@
                                                                             "id",
                                                                             "url",
                                                                             "text",
-                                                                            "createdAt",
+                                                                            "createdUtc",
                                                                             "likes",
                                                                             "retweets",
                                                                             "replies",
