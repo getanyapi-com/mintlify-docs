@@ -16335,6 +16335,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The results wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -16343,19 +16344,75 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Job listing records: title, employer, location, salary estimate, rating, and posting details.",
+                                                                    "description": "Job listing records for the search or company page.",
                                                                     "items": {
+                                                                        "description": "A Glassdoor job listing: title, employer, location, salary estimate, rating, and the listing URL.",
                                                                         "properties": {
+                                                                            "ageInDays": {
+                                                                                "description": "Days since the listing was posted.",
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "company": {
+                                                                                "description": "Hiring employer name.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "description": {
+                                                                                "description": "Full job description (may contain HTML).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Glassdoor job listing id.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "location": {
+                                                                                "description": "Job location (city, region).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "rating": {
+                                                                                "description": "Employer Glassdoor star rating (0 when not rated).",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "salary": {
+                                                                                "description": "Estimated salary range for the listing.",
+                                                                                "properties": {
+                                                                                    "currency": {
+                                                                                        "description": "ISO currency code for the salary figures.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "max": {
+                                                                                        "description": "High end of the estimated salary range.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "median": {
+                                                                                        "description": "Median of the estimated salary range.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "min": {
+                                                                                        "description": "Low end of the estimated salary range.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "period": {
+                                                                                        "description": "Pay period the figures cover (e.g. ANNUAL, HOURLY).",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
                                                                             "title": {
+                                                                                "description": "Job title.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Absolute Glassdoor job listing URL.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
                                                                         },
                                                                         "required": [
+                                                                            "id",
                                                                             "title",
                                                                             "url"
                                                                         ],
@@ -16373,6 +16430,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one job listing was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -26356,6 +26414,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The results wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -26364,18 +26423,38 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Ad records: advertiser name, ad creative text, format, and ad library URL.",
+                                                                    "description": "Ad records from the LinkedIn Ad Library.",
                                                                     "items": {
+                                                                        "description": "A LinkedIn ad: advertiser, creative text, format, and ad library URL.",
                                                                         "properties": {
-                                                                            "id": {
+                                                                            "advertiser": {
+                                                                                "description": "Advertiser (company) name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "advertiserLogo": {
+                                                                                "description": "Advertiser logo image URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "format": {
+                                                                                "description": "Ad format (e.g. SINGLE_IMAGE, VIDEO).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "LinkedIn ad id.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Ad creative image URL.",
+                                                                                "type": "string"
                                                                             },
                                                                             "text": {
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
+                                                                                "description": "Ad creative body text.",
+                                                                                "type": "string"
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical LinkedIn Ad Library detail URL.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -26398,6 +26477,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one ad was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -27164,6 +27244,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The results wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -27172,27 +27253,42 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Employee records: name, job title, location text, and LinkedIn profile URL.",
+                                                                    "description": "Employee records for the company.",
                                                                     "items": {
-                                                                        "description": "An employee: name, job title (headline), location text, public handle, and LinkedIn profile URL.",
+                                                                        "description": "An employee: name, headline, location, handle, and LinkedIn profile URL.",
                                                                         "properties": {
+                                                                            "firstName": {
+                                                                                "description": "First name.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "handle": {
+                                                                                "description": "Public profile identifier (the vanity slug in the URL).",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
-                                                                            "jobTitle": {
-                                                                                "description": "The employee's current role or headline at the company.",
+                                                                            "image": {
+                                                                                "description": "Profile picture URL.",
                                                                                 "type": "string"
                                                                             },
-                                                                            "locationText": {
+                                                                            "jobTitle": {
+                                                                                "description": "The employee's current role or headline.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "lastName": {
+                                                                                "description": "Last name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "location": {
                                                                                 "description": "The employee's location as a single string (city, region, country).",
                                                                                 "type": "string"
                                                                             },
                                                                             "name": {
+                                                                                "description": "Full name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
+                                                                                "description": "Canonical LinkedIn profile URL.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -27214,6 +27310,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one employee was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -27669,6 +27766,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The results wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -27677,8 +27775,9 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Email lookup records: the discovered work email for a LinkedIn profile, with the person's name, profile URL, title, and company.",
+                                                                    "description": "Email lookup records for the LinkedIn profile.",
                                                                     "items": {
+                                                                        "description": "The discovered work email for a LinkedIn profile, with the person's name, title, company, and location.",
                                                                         "properties": {
                                                                             "company": {
                                                                                 "description": "Current company name.",
@@ -27689,15 +27788,39 @@
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "firstName": {
+                                                                                "description": "First name.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "headline": {
+                                                                                "description": "Profile headline.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "lastName": {
+                                                                                "description": "Last name.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "linkedinUrl": {
                                                                                 "description": "Canonical LinkedIn profile URL.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "location": {
+                                                                                "description": "Current location (city, region, country).",
+                                                                                "type": "string"
+                                                                            },
                                                                             "name": {
                                                                                 "description": "Full name on the LinkedIn profile.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "phone": {
+                                                                                "description": "Phone number, when available.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "seniority": {
+                                                                                "description": "Seniority level (e.g. entry, senior).",
+                                                                                "type": "string"
                                                                             },
                                                                             "title": {
                                                                                 "description": "Current job title.",
@@ -27722,6 +27845,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when an email lookup record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -27938,6 +28062,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The results wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -27946,25 +28071,33 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Job records: title and listing URL, plus (when present) company, location, posting date, description, and seniority.",
+                                                                    "description": "Job listing records for the search.",
                                                                     "items": {
+                                                                        "description": "A LinkedIn job listing: title, company, location, posting date, and the listing URL.",
                                                                         "properties": {
                                                                             "company": {
                                                                                 "description": "Hiring company name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
+                                                                            "companyUrl": {
+                                                                                "description": "Canonical LinkedIn company URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            },
                                                                             "description": {
                                                                                 "description": "Full job description text.",
                                                                                 "type": "string"
                                                                             },
+                                                                            "id": {
+                                                                                "description": "LinkedIn job listing id.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "location": {
                                                                                 "description": "Job location (city, region).",
-                                                                                "type": "string",
-                                                                                "x-anyapi-must-populate": true
-                                                                            },
-                                                                            "postedAt": {
-                                                                                "description": "When the job was posted, as an ISO 8601 timestamp.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
@@ -27973,6 +28106,7 @@
                                                                                 "type": "string"
                                                                             },
                                                                             "title": {
+                                                                                "description": "Job title.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
@@ -28000,6 +28134,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one job listing was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -29023,6 +29158,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The results wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -29031,18 +29167,48 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Matching company records: name, LinkedIn URL, industry, location, headcount range, and description.",
+                                                                    "description": "Matching company records.",
                                                                     "items": {
+                                                                        "description": "A LinkedIn company: name, URL, industry, location, follower count, and description.",
                                                                         "properties": {
+                                                                            "description": {
+                                                                                "description": "Company summary / about text.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "followersText": {
+                                                                                "description": "Follower count as a display string (e.g. 105K followers).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "handle": {
+                                                                                "description": "Company universal name (the vanity slug in the URL).",
+                                                                                "type": "string"
+                                                                            },
                                                                             "id": {
+                                                                                "description": "LinkedIn company id.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Company logo image URL.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "industry": {
+                                                                                "description": "Company industry.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "location": {
+                                                                                "description": "Company location as a single string (city, region).",
                                                                                 "type": "string"
                                                                             },
                                                                             "name": {
+                                                                                "description": "Company name.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             },
                                                                             "url": {
-                                                                                "type": "string"
+                                                                                "description": "Canonical LinkedIn company URL.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
                                                                             }
                                                                         },
                                                                         "required": [
@@ -29064,6 +29230,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one company was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -29542,6 +29709,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The results wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -29550,17 +29718,34 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Matched profile records. Each carries the profile URL, handle, and id. Depending on the match, records may also include first/last name, headline, location, current position, work experience, and education, plus upstream extras (about, skills, languages, certifications, connections, profile picture, and more) that pass through.",
+                                                                    "description": "Matched profile records.",
                                                                     "items": {
+                                                                        "description": "A LinkedIn profile: name, headline, location, current position, work experience, and education, plus the profile URL, handle, and id.",
                                                                         "properties": {
+                                                                            "about": {
+                                                                                "description": "Profile about / summary text.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "currentPosition": {
-                                                                                "description": "Current role(s), passed through from the upstream. Typically a list of objects with job title, company, dates, and description; shape can vary by profile."
+                                                                                "description": "Current role(s). Each entry is an open object with the position title, company, dates, and location; shape can vary by profile and lane.",
+                                                                                "items": {
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
                                                                             },
                                                                             "education": {
-                                                                                "description": "Education history, passed through from the upstream. Typically a list of objects with school, degree, and field of study; shape can vary by profile."
+                                                                                "description": "Education history. Each entry is an open object with school, degree, and field of study; shape can vary by profile and lane.",
+                                                                                "items": {
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
                                                                             },
                                                                             "experience": {
-                                                                                "description": "Full work history, passed through from the upstream. Typically a list of objects with job title, company, dates, and description; shape can vary by profile."
+                                                                                "description": "Full work history. Each entry is an open object with the position title, company, dates, and location; shape can vary by profile and lane.",
+                                                                                "items": {
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
                                                                             },
                                                                             "firstName": {
                                                                                 "description": "Member's first name.",
@@ -29580,12 +29765,17 @@
                                                                                 "description": "LinkedIn member URN id for the profile.",
                                                                                 "type": "string"
                                                                             },
+                                                                            "image": {
+                                                                                "description": "Profile picture URL.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "lastName": {
                                                                                 "description": "Member's last name.",
                                                                                 "type": "string"
                                                                             },
                                                                             "location": {
-                                                                                "description": "Member's location, passed through from the upstream. Typically an object with the displayed location text and country code; shape can vary by profile."
+                                                                                "description": "Member's location as a single string (city, region, country).",
+                                                                                "type": "string"
                                                                             },
                                                                             "url": {
                                                                                 "description": "Canonical LinkedIn profile URL.",
@@ -29611,6 +29801,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one profile was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -31857,6 +32048,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The results wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -31865,10 +32057,130 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Skip-trace records: the matched person with known names, ages, current and past addresses, phone numbers, and email addresses.",
+                                                                    "description": "Matched person records with identity, address, and contact details.",
                                                                     "items": {
+                                                                        "description": "A skip-trace match: name, age, current and past addresses, phone numbers, email addresses, relatives, and associates.",
                                                                         "properties": {
+                                                                            "addressLocality": {
+                                                                                "description": "Current city.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "addressRegion": {
+                                                                                "description": "Current state.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "age": {
+                                                                                "description": "Reported age.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "associates": {
+                                                                                "description": "Reported associates. Each entry is an open object with name and age.",
+                                                                                "items": {
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "born": {
+                                                                                "description": "Reported birth month and year.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "county": {
+                                                                                "description": "Current county.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "emails": {
+                                                                                "description": "Up to five known email addresses, most-recent first. Absent slots are empty strings.",
+                                                                                "properties": {
+                                                                                    "email1": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "email2": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "email3": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "email4": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "email5": {
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "firstName": {
+                                                                                "description": "First name of the matched person.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "lastName": {
+                                                                                "description": "Last name of the matched person.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "location": {
+                                                                                "description": "Current city and state (e.g. Brook Park, OH).",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "phones": {
+                                                                                "description": "Up to five known phone numbers with line type, most-recent first. Absent slots are empty strings.",
+                                                                                "properties": {
+                                                                                    "phone1": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone1Type": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone2": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone2Type": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone3": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone3Type": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone4": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone4Type": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone5": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone5Type": {
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "postalCode": {
+                                                                                "description": "Current ZIP code.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "previousAddresses": {
+                                                                                "description": "Prior addresses. Each entry is an open object with street, locality, region, postal code, county, and timespan.",
+                                                                                "items": {
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "relatives": {
+                                                                                "description": "Reported relatives. Each entry is an open object with name and age.",
+                                                                                "items": {
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "streetAddress": {
+                                                                                "description": "Current street address.",
+                                                                                "type": "string"
+                                                                            },
                                                                             "url": {
+                                                                                "description": "Source record URL for the matched person.",
                                                                                 "type": "string",
                                                                                 "x-anyapi-must-populate": true
                                                                             }
@@ -31890,6 +32202,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when at least one matched person record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
@@ -54604,6 +54917,7 @@
                                             "additionalProperties": false,
                                             "properties": {
                                                 "data": {
+                                                    "description": "The results wrapper, or null when nothing was found.",
                                                     "oneOf": [
                                                         {
                                                             "type": "null"
@@ -54612,23 +54926,36 @@
                                                             "additionalProperties": false,
                                                             "properties": {
                                                                 "items": {
-                                                                    "description": "Validation records: the phone number with its WhatsApp registration status.",
+                                                                    "description": "Validation records for the phone number.",
                                                                     "items": {
+                                                                        "description": "A WhatsApp validation result: the phone number with its registration status.",
                                                                         "properties": {
-                                                                            "phone": {
-                                                                                "type": "string"
+                                                                            "checkedUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time) when the check ran. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
                                                                             },
-                                                                            "status": {
-                                                                                "type": "string"
+                                                                            "exists": {
+                                                                                "description": "True when the number is registered on WhatsApp.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "isValid": {
+                                                                                "description": "True when the number is a valid, reachable WhatsApp account.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "phone": {
+                                                                                "description": "The phone number that was checked, in international format.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
                                                                             }
                                                                         },
                                                                         "required": [
                                                                             "phone",
-                                                                            "status"
+                                                                            "exists"
                                                                         ],
                                                                         "type": "object"
                                                                     },
-                                                                    "type": "array"
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
                                                                 }
                                                             },
                                                             "required": [
@@ -54639,6 +54966,7 @@
                                                     ]
                                                 },
                                                 "found": {
+                                                    "description": "True when a validation record was returned.",
                                                     "type": "boolean"
                                                 }
                                             },
