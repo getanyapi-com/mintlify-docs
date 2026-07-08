@@ -17,7 +17,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 concurrency:
   group: sync-openapi
@@ -27,13 +26,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # Check out with SYNC_PAT when available so any PR this job opens is
-      # authored by the PAT and therefore TRIGGERS the required `check` workflow
-      # (PRs opened with the default GITHUB_TOKEN do not start other workflows,
-      # so auto-merge would hang forever waiting on a check that never runs).
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.SYNC_PAT || github.token }}
 
       - name: regenerate from live gateway
         run: curl -fsS https://api.getanyapi.com/openapi.json | python3 -m json.tool > openapi.json
@@ -42,13 +35,7 @@ jobs:
         run: |
           python3 -c "import json,sys; d=json.load(open('openapi.json')); n=len(d.get('paths',{})); print('paths:',n); sys.exit(1) if n < 100 else None"
 
-      # When SYNC_PAT is set: open an auto-merging PR so the change runs through
-      # the `check` gate before it deploys (required once main is branch
-      # protected). Without the PAT: fall back to the legacy direct push so the
-      # snapshot keeps syncing until the PAT + branch protection are in place.
-      - name: sync via PR (or direct push fallback)
-        env:
-          GH_TOKEN: ${{ secrets.SYNC_PAT }}
+      - name: commit if changed
         run: |
           if git diff --quiet openapi.json; then
             echo "openapi.json already in sync"
@@ -56,19 +43,6 @@ jobs:
           fi
           git config user.name "openapi-sync[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -n "${GH_TOKEN:-}" ]; then
-            branch="openapi-sync/${{ github.run_id }}"
-            git checkout -b "$branch"
-            git add openapi.json
-            git commit -m "chore(openapi): sync from live gateway"
-            git push -u origin "$branch"
-            gh pr create --base main --head "$branch" \
-              --title "chore(openapi): sync from live gateway" \
-              --body "Automated snapshot refresh from the live gateway spec. Auto-merges once \`check\` passes."
-            gh pr merge "$branch" --squash --auto --delete-branch
-          else
-            echo "SYNC_PAT not set - using legacy direct push (works until main is branch protected)."
-            git add openapi.json
-            git commit -m "chore(openapi): sync from live gateway"
-            git push
-          fi
+          git add openapi.json
+          git commit -m "chore(openapi): sync from live gateway"
+          git push
