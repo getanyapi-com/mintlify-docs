@@ -30,35 +30,16 @@ jobs:
       - name: install Mintlify CLI
         run: npm install -g mint
 
-      # 2. Real build check: every OpenAPI path must produce an API Reference
-      #    page. Counts generated /api-reference/* pages from the dev server
-      #    sitemap and asserts it equals the number of paths in openapi.json.
-      #    This is what catches "the reference silently disappeared" - a plain
-      #    broken-links pass does NOT, because nothing links to missing pages.
-      - name: API Reference page-count assertion
-        run: |
-          set -euo pipefail
-          mint dev --port 3123 > /tmp/mint-dev.log 2>&1 &
-          for _ in $(seq 1 90); do
-            grep -qiE "preview ready" /tmp/mint-dev.log && break
-            sleep 2
-          done
-          if ! grep -qiE "preview ready" /tmp/mint-dev.log; then
-            echo "::error::mint dev failed to start"
-            cat /tmp/mint-dev.log
-            exit 1
-          fi
-          port=$(grep -oE "localhost:[0-9]+" /tmp/mint-dev.log | head -1 | cut -d: -f2)
-          gen=$(curl -s "http://localhost:$port/sitemap.xml" \
-            | grep -oE "/api-reference/[a-z0-9-]+/[a-z0-9-]+" | sort -u | wc -l | tr -d ' ')
-          want=$(python3 -c "import json; print(len(json.load(open('openapi.json'))['paths']))")
-          echo "generated API Reference pages: $gen ; openapi.json paths: $want"
-          pkill -f "mint dev" 2>/dev/null || true
-          if [ "$gen" -eq 0 ] || [ "$gen" -ne "$want" ]; then
-            echo "::error::API Reference page count ($gen) != openapi path count ($want). The reference may have been dropped - check the docs.json 'API Reference' nav group."
-            exit 1
-          fi
+      # 2. Strict build validation (the Mintlify-supported CI command): fails on
+      #    any build warning/error - invalid MDX, bad refs, broken openapi.
+      #    Runs headless (no browser, no dev server, stdin closed) and uses the
+      #    latest client so it matches what the cloud build runs.
+      #    Note: `validate` does NOT catch a dropped API Reference nav group (the
+      #    CLI generates it regardless); the nav guard above is what enforces
+      #    that. `validate` covers the rest of the content-integrity surface.
+      - name: mint validate (strict build)
+        run: mint validate --telemetry false < /dev/null
 
-      # 3. Link integrity across the whole site.
+      # 3. Link integrity across the whole generated site.
       - name: broken links
-        run: mint broken-links
+        run: mint broken-links --telemetry false < /dev/null
