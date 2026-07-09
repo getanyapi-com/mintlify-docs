@@ -30577,6 +30577,594 @@
                 }
             }
         },
+        "/v1/run/linkedin.post_comments": {
+            "post": {
+                "description": "List comments on a LinkedIn post - full text, commenter name/URL/job title, timestamps, and engagement.\n\n**Price:** billed per result - $0.00 per 1,000 requests base + $2.00 per 1,000 results, capped at $200.00 per 1,000 requests.",
+                "operationId": "linkedin_post_comments",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 10,
+                                "url": "https://www.linkedin.com/posts/stripe_philip-kl%C3%B6ckner-in-conversation-with-conor-activity-7477791740645564416-tIbZ"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 10,
+                                    "url": "https://www.linkedin.com/posts/stripe_philip-kl%C3%B6ckner-in-conversation-with-conor-activity-7477791740645564416-tIbZ"
+                                },
+                                "properties": {
+                                    "limit": {
+                                        "default": 100,
+                                        "description": "Maximum number of comments to return. You are billed per comment returned, so a lower limit costs less.",
+                                        "maximum": 100,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "url": {
+                                        "description": "Full URL of the LinkedIn post to list comments for.",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "LinkedIn post comments input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "description": "The post comments result, or null when not found.",
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "items": {
+                                                                    "description": "The post's comments. Populated whenever the provider has data for the entity.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "actor": {
+                                                                                "description": "The commenter (a profile or a company).",
+                                                                                "properties": {
+                                                                                    "image": {
+                                                                                        "description": "Profile picture URL of the commenter.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "linkedinUrl": {
+                                                                                        "description": "Canonical LinkedIn URL of the commenter.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Display name of the commenter.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "position": {
+                                                                                        "description": "Commenter's headline or job title as displayed.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "type": {
+                                                                                        "description": "Commenter kind, e.g. 'profile' or 'company'.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "commentary": {
+                                                                                "description": "Full text of the comment. Populated whenever the provider has data for the entity.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "createdUtc": {
+                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                "type": "number"
+                                                                            },
+                                                                            "edited": {
+                                                                                "description": "Whether the comment has been edited.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "engagement": {
+                                                                                "description": "Engagement metrics for the comment.",
+                                                                                "properties": {
+                                                                                    "comments": {
+                                                                                        "description": "Number of replies to the comment.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "likes": {
+                                                                                        "description": "Number of likes on the comment.",
+                                                                                        "type": "integer"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "id": {
+                                                                                "description": "Unique identifier of the comment. Populated whenever the provider has data for the entity.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "pinned": {
+                                                                                "description": "Whether the comment is pinned on the post.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "url": {
+                                                                                "description": "Canonical permalink URL of the comment.",
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "id",
+                                                                            "commentary"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "items"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "description": "Whether comments were found for the post.",
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "LinkedIn post comments output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "LinkedIn Post Comments",
+                "tags": [
+                    "linkedin"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.200000",
+                        "min": "0.000000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/linkedin.post_reactions": {
+            "post": {
+                "description": "List who reacted to a LinkedIn post - reactor name, profile URL, job title, and reaction type. Lead-gen grade.\n\n**Price:** billed per result - $0.00 per 1,000 requests base + $2.00 per 1,000 results, capped at $200.00 per 1,000 requests.",
+                "operationId": "linkedin_post_reactions",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys and item counts) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 5,
+                                "url": "https://www.linkedin.com/posts/satyanadella_today-were-bringing-skills-to-copilot-for-activity-7475945433668694017--kvG"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 5,
+                                    "url": "https://www.linkedin.com/posts/satyanadella_today-were-bringing-skills-to-copilot-for-activity-7475945433668694017--kvG"
+                                },
+                                "properties": {
+                                    "limit": {
+                                        "description": "Maximum number of reactions to return (1-100, default 100). You are billed per reaction returned, so a lower limit costs less.",
+                                        "maximum": 100,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "url": {
+                                        "description": "URL of the LinkedIn post to list reactions for (a /posts/...-activity-... or /feed/update/urn:li:activity:... link).",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "LinkedIn Post Reactions input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "items": {
+                                                                    "description": "Reactions on the post, one record per reactor.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "actor": {
+                                                                                "description": "The reactor - the person or company that reacted.",
+                                                                                "properties": {
+                                                                                    "id": {
+                                                                                        "description": "LinkedIn member or company id of the reactor.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "linkedinUrl": {
+                                                                                        "description": "Canonical LinkedIn profile or company URL of the reactor.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Full name of the reactor (or company name). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "pictureUrl": {
+                                                                                        "description": "Profile picture URL of the reactor.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "position": {
+                                                                                        "description": "Reactor's current job title / headline (or follower count for a company).",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "name"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "postId": {
+                                                                                "description": "LinkedIn URN of the post that was reacted to.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "reactionType": {
+                                                                                "description": "Reaction kind (e.g. LIKE, PRAISE, EMPATHY, INTEREST, APPRECIATION, ENTERTAINMENT).",
+                                                                                "type": "string"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "reactionType",
+                                                                            "actor"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "items"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "LinkedIn Post Reactions output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "LinkedIn Post Reactions",
+                "tags": [
+                    "linkedin"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.200000",
+                        "min": "0.000000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/linkedin.post_transcript": {
             "post": {
                 "description": "Get the spoken transcript of a LinkedIn video post by URL.\n\n**Price:** $2.00 per 1,000 requests (flat per request - same cost regardless of results returned).",
