@@ -1,0 +1,257 @@
+---
+title: "SDKs"
+description: "Official typed TypeScript and Python SDKs for AnyAPI - one key, USD pricing, and a typed method for every API in the catalog."
+---
+
+AnyAPI ships two official, typed SDKs so you can call any API in the catalog from
+your own code without hand-writing HTTP requests. Both are generated from the platform's
+own OpenAPI spec (222 APIs), so they track the catalog automatically.
+
+| | |
+|---|---|
+| **TypeScript / Node** | [`@getanyapi/sdk`](https://www.npmjs.com/package/@getanyapi/sdk) - zero runtime dependencies, ESM + CJS, Node 18+ and edge runtimes |
+| **Python** | [`getanyapi`](https://pypi.org/project/getanyapi/) - httpx + pydantic v2, Python 3.10+, sync and async clients |
+| **Source** | [`getanyapi-com/sdks`](https://github.com/getanyapi-com/sdks) |
+
+Every API is a typed method under its platform namespace (`client.google.search(...)`,
+`client.amazon.reviews(...)`), and there is a generic escape hatch to call any API by slug.
+
+## Install
+
+<CodeGroup>
+```bash npm
+npm install @getanyapi/sdk
+```
+
+```bash pip
+pip install getanyapi
+```
+</CodeGroup>
+
+## Authenticate
+
+Construct a client with your AnyAPI key. When you omit it, both SDKs read
+`ANYAPI_API_KEY` from the environment, so you never have to hardcode a secret.
+
+Need a key? Grab one from the [dashboard](https://getanyapi.com/dashboard) or mint one
+from the terminal - see the [Quickstart](/quickstart).
+
+<CodeGroup>
+```ts TypeScript
+import { AnyAPI } from "@getanyapi/sdk";
+
+// Reads ANYAPI_API_KEY from the environment when apiKey is omitted.
+const client = new AnyAPI({ apiKey: process.env.ANYAPI_API_KEY });
+```
+
+```python Python
+from getanyapi import AnyAPI
+
+client = AnyAPI()  # reads ANYAPI_API_KEY from the environment
+```
+</CodeGroup>
+
+## Your first call
+
+Call any API as a typed method under its platform namespace. `res.output` is the
+normalized result, and the cost of the call in real US dollars is on `res.costUsd`
+(TypeScript) / `res.cost_usd` (Python).
+
+<CodeGroup>
+```ts TypeScript
+const res = await client.reddit.search({ query: "mechanical keyboard" });
+for (const post of res.output.posts) {
+  console.log(post.title, post.score);
+}
+console.log("charged", res.costUsd, "USD");
+```
+
+```python Python
+res = client.reddit.search(query="mechanical keyboard")
+for post in res.output.posts:
+    print(post.title, post.score)
+print("charged", res.cost_usd, "USD")
+```
+</CodeGroup>
+
+<Note>
+  In Python, input keyword arguments mirror the wire API verbatim (camelCase where the
+  API uses it). Output models are Pythonic: attributes are snake_case with a wire alias
+  (`item.reviews_count` reads the wire `reviewsCount`), and `model_dump(by_alias=True)`
+  reproduces the wire shape.
+</Note>
+
+## Call any API by slug
+
+Every typed method has a generic counterpart. Pass the API's slug and input to
+`run` to call any API in the catalog with full typing.
+
+<CodeGroup>
+```ts TypeScript
+const rev = await client.run("amazon.reviews", { product: "B07FZ8S74R", limit: 3 });
+```
+
+```python Python
+rev = client.run("amazon.reviews", {"product": "B07FZ8S74R", "limit": 3})
+```
+</CodeGroup>
+
+## Async (Python)
+
+The TypeScript SDK is promise-based, so every method is already `await`-able. In Python,
+use `AsyncAnyAPI` for an async client backed by the same typed surface.
+
+```python
+from getanyapi import AsyncAnyAPI
+
+async with AsyncAnyAPI() as client:
+    res = await client.google.search(query="best coffee maker")
+```
+
+## Not found vs error
+
+A successful call always resolves. For most APIs the payload is wrapped in a `found`
+flag: `output.found` is `false` when the upstream had no matching entity, which is a
+successful answer, not an error. Use `unwrap` to get the data or raise
+`ResultNotFoundError` when the result is empty.
+
+<CodeGroup>
+```ts TypeScript
+import { unwrap, ResultNotFoundError } from "@getanyapi/sdk";
+
+const res = await client.amazon.reviews({ product: "B07FZ8S74R" });
+try {
+  const data = unwrap(res); // the typed data payload, or throws
+} catch (e) {
+  if (e instanceof ResultNotFoundError) {
+    // empty result (found: false), not an HTTP failure
+  }
+}
+```
+
+```python Python
+from getanyapi import unwrap, ResultNotFoundError
+
+res = client.amazon.reviews(product="B07FZ8S74R")
+try:
+    data = unwrap(res)  # the typed data payload, or raises
+except ResultNotFoundError:
+    ...  # empty result (found: False), not an HTTP failure
+```
+</CodeGroup>
+
+`ResultNotFoundError` subclasses `NotFoundError`, so catching `NotFoundError` catches
+both an HTTP 404 and an empty result; catch `ResultNotFoundError` to handle only empty
+results. A few APIs (such as `reddit.search`) return their data object directly as
+`output` with no `found` wrapper, and `unwrap` returns it as-is without throwing.
+
+## Pagination
+
+Paginated APIs expose an iterator that yields items across pages and follows the cursor
+for you. Call `.pages()` on it to walk whole result pages instead, and read each page's
+`costUsd` / `cost_usd`.
+
+<CodeGroup>
+```ts TypeScript
+// Flatten items across pages, capped at 100 total.
+for await (const post of client.reddit.iterSearch({ query: "coffee" }, { maxItems: 100 })) {
+  console.log(post.title);
+}
+
+// Or walk pages to read per-page cost.
+for await (const page of client.reddit.iterSearch({ query: "coffee" }).pages()) {
+  console.log(page.costUsd);
+}
+```
+
+```python Python
+# Flatten validated item models across pages, capped at 100 total.
+for post in client.reddit.iter_search(query="coffee", options={"max_items": 100}):
+    print(post.title)
+
+# Or walk pages to read per-page cost.
+for page in client.reddit.iter_search(query="coffee").pages():
+    print(page.cost_usd)
+```
+</CodeGroup>
+
+## Trim the response
+
+Shape the response to save context and bandwidth. `fields`, `maxItems` /
+`max_items`, and `summary` trim what comes back, but they do NOT change the price.
+
+<CodeGroup>
+```ts TypeScript
+await client.google.search(
+  { query: "coffee" },
+  {
+    fields: ["title", "link"], // keep only these keys on each item
+    maxItems: 5,               // cap result rows returned
+    summary: true,             // structural outline instead of full data
+  },
+);
+```
+
+```python Python
+res = client.google.search(
+    query="coffee",
+    options={"fields": ["title", "link"], "max_items": 5, "summary": True},
+)
+```
+</CodeGroup>
+
+Per-call transport overrides live alongside these: `timeoutMs` and `maxRetries` (plus an
+`AbortSignal` via `signal`) in TypeScript, and `timeout` / `max_retries` inside `options`
+in Python.
+
+## Errors and retries
+
+Every failure raises an `AnyAPIError` subclass mapped from the HTTP status. Only 429 and
+network failures retry, with jittered exponential backoff that honors `Retry-After`;
+timeouts are never retried. The default `maxRetries` / `max_retries` is 2 (up to 3
+attempts), and you can set it on the client or per request.
+
+| Class | HTTP | Meaning |
+| --- | --- | --- |
+| `BadRequestError` | 400 | Input failed validation |
+| `AuthenticationError` | 401 | Missing or invalid API key |
+| `InsufficientBalanceError` | 402 | Wallet balance or per-key cap exceeded |
+| `NotFoundError` | 404 | Slug or resource does not exist |
+| `ResultNotFoundError` | - | `unwrap` on an empty found-data result |
+| `RateLimitedError` | 429 | Too many requests (retried automatically) |
+| `UpstreamError` | 502 | An upstream request failed |
+| `ConnectionError` | 0 | Network or transport failure (retried) |
+| `TimeoutError` | 0 | Request exceeded its timeout (not retried) |
+
+Configure the client with `new AnyAPI({ timeoutMs, maxRetries })` in TypeScript or
+`AnyAPI(max_retries=...)` in Python. Every error carries a `status` and request id
+(`requestId` / `request_id`).
+
+## Agent signup
+
+Bootstrap a capped starter key with no account, for autonomous agents. A human funds it
+later by claiming it at the returned URL. See
+[Let your agent onboard itself](/agent-self-signup) for the full flow.
+
+<CodeGroup>
+```ts TypeScript
+import { agentSignup, AnyAPI } from "@getanyapi/sdk";
+
+const { secret, capUsd, claimUrl } = await agentSignup({ label: "my-agent" });
+const client = new AnyAPI({ apiKey: secret });
+```
+
+```python Python
+from getanyapi import agent_signup, AnyAPI
+
+result = agent_signup(label="my-agent")
+client = AnyAPI(api_key=result.secret)
+```
+</CodeGroup>
+
+## Learn more
+
+- TypeScript package: [`@getanyapi/sdk` on npm](https://www.npmjs.com/package/@getanyapi/sdk)
+- Python package: [`getanyapi` on PyPI](https://pypi.org/project/getanyapi/)
+- Source and issues: [`getanyapi-com/sdks`](https://github.com/getanyapi-com/sdks)
+- Browse every API in the [API Reference](/api-reference/tiktok/tiktok-profile).
