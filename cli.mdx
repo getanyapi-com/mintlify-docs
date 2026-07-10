@@ -16,7 +16,7 @@ npx -y anyapi-cli@latest init
 ```
 
 `anyapi init` installs the AnyAPI agent skills into detected agents, offers MCP
-registration, and runs signup if no key is available.
+registration, and mints a free trial key if no key is available.
 
 For a global binary:
 
@@ -31,15 +31,15 @@ Repo: [github.com/getanyapi-com/cli](https://github.com/getanyapi-com/cli)
 
 | Command | What it does |
 | --- | --- |
-| `anyapi signup [--email <email>] [--label <label>] [--show-key]` | Creates a capped starter key, saves it locally, and prints claim guidance. The secret is hidden unless you pass `--show-key`. |
+| `anyapi signup [--label <label>] [--show-key]` | Mints a free trial key, saves it locally, and prints trial guidance. The secret is hidden unless you pass `--show-key`. |
+| `anyapi connect` | Starts an OAuth flow to connect a wallet and upgrade past the trial (anyapi-cli >= 0.3.0). |
 | `anyapi login --api-key aa_live_...` | Stores an existing dashboard key locally. |
 | `anyapi search <query>` | Searches the public catalog and prints matching SKUs, names, and USD price terms. |
 | `anyapi list [--category <category>]` | Lists catalog APIs, optionally filtered by category. |
 | `anyapi describe <sku>` | Prints the authenticated API definition, including schemas and USD pricing. |
 | `anyapi run <sku> --input '<json>' [-i file] [--fields a,b] [--max-items N] [--summary] [-o path] [--json]` | Runs an API with JSON input. |
 | `anyapi balance` | Prints the remaining USD balance for the active key. |
-| `anyapi claim` | Reprints stored claim guidance for a self-signed-up key. |
-| `anyapi init [--all] [--yes]` | Installs bundled agent skills and shows or applies MCP setup snippets. |
+| `anyapi init [--all] [--yes]` | Installs bundled agent skills, shows or applies MCP setup snippets, and mints a free trial key if none is stored. |
 | `anyapi setup skills` | Installs only the bundled skills. |
 
 ## Authentication
@@ -60,12 +60,12 @@ Use `anyapi signup` to call the same self-signup endpoint documented in
 [Let your agent onboard itself](/agent-self-signup):
 
 ```bash
-npx -y anyapi-cli@latest signup --email you@example.com --label my-agent
+npx -y anyapi-cli@latest signup --label my-agent
 ```
 
-This creates a capped starter key, stores it in `~/.anyapi/config.json`, and prints the
-claim URL. It does not print the secret key unless you pass `--show-key`. The starter
-key has a small USD cap and a 7-day claim window until a human claims it.
+This mints a free trial key, stores it in `~/.anyapi/config.json`, and prints trial
+guidance. It does not print the secret key unless you pass `--show-key`. The trial key
+carries a budget of about $0.15, creates no account, and self-expires in 7 days.
 
 ## Run output
 
@@ -91,18 +91,20 @@ Use these flags when a result would be too large for an agent context window:
 These flags trim only what is returned to you. They do not change the amount charged.
 `costUsd` reflects the full result the API produced.
 
-## 402 and claim handling
+## 402 and upgrading past the trial
 
-A starter key is capped until a human claims or funds it. If a run returns
-`402 key_cap_exceeded`, run:
+A free trial key is capped at about $0.15 of requests. When the trial budget is spent, a
+run returns `402 trial_cap_reached`. To keep going, connect a wallet (anyapi-cli >= 0.3.0):
 
 ```bash
-anyapi claim
+anyapi connect
 ```
 
-Send the claim URL and claim token to the human. After they claim the key in the
-[dashboard](https://getanyapi.com/dashboard/keys), the same key continues working on
-their funded wallet.
+This starts an OAuth flow with a localhost callback and prints a single consent URL. Hand
+that URL to a human: they open it, sign in at the
+[dashboard](https://getanyapi.com/dashboard/authorize), set a spend limit, and approve. The
+CLI then holds an OAuth access token and the agent keeps working on the same session.
 
-If the wallet balance is too low, top up from the
-[dashboard](https://getanyapi.com/dashboard).
+If a human already has a funded account, they can create a full, non-expiring key at the
+[dashboard](https://getanyapi.com/dashboard/keys) and store it with
+`anyapi login --api-key aa_live_...` instead.
