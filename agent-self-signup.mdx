@@ -1,20 +1,21 @@
 ---
 title: "Let your agent onboard itself"
-description: "Point an AI agent at AnyAPI and it provisions its own key, reads the catalog, and starts calling APIs. You just prompt it - no manual signup, no copied credentials."
+description: "Point an AI agent at AnyAPI and it provisions its own free trial key, reads the catalog, and starts calling APIs. You just prompt it - no signup, no email, no copied credentials."
 ---
 
 Most tools make *you* sign up, create a key, and paste it into your agent. AnyAPI flips
-that around: **the agent onboards itself.** It reads the machine-readable skill, mints its
-own spend-capped key, discovers the catalog, and makes the first call - all from a single
-prompt. You stay in control of the money; the agent does the setup.
+that around: **the agent onboards itself.** It installs the AnyAPI skills, mints its own
+**free trial key**, discovers the catalog, and makes the first call - all from a single
+prompt. No account, no email, no credentials to hand over. When the trial budget runs out,
+one human approval keeps it going.
 
 <Info>
   **Which page do you want?** This page is for an **autonomous agent that calls AnyAPI at
-  runtime** - it provisions its own key. If instead a coding agent is **integrating AnyAPI
-  into an app you'll ship**, the app is the caller: create a normal
+  runtime** - it provisions its own trial key. If instead a coding agent is **integrating
+  AnyAPI into an app you'll ship**, the app is the caller: create a normal
   [dashboard key](https://getanyapi.com/dashboard/keys) on your funded account and see
-  [Agent skills](/agent-skills). Self-signup keys are capped and expire in 7 days, so they
-  belong to autonomous agents, not shipped code.
+  [Agent skills](/agent-skills). Trial keys carry a small budget and expire in 7 days, so
+  they belong to autonomous agents, not shipped code.
 </Info>
 
 ## The one thing you do
@@ -24,115 +25,136 @@ Prompt your agent. That's the whole setup step:
 ```text
 You have access to AnyAPI, a pay-per-call marketplace for scraping and data APIs.
 Read https://getanyapi.com/agent-onboarding/SKILL.md, onboard yourself, and make one
-real API call. Use you@example.com as your sponsor email. Report what you did.
+real API call. Report what you did.
 ```
 
-Swap in your own email as the sponsor. The agent takes it from there.
+No email, no key to paste. The agent takes it from there: it mints a free trial key, runs
+a call, and tells you in one sentence what it did.
 
 <Note>
   Already have a funded account and want the agent to spend from it directly? Hand it an
-  [API key](https://getanyapi.com/dashboard/keys) instead and skip self-signup - see
-  [Agent skills](/agent-skills). Self-signup is for the zero-setup, agent-first path.
+  [API key](https://getanyapi.com/dashboard/keys) instead and skip the trial - see
+  [Agent skills](/agent-skills). The trial is for the zero-setup, agent-first path.
 </Note>
 
 ## What the agent does on its own
 
 <Steps>
-  <Step title="Discovers AnyAPI">
-    It fetches the skill at `https://getanyapi.com/agent-onboarding/SKILL.md` (or the
-    structured `https://getanyapi.com/.well-known/anyapi.json`), which tells it the MCP
-    endpoint, the REST base, the tools, and how to get a key.
+  <Step title="Installs the CLI (if it has a shell)">
+    An agent that can run shell commands installs the AnyAPI CLI first. One command
+    installs the skills, mints the free trial key, and writes local credentials:
+
+    ```bash
+    npx -y anyapi-cli@latest init
+    ```
+
+    `anyapi init` installs the AnyAPI agent skills, offers MCP registration, and runs the
+    trial signup if no key is available - saving it to `~/.anyapi/config.json`. After init,
+    the agent calls the installed `anyapi` binary directly.
   </Step>
-  <Step title="Mints its own key">
-    It posts to the public self-signup endpoint - no human, no dashboard:
+  <Step title="Mints its own free trial key">
+    With no shell (a hosted chat or no-code runtime), the agent posts to the public signup
+    endpoint directly - no human, no account, no email:
 
     ```bash
     curl -X POST https://api.getanyapi.com/agent/signup \
       -H "Content-Type: application/json" \
-      -d '{ "sponsorEmail": "you@example.com", "label": "my-agent" }'
+      -d '{ "label": "my-agent" }'
     ```
 
-    The response returns its key once, plus its limits:
+    The body is optional; `label` just tags the key. The response returns the key once,
+    plus everything needed to upgrade later:
 
     ```json
     {
       "secret": "aa_live_…",
       "keyId": "42",
       "capUsd": 0.15,
-      "verificationStatus": "pending",
-      "claimToken": "…",
-      "claimUrl": "https://getanyapi.com/dashboard",
-      "expiresAt": "2026-06-23T00:00:00Z"
+      "expiresAt": "2026-07-17T00:00:00Z",
+      "clientId": "…",
+      "upgrade": {
+        "authorizationServer": "https://api.getanyapi.com",
+        "scope": "run balance:read"
+      },
+      "notice": "This is a free AnyAPI trial key: about $0.15 of requests, it self-expires in 7 days, and no account was created. When it runs out, your human can connect a wallet to keep it going."
     }
     ```
 
-    `sponsorEmail` is optional but recommended - it's how you approve the agent later.
-
-    CLI shortcut:
-
-    ```bash
-    npx -y anyapi-cli@latest signup --email you@example.com --label my-agent
-    ```
-
-    `anyapi signup` calls the same endpoint, saves the starter key locally, and prints
-    the claim guidance.
+    The agent stores `secret` as `ANYAPI_API_KEY` and relays `notice` to you verbatim.
   </Step>
   <Step title="Starts working immediately">
-    The key works right away. The agent lists APIs, reads schemas, checks its USD balance,
-    and runs a real call over [MCP](/mcp-server) or REST - all priced in USD, pay per
-    request.
+    The trial key works right away. The agent lists APIs, reads schemas, checks its USD
+    balance, and runs a real call over [MCP](/mcp-server), the CLI, or REST - all priced in
+    USD, pay per request.
   </Step>
 </Steps>
 
 ## What it costs you to start
 
-Nothing up front. A self-signed-up key is **capped at a small USD amount** (the `capUsd`
-in the response) and its wallet starts with a matching credit, so the agent can prove it
-works without you spending anything. The cap is the agent's spending limit until you
-claim it onto your account. Exceeding it returns `402 key_cap_exceeded` - that's the signal
-it's time to fund the agent.
+Nothing, and nothing is owed. A trial key carries a budget of about **$0.15 of requests**
+(the `capUsd` in the response), **creates no account**, and **self-expires in 7 days** if
+it is never upgraded. If the agent proves useless, you do nothing: the key just expires and
+nothing lingers.
 
 <Warning>
-  An unapproved key **expires after 7 days** and stops working. Approve or claim it (below)
-  to make it permanent.
+  When the trial budget is spent, calls return **HTTP 402** with error code
+  `trial_cap_reached` and an `upgrade` object in the body. That's the signal it's time to
+  approve continued spend (below). The unspent trial also stops working after 7 days.
 </Warning>
 
-## Approving and funding the agent
+## Upgrade past the trial
 
-When the agent has proven useful, you give it a real budget. Two paths:
+Continuing past the trial takes exactly one human approval, through OAuth 2.1. The agent
+never stops to ask you for a key - you approve a spend limit, and it keeps working on the
+same session.
 
 <Tabs>
-  <Tab title="Claim it (recommended)">
-    The agent hands you its **claim token**. In the
-    [dashboard](https://getanyapi.com/dashboard/keys) under **API keys**, choose
-    **Claim agent key**, paste the token, and the key moves onto your account and loses its
-    cap. From then it spends from your wallet, which you top up in **Billing**.
+  <Tab title="With the CLI (recommended)">
+    The agent runs:
 
-    This is the path that funds the agent - claiming ties the key to your account and your
-    payment method.
+    ```bash
+    anyapi connect
+    ```
+
+    This requires `anyapi-cli >= 0.3.0`. It starts an OAuth flow with a localhost callback
+    and prints a **single consent URL**. Hand that one URL to the human. They open it,
+    reach the consent screen at
+    [getanyapi.com/dashboard/authorize](https://getanyapi.com/dashboard/authorize), sign in
+    or sign up, see a **receipt of what the agent accomplished on the trial**, set a spend
+    limit, and approve. The agent then holds an OAuth access token and keeps working - there
+    is no key to swap by hand.
+
+    <Note>
+      If the installed CLI predates `anyapi connect`, use the dashboard-key path below
+      instead.
+    </Note>
   </Tab>
-  <Tab title="Approve by email">
-    If the agent signed up with your `sponsorEmail`, you get a verification email with
-    **Approve** and **Block** links. Approve vouches for the agent and keeps its key from
-    expiring; Block revokes it. It does **not** raise the cap or add funds - claiming (left)
-    is the path that funds the agent and lifts the cap.
+  <Tab title="Raw REST or MCP (no shell)">
+    An agent that cannot run a shell surfaces the upgrade to you directly. The `402
+    trial_cap_reached` response body carries the `upgrade` coordinates
+    (`authorizationServer` and `scope`); the agent relays the link to you so you can sign in
+    and approve continued spend at
+    [getanyapi.com/dashboard/authorize](https://getanyapi.com/dashboard/authorize).
+  </Tab>
+  <Tab title="Dashboard key (secondary)">
+    A human already signed in at [getanyapi.com](https://getanyapi.com) can create a full,
+    **non-expiring** key directly at
+    [getanyapi.com/dashboard/keys](https://getanyapi.com/dashboard/keys) and hand it to the
+    agent via the `ANYAPI_API_KEY` environment variable. New accounts include a one-time
+    **$1 credit**. This is the path to use on a CLI too old for `anyapi connect`.
   </Tab>
 </Tabs>
 
-<Note>
-  Funding happens by **claiming** the key into your account, then topping up your USD
-  wallet in [Billing](https://getanyapi.com/dashboard). There is no separate per-agent
-  wallet to top up - an agent either runs on its starter credit or on your funded account.
-</Note>
-
 ## Why this is safe
 
-- The starter cap and wallet credit bound what an unapproved agent can spend.
-- Self-signup is rate-limited, and unapproved keys expire on their own.
-- You decide if and when to fund an agent. Until you claim it, it can only spend its small
-  starter amount.
+- The trial budget bounds what an unapproved agent can spend - about $0.15, no more.
+- No account is created and nothing is owed. An unspent trial key expires on its own in 7
+  days.
+- You decide if and when to continue. The OAuth approval is where you set the spend limit,
+  after you've seen a receipt of what the agent actually did.
 
 <Tip>
   Give your agent the live tools too: connect the [MCP server](/mcp-server) so it can
-  discover and run APIs without writing HTTP by hand.
+  discover and run APIs without writing HTTP by hand, or point it at the
+  [CLI](/cli) to keep tool schemas out of its context window.
 </Tip>

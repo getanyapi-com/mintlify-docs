@@ -22,19 +22,21 @@ your wallet, and run your first API.
     topping up.
 
     <Tip>
-      Prefer not to leave your terminal? Mint a key with one request — no dashboard, no
-      sign-in:
+      Prefer not to leave your terminal? Mint a free trial key with one request - no
+      dashboard, no sign-in, no account:
 
       ```bash
       curl -s -X POST https://api.getanyapi.com/agent/signup \
         -H "Content-Type: application/json" \
-        -d '{ "sponsorEmail": "you@example.com", "label": "quickstart" }'
+        -d '{ "label": "quickstart" }'
       ```
 
-      The response includes your `aa_live_…` key (shown once) and a `claimToken`. It works
-      immediately on a small starter credit; to lift its cap, make it permanent, and add
-      the $1 credit, sign in at the dashboard with that email and claim it under **API keys
-      → Claim agent key**. See [Let your agent onboard itself](/agent-self-signup).
+      The body is optional; `label` just tags the key. The response includes your
+      `aa_live_…` key (shown once). It works immediately on a free trial budget of about
+      $0.15, creates no account, and self-expires in 7 days. When the budget runs out, calls
+      return `402 trial_cap_reached`; run `anyapi connect` or open the
+      [dashboard](https://getanyapi.com/dashboard) to connect a wallet and keep going. See
+      [Let your agent onboard itself](/agent-self-signup).
     </Tip>
   </Step>
   <Step title="Make your first call">
