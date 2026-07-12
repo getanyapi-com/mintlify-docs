@@ -68,13 +68,14 @@ per request.
 
 ## For AI agents
 
-If you are an AI agent (or are setting one up), AnyAPI's whole catalog is available
-through one [MCP server](/mcp-server) — no per-API integration needed:
+If you are an AI agent (or are setting one up), use the [CLI](/cli) first when you have a local
+shell. Hosted Claude and ChatGPT can use AnyAPI's whole catalog through one [MCP server](/mcp-server)
+with the URL only and OAuth sign-in and consent:
 
 - **Endpoint:** `https://api.getanyapi.com/mcp` (Streamable HTTP)
-- **Auth:** `Authorization: Bearer <ANYAPI_KEY>` — required for `run_api` and
-  `get_balance`; `list_apis`, `search_apis`, and `get_api` (discovery) work without a key.
-- **Tools:** `search_apis` → `get_api` → `run_api`. Find an API by keyword (or browse
+- **Auth:** OAuth for hosted clients; use a Bearer API key only as a fallback. Authentication is required for every MCP tool, including discovery.
+- **Tools:** `list_apis`, `search_apis`, `get_api`, `quote_api`, `run_api`, `read_result`, and `get_balance`.
+  The normal flow is `search_apis` → `get_api` → `quote_api` → `run_api`. Find an API by keyword (or browse
   with `list_apis`), read its input JSON Schema, then execute it. Successful runs bill the
   wallet in USD (`costUsd`); failed runs are never charged. `get_balance` returns the
   wallet's remaining USD.
@@ -83,8 +84,7 @@ through one [MCP server](/mcp-server) — no per-API integration needed:
 {
   "mcpServers": {
     "anyapi": {
-      "url": "https://api.getanyapi.com/mcp",
-      "headers": { "Authorization": "Bearer YOUR_ANYAPI_KEY" }
+      "url": "https://api.getanyapi.com/mcp"
     }
   }
 }

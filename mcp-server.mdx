@@ -5,41 +5,42 @@ description: "Connect AI agents to every AnyAPI through one Model Context Protoc
 
 AnyAPI ships a [Model Context Protocol](https://modelcontextprotocol.io) server so agents
 can discover and run any API in the catalog without bespoke integrations. Point your MCP
-client at one endpoint, authenticate with your AnyAPI key, and your agent gets a
+client at one endpoint, sign in through OAuth when your client supports it, and your agent gets a
 registry-driven tool surface that covers the entire catalog — no tool-per-API sprawl.
 
 | | |
 |---|---|
 | **Endpoint** | `https://api.getanyapi.com/mcp` |
 | **Transport** | Streamable HTTP |
-| **Auth** | AnyAPI key as a Bearer token |
-| **Tools** | `list_apis`, `search_apis`, `get_api`, `run_api`, `get_balance` |
+| **Auth** | OAuth 2.1 for hosted clients; Bearer API key as a fallback |
+| **Tools** | `list_apis`, `search_apis`, `get_api`, `quote_api`, `run_api`, `read_result`, `get_balance` |
 
 ## Prerequisites
 
-- An AnyAPI key. Create one in the [dashboard](https://getanyapi.com/dashboard) under **API keys**.
-- A funded USD wallet. `run_api` bills your wallet per successful request; discovery is free.
+- An AnyAPI account for OAuth sign-in, or an AnyAPI API key for clients without OAuth.
+- A funded USD wallet. `run_api` bills your wallet per successful request; discovery and quoting do not charge the wallet.
 - An MCP-capable client (Claude Code, Claude Desktop, Cursor, Codex, or any client that
   speaks Streamable HTTP).
 
 <Note>
-  The MCP surface is **API-key only** — session tokens are not accepted. Send your key as
-  `Authorization: Bearer <your-key>`. Discovery (`list_apis`, `search_apis`, `get_api`) works
-  **without a key**, so an agent can browse the catalog and read schemas before credentials are
-  set up; `run_api` and `get_balance` require authentication.
+  Hosted Claude and ChatGPT connect with the URL only and handle OAuth sign-in and consent in
+  the client. Do not paste a Bearer header into those hosted integrations. Use a Bearer API key
+  only as a fallback for a client that cannot complete OAuth. The MCP endpoint requires
+  authentication for every tool, including discovery. After authentication, discovery and quoting
+  do not charge the wallet.
 </Note>
 
 ## Connect
 
 <Tabs>
   <Tab title="Claude Code">
-    Add the server with the CLI:
+    Claude Code has a shell, so use the [CLI](/cli) first. If you specifically need MCP, add the
+    remote server and let Claude complete OAuth:
 
     ```bash
     claude mcp add anyapi \
       --transport http \
-      https://api.getanyapi.com/mcp \
-      --header "Authorization: Bearer YOUR_ANYAPI_KEY"
+      https://api.getanyapi.com/mcp
     ```
 
     Confirm it registered:
@@ -56,10 +57,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
       "mcpServers": {
         "anyapi": {
           "type": "http",
-          "url": "https://api.getanyapi.com/mcp",
-          "headers": {
-            "Authorization": "Bearer YOUR_ANYAPI_KEY"
-          }
+          "url": "https://api.getanyapi.com/mcp"
         }
       }
     }
@@ -74,10 +72,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
     {
       "mcpServers": {
         "anyapi": {
-          "url": "https://api.getanyapi.com/mcp",
-          "headers": {
-            "Authorization": "Bearer YOUR_ANYAPI_KEY"
-          }
+          "url": "https://api.getanyapi.com/mcp"
         }
       }
     }
@@ -90,8 +85,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
     ```bash
     codex mcp add anyapi \
-      --url https://api.getanyapi.com/mcp \
-      --header "Authorization: Bearer YOUR_ANYAPI_KEY"
+      --url https://api.getanyapi.com/mcp
     ```
 
     Or add it to `~/.codex/config.toml`:
@@ -99,14 +93,14 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
     ```toml
     [mcp_servers.anyapi]
     url = "https://api.getanyapi.com/mcp"
-    http_headers = { "Authorization" = "Bearer YOUR_ANYAPI_KEY" }
+
     ```
   </Tab>
   <Tab title="Any MCP client">
     Configure a remote Streamable HTTP server with these values:
 
     - **URL:** `https://api.getanyapi.com/mcp`
-    - **Header:** `Authorization: Bearer YOUR_ANYAPI_KEY`
+    - **Auth:** complete OAuth sign-in and consent when prompted
 
     Most clients accept the same JSON shape:
 
@@ -114,8 +108,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
     {
       "mcpServers": {
         "anyapi": {
-          "url": "https://api.getanyapi.com/mcp",
-          "headers": { "Authorization": "Bearer YOUR_ANYAPI_KEY" }
+          "url": "https://api.getanyapi.com/mcp"
         }
       }
     }
@@ -125,8 +118,9 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 ## Tools
 
-The server exposes five generic tools. Discovery (`list_apis`, `search_apis`, `get_api`) is
-free; only `run_api` touches your wallet. `get_balance` reports what's left in it.
+The server exposes seven generic tools. Discovery (`list_apis`, `search_apis`, `get_api`) and
+`quote_api` are free; only `run_api` touches your wallet. `read_result` re-reads a prior run for
+free, and `get_balance` reports what's left.
 
 <AccordionGroup>
   <Accordion title="list_apis — browse the catalog" icon="list">
@@ -174,6 +168,20 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
     **Returns** the full API definition with input/output JSON schemas. Use the input
     schema to build a valid payload for `run_api`.
   </Accordion>
+  <Accordion title="quote_api — estimate a call" icon="calculator">
+    Estimate the USD cost of a call without executing it or charging your wallet.
+
+    **Input**
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `sku_id` | string | yes | The API SKU slug to price |
+    | `input` | object | yes | The exact normalized payload you plan to pass to `run_api` |
+
+    **Returns** a quote with `maxCostUsd`, `minCostUsd`, `baseUsd`, `perItemUsd`, `exact`, and
+    `pricing`. It also returns `perItemUnit` when available. All monetary fields are in USD;
+    `maxCostUsd` is the most the call can charge, while `minCostUsd` is the likely charge.
+  </Accordion>
   <Accordion title="run_api — execute an API" icon="bolt">
     Execute an API by SKU with a normalized input payload. Requires a valid AnyAPI key.
     Billed to your USD wallet on success only.
@@ -197,6 +205,10 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
     per result — `baseUsd + perItemUsd × items` — so cap results (and cost) with
     `limit` in your input; simple lookups are flat per request. Invalid input,
     insufficient funds, and total upstream failure are **not** charged.
+  </Accordion>
+  <Accordion title="read_result — re-read a saved result" icon="rotate">
+    Re-read a recent `run_api` result for free. Provide its `result_id` and optional response-budget
+    controls such as `fields`, `max_items`, `summary`, or `jq`.
   </Accordion>
   <Accordion title="get_balance — check your wallet" icon="wallet">
     Get the remaining wallet balance for the API key you authenticate with. Requires a
