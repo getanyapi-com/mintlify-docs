@@ -107,15 +107,23 @@ your wallet, and run your first API.
 
 ## Find an API
 
-You don't need to know SKUs ahead of time — list and search the catalog:
+You don't need to know SKUs ahead of time. Browse by category or use the dedicated
+ranked search endpoint:
 
 ```bash
-# List or search every available API
-curl -s "https://api.getanyapi.com/v1/apis?query=tiktok" -H "X-API-Key: YOUR_ANYAPI_KEY"
+# Browse available social APIs
+curl -s "https://api.getanyapi.com/catalog?category=social"
+
+# Search by intent
+curl -s "https://api.getanyapi.com/catalog/search?q=tiktok&limit=10"
 
 # Inspect one API's input and output schemas
 curl -s https://api.getanyapi.com/v1/apis/tiktok.profile -H "X-API-Key: YOUR_ANYAPI_KEY"
 ```
+
+Browse and search results report `provider: "AnyAPI"` and nested USD `pricing`.
+`pricing.from` is the cheapest complete offer and `pricing.failoverMaxUsd` is the
+maximum fallback ceiling.
 
 The full catalog with typed schemas also lives in the [API Reference](/api-reference/tiktok/tiktok-profile).
 

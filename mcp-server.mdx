@@ -130,23 +130,25 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
 
 <AccordionGroup>
   <Accordion title="list_apis — browse the catalog" icon="list">
-    Browse APIs as lightweight summaries, optionally filtered. Summaries carry the SKU,
-    name, category, and USD pricing only - **no descriptions or schemas** - so listing the
-    whole catalog stays token-cheap. To find an API by keyword (with descriptions), use
+    Browse APIs as lightweight summaries, optionally filtered by category. Summaries carry
+    the SKU, name, category, provider, and nested USD pricing only - **no descriptions or
+    schemas** - so listing the whole catalog stays token-cheap. To find an API by keyword
+    (with descriptions), use
     `search_apis`; for one API's schemas, use `get_api`.
 
     **Input**
 
     | Field | Type | Required | Description |
     |---|---|---|---|
-    | `query` | string | no | Free-text filter over name, slug, and description |
     | `category` | string | no | Category slug to filter by |
 
-    **Returns** an array of API summaries (`id`, `slug`, `name`, `category`, `priceUsd`,
-    `baseUsd`, `perItemUsd`).
+    **Returns** `scrapers`, an array containing exactly `id`, `slug`, `name`, `category`,
+    `provider`, nested `pricing`, and optional `heavy`. Descriptions, lanes, health,
+    schemas, eligibility, and relevance are omitted. Use `search_apis` for every ranked
+    free-text query.
   </Accordion>
-  <Accordion title="search_apis — find an API by keyword" icon="magnifying-glass">
-    Search APIs by keyword across name, slug, and description, returning matches **with
+  <Accordion title="search_apis — find an API by intent" icon="magnifying-glass">
+    Search APIs by meaning and keyword across name, slug, and description, returning matches **with
     their descriptions** (schemas omitted). This is the targeted lookup: use it to find the
     right SKU before reading its schema with `get_api`.
 
@@ -156,10 +158,12 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
     |---|---|---|---|
     | `query` | string | yes | Free-text search over name, slug, and description |
     | `category` | string | no | Category slug to narrow the search |
+    | `platform` | string | no | Platform slug to narrow the search |
     | `limit` | integer | no | Cap on matches returned (default 25) |
 
-    **Returns** `results` (API summaries including `description`) and `total`, the number
-    of APIs that matched before `limit` was applied, so you know whether to narrow further.
+    **Returns** `results` with the list fields plus `description` and response-relative
+    `relevance`, `total` before the limit, and `ranking` (`semantic` or `keyword`). Lanes,
+    health, schemas, and eligibility are omitted.
   </Accordion>
   <Accordion title="get_api — inspect input and output schemas" icon="file-lines">
     Get the full definition of one API by SKU, including its normalized input and output
@@ -171,8 +175,9 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
     |---|---|---|---|
     | `sku_id` | string | yes | The API SKU slug to describe |
 
-    **Returns** the full API definition with input/output JSON schemas. Use the input
-    schema to build a valid payload for `run_api`.
+    **Returns** the list fields plus `description`, anonymous lane pricing, input/output
+    JSON schemas, and optional `tryEligible`. Lane health is omitted. Use the input schema
+    to build a valid payload for `run_api`.
   </Accordion>
   <Accordion title="run_api — execute an API" icon="bolt">
     Execute an API by SKU with a normalized input payload. Requires a valid AnyAPI key.
@@ -194,7 +199,7 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
 
     **Returns** the normalized `output`, the serving `provider` (always **AnyAPI**),
     `costUsd`, and `items` (the number of results charged for). Most APIs are priced
-    per result — `baseUsd + perItemUsd × items` — so cap results (and cost) with
+    per result — `baseUsd + perUnitUsd × items` — so cap results (and cost) with
     `limit` in your input; simple lookups are flat per request. Invalid input,
     insufficient funds, and total upstream failure are **not** charged.
   </Accordion>
@@ -235,7 +240,7 @@ agent that learns this flow once can use the entire catalog.
 ### Worked example
 
 Discover Reddit APIs, inspect one, and run it. Tool results carry both a JSON text block
-and `structuredContent` with these exact shapes:
+and `structuredContent` with these shapes:
 
 ```json
 // search_apis {"query": "reddit"} → structuredContent
@@ -247,31 +252,60 @@ and `structuredContent` with these exact shapes:
       "category": "social",
       "name": "Reddit Search",
       "description": "Search Reddit posts across all subreddits by query, normalized across providers with transparent failover.",
-      "priceUsd": 0.003,
-      "baseUsd": 0.003,
-      "perItemUsd": 0
+      "provider": "AnyAPI",
+      "pricing": {
+        "from": {
+          "model": "flat",
+          "unit": "request",
+          "maxUsd": 0.003
+        },
+        "failoverMaxUsd": 0.003
+      },
+      "relevance": 1
     }
   ],
-  "total": 1
+  "total": 1,
+  "ranking": "semantic"
 }
 ```
 
-`list_apis` returns the same entries minus `description` (and wrapped in `scrapers`),
-so browsing the full catalog stays token-cheap; reach for it when you want to enumerate
-rather than search.
+`list_apis` returns the same identity and pricing fields without `description` or
+`relevance` (and wrapped in `scrapers`). Neither tool returns lanes, health, or schemas,
+so browsing and searching stay token-cheap. Reach for `list_apis` when you want to
+enumerate rather than search.
 
-`perItemUsd` is `0` here, so this API is **flat per request** (`priceUsd`). APIs
-priced per result report a non-zero `perItemUsd` and accept a `limit` in their
-input — then `costUsd = baseUsd + perItemUsd × items`.
+This API's `pricing.from.model` is `flat`, so its maximum is per request. A linear
+offer instead carries `unit`, `baseUsd`, `perUnitUsd`, and `maxUsd`. For example,
+an API billed per result reports `unit: "result"`; the actual successful charge is
+the base plus the per-unit amount, capped at `maxUsd`.
 
 ```json
 // get_api {"sku_id": "reddit.search"} → structuredContent (schemas abridged)
 {
   "scraper": {
+    "id": "reddit.search",
     "slug": "reddit.search",
-    "priceUsd": 0.003,
-    "baseUsd": 0.003,
-    "perItemUsd": 0,
+    "category": "social",
+    "name": "Reddit Search",
+    "provider": "AnyAPI",
+    "pricing": {
+      "from": {
+        "model": "flat",
+        "unit": "request",
+        "maxUsd": 0.003
+      },
+      "failoverMaxUsd": 0.003
+    },
+    "description": "Search Reddit posts across all subreddits by query.",
+    "lanes": [
+      {
+        "pricing": {
+          "model": "flat",
+          "unit": "request",
+          "maxUsd": 0.003
+        }
+      }
+    ],
     "inputSchema": {
       "type": "object",
       "required": ["query"],

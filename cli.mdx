@@ -42,6 +42,17 @@ Repo: [github.com/getanyapi-com/cli](https://github.com/getanyapi-com/cli)
 | `anyapi init [--all] [--yes]` | Installs bundled agent skills, shows or applies MCP setup snippets, and mints a free trial key if none is stored. |
 | `anyapi setup skills` | Installs only the bundled skills. |
 
+`anyapi search` uses the dedicated ranked catalog search. `anyapi list` only
+browses the catalog and accepts an optional category. Both commands display the
+customer-safe USD offer returned by discovery; they never expose an internal
+accounting unit or upstream provider.
+
+Static discovery pricing is nested. `pricing.from` is either a flat offer
+(`model`, `unit: "request"`, `maxUsd`) or a linear offer (`model`, `unit`,
+`baseUsd`, `perUnitUsd`, `maxUsd`). `pricing.failoverMaxUsd` is the greatest
+fallback ceiling. Use the displayed unit when estimating a linear call, or run
+`anyapi describe <sku>` to inspect the complete offer before execution.
+
 ## Authentication
 
 The CLI resolves auth in this order:

@@ -61,10 +61,12 @@ Most APIs are **priced per result**: a per-item rate for each result returned (a
 few also add a small base fee), so a call that returns 5 results costs less than
 one that returns 50. Set `limit` in
 your input to cap how many results you get (and what you pay); the response
-reports `items` — the count you were charged for. Each API's `baseUsd` and
-`perItemUsd` are listed in the catalog and via `get_api`, so you can budget a
-call before making it. Simple lookups that return a single record are priced flat
-per request.
+reports `items` — the count you were charged for. Catalog and `get_api` results
+carry nested `pricing`: `pricing.from` is the cheapest complete flat or linear
+offer, while `pricing.failoverMaxUsd` is the greatest fallback ceiling. Linear
+offers name their billable `unit` and include `baseUsd`, `perUnitUsd`, and
+`maxUsd`, so you can budget before making a call. Simple lookups are flat per
+request.
 
 ## For AI agents
 
@@ -94,8 +96,9 @@ See the [MCP server page](/mcp-server) for per-client setup (Claude Code, Claude
 Cursor, Codex) and the full tool reference. There is also an official
 [agent skill](/agent-skills) (`npx skills add getanyapi-com/skills`) that teaches your
 agent this whole workflow, including pricing and error semantics. Agents can also use the plain REST
-surface — `GET /v1/apis` to discover, `POST /v1/run/{sku}` to execute (both
-authenticated) — documented in the [API Reference](/api-reference/tiktok/tiktok-profile) and
+surface — `GET /v1/apis?category=...` to browse, `GET /catalog/search?q=...` to
+search, and `POST /v1/run/{sku}` to execute — documented in the
+[API Reference](/api-reference/tiktok/tiktok-profile) and
 machine-readable at the public
 [`/openapi.json`](https://api.getanyapi.com/openapi.json).
 
