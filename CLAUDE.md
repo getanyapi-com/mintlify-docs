@@ -7,6 +7,13 @@ interface and one key; pay per request in real dollars.
 This repo is cloned into `./docs` of the main app repo but is a **separate git repo** with its own
 history, deployed by Mintlify on push to `main`.
 
+## Ecosystem preflight
+
+Read and follow **`AGENTS.md`** first. For any discovery-, integration-, or contract-sensitive
+change, it routes you to the main repository's authoritative `ECOSYSTEM.md` map and its required
+impact ledger. Keep cross-repository topology and wire shapes in that map rather than duplicating
+them here.
+
 ## Mintlify conventions
 
 See **`AGENTS.md`** in this directory for the canonical Mintlify rules (MDX + frontmatter, `docs.json`
