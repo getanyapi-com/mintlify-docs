@@ -341,8 +341,22 @@ Tool failures come back as MCP tool errors with a short machine-readable prefix:
 | `sku_not_found` | The requested SKU does not exist | No |
 | `invalid_input` | Payload did not match the API's input schema | No |
 | `insufficient_credits` | Wallet balance too low — top up to run | No |
+| `key_cap_exceeded` | The API key reached its configured spend cap | No |
+| `trial_cap_reached` | The autonomous trial reached its cap | No |
+| `provider_rejected_request` | The upstream rejected this request; adjust it before retrying | No |
+| `provider_rate_limited` | The upstream rate-limited the request; retry later | No |
+| `provider_timeout` | Every available route ended in an upstream timeout | No (released) |
+| `provider_transport_error` | Every available route ended in a network failure | No (released) |
+| `provider_failure` | Every available route ended in an upstream service failure | No (released) |
+| `malformed_upstream_response` | The upstream response could not be safely normalized | No (released) |
+| `unclassified_upstream_response` | The upstream response is not recognized yet | No (released) |
 | `all_providers_failed` | Every provider for this API failed | No (released) |
 | `no_providers` | The API has no enabled providers | No |
+| `scrape_failed` | AnyAPI could not complete the request because of an internal failure | No |
+
+A completed lookup that returns a normalized empty result such as `found: false` is not a
+tool error. It is a successful, billable answer: the lookup ran and no matching entity was
+found.
 
 <Tip>
   Pair the MCP server with the official [agent skill](/agent-skills) — the skill teaches

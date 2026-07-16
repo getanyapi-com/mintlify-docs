@@ -32,6 +32,9 @@ Two payment rails are supported on the same endpoints:
 
 The flow is the standard HTTP 402 handshake, identical for both rails:
 
+AnyAPI validates the SKU and input before it calculates a challenge or accepts a payment.
+An unknown SKU or invalid payload therefore fails immediately without asking the agent to pay.
+
 <Steps>
   <Step title="Call the endpoint">
     Make a normal `POST https://api.getanyapi.com/v1/run/{sku}` with the SKU's JSON input and
@@ -88,7 +91,8 @@ if (receipt) console.log(decodeXPaymentResponse(receipt));
 <Note>
   **You only pay on success.** With x402, AnyAPI settles the payment *after* the API call
   succeeds, so a failed run never charges you. The response includes `costUsd` (the USD
-  charged) and `provider: "AnyAPI"`.
+  charged) and `provider: "AnyAPI"`. A recognized empty result such as `found: false` is a
+  successful answer and is charged like any other successful result.
 </Note>
 
 What the challenge advertises, if you implement the wire format yourself:
@@ -143,6 +147,13 @@ The MPP challenge arrives as a `WWW-Authenticate: Payment` header
 credential in `Authorization: Payment`. AnyAPI returns the result with a `Payment-Receipt`
 header.
 
+<Warning>
+  MPP settles the transfer before AnyAPI executes the request. If execution then fails after
+  the payment is verified, the request returns an error but the on-chain transfer cannot be
+  automatically reversed. Keep the response's request ID and transaction reference when
+  contacting support about one of these uncommon cases.
+</Warning>
+
 ## What you pay
 
 - **Per call, in USD.** Each endpoint is priced in real dollars, shown as the `amount` in the
@@ -151,6 +162,9 @@ header.
   pre-funded with AnyAPI.
 - **AnyAPI is the provider.** Responses report `provider: "AnyAPI"` and the USD cost, the same
   normalized shape as a keyed call.
+- **Empty can still be successful.** A normalized result such as `found: false` means the
+  lookup completed and found no matching entity. It is a successful, billable result rather
+  than an upstream failure.
 
 <Tip>
   Prices are low (many SKUs are a fraction of a cent), so set a sane per-call cap in your
