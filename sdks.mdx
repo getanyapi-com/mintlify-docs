@@ -211,6 +211,11 @@ network failures retry, with jittered exponential backoff that honors `Retry-Aft
 timeouts are never retried. The default `maxRetries` / `max_retries` is 2 (up to 3
 attempts), and you can set it on the client or per request.
 
+Direct REST error bodies retain the existing `error` message and also include a stable
+machine-readable `code` when one is available. Use `code` to distinguish cases such as
+`invalid_input`, `provider_rate_limited`, and `unclassified_upstream_response` without
+parsing the message text. Existing clients that only read `error` remain compatible.
+
 | Class | HTTP | Meaning |
 | --- | --- | --- |
 | `BadRequestError` | 400 | Input failed validation |
