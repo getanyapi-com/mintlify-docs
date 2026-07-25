@@ -70598,6 +70598,457 @@
                 }
             }
         },
+        "/v1/run/twitter.article": {
+            "post": {
+                "description": "Get a public X long-form article from its wrapper post URL, including its author, engagement, cover image, and structured content blocks.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).",
+                "operationId": "twitter_article",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "url": "https://x.com/Decentralisedco/status/1905545699552375179"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "url": "https://x.com/Decentralisedco/status/1905545699552375179"
+                                },
+                                "properties": {
+                                    "url": {
+                                        "description": "Canonical x.com or twitter.com URL of the public wrapper post for an X Article.",
+                                        "pattern": "^https?://(?:(?:www|mobile)\\.)?(?:x\\.com|twitter\\.com)/(?:[A-Za-z0-9_]+|i/web)/status/[0-9]+/?(?:[?#].*)?$",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "X / Twitter Article input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "description": "Normalized public article, or null when the wrapper post is not an article.",
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "author": {
+                                                                    "description": "Article author profile at retrieval time. Populated whenever the provider has data for the entity.",
+                                                                    "properties": {
+                                                                        "avatarUrl": {
+                                                                            "description": "Profile avatar image URL.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "bio": {
+                                                                            "description": "Profile biography.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "blueVerified": {
+                                                                            "description": "Whether the account has X blue verification.",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "coverUrl": {
+                                                                            "description": "Profile cover image URL when available.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "createdUtc": {
+                                                                            "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                            "type": "number"
+                                                                        },
+                                                                        "followers": {
+                                                                            "description": "Follower count at retrieval time.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "following": {
+                                                                            "description": "Following count at retrieval time.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "handle": {
+                                                                            "description": "Current X handle without @. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "id": {
+                                                                            "description": "Stable numeric X user ID. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "location": {
+                                                                            "description": "Self-reported profile location.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "name": {
+                                                                            "description": "Profile display name.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "url": {
+                                                                            "description": "Canonical public X profile URL. Populated whenever the provider has data for the entity.",
+                                                                            "format": "uri",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "verified": {
+                                                                            "description": "Whether the account has legacy verification.",
+                                                                            "type": "boolean"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "id",
+                                                                        "handle",
+                                                                        "url"
+                                                                    ],
+                                                                    "type": "object",
+                                                                    "x-anyapi-must-populate": true
+                                                                },
+                                                                "contentBlocks": {
+                                                                    "description": "Ordered, explicitly normalized article blocks. Unknown future block types remain representable through type and optional fields. Populated whenever the provider has data for the entity.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "entities": {
+                                                                                "description": "Entity references within the block text.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "key": {
+                                                                                            "description": "Upstream entity table key.",
+                                                                                            "minimum": 0,
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "length": {
+                                                                                            "description": "Entity character length.",
+                                                                                            "minimum": 0,
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "offset": {
+                                                                                            "description": "Zero-based character offset.",
+                                                                                            "minimum": 0,
+                                                                                            "type": "integer"
+                                                                                        }
+                                                                                    },
+                                                                                    "required": [
+                                                                                        "key",
+                                                                                        "offset",
+                                                                                        "length"
+                                                                                    ],
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "height": {
+                                                                                "description": "Image height in pixels when supplied.",
+                                                                                "minimum": 0,
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "image": {
+                                                                                "description": "Canonical image URL for an image block.",
+                                                                                "format": "uri",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "inlineStyles": {
+                                                                                "description": "Formatting ranges within the block text.",
+                                                                                "items": {
+                                                                                    "properties": {
+                                                                                        "length": {
+                                                                                            "description": "Formatted character length.",
+                                                                                            "minimum": 0,
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "offset": {
+                                                                                            "description": "Zero-based character offset.",
+                                                                                            "minimum": 0,
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "style": {
+                                                                                            "description": "Inline style name reported by X.",
+                                                                                            "type": "string"
+                                                                                        }
+                                                                                    },
+                                                                                    "required": [
+                                                                                        "style",
+                                                                                        "offset",
+                                                                                        "length"
+                                                                                    ],
+                                                                                    "type": "object"
+                                                                                },
+                                                                                "type": "array"
+                                                                            },
+                                                                            "text": {
+                                                                                "description": "Text content for a text-bearing block.",
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": {
+                                                                                "description": "Block type reported by X, such as unstyled, header-two, image, divider, blockquote, or list item. Populated whenever the provider has data for the entity.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "width": {
+                                                                                "description": "Image width in pixels when supplied.",
+                                                                                "minimum": 0,
+                                                                                "type": "integer"
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "type"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                },
+                                                                "coverImage": {
+                                                                    "description": "Canonical article cover image URL when available.",
+                                                                    "format": "uri",
+                                                                    "type": "string"
+                                                                },
+                                                                "createdUtc": {
+                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                    "type": "number",
+                                                                    "x-anyapi-must-populate": true
+                                                                },
+                                                                "id": {
+                                                                    "description": "Stable X Article entity ID. Populated whenever the provider has data for the entity.",
+                                                                    "type": "string",
+                                                                    "x-anyapi-must-populate": true
+                                                                },
+                                                                "likes": {
+                                                                    "description": "Wrapper post like count at retrieval time.",
+                                                                    "minimum": 0,
+                                                                    "type": "integer"
+                                                                },
+                                                                "previewText": {
+                                                                    "description": "Preview text supplied by X.",
+                                                                    "type": "string"
+                                                                },
+                                                                "quotes": {
+                                                                    "description": "Wrapper post quote count at retrieval time.",
+                                                                    "minimum": 0,
+                                                                    "type": "integer"
+                                                                },
+                                                                "replies": {
+                                                                    "description": "Wrapper post reply count at retrieval time.",
+                                                                    "minimum": 0,
+                                                                    "type": "integer"
+                                                                },
+                                                                "title": {
+                                                                    "description": "Article title. Populated whenever the provider has data for the entity.",
+                                                                    "type": "string",
+                                                                    "x-anyapi-must-populate": true
+                                                                },
+                                                                "views": {
+                                                                    "description": "Wrapper post view count at retrieval time.",
+                                                                    "minimum": 0,
+                                                                    "type": "integer"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "id",
+                                                                "title",
+                                                                "createdUtc",
+                                                                "author",
+                                                                "contentBlocks"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "description": "True when the wrapper post contains a public X Article.",
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "X / Twitter Article output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "X / Twitter Article",
+                "tags": [
+                    "twitter"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.000750",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/twitter.community": {
             "post": {
                 "description": "Fetch a Twitter/X community's public details (name, description, member count, join policy) by URL, normalized across providers with transparent failover.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).",
@@ -72691,6 +73142,306 @@
                         "max": "0.014000",
                         "min": "0.000750",
                         "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/twitter.trends": {
+            "post": {
+                "description": "Get current X (Twitter) trends for worldwide, a country, or a city in X ranking order, including the resolved location.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).",
+                "operationId": "twitter_trends",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 10,
+                                "location": "US"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 10,
+                                    "location": "US"
+                                },
+                                "properties": {
+                                    "limit": {
+                                        "default": 50,
+                                        "description": "Maximum number of ranked trends to return (1-50, default 50).",
+                                        "maximum": 50,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "location": {
+                                        "description": "Country name, city name, or ISO country code. Omit for worldwide trends.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "title": "X / Twitter trends input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "Amount charged in USD for this call.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "data": {
+                                                    "description": "The resolved location and its current ranked trends, or null when unavailable.",
+                                                    "oneOf": [
+                                                        {
+                                                            "type": "null"
+                                                        },
+                                                        {
+                                                            "additionalProperties": false,
+                                                            "properties": {
+                                                                "asOfUtc": {
+                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                    "type": "number",
+                                                                    "x-anyapi-must-populate": true
+                                                                },
+                                                                "items": {
+                                                                    "description": "Current trends in X's own ranking order. Distinct ranks may carry the same trend name. Populated whenever the provider has data for the entity.",
+                                                                    "items": {
+                                                                        "properties": {
+                                                                            "isHashtag": {
+                                                                                "description": "Whether the trend text is a hashtag.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "name": {
+                                                                                "description": "Trend text displayed by X. Populated whenever the provider has data for the entity.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "promoted": {
+                                                                                "description": "Whether X marks the trend as promoted.",
+                                                                                "type": "boolean"
+                                                                            },
+                                                                            "query": {
+                                                                                "description": "Search query corresponding to the trend. Populated whenever the provider has data for the entity.",
+                                                                                "type": "string",
+                                                                                "x-anyapi-must-populate": true
+                                                                            },
+                                                                            "rank": {
+                                                                                "description": "One-based position in X's trend ranking. Populated whenever the provider has data for the entity.",
+                                                                                "minimum": 1,
+                                                                                "type": "integer",
+                                                                                "x-anyapi-must-populate": true
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "rank",
+                                                                            "name",
+                                                                            "query"
+                                                                        ],
+                                                                        "type": "object"
+                                                                    },
+                                                                    "type": "array",
+                                                                    "x-anyapi-must-populate": true
+                                                                },
+                                                                "location": {
+                                                                    "description": "Resolved X trend-location name. Populated whenever the provider has data for the entity.",
+                                                                    "type": "string",
+                                                                    "x-anyapi-must-populate": true
+                                                                },
+                                                                "locationId": {
+                                                                    "description": "Resolved Yahoo WOEID used by X, exposed as a stable location identifier. Populated whenever the provider has data for the entity.",
+                                                                    "type": "string",
+                                                                    "x-anyapi-must-populate": true
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "location",
+                                                                "locationId",
+                                                                "asOfUtc",
+                                                                "items"
+                                                            ],
+                                                            "type": "object"
+                                                        }
+                                                    ]
+                                                },
+                                                "found": {
+                                                    "description": "Whether X trends were resolved for the requested location.",
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "required": [
+                                                "found",
+                                                "data"
+                                            ],
+                                            "title": "X / Twitter trends output",
+                                            "type": "object"
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance (no charge)."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "X / Twitter Trends",
+                "tags": [
+                    "twitter"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.000750",
+                        "currency": "USD",
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
