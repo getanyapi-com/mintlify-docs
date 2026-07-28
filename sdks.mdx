@@ -4,8 +4,8 @@ description: "Official typed TypeScript and Python SDKs for AnyAPI - one key, US
 ---
 
 AnyAPI ships two official, typed SDKs so you can call any API in the catalog from
-your own code without hand-writing HTTP requests. Both are generated from the platform's
-own OpenAPI spec (222 APIs), so they track the catalog automatically.
+your own code without hand-writing HTTP requests. Each SDK combines generated, typed
+SKU methods with a handwritten discovery client.
 
 | | |
 |---|---|
@@ -15,6 +15,9 @@ own OpenAPI spec (222 APIs), so they track the catalog automatically.
 
 Every API is a typed method under its platform namespace (`client.google.search(...)`,
 `client.amazon.reviews(...)`), and there is a generic escape hatch to call any API by slug.
+AnyAPI generates those execution methods from the gateway's OpenAPI document. The
+`catalog`, `search`, and `describe` methods are separate tolerant readers of the live
+discovery API; SDK generation does not update them.
 
 ## Install
 
@@ -95,6 +98,42 @@ const rev = await client.run("amazon.reviews", { product: "B07FZ8S74R", limit: 3
 rev = client.run("amazon.reviews", {"product": "B07FZ8S74R", "limit": 3})
 ```
 </CodeGroup>
+
+## Discover APIs
+
+Browse by category, run a ranked search, then describe one result to retrieve its schemas:
+
+<CodeGroup>
+```ts TypeScript
+const apis = await client.catalog({ category: "search" });
+const matches = await client.search({
+  query: "web search",
+  platform: "google",
+  limit: 10,
+});
+const api = await client.describe(matches.results[0]!.slug);
+
+console.log(api.pricing.from, api.pricing.failoverMaxUsd, api.failover);
+```
+
+```python Python
+apis = client.catalog(category="search")
+matches = client.search(query="web search", platform="google", limit=10)
+api = client.describe(matches.results[0].slug)
+
+print(api.pricing.from_offer, api.pricing.failover_max_usd, api.failover)
+```
+</CodeGroup>
+
+The gateway owns input validation, provider normalization, route and lane order,
+failover, pricing relationships, health semantics, and billing. The handwritten SDK
+clients authenticate and transport the request, validate the known fields they expose,
+and ignore safe new discovery fields. They preserve input and output schemas as opaque
+JSON.
+
+Treat `pricing.from`, `pricing.failoverMaxUsd`, `failover`, lane order, and health as
+gateway-published facts. `failover` reports whether AnyAPI currently has an alternate
+route. Do not derive it from the lane count or recompute pricing from individual lanes.
 
 ## Async (Python)
 

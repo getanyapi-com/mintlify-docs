@@ -128,12 +128,18 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 The server exposes five generic tools. Discovery (`list_apis`, `search_apis`, `get_api`) is
 free; only `run_api` touches your wallet. `get_balance` reports what's left in it.
 
+The MCP tools are a lightweight transport and projection over the same AnyAPI gateway
+used by REST. The gateway owns input validation, provider selection, routing, failover,
+pricing, health semantics, response normalization, and billing. Discovery tools return
+those gateway-published facts and tolerate safe additions to the underlying catalog;
+they do not recalculate relationships between prices, lanes, or failover.
+
 <AccordionGroup>
   <Accordion title="list_apis — browse the catalog" icon="list">
     Browse APIs as lightweight summaries, optionally filtered by category. Summaries carry
-    the SKU, name, category, provider, and nested USD pricing only - **no descriptions or
-    schemas** - so listing the whole catalog stays token-cheap. To find an API by keyword
-    (with descriptions), use
+    the SKU, name, category, provider, nested USD pricing, and failover status, but
+    **no descriptions or schemas**, so listing the whole catalog stays token-cheap.
+    To find an API by keyword (with descriptions), use
     `search_apis`; for one API's schemas, use `get_api`.
 
     **Input**
@@ -142,10 +148,11 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
     |---|---|---|---|
     | `category` | string | no | Category slug to filter by |
 
-    **Returns** `scrapers`, an array containing exactly `id`, `slug`, `name`, `category`,
-    `provider`, nested `pricing`, and optional `heavy`. Descriptions, lanes, health,
-    schemas, eligibility, and relevance are omitted. Use `search_apis` for every ranked
-    free-text query.
+    **Returns** `scrapers`, an array containing `id`, `slug`, `name`, `category`,
+    `provider`, nested `pricing`, `failover`, and optional `heavy` and
+    `excludesCallerDelay`. `failover` reports whether AnyAPI currently has an alternate
+    route. Descriptions, lanes, health, schemas, eligibility, and relevance are omitted.
+    Use `search_apis` for every ranked free-text query.
   </Accordion>
   <Accordion title="search_apis — find an API by intent" icon="magnifying-glass">
     Search APIs by meaning and keyword across name, slug, and description, returning matches **with
@@ -161,9 +168,9 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
     | `platform` | string | no | Platform slug to narrow the search |
     | `limit` | integer | no | Cap on matches returned (default 25) |
 
-    **Returns** `results` with the list fields plus `description` and response-relative
-    `relevance`, `total` before the limit, and `ranking` (`semantic` or `keyword`). Lanes,
-    health, schemas, and eligibility are omitted.
+    **Returns** `results` with the list fields, including `failover`, plus `description`
+    and response-relative `relevance`, `total` before the limit, and `ranking`
+    (`semantic` or `keyword`). Lanes, health, schemas, and eligibility are omitted.
   </Accordion>
   <Accordion title="get_api — inspect input and output schemas" icon="file-lines">
     Get the full definition of one API by SKU, including its normalized input and output
@@ -175,9 +182,9 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
     |---|---|---|---|
     | `sku_id` | string | yes | The API SKU slug to describe |
 
-    **Returns** the list fields plus `description`, anonymous lane pricing, input/output
-    JSON schemas, and optional `tryEligible`. Lane health is omitted. Use the input schema
-    to build a valid payload for `run_api`.
+    **Returns** the list fields, including `failover`, plus `description`, anonymous lane
+    pricing, input/output JSON schemas, and optional `tryEligible`. Lane health is
+    omitted. Use the input schema to build a valid payload for `run_api`.
   </Accordion>
   <Accordion title="run_api — execute an API" icon="bolt">
     Execute an API by SKU with a normalized input payload. Requires a valid AnyAPI key.
@@ -273,6 +280,7 @@ and `structuredContent` with these shapes:
         },
         "failoverMaxUsd": 0.003
       },
+      "failover": true,
       "relevance": 1
     }
   ],
@@ -286,7 +294,8 @@ and `structuredContent` with these shapes:
 so browsing and searching stay token-cheap. Reach for `list_apis` when you want to
 enumerate rather than search.
 
-This API's `pricing.from.model` is `flat`, so its maximum is per request. A linear
+This API's `pricing.from.model` is `flat`, so its maximum is per request. `failover`
+is the gateway's authoritative routing fact; do not infer it from lanes. A linear
 offer instead carries `unit`, `baseUsd`, `perUnitUsd`, and `maxUsd`. For example,
 an API billed per result reports `unit: "result"`; the actual successful charge is
 the base plus the per-unit amount, capped at `maxUsd`.
@@ -308,6 +317,7 @@ the base plus the per-unit amount, capped at `maxUsd`.
       },
       "failoverMaxUsd": 0.003
     },
+    "failover": true,
     "description": "Search Reddit posts across all subreddits by query.",
     "lanes": [
       {
