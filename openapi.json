@@ -89497,10 +89497,13 @@
                                         "type": "string"
                                     },
                                     "waitFor": {
-                                        "description": "Milliseconds to wait for the page to finish rendering before capture. Use this for JavaScript-heavy pages or single-page apps whose content loads after the initial paint. Capped at 15000 to stay within the request timeout.",
+                                        "description": "Milliseconds to wait for the page to finish rendering before capture. Use this for JavaScript-heavy pages or single-page apps whose content loads after the initial paint. Capped at 15000 to stay within the request timeout. This wait is time you asked us to spend, so your response takes this much longer, and it is excluded from the latency published for this endpoint.",
                                         "maximum": 15000,
                                         "minimum": 0,
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "x-anyapi-caller-delay": {
+                                            "unit": "ms"
+                                        }
                                     }
                                 },
                                 "required": [
