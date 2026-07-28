@@ -13,7 +13,7 @@ merge the results.
 |---|---|
 | **Package** | [`n8n-nodes-anyapi`](https://www.npmjs.com/package/n8n-nodes-anyapi) |
 | **Source** | [github.com/getanyapi-com/n8n-nodes-anyapi](https://github.com/getanyapi-com/n8n-nodes-anyapi) |
-| **Node** | **AnyAPI** (operations: Run API, Get API Schema, List APIs, Get Balance) |
+| **Node** | **AnyAPI** (operations: Run API, Get API Schema, List APIs, Search APIs, Get Balance) |
 | **Credential** | **AnyAPI API** (paste your key; Bearer auth) |
 
 ## Prerequisites
@@ -67,13 +67,12 @@ The node authenticates with one **AnyAPI API** credential.
 
 ## Operations
 
-The single **AnyAPI** node exposes four operations.
+The single **AnyAPI** node exposes five operations.
 
 <AccordionGroup>
   <Accordion title="Run API - execute any API by SKU" icon="bolt">
     Run an API by its SKU with a normalized JSON **Input** payload. The **API** dropdown loads
-    live from the public catalog, so every SKU is selectable and newly added providers appear
-    automatically without updating the node.
+    live from the public catalog, so available SKUs appear without being hard-coded into the node.
 
     Returns the normalized `output`, the serving `provider` (always **AnyAPI**), the `costUsd`
     of the call in real dollars, and `items` (the number of results charged for). You are billed
@@ -85,13 +84,30 @@ The single **AnyAPI** node exposes four operations.
   </Accordion>
   <Accordion title="List APIs - browse the catalog" icon="list">
     Browse the AnyAPI catalog, optionally narrowed with **Category** (a category slug).
-    Returns one item per API. For ranked free-text discovery, call the public
-    `/catalog/search?q=...` endpoint from an n8n HTTP Request node.
+    Returns one item per API.
+  </Accordion>
+  <Accordion title="Search APIs - find an API by intent" icon="magnifying-glass">
+    Run a ranked free-text catalog search, optionally narrowed with **Category** or
+    **Platform**. Results include the description and relevance metadata you need to
+    choose a SKU.
   </Accordion>
   <Accordion title="Get Balance - check your wallet" icon="wallet">
     Return the remaining wallet balance in USD for the key on the credential. Never charges.
   </Accordion>
 </AccordionGroup>
+
+## Gateway and node responsibilities
+
+The node is a lightweight n8n transport and presentation adapter. It uses n8n's native
+HTTP and credential helpers, projects the discovery fields its UI needs, and tolerates
+safe additions to catalog responses.
+
+The AnyAPI gateway owns input validation, provider selection, routing, failover, pricing,
+health semantics, and billing. Discovery operations display those gateway-published facts:
+`pricing.from` is the primary static offer, `pricing.failoverMaxUsd` is the fallback
+ceiling, and `failover` reports whether AnyAPI currently has an alternate route. The node
+does not calculate these values from `lanes`, and input and output schemas pass through as
+opaque JSON Schema objects.
 
 ## Response budget options (Run API)
 

@@ -136,8 +136,19 @@ curl -s https://api.getanyapi.com/v1/apis/tiktok.profile -H "X-API-Key: YOUR_ANY
 ```
 
 Browse and search results report `provider: "AnyAPI"` and nested USD `pricing`.
-`pricing.from` is the cheapest complete offer and `pricing.failoverMaxUsd` is the
-maximum fallback ceiling.
+`pricing.from` is the primary static offer, `pricing.failoverMaxUsd` is the maximum
+fallback ceiling, and `failover` reports whether AnyAPI currently has an alternate
+route.
+
+These values come from the gateway. The gateway owns input validation, provider
+selection, route and lane order, failover, pricing, health semantics, and billing.
+Do not infer failover from the number of lanes or recompute `pricing.from` from lane
+prices.
+
+If you build a discovery wrapper, treat response objects as extensible. Read the
+known fields your application needs, ignore safe additions, and preserve input and
+output JSON Schemas as opaque objects. This lets the gateway add customer-safe
+metadata without forcing a wrapper release.
 
 The full catalog with typed schemas also lives in the [API Reference](/api-reference/tiktok/tiktok-profile).
 

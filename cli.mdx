@@ -50,8 +50,20 @@ accounting unit or upstream provider.
 Static discovery pricing is nested. `pricing.from` is either a flat offer
 (`model`, `unit: "request"`, `maxUsd`) or a linear offer (`model`, `unit`,
 `baseUsd`, `perUnitUsd`, `maxUsd`). `pricing.failoverMaxUsd` is the greatest
-fallback ceiling. Use the displayed unit when estimating a linear call, or run
-`anyapi describe <sku>` to inspect the complete offer before execution.
+fallback ceiling. The optional `failover` boolean reports whether AnyAPI currently
+has an alternate route. Use the displayed unit when estimating a linear call, or
+run `anyapi describe <sku>` to inspect the complete offer before execution.
+
+## Gateway and CLI responsibilities
+
+The gateway owns input validation, provider normalization, pricing, lane order,
+routing, failover, health semantics, and billing. The CLI is a thin transport and
+presentation adapter. It projects the discovery fields it displays, tolerates safe
+new fields, and preserves input and output schemas as opaque JSON.
+
+Treat `pricing.from`, `pricing.failoverMaxUsd`, `failover`, and lane order as
+gateway-published facts. The CLI does not derive them from one another or repair
+their relationships.
 
 ## Authentication
 
@@ -88,6 +100,9 @@ By default, `anyapi run` writes JSON to:
 
 The command prints the output path, `costUsd`, and item count. Use `--json` to print the
 response JSON to stdout instead, or `-o path` to choose the output file.
+
+The gateway normalizes the successful response. The CLI preserves the `output` object
+as customer data instead of recursively deleting or rewriting its keys.
 
 ## Context-budget flags
 
