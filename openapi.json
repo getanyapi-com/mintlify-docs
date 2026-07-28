@@ -13392,7 +13392,7 @@
         },
         "/v1/run/email.verify": {
             "post": {
-                "description": "Verify any email address for deliverability: syntax, domain, and mailbox checks in one normalized response.\n\n**Price:** billed per result - \\$0.80 per 1,000 results, capped at \\$0.80 per 1,000 requests.",
+                "description": "Verify an email address for deliverability: a status verdict (valid, risky, or invalid) with domain, mailbox, catch-all, disposable, and role signals plus a confidence score. Malformed addresses are rejected by the input schema with no charge; every syntactically valid address returns a billed verdict, including undeliverable ones.\n\n**Price:** billed per result - \\$0.80 per 1,000 results, capped at \\$0.80 per 1,000 requests.",
                 "operationId": "email_verify",
                 "parameters": [
                     {
@@ -13457,7 +13457,13 @@
                                 },
                                 "properties": {
                                     "email": {
-                                        "description": "The email address to verify (e.g. jane.doe@acme.com).",
+                                        "description": "The email address to verify (e.g. jane.doe@acme.com). Exactly one @, a dotted domain, no whitespace or angle brackets. Addresses on reserved, never-deliverable TLDs (.invalid, .test, .example, .localhost, .local, .internal, .blink) and HTML/JSON escape artifacts (a u003e prefix) are rejected locally with no charge.",
+                                        "maxLength": 254,
+                                        "minLength": 6,
+                                        "not": {
+                                            "pattern": "^[uU]00[0-9a-fA-F]{2}|\\.\\.|\\.([Bb][Ll][Ii][Nn][Kk]|[Ii][Nn][Vv][Aa][Ll][Ii][Dd]|[Ll][Oo][Cc][Aa][Ll]([Hh][Oo][Ss][Tt])?|[Tt][Ee][Ss][Tt]|[Ee][Xx][Aa][Mm][Pp][Ll][Ee]|[Ii][Nn][Tt][Ee][Rr][Nn][Aa][Ll])$"
+                                        },
+                                        "pattern": "^[^\\s<>()\\[\\],;:\"@\\\\]+@[^\\s<>()\\[\\],;:\"@\\\\]+\\.[^\\s<>()\\[\\],;:\"@.\\\\]{2,63}$",
                                         "type": "string"
                                     }
                                 },
@@ -13503,7 +13509,7 @@
                                                                     "additionalProperties": false,
                                                                     "properties": {
                                                                         "items": {
-                                                                            "description": "Verification records: the email address with its deliverability verdict and syntax, domain, and mailbox check details. Populated whenever the provider has data for the entity.",
+                                                                            "description": "Verification records: the email address with its deliverability verdict and the domain, mailbox, and reputation signals behind it. A record is returned for every syntactically valid address, including ones the verdict marks undeliverable. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "catchAll": {
@@ -15264,13 +15270,26 @@
                             },
                             "schema": {
                                 "additionalProperties": false,
+                                "anyOf": [
+                                    {
+                                        "required": [
+                                            "pageId"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "companyName"
+                                        ]
+                                    }
+                                ],
                                 "example": {
                                     "companyName": "nike",
                                     "sortBy": "recent"
                                 },
                                 "properties": {
                                     "companyName": {
-                                        "description": "Company name to search (e.g. \"nike\"). Provide either pageId or companyName.",
+                                        "description": "Company name to search (e.g. \"nike\"). Exact-match and case-sensitive against the Meta Ad Library index; an advertiser with no indexed page returns found:false.",
+                                        "minLength": 1,
                                         "type": "string"
                                     },
                                     "country": {
@@ -15303,6 +15322,7 @@
                                     },
                                     "pageId": {
                                         "description": "Company's Ad Library page ID. Provide either pageId or companyName.",
+                                        "minLength": 1,
                                         "type": "string"
                                     },
                                     "sortBy": {
