@@ -198,10 +198,22 @@ free; only `run_api` touches your wallet. `get_balance` reports what's left in i
     what you are billed (`costUsd` reflects the full result the API produced).
 
     **Returns** the normalized `output`, the serving `provider` (always **AnyAPI**),
-    `costUsd`, and `items` (the number of results charged for). Most APIs are priced
-    per result — `baseUsd + perUnitUsd × items` — so cap results (and cost) with
-    `limit` in your input; simple lookups are flat per request. Invalid input,
+    `costUsd`, `items` (the number of results charged for), and `replayed`. Most APIs
+    are priced per result — `baseUsd + perUnitUsd × items` — so cap results (and cost)
+    with `limit` in your input; simple lookups are flat per request. Invalid input,
     insufficient funds, and total upstream failure are **not** charged.
+
+    **Duplicate calls are not charged twice.** MCP clients re-issue a tool call on
+    their own judgment: the model reads a result as truncated, the user re-runs the
+    turn, a conversation branch is replayed. AnyAPI dedupes automatically, with no
+    argument for you to pass. For about five minutes after a run, the same `sku_id`
+    and the same `input` (compared by meaning, so key order and formatting do not
+    matter) replays the original result instead of running again: `replayed` comes
+    back `true`, `costUsd` restates the original charge, and nothing new is billed.
+    Repeat the call while the original is still running and you get
+    `duplicate_call_in_progress` (nothing charged) - wait a few seconds and repeat the
+    same call to receive the result. Past that window, or with any change to the
+    input, the call runs fresh and is billed normally.
   </Accordion>
   <Accordion title="get_balance — check your wallet" icon="wallet">
     Get the remaining wallet balance for the API key you authenticate with. Requires a
@@ -327,7 +339,8 @@ the base plus the per-unit amount, capped at `maxUsd`.
   "output":   { "posts": [ { "title": "…", "url": "…", "score": 123 } ] },
   "provider": "AnyAPI",
   "costUsd":  0.003,
-  "items":    25
+  "items":    25,
+  "replayed": false
 }
 ```
 
@@ -342,7 +355,12 @@ Tool failures come back as MCP tool errors with a short machine-readable prefix:
 | `invalid_input` | Payload did not match the API's input schema | No |
 | `insufficient_credits` | Wallet balance too low — top up to run | No |
 | `key_cap_exceeded` | The API key reached its configured spend cap | No |
+| `grant_cap_exceeded` | The authorization reached the spending limit its owner approved | No |
 | `trial_cap_reached` | The autonomous trial reached its cap | No |
+| `duplicate_call_in_progress` | An identical call is still running; wait a few seconds and repeat the same call to get its result | No |
+| `duplicate_needs_review` | An identical earlier call is being reconciled; retrying will not clear it | No |
+| `duplicate_call_conflict` | An earlier call holds this call's duplicate-protection slot | No |
+| `duplicate_protection_unavailable` | AnyAPI could not check for a duplicate, so nothing ran; safe to retry | No |
 | `provider_rejected_request` | The upstream rejected this request; adjust it before retrying | No |
 | `provider_rate_limited` | The upstream rate-limited the request; retry later | No |
 | `provider_timeout` | Every available route ended in an upstream timeout | No (released) |
@@ -352,7 +370,7 @@ Tool failures come back as MCP tool errors with a short machine-readable prefix:
 | `unclassified_upstream_response` | The upstream response is not recognized yet | No (released) |
 | `all_providers_failed` | Every provider for this API failed | No (released) |
 | `no_providers` | The API has no enabled providers | No |
-| `scrape_failed` | AnyAPI could not complete the request because of an internal failure | No |
+| `scrape_failed` | The run ended without a confirmed outcome | Unknown - check `get_balance`; repeating the same call within a few minutes cannot double charge |
 
 A completed lookup that returns a normalized empty result such as `found: false` is not a
 tool error. It is a successful, billable answer: the lookup ran and no matching entity was
