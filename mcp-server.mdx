@@ -212,14 +212,23 @@ they do not recalculate relationships between prices, lanes, or failover.
 
     **Duplicate calls are not charged twice.** MCP clients re-issue a tool call on
     their own judgment: the model reads a result as truncated, the user re-runs the
-    turn, a conversation branch is replayed. AnyAPI dedupes automatically, with no
-    argument for you to pass. For about five minutes after a run, the same `sku_id`
-    and the same `input` (compared by meaning, so key order and formatting do not
-    matter) replays the original result instead of running again: `replayed` comes
-    back `true`, `costUsd` restates the original charge, and nothing new is billed.
-    Repeat the call while the original is still running and you get
-    `duplicate_call_in_progress` (nothing charged) - wait a few seconds and repeat the
-    same call to receive the result. Past that window, or with any change to the
+    turn, a conversation branch is replayed. AnyAPI derives a duplicate-protection
+    key automatically, with no argument for you to pass.
+
+    Once AnyAPI admits that keyed run, it can continue synchronously in-process if
+    the MCP client disconnects, bounded by the normal execution deadline. The
+    disconnected request does not receive the eventual result. Repeat the same
+    `sku_id` and `input` (compared by meaning, so key order and formatting do not
+    matter):
+
+    - `duplicate_call_in_progress` means the original run is still working. Nothing
+      has been charged yet; wait a few seconds and repeat the same call.
+    - A completed replay returns the original `output`, `costUsd`, and `items` with
+      `replayed: true`, without another provider run or charge.
+
+    Completed results remain replayable for about five minutes. A continued run that
+    produces a replayable result charges normally exactly once even if the original
+    MCP request disconnected. Past the replay window, or with any change to the
     input, the call runs fresh and is billed normally.
   </Accordion>
   <Accordion title="get_balance — check your wallet" icon="wallet">

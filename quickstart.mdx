@@ -152,6 +152,33 @@ metadata without forcing a wrapper release.
 
 The full catalog with typed schemas also lives in the [API Reference](/api-reference/tiktok/tiktok-profile).
 
+## Retry safely after a disconnect
+
+Wallet-funded REST calls support an optional `Idempotency-Key` header. Generate one key for a
+logical call and keep it until you receive a terminal response:
+
+```bash
+curl -s https://api.getanyapi.com/v1/run/reddit.search \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" \
+  -H "Idempotency-Key: YOUR_UNIQUE_RETRY_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"mechanical keyboard"}'
+```
+
+When AnyAPI honors the key, the synchronous run can continue in-process after your client
+disconnects, bounded by the normal execution deadline. The disconnected socket does not receive
+the eventual result. Retry the same SKU, query parameters, body, and key:
+
+- `409 idempotency_in_progress` means the original run is still working. Wait a few seconds and
+  retry the same request.
+- `200` with `Idempotency-Replayed: true` returns the original `output`, `costUsd`, and `items`
+  without another provider run or charge.
+- Reusing the key with different request semantics returns `409 idempotency_conflict`.
+
+REST results remain replayable for 24 hours. If the continued run produces a replayable result,
+it charges normally exactly once even if the original client disconnected. Calls without an
+`Idempotency-Key` stay tied to the caller and are canceled on disconnect.
+
 ## Check your balance
 
 ```bash
