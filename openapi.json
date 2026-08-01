@@ -91156,7 +91156,7 @@
         },
         "/v1/run/web.scrape": {
             "post": {
-                "description": "Scrape any web page and get its content back as clean Markdown (or HTML, or raw HTML) plus title and metadata.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Scrape any web page and get its content back as clean Markdown (or HTML, or raw HTML) plus title and metadata.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "web_scrape",
                 "parameters": [
                     {
@@ -91270,6 +91270,11 @@
                                     "onlyMainContent": {
                                         "default": true,
                                         "description": "When true (default) return only the main article content, stripping navigation, headers, footers, and other boilerplate. Set false to capture the full page.",
+                                        "type": "boolean"
+                                    },
+                                    "stealth": {
+                                        "default": false,
+                                        "description": "When true, fetch through a stealth proxy that gets past bot protection which refuses an ordinary request. This costs materially more per request (see the pricing ceiling), so leave it off unless a normal scrape of the site comes back blocked or empty.",
                                         "type": "boolean"
                                     },
                                     "url": {
@@ -91515,7 +91520,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.000900",
+                        "max": "0.004500",
                         "min": "0.000500",
                         "mode": "dynamic"
                     },
