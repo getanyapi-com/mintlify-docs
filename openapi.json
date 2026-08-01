@@ -40799,7 +40799,7 @@
         },
         "/v1/run/instagram.stories_full": {
             "post": {
-                "description": "Fetch public Instagram accounts' currently live stories with the full record - media (image and video), type, dimensions, posting time, 24h expiry, and caption. Up to 100 usernames per request.\n\n**Price:** billed per username - \\$99.00 per 1,000 requests base + \\$3.00 per 1,000 usernames, capped at \\$102.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Fetch a public Instagram account's currently live stories with media, type, dimensions, posting time, and 24-hour expiry by username.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
                 "operationId": "instagram_stories_full",
                 "parameters": [
                     {
@@ -40855,30 +40855,22 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "usernames": [
-                                    "natgeo"
-                                ]
+                                "username": "natgeo"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "usernames": [
-                                        "natgeo"
-                                    ]
+                                    "username": "natgeo"
                                 },
                                 "properties": {
-                                    "usernames": {
-                                        "description": "Instagram usernames/handles (without the @). A flat run fee is shared across the batch, so request several at once to lower the cost per account. Up to 100 usernames per request.",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "maxItems": 100,
-                                        "minItems": 1,
-                                        "type": "array"
+                                    "username": {
+                                        "description": "Instagram username or handle without the @.",
+                                        "minLength": 1,
+                                        "type": "string"
                                     }
                                 },
                                 "required": [
-                                    "usernames"
+                                    "username"
                                 ],
                                 "title": "Instagram Stories (full) input",
                                 "type": "object"
@@ -40920,40 +40912,43 @@
                                                                     "additionalProperties": false,
                                                                     "properties": {
                                                                         "items": {
-                                                                            "description": "Story records across the requested accounts, each with full media, type, dimensions, posting + expiry time, and caption. Populated whenever the provider has data for the entity.",
+                                                                            "description": "Currently live story records for the requested account, with media, type, dimensions, posting time, and expiry. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
-                                                                                    "caption": {
-                                                                                        "description": "Story caption text, when present.",
-                                                                                        "type": "string"
-                                                                                    },
                                                                                     "code": {
-                                                                                        "description": "Instagram media shortcode.",
-                                                                                        "type": "string"
+                                                                                        "description": "Instagram media shortcode. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "createdUtc": {
-                                                                                        "description": "Posting time (Unix seconds).",
-                                                                                        "type": "number"
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "expiresAt": {
-                                                                                        "description": "Expiry time, 24h after posting (Unix seconds).",
-                                                                                        "type": "integer"
+                                                                                    "expiresUtc": {
+                                                                                        "description": "Expiry UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "height": {
-                                                                                        "description": "Media pixel height.",
-                                                                                        "type": "integer"
+                                                                                        "description": "Media pixel height. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "id": {
-                                                                                        "description": "Story identifier.",
-                                                                                        "type": "string"
+                                                                                        "description": "Story identifier. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "imageUrl": {
-                                                                                        "description": "Direct URL to the story image (highest resolution).",
-                                                                                        "type": "string"
+                                                                                    "image": {
+                                                                                        "description": "Direct URL to the story image (highest resolution). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "mediaType": {
-                                                                                        "description": "Media type: 1 = image, 2 = video.",
-                                                                                        "type": "integer"
+                                                                                        "description": "Media type: 1 = image, 2 = video. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "username": {
                                                                                         "description": "Owner username. Populated whenever the provider has data for the entity.",
@@ -40961,12 +40956,14 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "videoUrl": {
-                                                                                        "description": "Direct URL to the story video, when the story is a video.",
-                                                                                        "type": "string"
+                                                                                        "description": "Direct URL to the story video, when the story is a video. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "width": {
-                                                                                        "description": "Media pixel width.",
-                                                                                        "type": "integer"
+                                                                                        "description": "Media pixel width. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -41134,10 +41131,9 @@
                 ],
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.002000",
                         "currency": "USD",
-                        "max": "0.102000",
-                        "min": "0.099000",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
