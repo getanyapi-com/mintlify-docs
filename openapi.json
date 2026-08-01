@@ -57103,6 +57103,373 @@
                 }
             }
         },
+        "/v1/run/reddit.post": {
+            "post": {
+                "description": "Fetch a single Reddit post by URL, including its full body text, score, comment count, upvote ratio, and subreddit, as normalized JSON.\n\n**Price:** \\$1.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "operationId": "reddit_post",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "url": "https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "url": "https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/"
+                                },
+                                "properties": {
+                                    "url": {
+                                        "description": "Full Reddit post URL in the /r/<subreddit>/comments/<id>/<slug>/ form, e.g. \"https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/\". The short \"reddit.com/comments/<id>\" form is not accepted.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "Reddit post input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The post record, or null when nothing was found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "properties": {
+                                                                        "author": {
+                                                                            "description": "Author username, without the u/ prefix. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "body": {
+                                                                            "description": "The post's own body text (selftext), as Markdown. Empty for link posts, which carry no body. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "createdUtc": {
+                                                                            "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                            "type": "number"
+                                                                        },
+                                                                        "id": {
+                                                                            "description": "Reddit post ID (base-36, without the t3_ prefix). Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "image": {
+                                                                            "description": "Preview image for the post, when Reddit generated one. Reddit signs this URL and it is time-limited, so fetch it promptly rather than storing it; the query string carries the signature and must be kept intact. Empty when the post has no preview image.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "isNsfw": {
+                                                                            "description": "True when the post is marked NSFW (over 18).",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "numComments": {
+                                                                            "description": "Total number of comments on the post.",
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "permalink": {
+                                                                            "description": "Canonical reddit.com thread path for the post (e.g. \"/r/golang/comments/abc123/...\"). Differs from url, which is the destination link. Empty if the upstream omits it. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "score": {
+                                                                            "description": "Net score (upvotes minus downvotes) at fetch time.",
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "subreddit": {
+                                                                            "description": "Subreddit name, without the r/ prefix. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "title": {
+                                                                            "description": "Post title. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "upvoteRatio": {
+                                                                            "description": "Fraction of votes that are upvotes, between 0 and 1. Zero when the upstream does not report it.",
+                                                                            "type": "number"
+                                                                        },
+                                                                        "url": {
+                                                                            "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts). Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "id",
+                                                                        "title",
+                                                                        "author",
+                                                                        "score",
+                                                                        "numComments",
+                                                                        "url",
+                                                                        "permalink",
+                                                                        "createdUtc",
+                                                                        "subreddit"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "True when the post was found; false when the lookup returned nothing.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Reddit post output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap (no charge). Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Reddit Post",
+                "tags": [
+                    "reddit"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.002040",
+                        "min": "0.001000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/reddit.post_comments": {
             "post": {
                 "description": "List the top-level comments on a Reddit post by URL (author, body, score, timestamp).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
@@ -57259,10 +57626,15 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Cursor for the next page of comments; pass it back as the `cursor` input to fetch the following page. Empty string when there are no more comments.",
+                                                                            "type": "string"
                                                                         }
                                                                     },
                                                                     "required": [
-                                                                        "comments"
+                                                                        "comments",
+                                                                        "nextCursor"
                                                                     ],
                                                                     "type": "object"
                                                                 }
@@ -57739,6 +58111,393 @@
                         "amount": "0.002000",
                         "currency": "USD",
                         "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/reddit.profile": {
+            "post": {
+                "description": "Fetch a Reddit user's public profile (karma split, post and comment counts, bio, avatar, account age) by username.\n\n**Price:** \\$1.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "operationId": "reddit_profile",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "username": "spez"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "username": "spez"
+                                },
+                                "properties": {
+                                    "username": {
+                                        "description": "Reddit username, without the u/ prefix. Example: \"spez\".",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "username"
+                                ],
+                                "title": "Reddit profile input",
+                                "type": "object",
+                                "x-aliases": {
+                                    "handle": "username"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The profile record, or null when nothing was found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "properties": {
+                                                                        "avatarUrl": {
+                                                                            "description": "URL of the profile avatar image, with sizing and signing query params stripped. Populated whenever the provider has data for the entity.",
+                                                                            "format": "uri",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "bio": {
+                                                                            "description": "Public profile description text. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "commentKarma": {
+                                                                            "description": "Karma earned from comments. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "comments": {
+                                                                            "description": "Number of comments the account has contributed. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "createdUtc": {
+                                                                            "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                            "type": "number",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "displayName": {
+                                                                            "description": "Profile display title. Reddit defaults it to the username when the account has not set one. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "employee": {
+                                                                            "description": "True when the account belongs to a Reddit employee.",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "followers": {
+                                                                            "description": "Number of profile subscribers. Reddit reports 0 for accounts that do not expose a follower count.",
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "id": {
+                                                                            "description": "Reddit account ID (base-36, without the t2_ prefix). Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "karma": {
+                                                                            "description": "Total karma across the account, as Reddit reports it. The postKarma and commentKarma fields below are the split it is composed of. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nsfw": {
+                                                                            "description": "True when the profile is marked NSFW (over 18).",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "postKarma": {
+                                                                            "description": "Karma earned from posts. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "posts": {
+                                                                            "description": "Number of posts the account has contributed. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "profileUrl": {
+                                                                            "description": "Absolute reddit.com URL of the profile page. Populated whenever the provider has data for the entity.",
+                                                                            "format": "uri",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "trophies": {
+                                                                            "description": "Number of trophies unlocked in the account's trophy case. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "username": {
+                                                                            "description": "Account username, without the u/ prefix. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "verified": {
+                                                                            "description": "True when the account is verified by Reddit.",
+                                                                            "type": "boolean"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "id",
+                                                                        "username"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "True when the account was found; false when the lookup returned nothing.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Reddit profile output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap (no charge). Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Reddit Profile",
+                "tags": [
+                    "reddit"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.002040",
+                        "min": "0.001000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -59259,6 +60018,775 @@
                         "max": "0.003250",
                         "min": "0.002000",
                         "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/reddit.user_comments": {
+            "post": {
+                "description": "List a Reddit user's comments by username, sorted by new, top, hot, or controversial, with the parent post title and subreddit on every item and cursor pagination. Comment text comes back as a roughly 300-character preview rather than the full body, and this endpoint carries no per-comment permalink; use reddit.post_comments for full comment bodies and comment URLs on a given post.\n\n**Price:** \\$1.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "operationId": "reddit_user_comments",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "username": "spez"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "username": "spez"
+                                },
+                                "properties": {
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it back to fetch the next page.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "limit": {
+                                        "default": 25,
+                                        "description": "Maximum number of comments to return in this response (a page cap, not a total). Defaults to 25.",
+                                        "maximum": 100,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "sort": {
+                                        "description": "Sort order for the user's comments. Defaults to new (most recent first).",
+                                        "enum": [
+                                            "new",
+                                            "top",
+                                            "hot",
+                                            "controversial"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "username": {
+                                        "description": "Reddit username, without the u/ prefix. Example: \"spez\".",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "username"
+                                ],
+                                "title": "Reddit user comments input",
+                                "type": "object",
+                                "x-aliases": {
+                                    "handle": "username"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "One page of the user's comments, or null when the user was not found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "comments": {
+                                                                            "description": "The user's comments in feed order (newest first by default). Each item carries a truncated body preview plus the parent post it was made on; there is no per-comment permalink available from this endpoint. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "author": {
+                                                                                        "description": "Commenter username, without the u/ prefix. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "bodyPreview": {
+                                                                                        "description": "A preview of the comment text, not the full comment body: the upstream truncates it to roughly 300 characters and cuts mid-word. It is plain text rather than Markdown, and it is empty on the occasional comment for which the upstream returns no preview at all. For full comment bodies and comment permalinks, use the reddit.post_comments SKU against the parent post.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Reddit comment ID (base-36, without the t1_ prefix). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "postId": {
+                                                                                        "description": "Reddit post ID of the thread the comment was made on (base-36, without the t3_ prefix). Pass it to reddit.post or reddit.post_comments for the full thread. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "postTitle": {
+                                                                                        "description": "Title of the thread the comment was made on. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "score": {
+                                                                                        "description": "Net score (upvotes minus downvotes) on the comment at fetch time.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "subreddit": {
+                                                                                        "description": "Subreddit name of the parent thread, without the r/ prefix. Empty when the comment is on a post hosted on a user's own profile (r/u_<name>), which has no subreddit.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id",
+                                                                                    "author",
+                                                                                    "createdUtc"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of this user's comments; pass it back as the `cursor` input to fetch the following page. Null when there are no more pages.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "comments",
+                                                                        "nextCursor"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether the user's comment history was returned.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Reddit user comments output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap (no charge). Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Reddit User Comments",
+                "tags": [
+                    "reddit"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.001000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/reddit.user_posts": {
+            "post": {
+                "description": "List a Reddit user's posts by username, sorted by new, top, hot, or controversial, with cursor pagination.\n\n**Price:** \\$1.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "operationId": "reddit_user_posts",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "username": "spez"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "username": "spez"
+                                },
+                                "properties": {
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it back to fetch the next page.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "sort": {
+                                        "description": "Sort order for the user's posts. Defaults to new (most recent first).",
+                                        "enum": [
+                                            "new",
+                                            "top",
+                                            "hot",
+                                            "controversial"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "username": {
+                                        "description": "Reddit username without the leading u/ prefix (e.g. \"spez\").",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "username"
+                                ],
+                                "title": "Reddit user posts input",
+                                "type": "object",
+                                "x-aliases": {
+                                    "handle": "username"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "One page of the user's posts, or null when the user was not found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of this user's posts; pass it back as the `cursor` input to fetch the following page. Null when there are no more pages.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "posts": {
+                                                                            "description": "The user's posts in feed order. Posts hosted on the user's own profile (r/u_<name>) are included and carry an empty subreddit. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "author": {
+                                                                                        "description": "Author username, without the u/ prefix. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Reddit post ID (base-36, without the t3_ prefix). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "numComments": {
+                                                                                        "description": "Total number of comments on the post.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "permalink": {
+                                                                                        "description": "Canonical reddit.com thread path for the post (e.g. \"/r/golang/comments/abc123/...\"). Differs from url, which is the destination link. Empty if the upstream omits it. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "score": {
+                                                                                        "description": "Net score (upvotes minus downvotes) at fetch time.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "subreddit": {
+                                                                                        "description": "Subreddit name, without the r/ prefix. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Post title. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id",
+                                                                                    "title",
+                                                                                    "author",
+                                                                                    "permalink",
+                                                                                    "createdUtc"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "posts",
+                                                                        "nextCursor"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether the user's post feed was returned.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Reddit user posts output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap (no charge). Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "Reddit User Posts",
+                "tags": [
+                    "reddit"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.001000",
+                        "currency": "USD",
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
