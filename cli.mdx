@@ -33,7 +33,8 @@ Repo: [github.com/getanyapi-com/cli](https://github.com/getanyapi-com/cli)
 | --- | --- |
 | `anyapi signup [--label <label>] [--show-key]` | Mints a free trial key, saves it locally, and prints trial guidance. The secret is hidden unless you pass `--show-key`. |
 | `anyapi connect` | Starts an OAuth flow to connect a wallet and upgrade past the trial (anyapi-cli >= 0.3.0). |
-| `anyapi login --api-key aa_live_...` | Stores an existing dashboard key locally. |
+| `anyapi login` | Signs in to an AnyAPI account with the cross-device OAuth device flow. It does not bind a localhost callback. |
+| `anyapi login --api-key aa_live_...` | Stores an existing dashboard key locally without starting OAuth. |
 | `anyapi search <query>` | Searches the public catalog and prints matching SKUs, names, and USD price terms. |
 | `anyapi list [--category <category>]` | Lists catalog APIs, optionally filtered by category. |
 | `anyapi describe <sku>` | Prints the authenticated API definition, including schemas and USD pricing. |
@@ -76,6 +77,29 @@ The CLI resolves auth in this order:
 
 Application code should read `ANYAPI_API_KEY`. Do not make production app code depend
 on `~/.anyapi/config.json`.
+
+## Sign in to an account
+
+Run `anyapi login` to use account-backed OAuth immediately:
+
+```bash
+anyapi login
+```
+
+The CLI prints a verification URL and user code, then opens the complete URL when
+possible. You can approve from any browser or device while the CLI polls at the
+server-provided interval. It saves the access token, refresh token, expiry, and scope
+to `~/.anyapi/config.json` after approval, then refreshes the account session
+automatically before the access token expires.
+
+This device flow does not bind a localhost callback. It is separate from
+`anyapi connect`, which upgrades a saved free trial and preserves its trial receipt.
+
+To use an existing dashboard key without OAuth, store it locally:
+
+```bash
+anyapi login --api-key aa_live_...
+```
 
 ## Self-signup
 
