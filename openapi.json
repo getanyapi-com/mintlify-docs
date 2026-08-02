@@ -33433,7 +33433,7 @@
         },
         "/v1/run/hackernews.profile": {
             "post": {
-                "description": "Get a Hacker News user's public profile by username - karma, bio, and account details as clean JSON.\n\n**Price:** \\$3.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Get a Hacker News user's public profile by username - karma, bio, and account details as clean JSON.\n\n**Price:** \\$1.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "hackernews_profile",
                 "parameters": [
                     {
@@ -33711,7 +33711,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.003250",
+                        "amount": "0.001500",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -33742,7 +33742,7 @@
         },
         "/v1/run/hackernews.search": {
             "post": {
-                "description": "Search Hacker News by keyword - matching stories with title, link, author, points, and comment count as clean JSON.\n\n**Price:** \\$3.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Search Hacker News by keyword - matching stories with title, link, author, points, and comment count as clean JSON.\n\n**Price:** \\$1.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "hackernews_search",
                 "parameters": [
                     {
@@ -34065,9 +34065,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.003250",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003250",
+                        "min": "0.001500",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -34096,7 +34097,7 @@
         },
         "/v1/run/hackernews.story": {
             "post": {
-                "description": "Get a Hacker News story by id - title, link, author, points, and comment count as clean JSON.\n\n**Price:** \\$3.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Get a Hacker News story by id - title, link, author, points, and comment count as clean JSON.\n\n**Price:** \\$1.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "hackernews_story",
                 "parameters": [
                     {
@@ -34395,7 +34396,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.003250",
+                        "amount": "0.001500",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -34426,7 +34427,7 @@
         },
         "/v1/run/hackernews.story_comments": {
             "post": {
-                "description": "List the comments on a Hacker News story by id - text, author, and timestamp as clean JSON.\n\n**Price:** \\$3.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "List the comments on a Hacker News story by id - text, author, and timestamp as clean JSON.\n\n**Price:** \\$1.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "hackernews_story_comments",
                 "parameters": [
                     {
@@ -34734,9 +34735,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.003250",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003250",
+                        "min": "0.001500",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
