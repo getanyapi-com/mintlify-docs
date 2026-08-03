@@ -39297,7 +39297,7 @@
         },
         "/v1/run/instagram.reels_search": {
             "post": {
-                "description": "Search Instagram Reels by keyword and get matching reels (caption, views, likes, creator, and duration). Paging tops out around 110 reels per query (11 pages of 10).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Search Instagram Reels by keyword and get matching reels (caption, views, likes, creator, and duration). Results are relevance-ranked, not chronological. Paging tops out around 110 reels per query (11 pages of 10).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
                 "operationId": "instagram_reels_search",
                 "parameters": [
                     {
@@ -39362,7 +39362,7 @@
                                 },
                                 "properties": {
                                     "datePosted": {
-                                        "description": "Restrict results to reels posted within this window.",
+                                        "description": "Recency hint, not a hard filter. Reel discovery runs on top of Google search, so this window narrows Google's index by when it discovered or last crawled the reel, which is not the same as when the reel was published to Instagram. Returned reels can have a createdUtc outside the requested window, and narrow windows such as last-hour often return older reels or no results. Check createdUtc yourself if you need exact publication-time precision.",
                                         "enum": [
                                             "last-hour",
                                             "last-day",
