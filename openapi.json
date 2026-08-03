@@ -6115,7 +6115,7 @@
         },
         "/v1/run/apollo.organizations_bulk_enrich": {
             "post": {
-                "description": "Enrich up to 10 organization domains in one request with normalized company profile, industry, employee, revenue, funding, and location data.\n\n**Price:** \\$60.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Enrich up to 10 organization domains in one request with normalized company profile, industry, employee, revenue, and location data. Priced per request rather than per domain, so a full batch of 10 costs the same as a batch of 1. Results are positionally aligned with the domains you send, and a domain with no match returns null in its slot.\n\n**Price:** \\$60.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
                 "operationId": "apollo_organizations_bulk_enrich",
                 "parameters": [
                     {
@@ -6249,8 +6249,9 @@
                                                                             "type": "integer"
                                                                         },
                                                                         "organizations": {
-                                                                            "description": "Enriched organizations.",
+                                                                            "description": "Enriched organizations, positionally aligned with the requested domains: index i of this array is the result for index i of the domains input, and the array is always the same length as that input. An entry is null when the domain had no match, so a partial batch still returns every domain it did resolve.",
                                                                             "items": {
+                                                                                "description": "The enriched organization for the domain at this index, or null when that domain had no match.",
                                                                                 "properties": {
                                                                                     "annualRevenue": {
                                                                                         "description": "Estimated annual revenue in USD.",
@@ -6368,7 +6369,10 @@
                                                                                     "id",
                                                                                     "name"
                                                                                 ],
-                                                                                "type": "object"
+                                                                                "type": [
+                                                                                    "object",
+                                                                                    "null"
+                                                                                ]
                                                                             },
                                                                             "type": "array"
                                                                         },
@@ -6389,7 +6393,7 @@
                                                             ]
                                                         },
                                                         "found": {
-                                                            "description": "Whether any requested organizations were enriched.",
+                                                            "description": "Whether any requested organization was enriched. False when no requested domain matched, in which case data is null.",
                                                             "type": "boolean"
                                                         }
                                                     },
