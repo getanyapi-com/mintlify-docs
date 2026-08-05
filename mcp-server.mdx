@@ -13,7 +13,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 | **Endpoint** | `https://api.getanyapi.com/mcp` |
 | **Transport** | Streamable HTTP |
 | **Auth** | AnyAPI key as a Bearer token |
-| **Tools** | `list_apis`, `search_apis`, `get_api`, `run_api`, `get_balance` |
+| **Tools** | `list_apis`, `search_apis`, `get_api`, `run_api`, `get_request`, `get_balance` |
 
 ## Prerequisites
 
@@ -125,7 +125,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 ## Tools
 
-The server exposes five generic tools. Discovery (`list_apis`, `search_apis`, `get_api`) is
+The server exposes six generic tools. Discovery (`list_apis`, `search_apis`, `get_api`) is
 free; only `run_api` touches your wallet. `get_balance` reports what's left in it.
 
 The MCP tools are a lightweight transport and projection over the same AnyAPI gateway
@@ -215,21 +215,21 @@ they do not recalculate relationships between prices, lanes, or failover.
     turn, a conversation branch is replayed. AnyAPI derives a duplicate-protection
     key automatically, with no argument for you to pass.
 
-    Once AnyAPI admits that keyed run, it can continue synchronously in-process if
-    the MCP client disconnects, bounded by the normal execution deadline. The
-    disconnected request does not receive the eventual result. Repeat the same
-    `sku_id` and `input` (compared by meaning, so key order and formatting do not
-    matter):
+    For long-running work, `run_api` waits briefly and then returns a Request ID with a
+    machine-actionable `nextAction`. Call `get_request` instead of repeating `run_api`.
+  </Accordion>
+  <Accordion title="get_request — resume durable work" icon="clock">
+    Retrieve a durable Request by ID. This reads AnyAPI's stored state and never repeats the paid
+    operation.
 
-    - `duplicate_call_in_progress` means the original run is still working. Nothing
-      has been charged yet; wait a few seconds and repeat the same call.
-    - A completed replay returns the original `output`, `costUsd`, and `items` with
-      `replayed: true`, without another provider run or charge.
+    **Input**
 
-    Completed results remain replayable for about five minutes. A continued run that
-    produces a replayable result charges normally exactly once even if the original
-    MCP request disconnected. Past the replay window, or with any change to the
-    input, the call runs fresh and is billed normally.
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `request_id` | string | yes | The Request ID returned by `run_api` |
+
+    **Returns** the Request status and either its terminal result or a `nextAction` telling the
+    agent when to call `get_request` again.
   </Accordion>
   <Accordion title="get_balance — check your wallet" icon="wallet">
     Get the remaining wallet balance for the API key you authenticate with. Requires a

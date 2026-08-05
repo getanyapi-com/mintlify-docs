@@ -1,0 +1,79 @@
+---
+title: "Durable requests"
+description: "Start long-running AnyAPI calls safely, poll their Request state, and resume after a client timeout or disconnect."
+---
+
+Some APIs need more time than one HTTP connection can reliably stay open. AnyAPI runs those calls
+as durable Requests. The work continues if your client disconnects or your process restarts.
+
+AnyAPI submits a paid provider job at most once. If the provider accepts a submission but the
+network response is lost, AnyAPI keeps the Request in a safe recovery state and never blindly
+repeats the paid operation. When the provider offers no correlation lookup, that rare Request can
+expire instead of risking duplicate spend.
+
+Your normal `POST /v1/run/{sku}` call still returns the standard success envelope when the result is
+ready during the initial wait. Otherwise, it returns `202 Accepted` with a Request ID.
+
+## Start a durable call
+
+Send an `Idempotency-Key` with every durable call. Reuse the same key only when you are resuming the
+same logical invocation with the same SKU and input.
+
+```bash
+curl -i https://api.getanyapi.com/v1/run/YOUR_SKU \
+  -H "Authorization: Bearer $ANYAPI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: $(uuidgen)" \
+  -H "Prefer: respond-async" \
+  -d '{"your":"input"}'
+```
+
+`Prefer: respond-async` asks AnyAPI to return the Request snapshot immediately, even if an existing
+same-key Request has already completed. Omit it to wait up to 10 seconds. You can also send
+`Prefer: wait=N`; AnyAPI clamps `N` to 90 seconds.
+
+A pending response includes `Location`, `Retry-After`, and `X-Anyapi-Request-Id` headers:
+
+```json
+{
+  "requestId": "req_123",
+  "sku": "your.sku",
+  "status": "queued",
+  "createdAt": "2026-08-04T00:00:00Z",
+  "expiresAt": "2026-08-04T00:30:00Z",
+  "retryAfterSeconds": 2
+}
+```
+
+## Poll the Request
+
+Read the Request from the URL in `Location`. Customer polling reads AnyAPI's stored state. It does
+not repeat the paid operation.
+
+```bash
+curl https://api.getanyapi.com/v1/requests/req_123 \
+  -H "Authorization: Bearer $ANYAPI_API_KEY"
+```
+
+The public status is `queued`, `running`, `succeeded`, `failed`, or `expired`. Honor
+`retryAfterSeconds` before polling again. A succeeded snapshot includes the standard run envelope
+as `result`. A failed snapshot includes a safe AnyAPI error code.
+
+Request IDs are private to the wallet customer that created them. Unknown IDs and IDs owned by
+another customer both return `404`.
+
+## Resume safely
+
+Keep both the Request ID and the original idempotency key until the call completes. If a client wait
+times out, resume with `GET /v1/requests/{requestId}`. Do not send another paid POST.
+
+AnyAPI returns the same active Request for concurrent calls that use the same key, SKU, and input.
+It replays a completed success. Reusing a key with different input returns `409`.
+
+Successful output remains retrievable for 24 hours. After that, the Request metadata remains
+available with `resultExpired: true`.
+
+<Note>
+  Durable execution currently requires an authenticated wallet API key. It is not available through
+  anonymous, x402, or MPP payment flows.
+</Note>

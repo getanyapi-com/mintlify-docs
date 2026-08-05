@@ -243,6 +243,35 @@ Per-call transport overrides live alongside these: `timeoutMs` and `maxRetries` 
 `AbortSignal` via `signal`) in TypeScript, and `timeout` / `max_retries` inside `options`
 in Python.
 
+## Long-running APIs
+
+The SDKs transparently follow a `202 Accepted` response by polling the durable Request. The overall
+default remains 300 seconds. If that deadline expires while work is still active, the SDK throws
+`RequestPendingError` with the resumable Request ID instead of losing the operation.
+
+Use `start` when you want the handle immediately. If the same idempotency key already completed,
+`start` returns that terminal run result as `200` instead. Use `requests.get` or `requests.wait` to
+resume an accepted Request:
+
+<CodeGroup>
+```ts TypeScript
+const started = await client.start("your.sku", input);
+if ("requestId" in started) {
+  const snapshot = await client.requests.get(started.requestId);
+  const result = await client.requests.wait(started.requestId);
+}
+```
+
+```python Python
+started = client.start("your.sku", input)
+if hasattr(started, "request_id"):
+    snapshot = client.requests.get(started.request_id)
+    result = client.requests.wait(started.request_id)
+```
+</CodeGroup>
+
+See [Durable requests](/durable-requests) for status, retention, and idempotency details.
+
 ## Errors and retries
 
 Every failure raises an `AnyAPIError` subclass mapped from the HTTP status. Only 429 and
