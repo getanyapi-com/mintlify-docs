@@ -2918,7 +2918,7 @@
         },
         "/v1/run/amazon.bestsellers": {
             "post": {
-                "description": "List the top-ranked products of any Amazon Best Sellers category (rank, title, price, and rating) in one normalized request.\n\n**Price:** billed per result - \\$4.31 per 1,000 results, capped at \\$86.10 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "List the top-ranked products of any Amazon Best Sellers category (rank, title, price, and rating) in one normalized request.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "amazon_bestsellers",
                 "parameters": [
                     {
@@ -2985,6 +2985,7 @@
                                 },
                                 "properties": {
                                     "limit": {
+                                        "default": 20,
                                         "description": "Maximum number of results to return (1-20, default 20). You are billed per result returned, so a lower limit costs less.",
                                         "maximum": 20,
                                         "minimum": 1,
@@ -3258,7 +3259,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.086100",
-                        "min": "0.000000",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -3679,7 +3680,7 @@
         },
         "/v1/run/amazon.reviews": {
             "post": {
-                "description": "Pull up to 50 customer reviews for any Amazon product by ASIN or URL: rating, title, text, date, and verified-purchase badge.\n\n**Price:** \\$18.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Pull up to 50 customer reviews for any Amazon product by ASIN or URL: rating, title, text, date, and verified-purchase badge.\n\n**Price:** \\$1.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "amazon_reviews",
                 "parameters": [
                     {
@@ -3757,6 +3758,7 @@
                                         "type": "array"
                                     },
                                     "limit": {
+                                        "default": 50,
                                         "description": "Maximum number of results to return (1-50, default 50). You are billed per result returned, so a lower limit costs less.",
                                         "maximum": 50,
                                         "minimum": 1,
@@ -4072,7 +4074,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.042100",
-                        "min": "0.018000",
+                        "min": "0.001800",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -4102,7 +4104,7 @@
         },
         "/v1/run/amazon.search": {
             "post": {
-                "description": "Search Amazon from any search or category URL and get up to 20 matching products (title, price, rating, and thumbnail) in one normalized response.\n\n**Price:** billed per result - \\$3.68 per 1,000 results, capped at \\$73.50 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Search Amazon from any search or category URL and get up to 20 matching products (title, price, rating, and thumbnail) in one normalized response.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "amazon_search",
                 "parameters": [
                     {
@@ -4169,6 +4171,7 @@
                                 },
                                 "properties": {
                                     "limit": {
+                                        "default": 20,
                                         "description": "Maximum number of results to return (1-20, default 20). You are billed per result returned, so a lower limit costs less.",
                                         "maximum": 20,
                                         "minimum": 1,
@@ -4440,7 +4443,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.073500",
-                        "min": "0.000000",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -89374,7 +89377,7 @@
         },
         "/v1/run/twitter.community": {
             "post": {
-                "description": "Fetch a Twitter/X community's public details (name, description, member count, join policy) by URL.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Fetch a Twitter/X community's public details (name, description, member count, join policy) by URL.\n\n**Price:** \\$0.18 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "twitter_community",
                 "parameters": [
                     {
@@ -89682,7 +89685,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.002000",
+                        "min": "0.000180",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -89712,7 +89715,7 @@
         },
         "/v1/run/twitter.community_tweets": {
             "post": {
-                "description": "List recent tweets posted in a Twitter/X community by URL.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "List recent tweets posted in a Twitter/X community by URL.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "twitter_community_tweets",
                 "parameters": [
                     {
@@ -90031,7 +90034,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.003600",
+                        "max": "0.003780",
                         "min": "0.002000",
                         "mode": "dynamic"
                     },
@@ -90822,7 +90825,7 @@
         },
         "/v1/run/twitter.profile": {
             "post": {
-                "description": "Fetch a Twitter/X account's public profile (followers, tweets, bio, verification) by handle.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Fetch a Twitter/X account's public profile (followers, tweets, bio, verification) by handle.\n\n**Price:** \\$0.18 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "twitter_profile",
                 "parameters": [
                     {
@@ -91131,7 +91134,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.000750",
+                        "min": "0.000180",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -91161,7 +91164,7 @@
         },
         "/v1/run/twitter.replies": {
             "post": {
-                "description": "Fetch the replies to any X (Twitter) post URL as structured records: author, text, and engagement.\n\n**Price:** billed per result - \\$2.63 per 1,000 requests base + \\$0.27 per 1,000 results, capped at \\$13.20 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Fetch the replies to any X (Twitter) post URL as structured records: author, text, and engagement.\n\n**Price:** billed per result - \\$0.18 per 1,000 requests base + \\$0.18 per 1,000 results, capped at \\$6.66 per 1,000 requests.\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "twitter_replies",
                 "parameters": [
                     {
@@ -91228,7 +91231,7 @@
                                 },
                                 "properties": {
                                     "limit": {
-                                        "description": "Maximum number of results to return (1-40, default 40). You are billed per result returned, so a lower limit costs less.",
+                                        "description": "Maximum number of results to return (1-40, default 40). Per-result lanes cost less at lower limits; a backup that bills its native page may cost up to the advertised request price.",
                                         "maximum": 40,
                                         "minimum": 1,
                                         "type": "integer"
@@ -91500,7 +91503,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.013200",
-                        "min": "0.002630",
+                        "min": "0.000180",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -91530,7 +91533,7 @@
         },
         "/v1/run/twitter.search": {
             "post": {
-                "description": "Search X (Twitter) with full advanced-search syntax (operators like from:, since:, until:, min_faves: work inline in the query) and get structured tweets with text, author, engagement, and cursor pagination. Limit is a per-page maximum; native pages contain approximately 20 tweets unless requireSinglePage selects a bulk lane.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Search X (Twitter) with full advanced-search syntax (operators like from:, since:, until:, min_faves: work inline in the query) and get structured tweets with text, author, engagement, and cursor pagination. Limit is a per-page maximum; native pages contain approximately 20 tweets unless requireSinglePage selects a bulk lane.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "twitter_search",
                 "parameters": [
                     {
@@ -91934,7 +91937,7 @@
         },
         "/v1/run/twitter.trends": {
             "post": {
-                "description": "Get current X (Twitter) trends for worldwide, a country, or a city in X ranking order, including the resolved location.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Get current X (Twitter) trends for worldwide, a country, or a city in X ranking order, including the resolved location.\n\n**Price:** \\$0.18 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "twitter_trends",
                 "parameters": [
                     {
@@ -92266,9 +92269,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000750",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.000750",
+                        "min": "0.000180",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -92297,7 +92301,7 @@
         },
         "/v1/run/twitter.tweet": {
             "post": {
-                "description": "Fetch a single Twitter/X tweet by URL with its full text and engagement counts (likes, retweets, replies, quotes, bookmarks, views).\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Fetch a single Twitter/X tweet by URL with its full text and engagement counts (likes, retweets, replies, quotes, bookmarks, views).\n\n**Price:** \\$0.18 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "twitter_tweet",
                 "parameters": [
                     {
@@ -92612,7 +92616,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.000750",
+                        "min": "0.000180",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -92943,7 +92947,7 @@
         },
         "/v1/run/twitter.user_posts": {
             "post": {
-                "description": "Get an X (Twitter) account's profile Posts-tab timeline by handle. Results follow profile order: a pinned post may appear first, followed by otherwise reverse-chronological authored posts, reposts, quotes, and self-thread continuations.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Get an X (Twitter) account's profile Posts-tab timeline by handle. Results follow profile order: a pinned post may appear first, followed by otherwise reverse-chronological authored posts, reposts, quotes, and self-thread continuations.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "twitter_user_posts",
                 "parameters": [
                     {
@@ -93307,9 +93311,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000750",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003780",
+                        "min": "0.000750",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -93338,7 +93343,7 @@
         },
         "/v1/run/twitter.user_tweets": {
             "post": {
-                "description": "Get up to the requested limit of tweets and replies authored by an X (Twitter) account in one bulk call, with engagement, views, and language. The current lane returns nextCursor as null; cursor is reserved for future cursor-capable lanes.\n\n**Price:** billed per result - \\$0.21 per 1,000 results, capped at \\$210.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Get up to the requested limit of tweets and replies authored by an X (Twitter) account, with engagement, views, language, and cursor pagination where available.\n\n**Price:** billed per result - \\$0.18 per 1,000 requests base + \\$0.18 per 1,000 results, capped at \\$18.18 per 1,000 requests.\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "twitter_user_tweets",
                 "parameters": [
                     {
@@ -93405,7 +93410,7 @@
                                 },
                                 "properties": {
                                     "cursor": {
-                                        "description": "Reserved for cursor-capable lanes. The current bulk lane returns nextCursor as null, so omit this field.",
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page.",
                                         "type": "string"
                                     },
                                     "handle": {
@@ -93420,7 +93425,7 @@
                                         "type": "integer"
                                     },
                                     "requireSinglePage": {
-                                        "description": "Compatibility flag for requiring one response. The current lane already returns up to limit results in one bulk call, whether this is omitted or true.",
+                                        "description": "Require a lane that can return the requested limit in one response.",
                                         "type": "boolean"
                                     }
                                 },
@@ -93469,7 +93474,7 @@
                                                                     "additionalProperties": false,
                                                                     "properties": {
                                                                         "nextCursor": {
-                                                                            "description": "Reserved pagination cursor. The current bulk lane returns null; cursor-capable lanes may return an opaque continuation value in the future.",
+                                                                            "description": "Opaque cursor for the next page when the selected lane supports pagination, otherwise null.",
                                                                             "type": [
                                                                                 "string",
                                                                                 "null"
@@ -93702,7 +93707,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.210000",
-                        "min": "0.000000",
+                        "min": "0.000180",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -107026,7 +107031,7 @@
         },
         "/v1/run/zillow.search": {
             "post": {
-                "description": "Search Zillow for-sale, rental, or sold listings by region-level location (city, ZIP, county, or neighborhood) with optional price, bedroom, living-area, home-type, recency, and sort filters and get matching properties (price, address, beds, baths, living area, status, Zestimate) as normalized JSON.\n\n**Price:** billed per result - \\$0.53 per 1,000 requests base + \\$3.15 per 1,000 results, capped at \\$79.30 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Search Zillow for-sale, rental, or sold listings by region-level location (city, ZIP, county, or neighborhood) with optional price, bedroom, living-area, home-type, recency, and sort filters and get matching properties (price, address, beds, baths, living area, status, Zestimate) as normalized JSON.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "zillow_search",
                 "parameters": [
                     {
@@ -107142,6 +107147,7 @@
                                         "type": "boolean"
                                     },
                                     "limit": {
+                                        "default": 25,
                                         "description": "Maximum number of results to return (1-25, default 25). You are billed per result returned, so a lower limit costs less.",
                                         "maximum": 25,
                                         "minimum": 1,
@@ -107522,7 +107528,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.079300",
-                        "min": "0.000530",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
