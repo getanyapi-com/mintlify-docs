@@ -49972,6 +49972,1303 @@
                 }
             }
         },
+        "/v1/run/linkedin.profile_posts_full": {
+            "post": {
+                "description": "Fetch recent public LinkedIn profile posts with enriched author, engagement, article, newsletter, media, annotation, repost, and social activity details.\n\n**Price:** billed per result - \\$0.06 per 1,000 requests base + \\$1.84 per 1,000 results, capped at \\$184.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "operationId": "linkedin_profile_posts_full",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 10,
+                                "url": "https://www.linkedin.com/in/williamhgates/"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 10,
+                                    "url": "https://www.linkedin.com/in/williamhgates/"
+                                },
+                                "properties": {
+                                    "contextCountry": {
+                                        "description": "Regional LinkedIn context used when retrieving posts.",
+                                        "enum": [
+                                            "any",
+                                            "US",
+                                            "GB",
+                                            "DE",
+                                            "FR"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "includeQuotePosts": {
+                                        "default": true,
+                                        "description": "Whether to include quote posts that add commentary to shared content.",
+                                        "type": "boolean"
+                                    },
+                                    "includeReposts": {
+                                        "default": true,
+                                        "description": "Whether to include reposts that share content without added commentary.",
+                                        "type": "boolean"
+                                    },
+                                    "limit": {
+                                        "default": 10,
+                                        "description": "Maximum number of posts to return (1-100, default 10). You are billed per post returned, so a lower limit costs less.",
+                                        "maximum": 100,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "postedLimit": {
+                                        "description": "Only return posts published within this relative time window.",
+                                        "enum": [
+                                            "any",
+                                            "1h",
+                                            "24h",
+                                            "week",
+                                            "month",
+                                            "3months",
+                                            "6months",
+                                            "year"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "postedLimitDate": {
+                                        "description": "Only return posts published on or after this date or timestamp, using a JavaScript-compatible date-time string.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "url": {
+                                        "description": "Full URL of the public LinkedIn profile whose posts should be returned.",
+                                        "format": "uri",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "LinkedIn Profile Posts (full) input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The enriched profile posts result, or null when no posts were found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Recent enriched posts published by the profile. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "articleDescription": {
+                                                                                        "description": "Description excerpt of the attached article, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "articleImage": {
+                                                                                        "description": "Image URL of the attached article, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "articleImageHeight": {
+                                                                                        "description": "Height of the attached article image in pixels.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "articleImageWidth": {
+                                                                                        "description": "Width of the attached article image in pixels.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "articleLinkLabel": {
+                                                                                        "description": "Accessible display label for the attached article link, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "articleSubtitle": {
+                                                                                        "description": "Subtitle or publisher label of the attached article, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "articleTitle": {
+                                                                                        "description": "Title of the attached article, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "articleUrl": {
+                                                                                        "description": "Canonical URL of the attached article, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "author": {
+                                                                                        "description": "Detailed identity and publication information for the post author. Populated whenever the provider has data for the entity.",
+                                                                                        "properties": {
+                                                                                            "handle": {
+                                                                                                "description": "Public LinkedIn profile handle of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "headline": {
+                                                                                                "description": "Professional headline or follower summary displayed for the author. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "id": {
+                                                                                                "description": "Stable LinkedIn identifier of the author.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "image": {
+                                                                                                "description": "Profile or company image URL of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "imageHeight": {
+                                                                                                "description": "Height of the author image in pixels.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer"
+                                                                                            },
+                                                                                            "imageWidth": {
+                                                                                                "description": "Width of the author image in pixels.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer"
+                                                                                            },
+                                                                                            "name": {
+                                                                                                "description": "Display name of the author.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "profileUrl": {
+                                                                                                "description": "Canonical LinkedIn profile or company URL of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "type": {
+                                                                                                "description": "Author kind, such as profile or company.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "universalName": {
+                                                                                                "description": "Universal LinkedIn name used for company authors, when present.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "website": {
+                                                                                                "description": "Publication or website URL displayed by the author.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "websiteLabel": {
+                                                                                                "description": "Display label for the author's publication or website link.",
+                                                                                                "type": "string"
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "contentAnnotations": {
+                                                                                        "description": "Structured mentions and links embedded in the post text.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "companyId": {
+                                                                                                    "description": "LinkedIn identifier of a mentioned company, when present.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "companyName": {
+                                                                                                    "description": "Display name of a mentioned company, when present.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "companyUrl": {
+                                                                                                    "description": "Canonical LinkedIn URL of a mentioned company, when present.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "hyperlink": {
+                                                                                                    "description": "Canonical hyperlink attached to the annotation, when present.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "length": {
+                                                                                                    "description": "Length of the annotated text span.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "profileFirstName": {
+                                                                                                    "description": "First name of a mentioned profile, when present.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "profileHandle": {
+                                                                                                    "description": "Public LinkedIn handle of a mentioned profile, when present.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "profileId": {
+                                                                                                    "description": "LinkedIn identifier of a mentioned profile, when present.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "profileLastName": {
+                                                                                                    "description": "Last name of a mentioned profile, when present.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "profileUrl": {
+                                                                                                    "description": "Canonical LinkedIn URL of a mentioned profile, when present.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "start": {
+                                                                                                    "description": "Zero-based start offset of the annotation in the post text.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "textLink": {
+                                                                                                    "description": "Canonical text link attached to the annotation, when present.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "type": {
+                                                                                                    "description": "Kind of content annotation.",
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "engagement": {
+                                                                                        "description": "Engagement totals and reaction breakdown for the post. Populated whenever the provider has data for the entity.",
+                                                                                        "properties": {
+                                                                                            "breakdown": {
+                                                                                                "description": "Counts grouped by LinkedIn reaction type.",
+                                                                                                "items": {
+                                                                                                    "properties": {
+                                                                                                        "count": {
+                                                                                                            "description": "Number of reactions of this type.",
+                                                                                                            "minimum": 0,
+                                                                                                            "type": "integer"
+                                                                                                        },
+                                                                                                        "type": {
+                                                                                                            "description": "LinkedIn reaction type.",
+                                                                                                            "type": "string"
+                                                                                                        }
+                                                                                                    },
+                                                                                                    "required": [
+                                                                                                        "type",
+                                                                                                        "count"
+                                                                                                    ],
+                                                                                                    "type": "object"
+                                                                                                },
+                                                                                                "type": "array"
+                                                                                            },
+                                                                                            "comments": {
+                                                                                                "description": "Total number of comments on the post. Populated whenever the provider has data for the entity.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "reactions": {
+                                                                                                "description": "Total number of reactions on the post. Populated whenever the provider has data for the entity.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "reposts": {
+                                                                                                "description": "Total number of reposts or shares of the post. Populated whenever the provider has data for the entity.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Unique identifier of the LinkedIn post. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "images": {
+                                                                                        "description": "Images attached to the post.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "height": {
+                                                                                                    "description": "Height of the image in pixels.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "url": {
+                                                                                                    "description": "URL of the attached image.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "width": {
+                                                                                                    "description": "Width of the image in pixels.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "integer"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "url"
+                                                                                            ],
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "newsletterTitle": {
+                                                                                        "description": "Title of the LinkedIn newsletter associated with the post, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "newsletterUrl": {
+                                                                                        "description": "Canonical URL of the LinkedIn newsletter associated with the post, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "publicationUrl": {
+                                                                                        "description": "Canonical LinkedIn feed publication URL for the post.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostArticleDescription": {
+                                                                                        "description": "Description excerpt of the reposted post's article, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostArticleImage": {
+                                                                                        "description": "Image URL of the reposted post's article, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostArticleImageHeight": {
+                                                                                        "description": "Height of the reposted post's article image in pixels.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "repostArticleImageWidth": {
+                                                                                        "description": "Width of the reposted post's article image in pixels.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "repostArticleLinkLabel": {
+                                                                                        "description": "Accessible display label for the reposted post's article link, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostArticleSubtitle": {
+                                                                                        "description": "Subtitle or publisher label of the reposted post's article, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostArticleTitle": {
+                                                                                        "description": "Title of the article attached to the reposted post, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostArticleUrl": {
+                                                                                        "description": "Canonical URL of the reposted post's article, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostAuthorHandle": {
+                                                                                        "description": "Public LinkedIn profile handle of the reposted post's author, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostAuthorHeadline": {
+                                                                                        "description": "Headline or follower summary of the reposted post's author, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostAuthorId": {
+                                                                                        "description": "Stable LinkedIn identifier of the reposted post's author, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostAuthorImage": {
+                                                                                        "description": "Image URL of the reposted post's author, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostAuthorName": {
+                                                                                        "description": "Display name of the reposted post's author, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostAuthorType": {
+                                                                                        "description": "Author kind for the reposted post, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostAuthorUniversalName": {
+                                                                                        "description": "Universal LinkedIn name of the reposted post's company author, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostAuthorUrl": {
+                                                                                        "description": "Canonical LinkedIn URL of the reposted post's author, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostCreatedUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time) when the reposted post was published. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "repostId": {
+                                                                                        "description": "Unique identifier of the reposted post, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostImages": {
+                                                                                        "description": "Images attached to the reposted post.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "height": {
+                                                                                                    "description": "Height of the reposted image in pixels.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "url": {
+                                                                                                    "description": "URL of an image attached to the reposted post.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "width": {
+                                                                                                    "description": "Width of the reposted image in pixels.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "integer"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "url"
+                                                                                            ],
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "repostText": {
+                                                                                        "description": "Text content of the reposted post, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostUrl": {
+                                                                                        "description": "Canonical URL of the reposted post, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "socialContent": {
+                                                                                        "description": "LinkedIn visibility and action flags for the post.",
+                                                                                        "properties": {
+                                                                                            "hideCommentAction": {
+                                                                                                "description": "Whether LinkedIn hides the comment action.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "hideCommentsCount": {
+                                                                                                "description": "Whether LinkedIn hides the comment count.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "hideReactAction": {
+                                                                                                "description": "Whether LinkedIn hides the react action.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "hideReactionsCount": {
+                                                                                                "description": "Whether LinkedIn hides the reaction count.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "hideRepostsCount": {
+                                                                                                "description": "Whether LinkedIn hides the repost count.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "hideSendAction": {
+                                                                                                "description": "Whether LinkedIn hides the send action.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "hideShareAction": {
+                                                                                                "description": "Whether LinkedIn hides the share action.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "hideSocialActivityCounts": {
+                                                                                                "description": "Whether LinkedIn hides social activity counts.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "hideViewsCount": {
+                                                                                                "description": "Whether LinkedIn hides the view count.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "shareUrl": {
+                                                                                                "description": "Canonical LinkedIn share URL for the post.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "showContributionExperience": {
+                                                                                                "description": "Whether LinkedIn enables the contribution experience.",
+                                                                                                "type": "boolean"
+                                                                                            },
+                                                                                            "showSocialDetail": {
+                                                                                                "description": "Whether LinkedIn shows social detail.",
+                                                                                                "type": "boolean"
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object"
+                                                                                    },
+                                                                                    "text": {
+                                                                                        "description": "Text content of the post. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "type": {
+                                                                                        "description": "LinkedIn record type reported for the post.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Canonical LinkedIn URL of the post. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "videoThumbnail": {
+                                                                                        "description": "Thumbnail URL of the attached video, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "videoUrl": {
+                                                                                        "description": "URL of the attached video, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id",
+                                                                                    "url",
+                                                                                    "text",
+                                                                                    "createdUtc"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "items"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether profile posts were found.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "LinkedIn Profile Posts (full) output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap (no charge). Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "LinkedIn Profile Posts (full)",
+                "tags": [
+                    "linkedin"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.184000",
+                        "min": "0.000060",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/linkedin.profile_posts_thin": {
+            "post": {
+                "description": "Fetch recent public LinkedIn profile posts with portable identity, author, engagement, article, image, video, and repost fields.\n\n**Price:** billed per result - \\$1.37 per 1,000 results, capped at \\$137.00 per 1,000 requests.\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "operationId": "linkedin_profile_posts_thin",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 10,
+                                "url": "https://www.linkedin.com/in/williamhgates/"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 10,
+                                    "url": "https://www.linkedin.com/in/williamhgates/"
+                                },
+                                "properties": {
+                                    "limit": {
+                                        "default": 10,
+                                        "description": "Maximum number of posts to return (10-100, default 10). You are billed per post returned, so a lower limit costs less.",
+                                        "maximum": 100,
+                                        "minimum": 10,
+                                        "type": "integer"
+                                    },
+                                    "url": {
+                                        "description": "Full URL of the public LinkedIn profile whose posts should be returned.",
+                                        "format": "uri",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "LinkedIn Profile Posts (basic) input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The profile posts result, or null when no posts were found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Recent posts published by the profile. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "articleImage": {
+                                                                                        "description": "Image URL of the attached article, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "articleSubtitle": {
+                                                                                        "description": "Subtitle or publisher label of the attached article, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "articleTitle": {
+                                                                                        "description": "Title of the attached article, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "articleUrl": {
+                                                                                        "description": "Canonical URL of the attached article, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "author": {
+                                                                                        "description": "Portable details about the post author. Populated whenever the provider has data for the entity.",
+                                                                                        "properties": {
+                                                                                            "handle": {
+                                                                                                "description": "Public LinkedIn handle of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "headline": {
+                                                                                                "description": "Professional headline displayed for the author. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "image": {
+                                                                                                "description": "Profile image URL of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "profileUrl": {
+                                                                                                "description": "Canonical LinkedIn profile URL of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "engagement": {
+                                                                                        "description": "Portable engagement totals for the post. Populated whenever the provider has data for the entity.",
+                                                                                        "properties": {
+                                                                                            "comments": {
+                                                                                                "description": "Total number of comments on the post. Populated whenever the provider has data for the entity.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "reactions": {
+                                                                                                "description": "Total number of reactions on the post. Populated whenever the provider has data for the entity.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "reposts": {
+                                                                                                "description": "Total number of reposts or shares of the post. Populated whenever the provider has data for the entity.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Unique identifier of the LinkedIn post. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "images": {
+                                                                                        "description": "Images attached to the post.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "url": {
+                                                                                                    "description": "URL of an attached image.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "url"
+                                                                                            ],
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "repostArticleTitle": {
+                                                                                        "description": "Title of the article attached to the reposted post, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostArticleUrl": {
+                                                                                        "description": "Canonical URL of the article attached to the reposted post, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostCreatedUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time) when the reposted post was published. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "repostId": {
+                                                                                        "description": "Unique identifier of the reposted post, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostText": {
+                                                                                        "description": "Text content of the reposted post, when present.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "repostUrl": {
+                                                                                        "description": "Canonical URL of the reposted post, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "text": {
+                                                                                        "description": "Text content of the post. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Canonical LinkedIn URL of the post. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "videoThumbnail": {
+                                                                                        "description": "Thumbnail URL of the attached video, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "videoUrl": {
+                                                                                        "description": "URL of the attached video, when present.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id",
+                                                                                    "url",
+                                                                                    "text",
+                                                                                    "createdUtc"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "items"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether profile posts were found.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "LinkedIn Profile Posts (basic) output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap (no charge). Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "LinkedIn Profile Posts (basic)",
+                "tags": [
+                    "linkedin"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.184000",
+                        "min": "0.000000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/linkedin.profile_thin": {
             "post": {
                 "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$1.44 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
