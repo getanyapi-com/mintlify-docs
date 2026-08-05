@@ -38,7 +38,9 @@ Repo: [github.com/getanyapi-com/cli](https://github.com/getanyapi-com/cli)
 | `anyapi search <query>` | Searches the public catalog and prints matching SKUs, names, and USD price terms. |
 | `anyapi list [--category <category>]` | Lists catalog APIs, optionally filtered by category. |
 | `anyapi describe <sku>` | Prints the authenticated API definition, including schemas and USD pricing. |
-| `anyapi run <sku> --input '<json>' [-i file] [--fields a,b] [--max-items N] [--summary] [-o path] [--json]` | Runs an API with JSON input. |
+| `anyapi run <sku> --input '<json>' [-i file] [--no-wait] [--fields a,b] [--max-items N] [--summary] [-o path] [--json]` | Runs an API with JSON input and waits for durable completion by default. |
+| `anyapi requests get <request-id>` | Gets the current state of a durable Request. |
+| `anyapi requests wait <request-id>` | Waits for a durable Request and prints its result. |
 | `anyapi balance` | Prints the remaining USD balance for the active key. |
 | `anyapi init [--all] [--yes]` | Installs bundled agent skills, shows or applies MCP setup snippets, and mints a free trial key if none is stored. |
 | `anyapi setup skills` | Installs only the bundled skills. |
@@ -127,6 +129,11 @@ response JSON to stdout instead, or `-o path` to choose the output file.
 
 The gateway normalizes the successful response. The CLI preserves the `output` object
 as customer data instead of recursively deleting or rewriting its keys.
+
+For a long-running API, the CLI waits and polls the returned Request by default. Pass `--no-wait`
+to return its Request ID immediately. If you press Ctrl-C after acceptance, the CLI prints the
+`anyapi requests wait <request-id>` command you can use to resume. Automatic idempotency uses a
+fresh random key for each logical CLI invocation.
 
 ## Context-budget flags
 

@@ -13,7 +13,7 @@ merge the results.
 |---|---|
 | **Package** | [`n8n-nodes-anyapi`](https://www.npmjs.com/package/n8n-nodes-anyapi) |
 | **Source** | [github.com/getanyapi-com/n8n-nodes-anyapi](https://github.com/getanyapi-com/n8n-nodes-anyapi) |
-| **Node** | **AnyAPI** (operations: Run API, Get API Schema, List APIs, Search APIs, Get Balance) |
+| **Node** | **AnyAPI** (operations include Run API, Get/Wait Request, discovery, and balance) |
 | **Credential** | **AnyAPI API** (paste your key; Bearer auth) |
 
 ## Prerequisites
@@ -67,7 +67,7 @@ The node authenticates with one **AnyAPI API** credential.
 
 ## Operations
 
-The single **AnyAPI** node exposes five operations.
+The single **AnyAPI** node exposes execution, Request retrieval, discovery, and balance operations.
 
 <AccordionGroup>
   <Accordion title="Run API - execute any API by SKU" icon="bolt">
@@ -77,6 +77,14 @@ The single **AnyAPI** node exposes five operations.
     Returns the normalized `output`, the serving `provider` (always **AnyAPI**), the `costUsd`
     of the call in real dollars, and `items` (the number of results charged for). You are billed
     on success only.
+
+    The node waits and polls long-running calls by default. Enable **Return Immediately** to emit a
+    resumable Request ID. The node sends the paid POST once and polls AnyAPI's Request state.
+  </Accordion>
+  <Accordion title="Get or Wait Request - resume long-running work" icon="clock">
+    **Get Request** returns the current stored state. **Wait for Request** polls that state until the
+    terminal result is ready. Connect the Request ID from a **Run API** node configured with
+    **Return Immediately**.
   </Accordion>
   <Accordion title="Get API Schema - inspect input and output" icon="file-lines">
     Fetch the input and output JSON Schema for one API. Use the input schema to build a valid
