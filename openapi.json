@@ -3288,7 +3288,7 @@
         },
         "/v1/run/amazon.product": {
             "post": {
-                "description": "Fetch full Amazon product details (title, brand, price when in stock, images, ratings, review count, variants, and attributes) from a product URL.\n\n**Price:** billed per result - \\$1.05 per 1,000 requests base + \\$8.51 per 1,000 results, capped at \\$9.56 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Fetch full Amazon product details (title, brand, price when in stock, images, ratings, review count, variants, and attributes) from a product URL.\n\n**Price:** \\$1.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "amazon_product",
                 "parameters": [
                     {
@@ -3649,7 +3649,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.009560",
-                        "min": "0.001050",
+                        "min": "0.001800",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -30456,7 +30456,7 @@
         },
         "/v1/run/google.search": {
             "post": {
-                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON.\n\n**Price:** \\$0.99 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON.\n\n**Price:** \\$0.99 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "google_search",
                 "parameters": [
                     {
@@ -30795,9 +30795,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000990",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.001260",
+                        "min": "0.000990",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -47588,7 +47589,7 @@
         },
         "/v1/run/linkedin.jobs_thin": {
             "post": {
-                "description": "Cheap job index: title, company, location, posted date, URL. No description, salary, applicant counts, or seniority - for those use linkedin.jobs.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Cheap job index: title, company, location, posted date, URL. No description, salary, applicant counts, or seniority - for those use linkedin.jobs.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "linkedin_jobs_thin",
                 "parameters": [
                     {
@@ -47968,9 +47969,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.001200",
+                        "min": "0.000900",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -47999,7 +48001,7 @@
         },
         "/v1/run/linkedin.post": {
             "post": {
-                "description": "Fetch a single LinkedIn post or article by URL (title, text, author, like and comment counts, publish date).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Fetch a single LinkedIn post or article by URL (title, text, author, like and comment counts, publish date).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "linkedin_post",
                 "parameters": [
                     {
@@ -48306,7 +48308,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.002000",
-                        "min": "0.001200",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -49972,7 +49974,7 @@
         },
         "/v1/run/linkedin.profile_thin": {
             "post": {
-                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$1.44 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "linkedin_profile_thin",
                 "parameters": [
                     {
@@ -50380,9 +50382,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.002000",
+                        "min": "0.001440",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -57908,7 +57911,7 @@
         },
         "/v1/run/reddit.post": {
             "post": {
-                "description": "Fetch a single Reddit post by URL, including its full body text, score, comment count, upvote ratio, and subreddit, as normalized JSON.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Fetch a single Reddit post by URL, including its full body text, score, comment count, upvote ratio, and subreddit, as normalized JSON.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "reddit_post",
                 "parameters": [
                     {
@@ -58245,7 +58248,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.001200",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -59332,7 +59335,7 @@
         },
         "/v1/run/reddit.search": {
             "post": {
-                "description": "Search Reddit posts across all subreddits by query.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Search Reddit posts across all subreddits by query.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "reddit_search",
                 "parameters": [
                     {
@@ -59698,7 +59701,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.001200",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -60066,7 +60069,7 @@
         },
         "/v1/run/reddit.subreddit_posts": {
             "post": {
-                "description": "Fetch posts from a subreddit listing (hot, new, or top).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Fetch posts from a subreddit listing (hot, new, or top).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "reddit_subreddit_posts",
                 "parameters": [
                     {
@@ -60444,9 +60447,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.002000",
+                        "min": "0.000900",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -61625,7 +61629,7 @@
         },
         "/v1/run/reddit.user_posts": {
             "post": {
-                "description": "List a Reddit user's posts by username, sorted by new, top, hot, or controversial, with cursor pagination.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "List a Reddit user's posts by username, sorted by new, top, hot, or controversial, with cursor pagination.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "reddit_user_posts",
                 "parameters": [
                     {
@@ -61979,9 +61983,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.001200",
+                        "min": "0.000900",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -78217,7 +78222,7 @@
         },
         "/v1/run/tiktok.hashtag_videos": {
             "post": {
-                "description": "List recent TikTok videos for a hashtag (creator, caption, views, likes, shares).\n\n**Price:** \\$3.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "List recent TikTok videos for a hashtag (creator, caption, views, likes, shares).\n\n**Price:** \\$1.44 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "tiktok_hashtag_videos",
                 "parameters": [
                     {
@@ -78551,7 +78556,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.063000",
-                        "min": "0.003600",
+                        "min": "0.001440",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -78923,7 +78928,7 @@
         },
         "/v1/run/tiktok.profile": {
             "post": {
-                "description": "Fetch a TikTok creator's public profile (followers, likes, bio, verification) by handle.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Fetch a TikTok creator's public profile (followers, likes, bio, verification) by handle.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "tiktok_profile",
                 "parameters": [
                     {
@@ -79233,7 +79238,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.001200",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -82447,7 +82452,7 @@
         },
         "/v1/run/tiktok.video": {
             "post": {
-                "description": "Fetch a single TikTok video by URL with its caption and engagement counts (views, likes, comments, shares, saves).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Fetch a single TikTok video by URL with its caption and engagement counts (views, likes, comments, shares, saves).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "tiktok_video",
                 "parameters": [
                     {
@@ -82753,7 +82758,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.001200",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -82783,7 +82788,7 @@
         },
         "/v1/run/tiktok.video_comments": {
             "post": {
-                "description": "List the comments on a TikTok video by URL with cursor pagination (text, author, likes, reply count).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "List the comments on a TikTok video by URL with cursor pagination (text, author, likes, reply count).\n\n**Price:** \\$1.44 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "tiktok_video_comments",
                 "parameters": [
                     {
@@ -83104,7 +83109,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.002000",
+                        "min": "0.001440",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -97737,7 +97742,7 @@
         },
         "/v1/run/youtube.channel": {
             "post": {
-                "description": "Fetch a YouTube channel's stats (subscribers, video count, total views, description) by handle or channel ID.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Fetch a YouTube channel's stats (subscribers, video count, total views, description) by handle or channel ID.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "youtube_channel",
                 "parameters": [
                     {
@@ -98050,7 +98055,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.002000",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -99547,7 +99552,7 @@
         },
         "/v1/run/youtube.channel_videos": {
             "post": {
-                "description": "List a YouTube channel's videos by handle or channel ID with cursor pagination (title, views, length, publish time).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "List a YouTube channel's videos by handle or channel ID with cursor pagination (title, views, length, publish time).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "youtube_channel_videos",
                 "parameters": [
                     {
@@ -99892,7 +99897,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.002000",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -100952,7 +100957,7 @@
         },
         "/v1/run/youtube.search": {
             "post": {
-                "description": "Search YouTube and get matching videos (title, channel, views, length, publish time) as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
+                "description": "Search YouTube and get matching videos (title, channel, views, length, publish time) as normalized JSON.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "youtube_search",
                 "parameters": [
                     {
@@ -101293,7 +101298,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.002000",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -105327,7 +105332,7 @@
         },
         "/v1/run/zillow.property": {
             "post": {
-                "description": "Fetch full details for a single Zillow property listing by URL (price, facts and features, photos, and price/tax history).\n\n**Price:** billed per result - \\$2.52 per 1,000 results, capped at \\$2.52 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Fetch full details for a single Zillow property listing by URL (price, facts and features, photos, and price/tax history).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "zillow_property",
                 "parameters": [
                     {
@@ -105694,7 +105699,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.002520",
-                        "min": "0.000000",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
