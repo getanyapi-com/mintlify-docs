@@ -11,6 +11,25 @@ provider errors.
 No per-provider signups, no monthly plans, no juggling credentials. Top up a
 single wallet and start calling.
 
+## Build from the API contract
+
+Before you write a request, select the SKU and fetch its contract:
+
+```text
+GET https://api.getanyapi.com/v1/apis/{sku}
+```
+
+With MCP, call `get_api` for the selected SKU instead. Use only the fields declared in
+`inputSchema`. Input fields are SKU-specific, so do not add familiar names such as `limit`,
+`cursor`, `page`, or `sort` unless that schema declares them. If the API returns
+`invalid_input`, compare the request with the schema. Do not retry with guessed field names.
+
+If you are using a coding agent, give it the maintained AnyAPI integration instructions:
+
+```text
+Set up https://getanyapi.com/SKILL.md
+```
+
 ## Why AnyAPI
 
 <CardGroup cols={2}>
@@ -59,14 +78,13 @@ you pay nothing.
 
 Most APIs are **priced per result**: a per-item rate for each result returned (a
 few also add a small base fee), so a call that returns 5 results costs less than
-one that returns 50. Set `limit` in
-your input to cap how many results you get (and what you pay); the response
-reports `items` — the count you were charged for. Catalog and `get_api` results
-carry nested `pricing`: `pricing.from` is the cheapest complete flat or linear
-offer, while `pricing.failoverMaxUsd` is the greatest fallback ceiling. Linear
-offers name their billable `unit` and include `baseUsd`, `perUnitUsd`, and
-`maxUsd`, so you can budget before making a call. Simple lookups are flat per
-request.
+one that returns 50. Some input schemas declare a result cap such as `limit`. Use
+that field only when the selected SKU's `inputSchema` declares it. The response
+reports `items`, the count you were charged for. Catalog and `get_api` results carry
+nested `pricing`: `pricing.from` is the cheapest complete flat or linear offer,
+while `pricing.failoverMaxUsd` is the greatest fallback ceiling. Linear offers name
+their billable `unit` and include `baseUsd`, `perUnitUsd`, and `maxUsd`, so you can
+budget before making a call. Simple lookups are flat per request.
 
 ## For AI agents
 

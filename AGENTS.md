@@ -41,5 +41,6 @@ with `npx skills add https://mintlify.com/docs`.
 
 ## Local gate
 
-Run `bash scripts/check-docs-nav.sh`, `mint validate --telemetry false`, and
-`mint broken-links --telemetry false` before handing off customer-facing changes.
+Run `bash scripts/check-docs-nav.sh`, `bash scripts/check-agent-contract.sh`,
+`mint validate --telemetry false`, and `mint broken-links --telemetry false` before handing off
+customer-facing changes.
