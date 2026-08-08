@@ -23,6 +23,11 @@ jobs:
       - name: docs.json nav guard
         run: bash scripts/check-docs-nav.sh
 
+      # 2. Agent contract guard: the docs root must direct generated integrations
+      #    to each SKU's schema and must not claim that common input fields are universal.
+      - name: agent contract guard
+        run: bash scripts/check-agent-contract.sh
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -30,7 +35,7 @@ jobs:
       - name: install Mintlify CLI
         run: npm install -g mint
 
-      # 2. Strict build validation (the Mintlify-supported CI command): fails on
+      # 3. Strict build validation (the Mintlify-supported CI command): fails on
       #    any build warning/error - invalid MDX, bad refs, broken openapi.
       #    Runs headless (no browser, no dev server, stdin closed) and uses the
       #    latest client so it matches what the cloud build runs.
@@ -40,6 +45,6 @@ jobs:
       - name: mint validate (strict build)
         run: mint validate --telemetry false < /dev/null
 
-      # 3. Link integrity across the whole generated site.
+      # 4. Link integrity across the whole generated site.
       - name: broken links
         run: mint broken-links --telemetry false < /dev/null

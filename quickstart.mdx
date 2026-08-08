@@ -58,6 +58,11 @@ Prefer to do it yourself? Follow the manual steps below.
     `X-API-Key` header (or `Authorization: Bearer`) and the SKU's normalized input
     as the JSON body.
 
+    The example below uses the published `tiktok.profile` input. When you integrate a
+    different SKU, fetch `GET /v1/apis/{sku}` first and construct the body from its
+    `inputSchema`. Do not transfer fields from another API or retry invalid input with
+    guessed aliases.
+
     <CodeGroup>
     ```bash curl
     curl -s https://api.getanyapi.com/v1/run/tiktok.profile \
@@ -134,6 +139,9 @@ curl -s "https://api.getanyapi.com/catalog/search?q=tiktok&limit=10"
 # Inspect one API's input and output schemas
 curl -s https://api.getanyapi.com/v1/apis/tiktok.profile -H "X-API-Key: YOUR_ANYAPI_KEY"
 ```
+
+Treat `inputSchema` as the request contract. Send only properties it declares. A field used by
+one search API, including `limit`, `cursor`, `page`, or `sort`, may be invalid for another.
 
 Browse and search results report `provider: "AnyAPI"` and nested USD `pricing`.
 `pricing.from` is the primary static offer, `pricing.failoverMaxUsd` is the maximum
