@@ -82255,7 +82255,7 @@
         },
         "/v1/run/tiktok.ad_library_ad": {
             "post": {
-                "description": "Fetch full details for a single TikTok ad (brand, title, spend, CTR, objectives, landing page, and video info).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "description": "Fetch full details for a single TikTok ad (brand, title, spend, CTR, objectives, landing page, and video info).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes - a failed attempt fails over to the next lane automatically, and the same normalized schema comes back either way.",
                 "operationId": "tiktok_ad_library_ad",
                 "parameters": [
                     {
@@ -82585,9 +82585,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.002000",
+                        "min": "0.001200",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -83104,6 +83105,447 @@
                 "x-payment-info": {
                     "price": {
                         "amount": "0.002000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/tiktok.ad_transparency_search": {
+            "post": {
+                "description": "Search TikTok's EU Commercial Content Library by keyword or advertiser ID.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "operationId": "tiktok_ad_transparency_search",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "days": 30,
+                                "limit": 20,
+                                "query": "nike",
+                                "region": "DE"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "anyOf": [
+                                    {
+                                        "required": [
+                                            "query"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "advertiserId"
+                                        ]
+                                    }
+                                ],
+                                "example": {
+                                    "days": 30,
+                                    "limit": 20,
+                                    "query": "nike",
+                                    "region": "DE"
+                                },
+                                "properties": {
+                                    "advertiserId": {
+                                        "description": "TikTok Commercial Content Library advertiser ID. Provide advertiserId or query.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "cursor": {
+                                        "description": "Search cursor from a previous response's nextCursor.",
+                                        "type": "string"
+                                    },
+                                    "days": {
+                                        "default": 30,
+                                        "description": "Number of days of Commercial Content Library history to search, from 1 to 365. Defaults to 30.",
+                                        "maximum": 365,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "limit": {
+                                        "default": 20,
+                                        "description": "Maximum number of ads to return, from 1 to 50. Defaults to 20. Billing is flat per request.",
+                                        "maximum": 50,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "offset": {
+                                        "default": 0,
+                                        "description": "Zero-based result offset. Defaults to 0.",
+                                        "minimum": 0,
+                                        "type": "integer"
+                                    },
+                                    "query": {
+                                        "description": "Keyword to search in TikTok's EU Commercial Content Library. Provide query or advertiserId.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "region": {
+                                        "default": "DE",
+                                        "description": "Region code for the transparency search. Defaults to DE.",
+                                        "type": "string"
+                                    },
+                                    "sort": {
+                                        "default": "last_shown_date,desc",
+                                        "description": "Upstream sort expression. Defaults to last_shown_date,desc.",
+                                        "type": "string"
+                                    }
+                                },
+                                "title": "TikTok Ad Transparency Search input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "Ad transparency search results and pagination, or null when no ads were found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "ads": {
+                                                                            "description": "Commercial Content Library ad records returned for the search. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "advertiserName": {
+                                                                                        "description": "Advertiser display name associated with the ad. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "firstShownUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the ad was first shown. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "format": {
+                                                                                        "description": "Commercial Content Library creative format code for the ad. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "TikTok Commercial Content Library ad identifier. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "image": {
+                                                                                        "description": "Signed cover image URL exactly as returned by the Commercial Content Library. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "lastShownUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the ad was last shown. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "status": {
+                                                                                        "description": "Commercial Content Library audit status code for the ad. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "videoUrl": {
+                                                                                        "description": "Signed video asset URL exactly as returned by the Commercial Content Library. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "hasMore": {
+                                                                            "description": "Whether the Commercial Content Library reports more matching ads. Populated whenever the provider has data for the entity.",
+                                                                            "type": "boolean",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Search cursor to pass as cursor on a subsequent request, or null when there is no next page. Populated whenever the provider has data for the entity.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ],
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "offset": {
+                                                                            "description": "Zero-based result offset reported for this page.",
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "region": {
+                                                                            "description": "Region code applied to this transparency search. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "total": {
+                                                                            "description": "Total number of matching ads reported by the Commercial Content Library. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "nextCursor",
+                                                                        "hasMore",
+                                                                        "total",
+                                                                        "offset",
+                                                                        "region",
+                                                                        "ads"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "True when TikTok's EU Commercial Content Library returned at least one ad.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "TikTok Ad Transparency Search output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap (no charge). Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "TikTok Ad Transparency Search",
+                "tags": [
+                    "tiktok"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.000900",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -88385,6 +88827,495 @@
                         "max": "0.003600",
                         "min": "0.002000",
                         "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/tiktok.top_ads_search": {
+            "post": {
+                "description": "Search TikTok Creative Center top video ads by keyword with explicit performance, objective, region, language, and time-window filters.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Failed attempts are never billed.",
+                "operationId": "tiktok_top_ads_search",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "query": "glasses"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "query": "glasses"
+                                },
+                                "properties": {
+                                    "adLanguage": {
+                                        "default": "en",
+                                        "description": "Language code for returned ads (default en).",
+                                        "enum": [
+                                            "en",
+                                            "es",
+                                            "ar",
+                                            "vi",
+                                            "th",
+                                            "de",
+                                            "id",
+                                            "pt",
+                                            "fr",
+                                            "ms",
+                                            "nl",
+                                            "ja",
+                                            "it",
+                                            "ro",
+                                            "zh-Hant",
+                                            "ko"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "limit": {
+                                        "default": 20,
+                                        "description": "Maximum number of ads requested for this page, from 1 through 20 (default 20).",
+                                        "maximum": 20,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "objective": {
+                                        "default": "traffic",
+                                        "description": "Campaign objective filter (default traffic).",
+                                        "enum": [
+                                            "traffic",
+                                            "app_installs",
+                                            "conversions",
+                                            "video_views",
+                                            "reach",
+                                            "lead_generation",
+                                            "product_sales"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "orderBy": {
+                                        "default": "for_you",
+                                        "description": "Result ordering: Creative Center recommendations or like count (default for_you).",
+                                        "enum": [
+                                            "for_you",
+                                            "likes"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "page": {
+                                        "default": 1,
+                                        "description": "One-based provider page number (default 1).",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "performanceRank": {
+                                        "default": "top_1_20",
+                                        "description": "Ad performance percentile bucket, where top_1_20 is the highest-performing 20 percent (default top_1_20).",
+                                        "enum": [
+                                            "top_1_20",
+                                            "top_21_40",
+                                            "top_41_60",
+                                            "top_61_80"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "period": {
+                                        "default": 180,
+                                        "description": "Lookback period in days (default 180).",
+                                        "enum": [
+                                            7,
+                                            30,
+                                            180
+                                        ],
+                                        "type": "integer"
+                                    },
+                                    "query": {
+                                        "description": "Keyword to search in TikTok Creative Center top video ads.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "region": {
+                                        "default": "US",
+                                        "description": "Country code used to select the Creative Center market (default US).",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "query"
+                                ],
+                                "title": "TikTok Top Ads Search input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "Top-ad results and page metadata, or null when no matching ads were found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "ads": {
+                                                                            "description": "TikTok Creative Center top-ad records returned for this page. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "adId": {
+                                                                                        "description": "TikTok Creative Center ad material identifier. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "adTitle": {
+                                                                                        "description": "Title or primary copy shown for the ad. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "brandName": {
+                                                                                        "description": "Advertiser brand name when supplied by TikTok Creative Center. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "cost": {
+                                                                                        "description": "TikTok Creative Center's relative cost ranking value for the ad. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "ctr": {
+                                                                                        "description": "TikTok Creative Center's click-through rate value for the ad. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "durationSeconds": {
+                                                                                        "description": "Video duration in seconds. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "height": {
+                                                                                        "description": "Video height in pixels. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "image": {
+                                                                                        "description": "Signed video cover image URL exactly as returned by TikTok Creative Center. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "industry": {
+                                                                                        "description": "TikTok Creative Center industry classification key. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "likes": {
+                                                                                        "description": "Number of likes reported for the ad. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "objective": {
+                                                                                        "description": "TikTok Creative Center campaign objective key. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "videoUrl": {
+                                                                                        "description": "Signed 720p video asset URL exactly as returned by TikTok Creative Center. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "width": {
+                                                                                        "description": "Video width in pixels. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "adId"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "hasMore": {
+                                                                            "description": "Whether TikTok Creative Center reports another page of matching ads. Populated whenever the provider has data for the entity.",
+                                                                            "type": "boolean",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "page": {
+                                                                            "description": "One-based page number reported by TikTok Creative Center. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "pageSize": {
+                                                                            "description": "Page size reported by TikTok Creative Center. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "total": {
+                                                                            "description": "Total number of matching top ads reported by TikTok Creative Center. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "page",
+                                                                        "pageSize",
+                                                                        "total",
+                                                                        "hasMore",
+                                                                        "ads"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "True when TikTok Creative Center returned at least one matching top ad.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "TikTok Top Ads Search output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request (no charge)."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap (no charge). Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource (no charge)."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can (no charge)."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited, retry shortly (no charge)."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error (charge released)."
+                    }
+                },
+                "summary": "TikTok Top Ads Search",
+                "tags": [
+                    "tiktok"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.001200",
+                        "currency": "USD",
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
