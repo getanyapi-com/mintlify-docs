@@ -151,8 +151,8 @@ they do not recalculate relationships between prices, lanes, or failover.
     **Returns** `scrapers`, an array containing `id`, `slug`, `name`, `category`,
     `provider`, nested `pricing`, `failover`, and optional `heavy` and
     `excludesCallerDelay`. `failover` reports whether AnyAPI currently has an alternate
-    route. Descriptions, lanes, health, schemas, eligibility, and relevance are omitted.
-    Use `search_apis` for every ranked free-text query.
+    route. Descriptions, lanes, health, schemas, latency, eligibility, and relevance are
+    omitted. Use `search_apis` for every ranked free-text query.
   </Accordion>
   <Accordion title="search_apis — find an API by intent" icon="magnifying-glass">
     Search APIs by meaning and keyword across name, slug, and description, returning matches **with
@@ -170,7 +170,8 @@ they do not recalculate relationships between prices, lanes, or failover.
 
     **Returns** `results` with the list fields, including `failover`, plus `description`
     and response-relative `relevance`, `total` before the limit, and `ranking`
-    (`semantic` or `keyword`). Lanes, health, schemas, and eligibility are omitted.
+    (`semantic` or `keyword`). Lanes, health, schemas, latency, and eligibility are
+    omitted.
   </Accordion>
   <Accordion title="get_api — inspect input and output schemas" icon="file-lines">
     Get the full definition of one API by SKU, including its normalized input and output
@@ -183,12 +184,28 @@ they do not recalculate relationships between prices, lanes, or failover.
     | `sku_id` | string | yes | The API SKU slug to describe |
 
     **Returns** the list fields, including `failover`, plus `description`, anonymous lane
-    pricing, input/output JSON schemas, and optional `tryEligible`. Lane health is
-    omitted. Use the input schema to build a valid payload for `run_api`.
+    pricing, input/output JSON schemas, nullable `latency`, and optional `tryEligible`.
+    Lane health is omitted. Use the input schema to build a valid payload for `run_api`.
+
+    `latency` describes successful end-to-end requests after AnyAPI failover over the
+    trailing 30 days:
+
+    | Field | Meaning |
+    |---|---|
+    | `window` | Observation window, currently `30d` |
+    | `p50Ms`, `p95Ms`, `p99Ms` | Observed latency percentiles in milliseconds |
+    | `sample` | Successful requests included in the percentiles |
+    | `basis` | `service_time_excludes_caller_requested_delay` |
+
+    The value is `null` when there are no successful observations or metrics could not
+    be read. A p99 is an observation, not a maximum or a recommended timeout. If
+    `excludesCallerDelay` is true, add the waiting requested in your input when reasoning
+    about wall-clock time.
   </Accordion>
   <Accordion title="run_api — execute an API" icon="bolt">
     Execute an API by SKU with a normalized input payload. Requires a valid AnyAPI key.
-    Billed to your USD wallet on success only.
+    Billed to your USD wallet on success only. Before choosing an MCP tool deadline, call
+    `get_api` and inspect its observed latency.
 
     **Input**
 
@@ -253,8 +270,8 @@ A typical flow chains the tools - discover, inspect, run:
     lightweight summaries.)
   </Step>
   <Step title="Inspect">
-    It calls `get_api` with that `sku_id` to read the input schema and build a valid
-    payload.
+    It calls `get_api` with that `sku_id` to read the input schema, inspect observed
+    latency before choosing a tool deadline, and build a valid payload.
   </Step>
   <Step title="Run">
     It calls `run_api` with the `sku_id` and `input`. AnyAPI routes to a provider,

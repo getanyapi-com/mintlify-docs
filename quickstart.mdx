@@ -61,7 +61,8 @@ Prefer to do it yourself? Follow the manual steps below.
     The example below uses the published `tiktok.profile` input. When you integrate a
     different SKU, fetch `GET /v1/apis/{sku}` first and construct the body from its
     `inputSchema`. Do not transfer fields from another API or retry invalid input with
-    guessed aliases.
+    guessed aliases. That selected-SKU response also includes observed latency for
+    choosing your HTTP client deadline.
 
     <CodeGroup>
     ```bash curl
@@ -159,6 +160,27 @@ output JSON Schemas as opaque objects. This lets the gateway add customer-safe
 metadata without forcing a wrapper release.
 
 The full catalog with typed schemas also lives in the [API Reference](/api-reference/tiktok/tiktok-profile).
+
+## Choose request deadlines from observed latency
+
+Before you set an HTTP client timeout, inspect the selected SKU rather than using one
+short timeout for the whole catalog:
+
+```bash
+curl -s https://api.getanyapi.com/v1/apis/google.search \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" \
+  | jq '.latency'
+```
+
+`latency` reports trailing-30-day `p50Ms`, `p95Ms`, `p99Ms`, and `sample` values from
+successful end-to-end requests after AnyAPI failover. Its `basis` is
+`service_time_excludes_caller_requested_delay`. If `excludesCallerDelay` is true, your
+wall-clock time also includes the waiting requested in your input.
+
+`latency` is `null` when there are no successful observations or metrics could not be
+read. A p99 value is an observation, not a maximum or a recommended timeout. Browse and
+search responses omit `latency`; fetch the selected-SKU detail before choosing a
+deadline.
 
 ## Retry safely after a disconnect
 
