@@ -12815,17 +12815,17 @@
                         "application/json": {
                             "example": {
                                 "duration": "0",
-                                "publishedWithin": "0",
+                                "publishedWithin": 0,
                                 "query": "\u673a\u5668\u4eba",
-                                "sort": "0"
+                                "sort": 0
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
                                     "duration": "0",
-                                    "publishedWithin": "0",
+                                    "publishedWithin": 0,
                                     "query": "\u673a\u5668\u4eba",
-                                    "sort": "0"
+                                    "sort": 0
                                 },
                                 "properties": {
                                     "backtrace": {
@@ -12849,15 +12849,22 @@
                                         "type": "string"
                                     },
                                     "publishedWithin": {
-                                        "default": "0",
-                                        "description": "Publication window in days: 0 any time, 1 day, 7 days, or 180 days.",
+                                        "default": 0,
+                                        "description": "Publication window in days. Use the canonical JSON integer 0 for any time, 1 for one day, 7 for seven days, or 180 for 180 days; legacy numeric strings remain accepted.",
                                         "enum": [
+                                            0,
+                                            1,
+                                            7,
+                                            180,
                                             "0",
                                             "1",
                                             "7",
                                             "180"
                                         ],
-                                        "type": "string"
+                                        "type": [
+                                            "integer",
+                                            "string"
+                                        ]
                                     },
                                     "query": {
                                         "description": "Keyword to search for.",
@@ -12869,14 +12876,20 @@
                                         "type": "string"
                                     },
                                     "sort": {
-                                        "default": "0",
-                                        "description": "Sort order: 0 comprehensive, 1 most liked, or 2 newest.",
+                                        "default": 0,
+                                        "description": "Sort order. Use the canonical JSON integer 0 for comprehensive, 1 for most liked, or 2 for newest; legacy numeric strings remain accepted.",
                                         "enum": [
+                                            0,
+                                            1,
+                                            2,
                                             "0",
                                             "1",
                                             "2"
                                         ],
-                                        "type": "string"
+                                        "type": [
+                                            "integer",
+                                            "string"
+                                        ]
                                     }
                                 },
                                 "required": [
@@ -13285,8 +13298,17 @@
                                     },
                                     "sort": {
                                         "default": 0,
-                                        "description": "Post order: 0 for newest or 1 for most popular.",
-                                        "type": "integer"
+                                        "description": "Post order. Use the canonical JSON integer 0 for newest or 1 for most popular; legacy numeric strings remain accepted.",
+                                        "enum": [
+                                            0,
+                                            1,
+                                            "0",
+                                            "1"
+                                        ],
+                                        "type": [
+                                            "integer",
+                                            "string"
+                                        ]
                                     }
                                 },
                                 "required": [
@@ -82650,13 +82672,17 @@
                     "content": {
                         "application/json": {
                             "example": {
+                                "limit": 20,
                                 "objective": "conversions",
+                                "period": 30,
                                 "query": "spotify"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
+                                    "limit": 20,
                                     "objective": "conversions",
+                                    "period": 30,
                                     "query": "spotify"
                                 },
                                 "properties": {
@@ -82749,8 +82775,15 @@
                                         "type": "string"
                                     },
                                     "limit": {
-                                        "description": "Results per page, max 50 (defaults to 20).",
-                                        "type": "string"
+                                        "default": 20,
+                                        "description": "Results per page, with an existing maximum of 50 (default 20). Use a canonical JSON integer; legacy numeric strings remain accepted.",
+                                        "maximum": 50,
+                                        "minimum": 0,
+                                        "pattern": "^0*(?:[0-9]|[1-4][0-9]|50)$",
+                                        "type": [
+                                            "integer",
+                                            "string"
+                                        ]
                                     },
                                     "objective": {
                                         "description": "Campaign objective filter.",
@@ -82770,8 +82803,19 @@
                                         "type": "string"
                                     },
                                     "period": {
-                                        "description": "Time window for top ads: 7, 30, or 180 days.",
-                                        "type": "string"
+                                        "description": "Time window for top ads. Use the canonical JSON integer 7, 30, or 180; legacy numeric strings remain accepted.",
+                                        "enum": [
+                                            7,
+                                            30,
+                                            180,
+                                            "7",
+                                            "30",
+                                            "180"
+                                        ],
+                                        "type": [
+                                            "integer",
+                                            "string"
+                                        ]
                                     },
                                     "query": {
                                         "description": "Keyword to search ad titles and content (e.g. spotify).",
@@ -86611,12 +86655,16 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "query": "cooking"
+                                "datePosted": 0,
+                                "query": "cooking",
+                                "sortBy": 0
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "query": "cooking"
+                                    "datePosted": 0,
+                                    "query": "cooking",
+                                    "sortBy": 0
                                 },
                                 "properties": {
                                     "cursor": {
@@ -86624,16 +86672,32 @@
                                         "type": "string"
                                     },
                                     "datePosted": {
-                                        "description": "Time frame filter (e.g. 0=any, 1=past 24h, 7=past week).",
-                                        "type": "string"
+                                        "default": 0,
+                                        "description": "Time frame filter. Use a canonical JSON integer that is nonnegative; common values are 0 for any time, 1 for the past 24 hours, 7 for the past week, and 30 for the past month. Legacy numeric strings remain accepted.",
+                                        "minimum": 0,
+                                        "pattern": "^[0-9]+$",
+                                        "type": [
+                                            "integer",
+                                            "string"
+                                        ]
                                     },
                                     "query": {
                                         "description": "The keyword to search TikTok for.",
                                         "type": "string"
                                     },
                                     "sortBy": {
-                                        "description": "Sort order (e.g. 0=relevance, 1=most liked).",
-                                        "type": "string"
+                                        "default": 0,
+                                        "description": "Sort order. Use the canonical JSON integer 0 for relevance or 1 for most liked; legacy numeric strings remain accepted.",
+                                        "enum": [
+                                            0,
+                                            1,
+                                            "0",
+                                            "1"
+                                        ],
+                                        "type": [
+                                            "integer",
+                                            "string"
+                                        ]
                                     }
                                 },
                                 "required": [
