@@ -5255,12 +5255,10 @@
                                         "description": "Only return reviews on or before this date, inclusive, in YYYY-MM-DD format (e.g. 2026-06-30).",
                                         "type": "string"
                                     },
-                                    "keywords": {
-                                        "description": "Only return reviews whose text contains one of these keywords (e.g. [\"battery\", \"screen\"]).",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "type": "array"
+                                    "keyword": {
+                                        "description": "Only return reviews whose title or text contains this keyword, case-insensitively (e.g. battery).",
+                                        "minLength": 1,
+                                        "type": "string"
                                     },
                                     "limit": {
                                         "default": 50,
@@ -5288,7 +5286,6 @@
                                         "type": "array"
                                     },
                                     "region": {
-                                        "default": "amazon.com",
                                         "description": "Amazon marketplace domain the product ASIN belongs to (e.g. amazon.co.uk).",
                                         "enum": [
                                             "amazon.com",
@@ -5317,7 +5314,6 @@
                                         "type": "string"
                                     },
                                     "sort": {
-                                        "default": "helpful",
                                         "description": "Review sort order: most helpful first or most recent first (e.g. recent).",
                                         "enum": [
                                             "helpful",
@@ -5330,7 +5326,6 @@
                                         "type": "string"
                                     },
                                     "verifiedOnly": {
-                                        "default": false,
                                         "description": "Set true to return only verified-purchase reviews (e.g. true).",
                                         "type": "boolean"
                                     }
@@ -5404,6 +5399,11 @@
                                                                                     },
                                                                                     "title": {
                                                                                         "description": "Review headline / title; empty when the review has none.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Public Amazon page for this review, when supplied by the serving lane.",
+                                                                                        "format": "uri",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "verifiedPurchase": {
@@ -5649,7 +5649,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.042100",
+                        "max": "0.216000",
                         "min": "0.001800",
                         "mode": "dynamic"
                     },
@@ -5692,7 +5692,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.042100",
+                                "max": "0.216000",
                                 "min": "0.001800",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -5725,7 +5725,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.042100",
+                                "max": "0.216000",
                                 "min": "0.001800",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -11150,6 +11150,11 @@
                                                                                     },
                                                                                     "title": {
                                                                                         "description": "Review title.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Public App Store page for this review, when supplied by the serving lane.",
+                                                                                        "format": "uri",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "version": {
@@ -25039,13 +25044,35 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "id": "1869276447125570"
+                                "id": "1249043200627555"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "id": "1869276447125570"
+                                    "id": "1249043200627555"
                                 },
+                                "oneOf": [
+                                    {
+                                        "not": {
+                                            "required": [
+                                                "url"
+                                            ]
+                                        },
+                                        "required": [
+                                            "id"
+                                        ]
+                                    },
+                                    {
+                                        "not": {
+                                            "required": [
+                                                "id"
+                                            ]
+                                        },
+                                        "required": [
+                                            "url"
+                                        ]
+                                    }
+                                ],
                                 "properties": {
                                     "id": {
                                         "description": "Meta Ad Library ad ID (e.g. \"702369045530963\"). Provide either id or url.",
@@ -25167,6 +25194,12 @@
                                                                             ],
                                                                             "x-anyapi-must-populate": true
                                                                         },
+                                                                        "sourceUrl": {
+                                                                            "description": "Inspectable Meta Ad Library URL for this ad. Populated whenever the provider has data for the entity.",
+                                                                            "format": "uri",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
                                                                         "startDate": {
                                                                             "description": "Run start, epoch seconds. Populated whenever the provider has data for the entity.",
                                                                             "type": [
@@ -25194,6 +25227,7 @@
                                                                     },
                                                                     "required": [
                                                                         "adArchiveId",
+                                                                        "sourceUrl",
                                                                         "pageId"
                                                                     ],
                                                                     "type": "object"
@@ -25497,6 +25531,620 @@
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/facebook.ad_details_full": {
+            "post": {
+                "description": "Pull one Meta Ad Library ad with its creative: every carousel variant, image and video URL, headline, body, and call to action.\n\n**Price:** billed per result - \\$4.41 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$4.41 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.",
+                "operationId": "facebook_ad_details_full",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "id": "1519158199783790"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "id": "1519158199783790"
+                                },
+                                "properties": {
+                                    "id": {
+                                        "description": "Meta Ad Library ad ID - the numeric id in an Ad Library URL (e.g. \"1519158199783790\" from https://www.facebook.com/ads/library/?id=1519158199783790).",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "id"
+                                ],
+                                "title": "Facebook ad creative details input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "properties": {
+                                                                        "active": {
+                                                                            "description": "Whether the ad is currently running.",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "adArchiveId": {
+                                                                            "description": "Ad Library archive ID (stable identity). Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "body": {
+                                                                            "description": "Ad body text. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "caption": {
+                                                                            "description": "Display caption, usually the destination domain.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "creatives": {
+                                                                            "description": "One entry per creative variant of a carousel or dynamic ad, in the order Meta returns them. Single-creative ads return an empty array and carry their media in images/videos. Meta CDN media URLs are signed and expire, so fetch what you need at read time.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "body": {
+                                                                                        "description": "Variant body text.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "caption": {
+                                                                                        "description": "Variant display caption.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "ctaText": {
+                                                                                        "description": "Variant call-to-action label.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "ctaType": {
+                                                                                        "description": "Variant call-to-action type.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "image": {
+                                                                                        "description": "Original creative image URL.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "imageResized": {
+                                                                                        "description": "Resized creative image URL.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "linkDescription": {
+                                                                                        "description": "Variant secondary description.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "linkUrl": {
+                                                                                        "description": "Variant destination URL.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Variant headline.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "videoPreviewImage": {
+                                                                                        "description": "Poster frame for the creative video.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "videoUrl": {
+                                                                                        "description": "Creative video URL (HD when supplied, otherwise SD).",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "ctaText": {
+                                                                            "description": "Call-to-action label (e.g. \"Shop now\").",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "ctaType": {
+                                                                            "description": "Call-to-action type (e.g. \"SHOP_NOW\").",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "displayFormat": {
+                                                                            "description": "Ad creative format (e.g. \"DPA\", \"VIDEO\", \"IMAGE\"). Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "endedUtc": {
+                                                                            "description": "Run end, or last-seen date while the ad is still running. UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                            "type": "number"
+                                                                        },
+                                                                        "images": {
+                                                                            "description": "Standalone creative images for a single-image ad. Meta CDN media URLs are signed and expire.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "image": {
+                                                                                        "description": "Original creative image URL.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "imageResized": {
+                                                                                        "description": "Resized creative image URL.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "linkDescription": {
+                                                                            "description": "Secondary link description line.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "linkUrl": {
+                                                                            "description": "Creative destination URL.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "pageId": {
+                                                                            "description": "Advertiser page ID (stable identity). Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "pageImage": {
+                                                                            "description": "Advertiser page profile picture URL. Meta CDN URLs are signed and expire.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "pageName": {
+                                                                            "description": "Advertiser page name. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "pageUrl": {
+                                                                            "description": "Advertiser page URL.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "platforms": {
+                                                                            "description": "Publisher platforms the ad runs on.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "sourceUrl": {
+                                                                            "description": "Inspectable Meta Ad Library URL for this ad. Populated whenever the provider has data for the entity.",
+                                                                            "format": "uri",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "startedUtc": {
+                                                                            "description": "Run start. UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                            "type": "number"
+                                                                        },
+                                                                        "title": {
+                                                                            "description": "Creative headline. Dynamic-product ads return a template such as \"{{product.name}}\".",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "videos": {
+                                                                            "description": "Standalone creative videos for a single-video ad. Meta CDN media URLs are signed and expire.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "videoPreviewImage": {
+                                                                                        "description": "Poster frame for the creative video.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "videoUrl": {
+                                                                                        "description": "Creative video URL (HD when supplied, otherwise SD).",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "adArchiveId",
+                                                                        "sourceUrl",
+                                                                        "pageId"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Facebook ad creative details output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "Facebook Ad Creative Details",
+                "tags": [
+                    "facebook"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.004410",
+                        "min": "0.004410",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.004410",
+                                "min": "0.004410",
+                                "minimumUsd": "0.001000",
+                                "mode": "dynamic",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.004410",
+                                "min": "0.004410",
+                                "minimumUsd": null,
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -26215,6 +26863,12 @@
                                                                                         "type": "array",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "sourceUrl": {
+                                                                                        "description": "Inspectable Meta Ad Library URL for this ad. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
                                                                                     "startDate": {
                                                                                         "description": "Epoch seconds. Populated whenever the provider has data for the entity.",
                                                                                         "type": "integer",
@@ -26233,6 +26887,7 @@
                                                                                 },
                                                                                 "required": [
                                                                                     "id",
+                                                                                    "sourceUrl",
                                                                                     "pageId",
                                                                                     "pageName",
                                                                                     "active",
@@ -33870,7 +34525,7 @@
         },
         "/v1/run/facebook.post_transcript": {
             "post": {
-                "description": "Get the spoken-word transcript of any public Facebook video post by URL as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.",
+                "description": "Get the spoken-word transcript of any public Facebook video post by URL as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.",
                 "operationId": "facebook_post_transcript",
                 "parameters": [
                     {
@@ -34209,9 +34864,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.036000",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -34251,10 +34907,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.036000",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -34283,10 +34940,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.036000",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -59772,7 +60430,7 @@
         },
         "/v1/run/instagram.media_transcript": {
             "post": {
-                "description": "Get the spoken-audio transcript text for an Instagram post or reel by URL.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.",
+                "description": "Get the spoken-audio transcript text for an Instagram post or reel by URL.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.",
                 "operationId": "instagram_media_transcript",
                 "parameters": [
                     {
@@ -60139,9 +60797,10 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.036000",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -60181,10 +60840,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.036000",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -60213,10 +60873,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.036000",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -78193,15 +78854,7 @@
                                                                         }
                                                                     },
                                                                     "required": [
-                                                                        "name",
-                                                                        "location",
-                                                                        "followers",
-                                                                        "about",
-                                                                        "avatarUrl",
-                                                                        "experience",
-                                                                        "education",
-                                                                        "recentPosts",
-                                                                        "articles"
+                                                                        "name"
                                                                     ],
                                                                     "type": "object"
                                                                 }
@@ -85779,6 +86432,538 @@
                 }
             }
         },
+        "/v1/run/naver.blog_search": {
+            "post": {
+                "description": "Search up to five enriched Naver blog results by keyword with stable cursor pagination: result rank, title, excerpt, post and blogger URLs, blogger name, publish time, and Naver's total match count.\n\n**Price:** \\$36.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.",
+                "operationId": "naver_blog_search",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 5,
+                                "query": "\uc81c\uc8fc\ub3c4 \ub9db\uc9d1",
+                                "sort": "relevance"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 5,
+                                    "query": "\uc81c\uc8fc\ub3c4 \ub9db\uc9d1",
+                                    "sort": "relevance"
+                                },
+                                "properties": {
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor.",
+                                        "type": "string"
+                                    },
+                                    "limit": {
+                                        "description": "Maximum number of title-enriched posts to return, from 1 to 5 (default 5).",
+                                        "maximum": 5,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "query": {
+                                        "description": "Keyword phrase to search across Naver blogs.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "sort": {
+                                        "description": "Order posts by Naver relevance or newest publication date (default relevance).",
+                                        "enum": [
+                                            "relevance",
+                                            "recent"
+                                        ],
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "query"
+                                ],
+                                "title": "Naver Blog Search input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The result wrapper, or null when nothing was found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Blog posts in Naver's requested search order. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "bloggerName": {
+                                                                                        "description": "Blogger display name.",
+                                                                                        "minLength": 1,
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "bloggerUrl": {
+                                                                                        "description": "Public root URL for the blog that published the post.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "Publication date as a UTC epoch timestamp in seconds.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "description": {
+                                                                                        "description": "Search-result excerpt from the post.",
+                                                                                        "minLength": 1,
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "rank": {
+                                                                                        "description": "One-based rank within this result page.",
+                                                                                        "minimum": 1,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Blog post title.",
+                                                                                        "minLength": 1,
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Public blog post URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "rank",
+                                                                                    "title",
+                                                                                    "url",
+                                                                                    "description",
+                                                                                    "bloggerName",
+                                                                                    "bloggerUrl",
+                                                                                    "createdUtc"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page, or an empty string when no next page is available.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "total": {
+                                                                            "description": "Naver's reported number of matching blog posts.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "total",
+                                                                        "items",
+                                                                        "nextCursor"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "True when Naver returned at least one matching blog post.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Naver Blog Search output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "Naver Blog Search",
+                "tags": [
+                    "naver"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.036000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.036000",
+                                "currency": "USD",
+                                "minimumUsd": "0.001000",
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.036000",
+                                "currency": "USD",
+                                "minimumUsd": null,
+                                "mode": "fixed",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/pandaexpress.locations": {
             "post": {
                 "description": "Find Panda Express restaurants near a latitude/longitude, sorted by distance, with address, phone, hours availability, and pickup/delivery support.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.",
@@ -91320,8 +92505,7 @@
                                         "type": "array"
                                     },
                                     "deviceType": {
-                                        "default": "mobile",
-                                        "description": "Only return reviews from this device type (e.g. \"tablet\"); defaults to mobile.",
+                                        "description": "Only return reviews from this device type (e.g. \"tablet\"); omit for the provider default.",
                                         "enum": [
                                             "mobile",
                                             "tablet",
@@ -91363,7 +92547,6 @@
                                         "type": "integer"
                                     },
                                     "sortBy": {
-                                        "default": "mostRelevant",
                                         "description": "Review ordering: mostRelevant, newest, or rating (e.g. newest).",
                                         "type": "string"
                                     }
@@ -110546,7 +111729,7 @@
                                                                                                     "type": "string"
                                                                                                 },
                                                                                                 "thumbnailUrl": {
-                                                                                                    "description": "Story thumbnail image URL, with tracking query params stripped.",
+                                                                                                    "description": "Story thumbnail image URL, preserving signed delivery parameters required to load the preview.",
                                                                                                     "type": "string"
                                                                                                 }
                                                                                             },
@@ -129423,8 +130606,7 @@
                                                                         }
                                                                     },
                                                                     "required": [
-                                                                        "transcript",
-                                                                        "language"
+                                                                        "transcript"
                                                                     ],
                                                                     "type": "object"
                                                                 }
@@ -129729,6 +130911,544 @@
                                 "currency": "USD",
                                 "max": "0.036000",
                                 "min": "0.002000",
+                                "minimumUsd": null,
+                                "mode": "dynamic",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/tiktok.video_transcript_full": {
+            "post": {
+                "description": "Transcribe the spoken audio of a TikTok video with timed segments, speaker labels, and per-word confidence - for videos TikTok publishes no subtitle track for.\n\n**Price:** billed per result - \\$16.80 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$16.80 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.",
+                "operationId": "tiktok_video_transcript_full",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "url": "https://www.tiktok.com/@thatdudecancook/video/7649086431641521421"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "url": "https://www.tiktok.com/@thatdudecancook/video/7649086431641521421"
+                                },
+                                "properties": {
+                                    "url": {
+                                        "description": "TikTok video URL (e.g. \"https://www.tiktok.com/@user/video/1234567890\").",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "TikTok Video Transcript (Audio) input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "properties": {
+                                                                        "durationSeconds": {
+                                                                            "description": "Video duration in seconds.",
+                                                                            "minimum": 0,
+                                                                            "type": "number"
+                                                                        },
+                                                                        "language": {
+                                                                            "description": "Detected spoken language of the audio (BCP-47 style code, e.g. \"en\").",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "segments": {
+                                                                            "description": "Timed transcript segments in playback order, each with the recognizer's per-word confidence so low-confidence text can be treated as uncertain rather than quoted. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "endSeconds": {
+                                                                                        "description": "Segment end offset in seconds.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "language": {
+                                                                                        "description": "Detected language for this segment.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "speaker": {
+                                                                                        "description": "Recognizer speaker label for this segment (e.g. \"SPEAKER_00\"). Diarization is a guess, not an identification.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "startSeconds": {
+                                                                                        "description": "Segment start offset in seconds.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "text": {
+                                                                                        "description": "Text of this segment.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "words": {
+                                                                                        "description": "Per-word timing and recognizer confidence for this segment.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "confidence": {
+                                                                                                    "description": "Recognizer confidence for this word, 0 to 1. Low values mark words the recognizer guessed; they are common on names, jargon, and music.",
+                                                                                                    "maximum": 1,
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "number"
+                                                                                                },
+                                                                                                "endSeconds": {
+                                                                                                    "description": "Word end offset in seconds.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "number"
+                                                                                                },
+                                                                                                "speaker": {
+                                                                                                    "description": "Recognizer speaker label for this word.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "startSeconds": {
+                                                                                                    "description": "Word start offset in seconds.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "number"
+                                                                                                },
+                                                                                                "word": {
+                                                                                                    "description": "The recognized word.",
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "word",
+                                                                                                "confidence"
+                                                                                            ],
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "text",
+                                                                                    "startSeconds",
+                                                                                    "endSeconds"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "source": {
+                                                                            "description": "How the text was produced. Always \"audio_asr\" on this endpoint: the words come from automatic speech recognition over the audio, not from a caption track the platform published. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "transcript": {
+                                                                            "description": "Full spoken-word transcript, machine-transcribed from the video's audio track. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "transcript",
+                                                                        "source"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "TikTok Video Transcript (Audio) output",
+                                                    "type": "object",
+                                                    "x-anyapi-heavy": true
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "TikTok Video Transcript (Audio)",
+                "tags": [
+                    "tiktok"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.016800",
+                        "min": "0.016800",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.016800",
+                                "min": "0.016800",
+                                "minimumUsd": "0.001000",
+                                "mode": "dynamic",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.016800",
+                                "min": "0.016800",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -152093,7 +153813,7 @@
         },
         "/v1/run/youtube.channel_shorts": {
             "post": {
-                "description": "List a YouTube channel's Shorts by handle or channel ID with cursor pagination (title, views, likes, duration).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.",
+                "description": "List a YouTube channel's Shorts by handle or channel ID with cursor pagination, views, and publish timestamps.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.",
                 "operationId": "youtube_channel_shorts",
                 "parameters": [
                     {
@@ -152149,7 +153869,8 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "handle": "@starterstory"
+                                "handle": "@zachking",
+                                "sort": "latest"
                             },
                             "schema": {
                                 "additionalProperties": false,
@@ -152166,24 +153887,26 @@
                                     }
                                 ],
                                 "example": {
-                                    "handle": "@starterstory"
+                                    "handle": "@zachking",
+                                    "sort": "latest"
                                 },
                                 "properties": {
                                     "channelId": {
-                                        "description": "YouTube channel ID.",
+                                        "description": "YouTube channel ID beginning with UC.",
                                         "type": "string"
                                     },
                                     "cursor": {
-                                        "description": "Continuation token from a previous response for pagination.",
+                                        "description": "Continuation token from a previous response.",
                                         "type": "string"
                                     },
                                     "handle": {
-                                        "description": "YouTube channel handle.",
+                                        "description": "YouTube channel handle, including or omitting the leading @.",
                                         "type": "string"
                                     },
                                     "sort": {
-                                        "description": "Sort order.",
+                                        "description": "Sort order for the Shorts feed. latest and newest are equivalent.",
                                         "enum": [
+                                            "latest",
                                             "newest",
                                             "popular"
                                         ],
@@ -152221,6 +153944,7 @@
                                                     "additionalProperties": false,
                                                     "properties": {
                                                         "data": {
+                                                            "description": "The normalized Shorts page, or null when the channel was not found.",
                                                             "oneOf": [
                                                                 {
                                                                     "type": "null"
@@ -152229,39 +153953,60 @@
                                                                     "additionalProperties": false,
                                                                     "properties": {
                                                                         "nextCursor": {
-                                                                            "description": "Opaque cursor for the next page of shorts, or null when this lane has no more. Pass it back as cursor to continue.",
+                                                                            "description": "Opaque cursor for the next Shorts page, or null when no next page is available.",
                                                                             "type": [
                                                                                 "string",
                                                                                 "null"
                                                                             ]
                                                                         },
                                                                         "shorts": {
-                                                                            "description": "Populated whenever the provider has data for the entity.",
+                                                                            "description": "Short-form videos returned by the provider's dedicated YouTube Shorts endpoint. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
+                                                                                    "contentType": {
+                                                                                        "description": "Explicit normalized provenance that this item came from a dedicated Shorts feed.",
+                                                                                        "enum": [
+                                                                                            "short"
+                                                                                        ],
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds when supplied by the upstream response.",
+                                                                                        "type": "number"
+                                                                                    },
                                                                                     "duration": {
+                                                                                        "description": "Published duration when supplied by the upstream response.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "id": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Unique YouTube video identifier. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "likes": {
+                                                                                        "description": "Public like count when supplied by the upstream response.",
+                                                                                        "minimum": 0,
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "title": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Public title or caption for the Short. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "url": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Public YouTube URL for the Short. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "views": {
+                                                                                        "description": "Public view count when supplied by the upstream response.",
+                                                                                        "minimum": 0,
                                                                                         "type": "integer"
+                                                                                    },
+                                                                                    "viewsAvailable": {
+                                                                                        "description": "Whether views is backed by a public count in the upstream response.",
+                                                                                        "type": "boolean"
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -152269,8 +154014,10 @@
                                                                                     "url",
                                                                                     "title",
                                                                                     "views",
+                                                                                    "viewsAvailable",
                                                                                     "likes",
-                                                                                    "duration"
+                                                                                    "duration",
+                                                                                    "contentType"
                                                                                 ],
                                                                                 "type": "object"
                                                                             },
@@ -152287,6 +154034,7 @@
                                                             ]
                                                         },
                                                         "found": {
+                                                            "description": "Whether the channel Shorts feed was found.",
                                                             "type": "boolean"
                                                         }
                                                     },
@@ -157587,7 +159335,7 @@
         },
         "/v1/run/youtube.video_transcript": {
             "post": {
-                "description": "Fetch the transcript/captions of a YouTube video by URL or ID.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.",
+                "description": "Fetch the transcript/captions of a YouTube video by URL or ID.\n\n**Price:** \\$11.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.",
                 "operationId": "youtube_video_transcript",
                 "parameters": [
                     {
@@ -157713,6 +159461,34 @@
                                                                             "description": "Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "segments": {
+                                                                            "description": "Timed transcript segments in source order when the serving lane supplies caption timing.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "durationSeconds": {
+                                                                                        "description": "Segment duration in seconds.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "startSeconds": {
+                                                                                        "description": "Segment start offset in seconds.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "text": {
+                                                                                        "description": "Text of this transcript segment.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "text",
+                                                                                    "startSeconds",
+                                                                                    "durationSeconds"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
                                                                         },
                                                                         "transcript": {
                                                                             "description": "Populated whenever the provider has data for the entity.",
@@ -157948,7 +159724,7 @@
                 ],
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.011000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -157990,7 +159766,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
+                                "amount": "0.011000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -158022,10 +159798,531 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
+                                "amount": "0.011000",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/youtube.video_transcript_full": {
+            "post": {
+                "description": "Fetch a YouTube transcript with timed segments and its provenance: whether the words are creator-written captions or machine speech recognition.\n\n**Price:** billed per result - \\$2.94 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$2.94 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.",
+                "operationId": "youtube_video_transcript_full",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                                },
+                                "properties": {
+                                    "captionKind": {
+                                        "default": "any",
+                                        "description": "Which caption track to accept: \"manual\" only creator-written captions, \"automatic\" only YouTube's speech recognition, \"any\" whichever exists.",
+                                        "enum": [
+                                            "manual",
+                                            "automatic",
+                                            "any"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "language": {
+                                        "description": "Preferred caption language code (e.g. \"en\", \"es\"). Defaults to English.",
+                                        "type": "string"
+                                    },
+                                    "url": {
+                                        "description": "YouTube video URL (e.g. \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\").",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "YouTube Video Transcript (Provenance) input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "properties": {
+                                                                        "channel": {
+                                                                            "description": "Channel name that published the video.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "durationSeconds": {
+                                                                            "description": "Video duration in seconds.",
+                                                                            "minimum": 0,
+                                                                            "type": "number"
+                                                                        },
+                                                                        "isAiGenerated": {
+                                                                            "description": "True when the words were recognized from the audio by the serving lane rather than read from any YouTube caption track.",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "isAutoGenerated": {
+                                                                            "description": "True when YouTube generated the caption track by speech recognition rather than the creator supplying it. Automatic captions carry recognition errors, especially on names and jargon. Populated whenever the provider has data for the entity.",
+                                                                            "type": "boolean",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "language": {
+                                                                            "description": "Caption language code (e.g. \"en\"). Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "segments": {
+                                                                            "description": "Timed transcript segments in playback order. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "endSeconds": {
+                                                                                        "description": "Segment end offset in seconds.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "startSeconds": {
+                                                                                        "description": "Segment start offset in seconds.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "text": {
+                                                                                        "description": "Text of this transcript segment.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "text",
+                                                                                    "startSeconds",
+                                                                                    "endSeconds"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "title": {
+                                                                            "description": "Video title.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "transcript": {
+                                                                            "description": "Full transcript text, segments joined in playback order. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "transcript",
+                                                                        "language",
+                                                                        "isAutoGenerated"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "YouTube Video Transcript (Provenance) output",
+                                                    "type": "object",
+                                                    "x-anyapi-heavy": true
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "YouTube Video Transcript (Provenance)",
+                "tags": [
+                    "youtube"
+                ],
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.002940",
+                        "min": "0.002940",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.002940",
+                                "min": "0.002940",
+                                "minimumUsd": "0.001000",
+                                "mode": "dynamic",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.002940",
+                                "min": "0.002940",
+                                "minimumUsd": null,
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -162051,6 +164348,10 @@
         {
             "name": "mobile-phone",
             "x-group": "Mobile_phone"
+        },
+        {
+            "name": "naver",
+            "x-group": "Naver"
         },
         {
             "name": "pandaexpress",
