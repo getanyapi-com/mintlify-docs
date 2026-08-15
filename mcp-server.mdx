@@ -13,7 +13,7 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 | **Endpoint** | `https://api.getanyapi.com/mcp` |
 | **Transport** | Streamable HTTP |
 | **Auth** | AnyAPI key as a Bearer token |
-| **Tools** | `list_apis`, `search_apis`, `get_api`, `run_api`, `get_request`, `get_balance` |
+| **Tools** | `list_apis`, `search_apis`, `get_api`, `run_api`, `get_request`, `get_balance`, `report_bug`, `send_feedback` |
 
 ## Prerequisites
 
@@ -125,8 +125,9 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 ## Tools
 
-The server exposes six generic tools. Discovery (`list_apis`, `search_apis`, `get_api`) is
-free; only `run_api` touches your wallet. `get_balance` reports what's left in it.
+Discovery (`list_apis`, `search_apis`, `get_api`) is free; only `run_api` touches your
+wallet. `get_balance` reports what's left in it, and `report_bug` and `send_feedback`
+let an agent tell us when something is wrong without leaving the session.
 
 The MCP tools are a lightweight transport and projection over the same AnyAPI gateway
 used by REST. The gateway owns input validation, provider selection, routing, failover,
@@ -256,6 +257,28 @@ they do not recalculate relationships between prices, lanes, or failover.
 
     **Returns** `balanceUsd`, the remaining wallet balance in USD. Use it to confirm
     there are funds before a `run_api` call, or to surface the balance to a user.
+  </Accordion>
+  <Accordion title="report_bug - tell us something is broken" icon="bug">
+    Report a defect: a `run_api` call that returned wrong, empty, or malformed data for
+    input you believe is valid, an error message that was misleading or unactionable, or a
+    price or schema that looks wrong. Free; nothing is charged.
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `summary` | string | yes | One line saying what went wrong |
+    | `details` | string | no | What you expected, what you got, what you already tried |
+    | `sku` | string | no | The SKU this is about |
+    | `request_id` | string | no | The `requestId` or `resultId` from the failing run |
+    | `contact` | string | no | An email to reply to |
+
+    **Returns** the stored report `id`. Pass `request_id` whenever you have one: it reaches
+    the stored run and its upstream error body, so you never need to paste the payload.
+    File the report and continue with the best alternative you have.
+  </Accordion>
+  <Accordion title="send_feedback - tell us what is missing" icon="comment">
+    Send feedback that is not a defect: an API you wanted and could not find in the catalog,
+    a field missing from a result you needed, a confusing part of the docs, or what would
+    have made a task easier. Same fields as `report_bug`, and also free.
   </Accordion>
 </AccordionGroup>
 
