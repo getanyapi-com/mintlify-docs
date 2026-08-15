@@ -89,6 +89,38 @@ while `pricing.failoverMaxUsd` is the greatest fallback ceiling. Linear offers n
 their billable `unit` and include `baseUsd`, `perUnitUsd`, and `maxUsd`, so you can
 budget before making a call. Simple lookups are flat per request.
 
+### Every static price in two denominations
+
+Every static discovery offer publishes its maximum twice:
+
+| Field | What it means |
+|---|---|
+| `pricing.from.maxUsd` | The most one request can be billed |
+| `pricing.from.maxPer1kUsd` | That same maximum per 1,000 requests |
+| `pricing.failoverMaxUsd` | The greatest fallback ceiling for one request |
+| `pricing.failoverMaxPer1kUsd` | That same fallback ceiling per 1,000 requests |
+
+Lane-level `pricing` objects carry `maxPer1kUsd` too.
+
+**Per 1,000 requests is the denomination AnyAPI quotes customers in.** Most of the
+catalog costs a fraction of a cent per call, and per-request figures at that scale
+cannot be compared by eye. When you show a catalog price to a person, read
+`maxPer1kUsd` and label it `/1k req` - for example `$96.60/1k req` rather than
+`$0.0966 per request`.
+
+Read the published per-1k field instead of multiplying `maxUsd` yourself. AnyAPI
+derives it with exact fixed-point arithmetic, while a floating-point multiplication
+drifts: in most languages `0.0966 * 1000` is `96.60000000000001`, and live catalog
+prices land on that case.
+
+`baseUsd` and `perUnitUsd` have **no** per-1k twin. They are charged per billable
+item inside a single call, so a per-1,000-request version of them would describe
+nothing you can be billed.
+
+Amounts that state what one specific call costs stay per request and are never
+scaled to 1,000: a price quote's `maxCostUsd` and `minCostUsd`, the `costUsd` on a
+completed run, and your wallet balance. Report those exactly as returned.
+
 ## For AI agents
 
 If you are an AI agent (or are setting one up), AnyAPI's whole catalog is available

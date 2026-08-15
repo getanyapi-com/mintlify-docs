@@ -117,6 +117,15 @@ ceiling, and `failover` reports whether AnyAPI currently has an alternate route.
 does not calculate these values from `lanes`, and input and output schemas pass through as
 opaque JSON Schema objects.
 
+Each static maximum is published in two denominations: `maxUsd` for one request and
+`maxPer1kUsd` for 1,000 of them, with `failoverMaxPer1kUsd` beside `failoverMaxUsd`.
+**Per 1,000 requests is the denomination AnyAPI quotes customers in**, because most of
+the catalog costs a fraction of a cent per call and per-request figures cannot be
+compared by eye. Read the published per-1k field rather than scaling `maxUsd` yourself,
+which drifts in floating point (`0.0966 * 1000` is `96.60000000000001` in most
+languages). `baseUsd` and `perUnitUsd` have no per-1k twin, because they are charged per
+billable item inside one call, and the `costUsd` on a completed run stays per request.
+
 ## Response budget options (Run API)
 
 **Run API** has three optional controls under **Options** that shrink the response payload so a

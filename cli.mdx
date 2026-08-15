@@ -51,11 +51,21 @@ customer-safe USD offer returned by discovery; they never expose an internal
 accounting unit or upstream provider.
 
 Static discovery pricing is nested. `pricing.from` is either a flat offer
-(`model`, `unit: "request"`, `maxUsd`) or a linear offer (`model`, `unit`,
-`baseUsd`, `perUnitUsd`, `maxUsd`). `pricing.failoverMaxUsd` is the greatest
-fallback ceiling. The optional `failover` boolean reports whether AnyAPI currently
-has an alternate route. Use the displayed unit when estimating a linear call, or
-run `anyapi describe <sku>` to inspect the complete offer before execution.
+(`model`, `unit: "request"`, `maxUsd`, `maxPer1kUsd`) or a linear offer (`model`,
+`unit`, `baseUsd`, `perUnitUsd`, `maxUsd`, `maxPer1kUsd`). `pricing.failoverMaxUsd`
+is the greatest fallback ceiling, published beside its per-1,000-request twin
+`pricing.failoverMaxPer1kUsd`. The optional `failover` boolean reports whether AnyAPI
+currently has an alternate route. Use the displayed unit when estimating a linear
+call, or run `anyapi describe <sku>` to inspect the complete offer before execution.
+
+Every maximum arrives in two denominations: `maxUsd` for one request and
+`maxPer1kUsd` for 1,000 of them. **Per 1,000 requests is the denomination AnyAPI
+quotes customers in**, because most of the catalog costs a fraction of a cent per call
+and per-request figures cannot be compared by eye. Read the published per-1k field
+instead of multiplying `maxUsd`, which drifts in floating point (`0.0966 * 1000` is
+`96.60000000000001` in most languages). `baseUsd` and `perUnitUsd` have no per-1k
+twin, because they are charged per billable item inside one call, and the `costUsd` of
+a completed run and the balance from `anyapi balance` stay per request.
 
 ## Gateway and CLI responsibilities
 

@@ -135,6 +135,16 @@ Treat `pricing.from`, `pricing.failoverMaxUsd`, `failover`, lane order, and heal
 gateway-published facts. `failover` reports whether AnyAPI currently has an alternate
 route. Do not derive it from the lane count or recompute pricing from individual lanes.
 
+Discovery publishes each static maximum in two denominations: `maxUsd` is what one
+request can be billed and `maxPer1kUsd` is that same maximum per 1,000 requests, with
+`failoverMaxPer1kUsd` as the twin of `failoverMaxUsd`. **Per 1,000 requests is the
+denomination AnyAPI quotes customers in**, because most of the catalog costs a fraction
+of a cent per call and per-request figures cannot be compared by eye. Display the
+published per-1k field rather than multiplying `maxUsd`, which drifts in floating point
+(`0.0966 * 1000` is `96.60000000000001` in most languages). `baseUsd` and `perUnitUsd`
+have no per-1k twin, because they are charged per billable item inside one call, and
+`costUsd` and the wallet balance stay per request.
+
 ## Async (Python)
 
 The TypeScript SDK is promise-based, so every method is already `await`-able. In Python,
