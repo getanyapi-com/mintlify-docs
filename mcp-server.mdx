@@ -302,9 +302,11 @@ and `structuredContent` with these shapes:
         "from": {
           "model": "flat",
           "unit": "request",
-          "maxUsd": 0.003
+          "maxUsd": 0.003,
+          "maxPer1kUsd": 3
         },
-        "failoverMaxUsd": 0.003
+        "failoverMaxUsd": 0.003,
+        "failoverMaxPer1kUsd": 3
       },
       "failover": true,
       "relevance": 1
@@ -320,11 +322,25 @@ and `structuredContent` with these shapes:
 so browsing and searching stay token-cheap. Reach for `list_apis` when you want to
 enumerate rather than search.
 
-This API's `pricing.from.model` is `flat`, so its maximum is per request. `failover`
-is the gateway's authoritative routing fact; do not infer it from lanes. A linear
-offer instead carries `unit`, `baseUsd`, `perUnitUsd`, and `maxUsd`. For example,
-an API billed per result reports `unit: "result"`; the actual successful charge is
-the base plus the per-unit amount, capped at `maxUsd`.
+This API's `pricing.from.model` is `flat`, so `maxUsd` is what one request is billed.
+`failover` is the gateway's authoritative routing fact; do not infer it from lanes. A
+linear offer instead carries `unit`, `baseUsd`, `perUnitUsd`, `maxUsd`, and
+`maxPer1kUsd`. For example, an API billed per result reports `unit: "result"`; the
+actual successful charge is the base plus the per-unit amount, capped at `maxUsd`.
+
+Every static offer publishes its maximum twice: `maxUsd` for one request and
+`maxPer1kUsd` for 1,000 of them, with `failoverMaxPer1kUsd` as the twin of
+`failoverMaxUsd`. Lane-level `pricing` objects carry `maxPer1kUsd` too.
+**Per 1,000 requests is the denomination AnyAPI quotes customers in**, because most of
+the catalog costs a fraction of a cent per call and per-request figures cannot be
+compared by eye. Surface `$3.00/1k req` rather than `$0.003 per request`, and read the
+published field instead of multiplying `maxUsd`, which drifts in floating point
+(`0.0966 * 1000` is `96.60000000000001` in most languages).
+
+`baseUsd` and `perUnitUsd` have no per-1k twin, because they are charged per billable
+item inside one call. Amounts that state what a specific call costs stay per request
+and are never scaled to 1,000: a price quote's `maxCostUsd` and `minCostUsd`, the
+`costUsd` `run_api` returns, and the `balanceUsd` from `get_balance`.
 
 ```json
 // get_api {"sku_id": "reddit.search"} → structuredContent (schemas abridged)
@@ -339,9 +355,11 @@ the base plus the per-unit amount, capped at `maxUsd`.
       "from": {
         "model": "flat",
         "unit": "request",
-        "maxUsd": 0.003
+        "maxUsd": 0.003,
+        "maxPer1kUsd": 3
       },
-      "failoverMaxUsd": 0.003
+      "failoverMaxUsd": 0.003,
+      "failoverMaxPer1kUsd": 3
     },
     "failover": true,
     "description": "Search Reddit posts across all subreddits by query.",
@@ -350,7 +368,8 @@ the base plus the per-unit amount, capped at `maxUsd`.
         "pricing": {
           "model": "flat",
           "unit": "request",
-          "maxUsd": 0.003
+          "maxUsd": 0.003,
+          "maxPer1kUsd": 3
         }
       }
     ],

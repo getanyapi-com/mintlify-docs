@@ -156,6 +156,17 @@ Browse and search results report `provider: "AnyAPI"` and nested USD `pricing`.
 fallback ceiling, and `failover` reports whether AnyAPI currently has an alternate
 route.
 
+Each of those maximums arrives in two denominations. `pricing.from.maxUsd` and
+`pricing.failoverMaxUsd` are what one request can be billed;
+`pricing.from.maxPer1kUsd` and `pricing.failoverMaxPer1kUsd` are the same ceilings per
+1,000 requests. **Per 1,000 requests is the denomination AnyAPI quotes customers in**,
+because most of the catalog costs a fraction of a cent per call and per-request figures
+cannot be compared by eye. Show `$96.60/1k req` rather than `$0.0966 per request`, and
+read the published per-1k field instead of multiplying `maxUsd`, which drifts in
+floating point (`0.0966 * 1000` is `96.60000000000001` in most languages). `baseUsd`
+and `perUnitUsd` have no per-1k twin, because they are charged per billable item inside
+one call. The `costUsd` on a completed run and your wallet balance stay per request.
+
 These values come from the gateway. The gateway owns input validation, provider
 selection, route and lane order, failover, pricing, health semantics, and billing.
 Do not infer failover from the number of lanes or recompute `pricing.from` from lane
