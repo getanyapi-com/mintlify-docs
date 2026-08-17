@@ -23590,6 +23590,1229 @@
                 }
             }
         },
+        "/v1/run/email_finding.hunter_count": {
+            "post": {
+                "description": "Count how many contacts a company domain has, split by personal and generic mailboxes and broken down by department and seniority. Scope a domain for $1 per 1,000 requests before paying per contact.\n\n**Price:** \\$1.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Email Finding - Hunter Email Count pricing and uptime](https://getanyapi.com/api/email-finding/hunter-count) - live USD price, lane routing, and measured 30-day uptime. [Every Email_finding endpoint](https://getanyapi.com/api/email-finding).",
+                "operationId": "email_finding_hunter_count",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "domain": "stripe.com"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "domain": "stripe.com"
+                                },
+                                "properties": {
+                                    "domain": {
+                                        "description": "Company domain without a scheme or path, e.g. stripe.com.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "description": "Count only personal mailboxes belonging to a named person, or only generic ones such as info@ and support@.",
+                                        "enum": [
+                                            "personal",
+                                            "generic"
+                                        ],
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "domain"
+                                ],
+                                "title": "Email Finding - Hunter Email Count input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireCursor: true` to be served only by a source that can page, which may cost more per request.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "properties": {
+                                                                        "departmentCounts": {
+                                                                            "description": "Contacts per department.",
+                                                                            "properties": {
+                                                                                "communication": {
+                                                                                    "description": "Contacts in the communication department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "design": {
+                                                                                    "description": "Contacts in the design department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "education": {
+                                                                                    "description": "Contacts in the education department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "executive": {
+                                                                                    "description": "Contacts in the executive department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "finance": {
+                                                                                    "description": "Contacts in the finance department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "health": {
+                                                                                    "description": "Contacts in the health department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "hr": {
+                                                                                    "description": "Contacts in the HR department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "it": {
+                                                                                    "description": "Contacts in the IT department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "legal": {
+                                                                                    "description": "Contacts in the legal department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "management": {
+                                                                                    "description": "Contacts in the management department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "marketing": {
+                                                                                    "description": "Contacts in the marketing department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "operations": {
+                                                                                    "description": "Contacts in the operations department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "sales": {
+                                                                                    "description": "Contacts in the sales department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "support": {
+                                                                                    "description": "Contacts in the support department.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "domain": {
+                                                                            "description": "The company domain the counts describe.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "genericEmails": {
+                                                                            "description": "Contacts that are a shared inbox such as info@ or support@.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "personalEmails": {
+                                                                            "description": "Contacts that are a named person's mailbox.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "seniorityCounts": {
+                                                                            "description": "Contacts per seniority level.",
+                                                                            "properties": {
+                                                                                "executive": {
+                                                                                    "description": "Contacts at executive level.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "junior": {
+                                                                                    "description": "Contacts at junior level.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "senior": {
+                                                                                    "description": "Contacts at senior level.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "total": {
+                                                                            "description": "Contacts known for the domain.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "domain",
+                                                                        "total"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "False when the domain has no counted contacts.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Email Finding - Hunter Email Count output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "Email Finding - Hunter Email Count",
+                "tags": [
+                    "email-finding"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/email-finding/hunter-count"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.001000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.001000",
+                                "currency": "USD",
+                                "minimumUsd": "0.001000",
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.001000",
+                                "currency": "USD",
+                                "minimumUsd": null,
+                                "mode": "fixed",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/email_finding.hunter_domain": {
+            "post": {
+                "description": "Find named contacts and their work email addresses at a company domain, filtered by job title, seniority or department. Priced per returned contact, so limit is the cost control.\n\n**Price:** billed per result - \\$36.00 per 1,000 results, capped at \\$3,600.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Email Finding - Hunter Domain Search pricing and uptime](https://getanyapi.com/api/email-finding/hunter-domain) - live USD price, lane routing, and measured 30-day uptime. [Every Email_finding endpoint](https://getanyapi.com/api/email-finding).",
+                "operationId": "email_finding_hunter_domain",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "domain": "stripe.com",
+                                "limit": 2,
+                                "type": "personal"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "domain": "stripe.com",
+                                    "limit": 2,
+                                    "type": "personal"
+                                },
+                                "properties": {
+                                    "department": {
+                                        "description": "Restrict to one department.",
+                                        "enum": [
+                                            "executive",
+                                            "it",
+                                            "finance",
+                                            "management",
+                                            "sales",
+                                            "legal",
+                                            "support",
+                                            "hr",
+                                            "marketing",
+                                            "communication",
+                                            "education",
+                                            "design",
+                                            "health",
+                                            "operations"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "domain": {
+                                        "description": "Company domain without a scheme or path, e.g. stripe.com.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "jobTitle": {
+                                        "description": "One job-title keyword to match, e.g. editor. A single keyword only: a comma-separated list is not supported and only its last entry would apply.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "limit": {
+                                        "default": 3,
+                                        "description": "Maximum contacts to return in this response. Every returned contact is billed, so this is the cost control.",
+                                        "maximum": 100,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "offset": {
+                                        "description": "Number of contacts to skip before this page begins.",
+                                        "minimum": 0,
+                                        "type": "integer"
+                                    },
+                                    "requiredField": {
+                                        "description": "Only return contacts that carry this field.",
+                                        "enum": [
+                                            "full_name",
+                                            "position",
+                                            "phone_number"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "seniority": {
+                                        "description": "Restrict to one seniority level.",
+                                        "enum": [
+                                            "junior",
+                                            "senior",
+                                            "executive"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "description": "Restrict to personal mailboxes belonging to a named person, or to generic ones such as info@ and support@.",
+                                        "enum": [
+                                            "personal",
+                                            "generic"
+                                        ],
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "domain"
+                                ],
+                                "title": "Email Finding - Hunter Domain Search input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireCursor: true` to be served only by a source that can page, which may cost more per request.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "acceptAll": {
+                                                                            "description": "True when the mail server accepts any address at this domain, so an address cannot be verified by delivery.",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "disposable": {
+                                                                            "description": "True when the domain belongs to a disposable-email service.",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "domain": {
+                                                                            "description": "The company domain the contacts belong to.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "emailPattern": {
+                                                                            "description": "Address pattern the company uses, e.g. {first}{last}.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "emails": {
+                                                                            "description": "Contacts returned by this page, one per billed result.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "confidence": {
+                                                                                        "description": "Upstream confidence in the address, 0 to 100.",
+                                                                                        "maximum": 100,
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "decisionMaker": {
+                                                                                        "description": "True when the contact is judged a decision maker.",
+                                                                                        "type": "boolean"
+                                                                                    },
+                                                                                    "department": {
+                                                                                        "description": "Department the contact works in.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "email": {
+                                                                                        "description": "The work email address.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "firstName": {
+                                                                                        "description": "Contact's first name.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "lastName": {
+                                                                                        "description": "Contact's last name.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "linkedinUrl": {
+                                                                                        "description": "Contact's LinkedIn profile URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone": {
+                                                                                        "description": "Contact's phone number.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "position": {
+                                                                                        "description": "Contact's job title.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "seniority": {
+                                                                                        "description": "Seniority level: junior, senior or executive.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "sources": {
+                                                                                        "description": "Public pages the address was found on.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "domain": {
+                                                                                                    "description": "Domain of the page the address was found on.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "extractedUtc": {
+                                                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                                    "type": "number"
+                                                                                                },
+                                                                                                "lastSeenUtc": {
+                                                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                                    "type": "number"
+                                                                                                },
+                                                                                                "stillOnPage": {
+                                                                                                    "description": "True when the address was still present at the last check.",
+                                                                                                    "type": "boolean"
+                                                                                                },
+                                                                                                "url": {
+                                                                                                    "description": "URL of the page the address was found on.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "domain"
+                                                                                            ],
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "type": {
+                                                                                        "description": "personal for a named person's mailbox, generic for a shared inbox.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "verificationStatus": {
+                                                                                        "description": "Deliverability verdict recorded for the address.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "verifiedUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "email"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "organization": {
+                                                                            "description": "Company name registered against the domain.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "totalCount": {
+                                                                            "description": "Contacts matching the filters across the whole domain, of which this response returns at most limit.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "webmail": {
+                                                                            "description": "True when the domain is a webmail provider rather than a company.",
+                                                                            "type": "boolean"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "domain",
+                                                                        "totalCount",
+                                                                        "emails"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "False when the domain yielded no contacts for the requested filters.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Email Finding - Hunter Domain Search output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "Email Finding - Hunter Domain Search",
+                "tags": [
+                    "email-finding"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/email-finding/hunter-domain"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "3.600000",
+                        "min": "0.000000",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "3.600000",
+                                "min": "0.001000",
+                                "minimumUsd": "0.001000",
+                                "mode": "dynamic",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "3.600000",
+                                "min": "0.000000",
+                                "minimumUsd": null,
+                                "mode": "dynamic",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/email_finding.icypeas": {
             "post": {
                 "description": "Find a professional email from a person and company through the durable Request lifecycle.\n\n**Price:** \\$16.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Email Finding - Icypeas pricing and uptime](https://getanyapi.com/api/email-finding/icypeas) - live USD price, lane routing, and measured 30-day uptime. [Every Email_finding endpoint](https://getanyapi.com/api/email-finding).",
