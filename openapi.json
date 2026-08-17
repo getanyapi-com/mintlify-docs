@@ -70940,7 +70940,7 @@
         },
         "/v1/run/linkedin.company": {
             "post": {
-                "description": "Fetch a full LinkedIn company page by URL: name, description, industry, employee count and range, follower count, founded year, headquarters and office locations, funding data, tagline, logo, website, and specialities.\n\n**Price:** billed per result - \\$4.20 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$4.20 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Company pricing and uptime](https://getanyapi.com/api/linkedin/company) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Fetch a full LinkedIn company page by URL: name, description, industry, employee count and range, follower count, founded year, headquarters and office locations, funding data, tagline, logo, website, and specialities.\n\n**Price:** billed per result - \\$1.37 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$1.37 per 1,000 requests.\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Company pricing and uptime](https://getanyapi.com/api/linkedin/company) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_company",
                 "parameters": [
                     {
@@ -71419,8 +71419,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.004200",
-                        "min": "0.004200",
+                        "max": "0.003680",
+                        "min": "0.001370",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -71462,8 +71462,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.004200",
-                                "min": "0.004200",
+                                "max": "0.003680",
+                                "min": "0.001370",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -71495,8 +71495,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.004200",
-                                "min": "0.004200",
+                                "max": "0.003680",
+                                "min": "0.001370",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -72195,20 +72195,23 @@
                                                                                                 "type": "string"
                                                                                             },
                                                                                             "linkedinUrl": {
-                                                                                                "description": "Canonical LinkedIn URL of the author.",
-                                                                                                "type": "string"
+                                                                                                "description": "Canonical LinkedIn URL of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "name": {
-                                                                                                "description": "Display name of the author.",
-                                                                                                "type": "string"
+                                                                                                "description": "Display name of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "type": {
                                                                                                 "description": "Author kind, e.g. 'company' or 'profile'.",
                                                                                                 "type": "string"
                                                                                             },
                                                                                             "universalName": {
-                                                                                                "description": "URL-safe company/profile handle, when present.",
-                                                                                                "type": "string"
+                                                                                                "description": "URL-safe company/profile handle, when present. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             }
                                                                                         },
                                                                                         "type": "object"
@@ -72281,8 +72284,9 @@
                                                                                         ]
                                                                                     },
                                                                                     "text": {
-                                                                                        "description": "Full text content of the post.",
-                                                                                        "type": "string"
+                                                                                        "description": "Full text content of the post. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "url": {
                                                                                         "description": "Canonical URL of the post. Populated whenever the provider has data for the entity.",
@@ -73747,8 +73751,9 @@
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "status": {
-                                                                                        "description": "Validation status of the email (e.g. valid).",
-                                                                                        "type": "string"
+                                                                                        "description": "Validation status of the email (e.g. valid). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "validEmailServer": {
                                                                                         "description": "True when the domain has a valid mail server.",
@@ -75833,7 +75838,7 @@
         },
         "/v1/run/linkedin.post_comments": {
             "post": {
-                "description": "List comments on a LinkedIn post - full text, commenter name/URL/job title, timestamps, and engagement.\n\n**Price:** billed per result - \\$2.10 per 1,000 results, capped at \\$210.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Post Comments pricing and uptime](https://getanyapi.com/api/linkedin/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "List comments on a LinkedIn post - full text, commenter name/URL/job title, timestamps, and engagement.\n\n**Price:** billed per result - \\$1.37 per 1,000 results, capped at \\$137.00 per 1,000 requests.\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Post Comments pricing and uptime](https://getanyapi.com/api/linkedin/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_post_comments",
                 "parameters": [
                     {
@@ -75978,20 +75983,24 @@
                                                                                         "description": "The commenter (a profile or a company).",
                                                                                         "properties": {
                                                                                             "image": {
-                                                                                                "description": "Profile picture URL of the commenter.",
-                                                                                                "type": "string"
+                                                                                                "description": "Profile picture URL of the commenter. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "linkedinUrl": {
-                                                                                                "description": "Canonical LinkedIn URL of the commenter.",
-                                                                                                "type": "string"
+                                                                                                "description": "Canonical LinkedIn URL of the commenter. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "name": {
-                                                                                                "description": "Display name of the commenter.",
-                                                                                                "type": "string"
+                                                                                                "description": "Display name of the commenter. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "position": {
-                                                                                                "description": "Commenter's headline or job title as displayed.",
-                                                                                                "type": "string"
+                                                                                                "description": "Commenter's headline or job title as displayed. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "type": {
                                                                                                 "description": "Commenter kind, e.g. 'profile' or 'company'.",
@@ -76006,8 +76015,9 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "createdUtc": {
-                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
-                                                                                        "type": "number"
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "edited": {
                                                                                         "description": "Whether the comment has been edited.",
@@ -76037,8 +76047,9 @@
                                                                                         "type": "boolean"
                                                                                     },
                                                                                     "url": {
-                                                                                        "description": "Canonical permalink URL of the comment.",
-                                                                                        "type": "string"
+                                                                                        "description": "Canonical permalink URL of the comment. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -76518,13 +76529,15 @@
                                                                                         "description": "The reactor - the person or company that reacted.",
                                                                                         "properties": {
                                                                                             "id": {
-                                                                                                "description": "LinkedIn member or company id of the reactor.",
-                                                                                                "type": "string"
+                                                                                                "description": "LinkedIn member or company id of the reactor. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "linkedinUrl": {
-                                                                                                "description": "Canonical LinkedIn profile or company URL of the reactor.",
+                                                                                                "description": "Canonical LinkedIn profile or company URL of the reactor. Populated whenever the provider has data for the entity.",
                                                                                                 "format": "uri",
-                                                                                                "type": "string"
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "name": {
                                                                                                 "description": "Full name of the reactor (or company name). Populated whenever the provider has data for the entity.",
@@ -76536,8 +76549,9 @@
                                                                                                 "type": "string"
                                                                                             },
                                                                                             "position": {
-                                                                                                "description": "Reactor's current job title / headline (or follower count for a company).",
-                                                                                                "type": "string"
+                                                                                                "description": "Reactor's current job title / headline (or follower count for a company). Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             }
                                                                                         },
                                                                                         "required": [
@@ -76546,8 +76560,9 @@
                                                                                         "type": "object"
                                                                                     },
                                                                                     "postId": {
-                                                                                        "description": "LinkedIn URN of the post that was reacted to.",
-                                                                                        "type": "string"
+                                                                                        "description": "LinkedIn URN of the post that was reacted to. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "reactionType": {
                                                                                         "description": "Reaction kind (e.g. LIKE, PRAISE, EMPATHY, INTEREST, APPRECIATION, ENTERTAINMENT).",
@@ -78294,8 +78309,9 @@
                                                                                                 "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "id": {
-                                                                                                "description": "Stable LinkedIn identifier of the author.",
-                                                                                                "type": "string"
+                                                                                                "description": "Stable LinkedIn identifier of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "image": {
                                                                                                 "description": "Profile or company image URL of the author. Populated whenever the provider has data for the entity.",
@@ -78314,8 +78330,9 @@
                                                                                                 "type": "integer"
                                                                                             },
                                                                                             "name": {
-                                                                                                "description": "Display name of the author.",
-                                                                                                "type": "string"
+                                                                                                "description": "Display name of the author. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "profileUrl": {
                                                                                                 "description": "Canonical LinkedIn profile or company URL of the author. Populated whenever the provider has data for the entity.",
@@ -78324,8 +78341,9 @@
                                                                                                 "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "type": {
-                                                                                                "description": "Author kind, such as profile or company.",
-                                                                                                "type": "string"
+                                                                                                "description": "Author kind, such as profile or company. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
                                                                                             },
                                                                                             "universalName": {
                                                                                                 "description": "Universal LinkedIn name used for company authors, when present.",
@@ -78505,9 +78523,10 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "publicationUrl": {
-                                                                                        "description": "Canonical LinkedIn feed publication URL for the post.",
+                                                                                        "description": "Canonical LinkedIn feed publication URL for the post. Populated whenever the provider has data for the entity.",
                                                                                         "format": "uri",
-                                                                                        "type": "string"
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "repostArticleDescription": {
                                                                                         "description": "Description excerpt of the reposted post's article, when present.",
@@ -78684,8 +78703,9 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "type": {
-                                                                                        "description": "LinkedIn record type reported for the post.",
-                                                                                        "type": "string"
+                                                                                        "description": "LinkedIn record type reported for the post. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "url": {
                                                                                         "description": "Canonical LinkedIn URL of the post. Populated whenever the provider has data for the entity.",
@@ -80393,16 +80413,19 @@
                                                                                 "description": "A LinkedIn company: name, URL, industry, location, follower count, and description.",
                                                                                 "properties": {
                                                                                     "description": {
-                                                                                        "description": "Company summary / about text.",
-                                                                                        "type": "string"
+                                                                                        "description": "Company summary / about text. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "followersText": {
-                                                                                        "description": "Follower count as a display string (e.g. 105K followers).",
-                                                                                        "type": "string"
+                                                                                        "description": "Follower count as a display string (e.g. 105K followers). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "handle": {
-                                                                                        "description": "Company universal name (the vanity slug in the URL).",
-                                                                                        "type": "string"
+                                                                                        "description": "Company universal name (the vanity slug in the URL). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "id": {
                                                                                         "description": "LinkedIn company id. Populated whenever the provider has data for the entity.",
@@ -80410,16 +80433,19 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "image": {
-                                                                                        "description": "Company logo image URL.",
-                                                                                        "type": "string"
+                                                                                        "description": "Company logo image URL. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "industry": {
-                                                                                        "description": "Company industry.",
-                                                                                        "type": "string"
+                                                                                        "description": "Company industry. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "location": {
-                                                                                        "description": "Company location as a single string (city, region).",
-                                                                                        "type": "string"
+                                                                                        "description": "Company location as a single string (city, region). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "name": {
                                                                                         "description": "Company name. Populated whenever the provider has data for the entity.",
@@ -82452,8 +82478,9 @@
                                                                                 "description": "A full LinkedIn profile: name, headline, location, about, current position, work experience, education, and skills, plus the profile URL, handle, and id.",
                                                                                 "properties": {
                                                                                     "about": {
-                                                                                        "description": "Profile about / summary text.",
-                                                                                        "type": "string"
+                                                                                        "description": "Profile about / summary text. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "currentPosition": {
                                                                                         "description": "Current role(s). Each entry is an open object with the position title, company, dates, and location; shape can vary by profile.",
@@ -82478,8 +82505,9 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "firstName": {
-                                                                                        "description": "Member's first name.",
-                                                                                        "type": "string"
+                                                                                        "description": "Member's first name. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "handle": {
                                                                                         "description": "Public profile identifier (the vanity slug in the URL). Populated whenever the provider has data for the entity.",
@@ -82496,16 +82524,19 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "image": {
-                                                                                        "description": "Profile picture URL.",
-                                                                                        "type": "string"
+                                                                                        "description": "Profile picture URL. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "lastName": {
-                                                                                        "description": "Member's last name.",
-                                                                                        "type": "string"
+                                                                                        "description": "Member's last name. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "location": {
-                                                                                        "description": "Member's location as a single string (city, region, country).",
-                                                                                        "type": "string"
+                                                                                        "description": "Member's location as a single string (city, region, country). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "openToWork": {
                                                                                         "description": "Whether the member has the Open to Work flag set.",
@@ -82872,7 +82903,7 @@
         },
         "/v1/run/linkedin.search_profiles_email": {
             "post": {
-                "description": "People search returning a full profile AND a verified work email for each hit. Search LinkedIn profiles by keyword with optional location and job-title filters; each match returns the full profile record (name, headline, location, current position, work experience, education, and skills, plus the profile URL, handle, and id) together with an emails array carrying the discovered work email and its deliverability. For a full profile without email use linkedin.search_profiles; for a cheaper name/headline/URL-only search use linkedin.search_profiles_thin.\n\n**Price:** billed per result - \\$84.00 per 1,000 requests base + \\$9.45 per 1,000 results, capped at \\$321.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Profile Search + Email pricing and uptime](https://getanyapi.com/api/linkedin/search-profiles-email) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "People search returning a full profile AND a verified work email for each hit. Search LinkedIn profiles by keyword with optional location and job-title filters; each match returns the full profile record (name, headline, location, current position, work experience, education, and skills, plus the profile URL, handle, and id) together with an emails array carrying the discovered work email and its deliverability. Email discovery is best effort and needs the profile to expose a resolvable company domain, so on a broad search many matches return an empty emails array while still billing the email rate. If you already have names and company domains, email.find, email_finding.icypeas, and email_finding.dropleads resolve addresses directly for less, and linkedin.email enriches a single known profile URL. For a full profile without email use linkedin.search_profiles; for a cheaper name/headline/URL-only search use linkedin.search_profiles_thin.\n\n**Price:** billed per result - \\$84.00 per 1,000 requests base + \\$9.45 per 1,000 results, capped at \\$321.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Profile Search + Email pricing and uptime](https://getanyapi.com/api/linkedin/search-profiles-email) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_search_profiles_email",
                 "parameters": [
                     {
@@ -83306,8 +83337,9 @@
                                                                                 "description": "A full LinkedIn profile: name, headline, location, about, current position, work experience, education, and skills, plus the profile URL, handle, id, and a discovered work email with deliverability.",
                                                                                 "properties": {
                                                                                     "about": {
-                                                                                        "description": "Profile about / summary text.",
-                                                                                        "type": "string"
+                                                                                        "description": "Profile about / summary text. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "currentPosition": {
                                                                                         "description": "Current role(s). Each entry is an open object with the position title, company, dates, and location; shape can vary by profile.",
@@ -83340,8 +83372,9 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "firstName": {
-                                                                                        "description": "Member's first name.",
-                                                                                        "type": "string"
+                                                                                        "description": "Member's first name. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "handle": {
                                                                                         "description": "Public profile identifier (the vanity slug in the URL). Populated whenever the provider has data for the entity.",
@@ -83358,16 +83391,19 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "image": {
-                                                                                        "description": "Profile picture URL.",
-                                                                                        "type": "string"
+                                                                                        "description": "Profile picture URL. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "lastName": {
-                                                                                        "description": "Member's last name.",
-                                                                                        "type": "string"
+                                                                                        "description": "Member's last name. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "location": {
-                                                                                        "description": "Member's location as a single string (city, region, country).",
-                                                                                        "type": "string"
+                                                                                        "description": "Member's location as a single string (city, region, country). Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "openToWork": {
                                                                                         "description": "Whether the member has the Open to Work flag set.",
