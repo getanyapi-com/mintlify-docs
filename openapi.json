@@ -140998,7 +140998,7 @@
         },
         "/v1/run/trustpilot.reviews": {
             "post": {
-                "description": "Pull Trustpilot reviews for any company by brand name: star ratings, review text, dates, and reviewer details as clean JSON.\n\n**Price:** \\$18.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Trustpilot Reviews pricing and uptime](https://getanyapi.com/api/trustpilot/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Trustpilot endpoint](https://getanyapi.com/api/trustpilot).",
+                "description": "Pull Trustpilot reviews for any company by brand name: star ratings, review text, dates, and reviewer details as clean JSON.\n\n**Price:** billed per result - \\$0.06 per 1,000 requests base + \\$0.05 per 1,000 results, capped at \\$8.46 per 1,000 requests.\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Trustpilot Reviews pricing and uptime](https://getanyapi.com/api/trustpilot/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Trustpilot endpoint](https://getanyapi.com/api/trustpilot).",
                 "operationId": "trustpilot_reviews",
                 "parameters": [
                     {
@@ -141083,8 +141083,8 @@
                                         "type": "array"
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (1-50, default 50). You are billed per result returned, so a lower limit costs less.",
-                                        "maximum": 50,
+                                        "description": "Maximum number of results to return (1-200, default 200). Trustpilot serves at most 200 reviews per company. You are billed per result returned, so a lower limit costs less.",
+                                        "maximum": 200,
                                         "minimum": 1,
                                         "type": "integer"
                                     },
@@ -141427,8 +141427,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.063000",
-                        "min": "0.018000",
+                        "max": "0.158000",
+                        "min": "0.000060",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -141470,8 +141470,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.063000",
-                                "min": "0.018000",
+                                "max": "0.158000",
+                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -141503,8 +141503,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.063000",
-                                "min": "0.018000",
+                                "max": "0.158000",
+                                "min": "0.000060",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
