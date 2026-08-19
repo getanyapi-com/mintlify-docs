@@ -132029,7 +132029,7 @@
         },
         "/v1/run/tiktok.trending_feed": {
             "post": {
-                "description": "Get TikTok's trending feed for a region (caption, views, likes, comments, author) as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Trending Feed pricing and uptime](https://getanyapi.com/api/tiktok/trending-feed) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Sample TikTok's For You feed as served to a viewer in one country (caption, views, likes, comments, author). Returns a rotating sample, not a ranked chart.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Trending Feed pricing and uptime](https://getanyapi.com/api/tiktok/trending-feed) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_trending_feed",
                 "parameters": [
                     {
@@ -132517,6 +132517,638 @@
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/tiktok.trending_hashtags": {
+            "post": {
+                "description": "Rank TikTok's trending hashtags for one country and industry, with each hashtag's daily popularity curve, post count, video views, and leading creators. Covers 27 markets: AE, AR, AU, BR, CA, CO, DE, EG, ES, FR, GB, ID, IL, IT, JP, KR, MX, MY, PH, SA, SG, TH, TR, TW, US, VN, ZA.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Trending Hashtags pricing and uptime](https://getanyapi.com/api/tiktok/trending-hashtags) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "operationId": "tiktok_trending_hashtags",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 20,
+                                "period": 7,
+                                "region": "US"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 20,
+                                    "period": 7,
+                                    "region": "US"
+                                },
+                                "properties": {
+                                    "industry": {
+                                        "description": "Restrict the ranking to one industry. Omit for the all-industries board.",
+                                        "enum": [
+                                            "apparel_accessories",
+                                            "baby_kids_maternity",
+                                            "beauty_personal_care",
+                                            "education",
+                                            "food_beverage",
+                                            "games",
+                                            "health",
+                                            "home_improvement",
+                                            "household_products",
+                                            "news_entertainment",
+                                            "pets",
+                                            "sports_outdoor",
+                                            "tech_electronics",
+                                            "travel",
+                                            "vehicle_transportation"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "limit": {
+                                        "default": 20,
+                                        "description": "Maximum number of ranked hashtags to return, from 1 through 100 (default 20).",
+                                        "maximum": 100,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "period": {
+                                        "default": 7,
+                                        "description": "Lookback window in days that the ranking and the popularity curve cover (default 7).",
+                                        "enum": [
+                                            7,
+                                            30,
+                                            90
+                                        ],
+                                        "type": "integer"
+                                    },
+                                    "region": {
+                                        "default": "US",
+                                        "description": "Two-letter country code of the market whose hashtag ranking to read (default US). Each market is ranked independently, so US and DE return different boards.",
+                                        "enum": [
+                                            "US",
+                                            "FR",
+                                            "DE",
+                                            "IT",
+                                            "ES",
+                                            "GB",
+                                            "AR",
+                                            "AU",
+                                            "BR",
+                                            "CA",
+                                            "CO",
+                                            "EG",
+                                            "ID",
+                                            "IL",
+                                            "JP",
+                                            "KR",
+                                            "MY",
+                                            "MX",
+                                            "PH",
+                                            "SA",
+                                            "SG",
+                                            "ZA",
+                                            "TW",
+                                            "TH",
+                                            "TR",
+                                            "AE",
+                                            "VN"
+                                        ],
+                                        "type": "string"
+                                    }
+                                },
+                                "title": "TikTok Trending Hashtags input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireCursor: true` to be served only by a source that can page, which may cost more per request.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The ranked hashtags for the requested market, or null when unavailable.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Hashtags in the market's own ranking order, best first. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "hashtag": {
+                                                                                        "description": "Hashtag name without the leading #. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "hashtagId": {
+                                                                                        "description": "Stable TikTok hashtag identifier. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "industryIds": {
+                                                                                        "description": "TikTok industry identifiers the hashtag is classified under, matching the ids behind the `industry` input. Empty when TikTok classifies the hashtag under none.",
+                                                                                        "items": {
+                                                                                            "type": "integer"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "popularity": {
+                                                                                        "description": "Daily popularity curve across the requested period, oldest first. Values are normalized 0-100 within this hashtag's own window, where 100 is its peak day, so they compare days of one hashtag rather than two hashtags. Populated whenever the provider has data for the entity.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "atUtc": {
+                                                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                                    "type": "number"
+                                                                                                },
+                                                                                                "value": {
+                                                                                                    "description": "Normalized popularity for that day, 0 through 100.",
+                                                                                                    "maximum": 100,
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "number"
+                                                                                                }
+                                                                                            },
+                                                                                            "required": [
+                                                                                                "atUtc",
+                                                                                                "value"
+                                                                                            ],
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "posts": {
+                                                                                        "description": "Number of videos published with the hashtag during the period. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "rank": {
+                                                                                        "description": "One-based position in this market's ranking for the requested period. Populated whenever the provider has data for the entity.",
+                                                                                        "minimum": 1,
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "topCreators": {
+                                                                                        "description": "Creators TikTok surfaces as leading the hashtag, in its own order.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "countryCode": {
+                                                                                                    "description": "Two-letter country code TikTok reports for the creator.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "followers": {
+                                                                                                    "description": "Creator's follower count.",
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "handle": {
+                                                                                                    "description": "Creator's TikTok username without the leading @.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "image": {
+                                                                                                    "description": "Creator's avatar image URL.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "nickname": {
+                                                                                                    "description": "Creator's display name.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "rank": {
+                                                                                                    "description": "One-based position among the hashtag's top creators.",
+                                                                                                    "minimum": 1,
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "userId": {
+                                                                                                    "description": "Creator's stable TikTok user id.",
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "views": {
+                                                                                        "description": "Total video views the hashtag drew during the period. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "rank",
+                                                                                    "hashtag",
+                                                                                    "hashtagId"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "items"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether a hashtag ranking was resolved for the requested market.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "TikTok Trending Hashtags output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "TikTok Trending Hashtags",
+                "tags": [
+                    "tiktok"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/tiktok/trending-hashtags"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.190000",
+                        "min": "0.001200",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.190000",
+                                "min": "0.001200",
+                                "minimumUsd": "0.001000",
+                                "mode": "dynamic",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.190000",
+                                "min": "0.001200",
+                                "minimumUsd": null,
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
