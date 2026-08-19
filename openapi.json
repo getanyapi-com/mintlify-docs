@@ -63085,6 +63085,10 @@
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
                                                                         },
+                                                                        "plays": {
+                                                                            "description": "Number of plays of the reel or video. Absent when Instagram does not expose a play count for this media, and on lanes that cannot serve it.",
+                                                                            "type": "integer"
+                                                                        },
                                                                         "shortcode": {
                                                                             "type": "string"
                                                                         },
@@ -64972,7 +64976,7 @@
         },
         "/v1/run/instagram.reels_search": {
             "post": {
-                "description": "Search Instagram Reels by keyword and get matching reels (caption, views, likes, creator, and duration). Results are relevance-ranked, not chronological. Paging tops out around 110 reels per query (11 pages of 10).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Reels Search pricing and uptime](https://getanyapi.com/api/instagram/reels-search) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Search Instagram Reels by keyword and get matching reels (caption, likes, comments, creator, and duration). Instagram does not return view or play counts in reels search results. Results are relevance-ranked, not chronological. Paging tops out around 110 reels per query (11 pages of 10).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Reels Search pricing and uptime](https://getanyapi.com/api/instagram/reels-search) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_reels_search",
                 "parameters": [
                     {
@@ -65125,10 +65129,6 @@
                                                                                         "description": "Reel duration in seconds.",
                                                                                         "type": "number"
                                                                                     },
-                                                                                    "followers": {
-                                                                                        "description": "Follower count of the posting account.",
-                                                                                        "type": "integer"
-                                                                                    },
                                                                                     "likes": {
                                                                                         "description": "Number of likes on the reel.",
                                                                                         "type": "integer"
@@ -65136,10 +65136,6 @@
                                                                                     "paidPartnership": {
                                                                                         "description": "True when the reel is a paid partnership.",
                                                                                         "type": "boolean"
-                                                                                    },
-                                                                                    "plays": {
-                                                                                        "description": "Number of plays of the reel.",
-                                                                                        "type": "integer"
                                                                                     },
                                                                                     "shortcode": {
                                                                                         "description": "Instagram media shortcode. Populated whenever the provider has data for the entity.",
@@ -65164,10 +65160,6 @@
                                                                                     "verified": {
                                                                                         "description": "True when the posting account is verified.",
                                                                                         "type": "boolean"
-                                                                                    },
-                                                                                    "views": {
-                                                                                        "description": "Number of views on the reel.",
-                                                                                        "type": "integer"
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -65175,14 +65167,11 @@
                                                                                     "url",
                                                                                     "caption",
                                                                                     "thumbnail",
-                                                                                    "views",
-                                                                                    "plays",
                                                                                     "likes",
                                                                                     "comments",
                                                                                     "durationSeconds",
                                                                                     "createdUtc",
                                                                                     "username",
-                                                                                    "followers",
                                                                                     "verified",
                                                                                     "paidPartnership"
                                                                                 ],
@@ -68613,7 +68602,7 @@
         },
         "/v1/run/instagram.trending_reels": {
             "post": {
-                "description": "List currently trending Instagram reels.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Trending Reels pricing and uptime](https://getanyapi.com/api/instagram/trending-reels) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "List currently trending Instagram reels. Instagram does not return play counts on this feed.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Trending Reels pricing and uptime](https://getanyapi.com/api/instagram/trending-reels) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_trending_reels",
                 "parameters": [
                     {
@@ -68739,9 +68728,6 @@
                                                                                     "likes": {
                                                                                         "type": "integer"
                                                                                     },
-                                                                                    "plays": {
-                                                                                        "type": "integer"
-                                                                                    },
                                                                                     "shortcode": {
                                                                                         "description": "Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -68760,7 +68746,6 @@
                                                                                     "caption",
                                                                                     "likes",
                                                                                     "comments",
-                                                                                    "plays",
                                                                                     "handle"
                                                                                 ],
                                                                                 "type": "object"
