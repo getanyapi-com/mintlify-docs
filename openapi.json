@@ -4705,7 +4705,7 @@
         },
         "/v1/run/amazon.product": {
             "post": {
-                "description": "Fetch full Amazon product details (title, brand, price when in stock, images, ratings, review count, variants, and attributes) from a product URL.\n\n**Price:** \\$1.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Amazon Product pricing and uptime](https://getanyapi.com/api/amazon/product) - live USD price, lane routing, and measured 30-day uptime. [Every Amazon endpoint](https://getanyapi.com/api/amazon).",
+                "description": "Fetch full Amazon product details (title, brand, price when in stock, images, ratings, review count, variants, and attributes) from a product URL.\n\n**Price:** \\$1.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Amazon Product pricing and uptime](https://getanyapi.com/api/amazon/product) - live USD price, lane routing, and measured 30-day uptime. [Every Amazon endpoint](https://getanyapi.com/api/amazon).",
                 "operationId": "amazon_product",
                 "parameters": [
                     {
@@ -152714,7 +152714,7 @@
         },
         "/v1/run/walmart.product": {
             "post": {
-                "description": "Fetch a Walmart product page by URL and get full product details (title, price, availability, ratings, images, and specs) in one normalized response.\n\n**Price:** billed per result - \\$3.87 per 1,000 results, capped at \\$3.87 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Walmart Product pricing and uptime](https://getanyapi.com/api/walmart/product) - live USD price, lane routing, and measured 30-day uptime. [Every Walmart endpoint](https://getanyapi.com/api/walmart).",
+                "description": "Fetch a Walmart product page by URL and get full product details (title, price, availability, ratings, images, and specs) in one normalized response.\n\n**Price:** \\$1.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Walmart Product pricing and uptime](https://getanyapi.com/api/walmart/product) - live USD price, lane routing, and measured 30-day uptime. [Every Walmart endpoint](https://getanyapi.com/api/walmart).",
                 "operationId": "walmart_product",
                 "parameters": [
                     {
@@ -153144,7 +153144,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003870",
-                        "min": "0.000000",
+                        "min": "0.001800",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -153187,7 +153187,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.003870",
-                                "min": "0.001000",
+                                "min": "0.001800",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -153220,7 +153220,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.003870",
-                                "min": "0.000000",
+                                "min": "0.001800",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
