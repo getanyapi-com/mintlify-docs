@@ -15402,7 +15402,7 @@
         },
         "/v1/run/company_enrichment.crustdata_v3": {
             "post": {
-                "description": "Enrich a company by domain, name, LinkedIn URL, or Crustdata identifier.\n\n**Price:** \\$97.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Company Enrichment - Crustdata v3 pricing and uptime](https://getanyapi.com/api/company-enrichment/crustdata-v3) - live USD price, lane routing, and measured 30-day uptime. [Every Company_enrichment endpoint](https://getanyapi.com/api/company-enrichment).",
+                "description": "Enrich a company by domain, name, LinkedIn URL, or Crustdata identifier.\n\n**Price:** \\$48.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Company Enrichment - Crustdata v3 pricing and uptime](https://getanyapi.com/api/company-enrichment/crustdata-v3) - live USD price, lane routing, and measured 30-day uptime. [Every Company_enrichment endpoint](https://getanyapi.com/api/company-enrichment).",
                 "operationId": "company_enrichment_crustdata_v3",
                 "parameters": [
                     {
@@ -15457,6 +15457,9 @@
                 "requestBody": {
                     "content": {
                         "application/json": {
+                            "example": {
+                                "companyDomain": "posthog.com"
+                            },
                             "schema": {
                                 "additionalProperties": false,
                                 "anyOf": [
@@ -15481,6 +15484,9 @@
                                         ]
                                     }
                                 ],
+                                "example": {
+                                    "companyDomain": "posthog.com"
+                                },
                                 "properties": {
                                     "companyDomain": {
                                         "minLength": 1,
@@ -15817,7 +15823,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.097200",
+                        "amount": "0.048000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -15859,7 +15865,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.097200",
+                                "amount": "0.048000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -15891,7 +15897,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.097200",
+                                "amount": "0.048000",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -16571,8 +16577,28 @@
                 "requestBody": {
                     "content": {
                         "application/json": {
+                            "example": {
+                                "filters": [
+                                    {
+                                        "filter_type": "company_website_domain",
+                                        "type": "(.)",
+                                        "value": "posthog.com"
+                                    }
+                                ],
+                                "limit": 1
+                            },
                             "schema": {
                                 "additionalProperties": false,
+                                "example": {
+                                    "filters": [
+                                        {
+                                            "filter_type": "company_website_domain",
+                                            "type": "(.)",
+                                            "value": "posthog.com"
+                                        }
+                                    ],
+                                    "limit": 1
+                                },
                                 "properties": {
                                     "cursor": {
                                         "minLength": 1,
@@ -16595,7 +16621,7 @@
                                         ]
                                     },
                                     "filters": {
-                                        "description": "Crustdata company-database filter expression.",
+                                        "description": "Crustdata company-database filter expression. A leaf condition is {\"filter_type\": <column>, \"type\": <operator>, \"value\": <match>}; a group is {\"op\": \"and\"|\"or\", \"conditions\": [<leaf>, ...]}. Pass a single leaf, an array of leaves, or a group. See the example for a domain lookup.",
                                         "oneOf": [
                                             {
                                                 "type": "object"
@@ -27332,8 +27358,14 @@
                 "requestBody": {
                     "content": {
                         "application/json": {
+                            "example": {
+                                "email": "support@stripe.com"
+                            },
                             "schema": {
                                 "additionalProperties": false,
+                                "example": {
+                                    "email": "support@stripe.com"
+                                },
                                 "properties": {
                                     "email": {
                                         "format": "email",
@@ -90379,6 +90411,9 @@
                 "requestBody": {
                     "content": {
                         "application/json": {
+                            "example": {
+                                "profileUrl": "https://www.linkedin.com/in/tim-zheng"
+                            },
                             "schema": {
                                 "additionalProperties": false,
                                 "anyOf": [
@@ -90403,6 +90438,9 @@
                                         ]
                                     }
                                 ],
+                                "example": {
+                                    "profileUrl": "https://www.linkedin.com/in/tim-zheng"
+                                },
                                 "properties": {
                                     "email": {
                                         "format": "email",
@@ -93533,8 +93571,18 @@
                 "requestBody": {
                     "content": {
                         "application/json": {
+                            "example": {
+                                "companyDomain": "posthog.com",
+                                "limit": 1,
+                                "titleKeywords": "engineer"
+                            },
                             "schema": {
                                 "additionalProperties": false,
+                                "example": {
+                                    "companyDomain": "posthog.com",
+                                    "limit": 1,
+                                    "titleKeywords": "engineer"
+                                },
                                 "properties": {
                                     "companyDomain": {
                                         "description": "Company domain without a path.",
@@ -93662,9 +93710,6 @@
                                                                                 "properties": {
                                                                                     "emails": {
                                                                                         "type": "array"
-                                                                                    },
-                                                                                    "firstName": {
-                                                                                        "type": "string"
                                                                                     },
                                                                                     "headline": {
                                                                                         "type": "string"
@@ -95882,6 +95927,9 @@
                 "requestBody": {
                     "content": {
                         "application/json": {
+                            "example": {
+                                "linkedinURL": "https://www.linkedin.com/in/dharmesh"
+                            },
                             "schema": {
                                 "additionalProperties": false,
                                 "anyOf": [
@@ -95936,6 +95984,9 @@
                                         ]
                                     }
                                 ],
+                                "example": {
+                                    "linkedinURL": "https://www.linkedin.com/in/dharmesh"
+                                },
                                 "properties": {
                                     "angelListID": {
                                         "minLength": 1,
