@@ -21493,7 +21493,7 @@
         },
         "/v1/run/ebay.sold_listings": {
             "post": {
-                "description": "Retrieve recently sold eBay listings for any keyword with optional price-range and sort filters (sold price, sale date, condition, item details); ideal for pricing research.\n\n**Price:** billed per result - \\$0.06 per 1,000 requests base + \\$4.20 per 1,000 results, capped at \\$106.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [eBay Sold Listings pricing and uptime](https://getanyapi.com/api/ebay/sold-listings) - live USD price, lane routing, and measured 30-day uptime. [Every Ebay endpoint](https://getanyapi.com/api/ebay).",
+                "description": "Retrieve recently sold eBay listings for any keyword with optional price-range, condition, and sort filters (sold price, sale date, condition, seller, item details); ideal for pricing research.\n\n**Price:** billed per result - \\$21.00 per 1,000 requests base + \\$2.52 per 1,000 results, capped at \\$84.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [eBay Sold Listings pricing and uptime](https://getanyapi.com/api/ebay/sold-listings) - live USD price, lane routing, and measured 30-day uptime. [Every Ebay endpoint](https://getanyapi.com/api/ebay).",
                 "operationId": "ebay_sold_listings",
                 "parameters": [
                     {
@@ -21549,16 +21549,16 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "limit": 3,
-                                "query": "nintendo switch",
-                                "sort": "price_high"
+                                "limit": 10,
+                                "query": "iphone 13 pro",
+                                "sort": "ended_recently"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "limit": 3,
-                                    "query": "nintendo switch",
-                                    "sort": "price_high"
+                                    "limit": 10,
+                                    "query": "iphone 13 pro",
+                                    "sort": "ended_recently"
                                 },
                                 "properties": {
                                     "condition": {
@@ -21571,16 +21571,24 @@
                                         ],
                                         "type": "string"
                                     },
-                                    "daysBack": {
-                                        "default": 30,
-                                        "description": "How many days back to include sold listings, 1-90 (e.g. 30).",
-                                        "type": "integer"
+                                    "freeShipping": {
+                                        "description": "Only include listings that sold with free shipping.",
+                                        "type": "boolean"
                                     },
                                     "limit": {
                                         "description": "Maximum number of results to return (1-25, default 25). You are billed per result returned, so a lower limit costs less.",
                                         "maximum": 25,
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "listingType": {
+                                        "description": "Restrict to a listing format; omit or use all for both (e.g. auction for auction sales only).",
+                                        "enum": [
+                                            "all",
+                                            "auction",
+                                            "buy_it_now"
+                                        ],
+                                        "type": "string"
                                     },
                                     "maxPrice": {
                                         "description": "Optional maximum sold price in the site currency (e.g. 500).",
@@ -21596,29 +21604,28 @@
                                         "description": "Search keyword for sold items (e.g. iphone 13 pro).",
                                         "type": "string"
                                     },
+                                    "returnsAccepted": {
+                                        "description": "Only include listings from sellers who accept returns.",
+                                        "type": "boolean"
+                                    },
+                                    "seller": {
+                                        "description": "Restrict to sold listings from one seller username (e.g. rainierconsignment).",
+                                        "type": "string"
+                                    },
                                     "site": {
                                         "default": "ebay.com",
-                                        "description": "eBay country site to search (e.g. ebay.co.uk).",
+                                        "description": "eBay country site to search. Sold-listing coverage is currently US only.",
                                         "enum": [
-                                            "ebay.com",
-                                            "ebay.co.uk",
-                                            "ebay.de",
-                                            "ebay.fr",
-                                            "ebay.it",
-                                            "ebay.es",
-                                            "ebay.ca",
-                                            "ebay.com.au"
+                                            "ebay.com"
                                         ],
                                         "type": "string"
                                     },
                                     "sort": {
-                                        "description": "Result sort order; omit for eBay's default ended-recently (e.g. price_high sorts by highest total price first).",
+                                        "description": "Result sort order; omit for eBay's default best-match order (e.g. price_high sorts by highest sold price first).",
                                         "enum": [
                                             "ended_recently",
-                                            "newly_listed",
                                             "price_low",
-                                            "price_high",
-                                            "distance_nearest"
+                                            "price_high"
                                         ],
                                         "type": "string"
                                     }
@@ -21669,14 +21676,19 @@
                                                                     "additionalProperties": false,
                                                                     "properties": {
                                                                         "items": {
-                                                                            "description": "Sold listing records: title, sold price, sale date, condition, shipping, and item URL. Populated whenever the provider has data for the entity.",
+                                                                            "description": "Sold listing records: title, sold price, sale date, condition, seller, and item URL. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
+                                                                                    "bidCount": {
+                                                                                        "description": "Number of bids the listing received, for auction sales.",
+                                                                                        "type": "integer"
+                                                                                    },
                                                                                     "condition": {
+                                                                                        "description": "Item condition as listed (e.g. Pre-Owned).",
                                                                                         "type": "string"
                                                                                     },
-                                                                                    "endedAt": {
-                                                                                        "description": "Sale date (ISO 8601).",
+                                                                                    "epid": {
+                                                                                        "description": "eBay catalog product identifier (ePID), when the listing is matched to a catalog product.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "image": {
@@ -21684,35 +21696,57 @@
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "images": {
+                                                                                        "description": "All listing image URLs, primary first.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
                                                                                     "itemId": {
                                                                                         "description": "eBay item identifier. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "listingType": {
+                                                                                        "description": "Sale format (e.g. Fixed price, Auction).",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "sellerFeedbackCount": {
+                                                                                        "description": "Seller's lifetime feedback count, when available.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "sellerFeedbackPercent": {
+                                                                                        "description": "Seller's positive-feedback percentage, when available.",
+                                                                                        "type": "number"
+                                                                                    },
                                                                                     "sellerUsername": {
+                                                                                        "description": "Seller's eBay username, when available.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "shippingCost": {
+                                                                                        "description": "Shipping cost as displayed on the listing (e.g. \"Free delivery\", \"$5.55 delivery\").",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "soldCurrency": {
+                                                                                        "description": "ISO currency code of the sold price (e.g. USD).",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "soldPrice": {
-                                                                                        "description": "Final sold price.",
+                                                                                        "description": "Final sold price in the site currency.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "soldUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
                                                                                         "type": "number"
                                                                                     },
                                                                                     "title": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Listing title as it appeared on eBay. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "totalPrice": {
-                                                                                        "description": "Sold price plus shipping.",
-                                                                                        "type": "number"
-                                                                                    },
                                                                                     "url": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Canonical listing URL. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     }
@@ -21958,8 +21992,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.106000",
-                        "min": "0.000060",
+                        "max": "0.084000",
+                        "min": "0.021000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -22001,8 +22035,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.106000",
-                                "min": "0.001000",
+                                "max": "0.084000",
+                                "min": "0.021000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -22034,8 +22068,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.106000",
-                                "min": "0.000060",
+                                "max": "0.084000",
+                                "min": "0.021000",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
