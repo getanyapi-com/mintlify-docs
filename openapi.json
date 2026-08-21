@@ -15186,9 +15186,54 @@
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
                                                                         },
+                                                                        "createdUtc": {
+                                                                            "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. null means the source that answered does not report when it answered.",
+                                                                            "type": [
+                                                                                "number",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "model": {
+                                                                            "description": "The ChatGPT model that produced the answer. null means the source that answered does not report it, which is not the same as an unknown model.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "prompt": {
                                                                             "description": "The prompt answered by ChatGPT.",
                                                                             "type": "string"
+                                                                        },
+                                                                        "searchQueries": {
+                                                                            "description": "The web search queries ChatGPT ran to ground its answer. null means the source that answered cannot report them; an empty array means it searched with none recorded.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "searchResults": {
+                                                                            "description": "Pages ChatGPT retrieved while answering. A SUPERSET of citations: a page can be read and not cited. null means the source that answered cannot report them.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "title": {
+                                                                                        "description": "Title of the retrieved page, empty when the source did not send one.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Canonical URL of the retrieved page, tracking parameters stripped.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "webSearchTriggered": {
                                                                             "description": "Whether ChatGPT actually ran a web search before answering. ChatGPT decides this per session, and an answer written without one is not web-grounded. null means the source that answered cannot report it, which is not the same as false.",
