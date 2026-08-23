@@ -67025,7 +67025,7 @@
         },
         "/v1/run/instagram.profile": {
             "post": {
-                "description": "Fetch an Instagram account's public profile (followers, posts, bio, verification) by handle.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Profile pricing and uptime](https://getanyapi.com/api/instagram/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Fetch an Instagram account's public profile (followers, posts, bio, verification) by handle.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Profile pricing and uptime](https://getanyapi.com/api/instagram/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_profile",
                 "parameters": [
                     {
@@ -67139,35 +67139,87 @@
                                                                 {
                                                                     "properties": {
                                                                         "avatarUrl": {
-                                                                            "description": "Populated whenever the provider has data for the entity.",
+                                                                            "description": "Profile picture URL at the highest resolution the account exposes. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "bio": {
-                                                                            "description": "Populated whenever the provider has data for the entity.",
+                                                                            "description": "Profile biography text. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
                                                                         },
+                                                                        "bioLinks": {
+                                                                            "description": "Every link the account publishes in its bio, in the order Instagram returns them. Business accounts often list several here while externalUrl carries only the first. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "title": {
+                                                                                        "description": "Display label for the link, empty when the account set none.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Destination URL, exactly as the account published it.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "url"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "category": {
+                                                                            "description": "Instagram's category label for the account (for example \"Government Agencies\" or \"Coffee shop\"). Absent when the account publishes no category. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "contactMethod": {
+                                                                            "description": "The contact button Instagram shows on the profile, for example CALL, TEXT, EMAIL, or UNKNOWN. Absent when the account exposes no contact button. Instagram no longer publishes the underlying email or phone number to unauthenticated callers.",
+                                                                            "type": "string"
+                                                                        },
                                                                         "displayName": {
-                                                                            "description": "Populated whenever the provider has data for the entity.",
+                                                                            "description": "Account display name. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "externalUrl": {
+                                                                            "description": "The single website link on the profile. Absent when the account publishes no link. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "followers": {
+                                                                            "description": "Follower count.",
                                                                             "type": "integer"
                                                                         },
                                                                         "following": {
+                                                                            "description": "Number of accounts this account follows.",
                                                                             "type": "integer"
                                                                         },
                                                                         "handle": {
-                                                                            "description": "Populated whenever the provider has data for the entity.",
+                                                                            "description": "Instagram username without the leading @. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
                                                                         },
+                                                                        "isBusiness": {
+                                                                            "description": "Whether Instagram flags the account as a business account.",
+                                                                            "type": "boolean"
+                                                                        },
                                                                         "posts": {
+                                                                            "description": "Number of posts on the account.",
                                                                             "type": "integer"
                                                                         },
+                                                                        "private": {
+                                                                            "description": "Whether the account is private.",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "userId": {
+                                                                            "description": "Instagram's numeric account id, as a string. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
                                                                         "verified": {
+                                                                            "description": "Whether the account carries Instagram's verified badge.",
                                                                             "type": "boolean"
                                                                         }
                                                                     },
@@ -67179,6 +67231,7 @@
                                                                         "posts",
                                                                         "bio",
                                                                         "verified",
+                                                                        "private",
                                                                         "avatarUrl"
                                                                     ],
                                                                     "type": "object"
@@ -67408,7 +67461,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.003600",
+                        "max": "0.002400",
                         "min": "0.000900",
                         "mode": "dynamic"
                     },
@@ -67451,7 +67504,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.003600",
+                                "max": "0.002400",
                                 "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -67484,7 +67537,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.003600",
+                                "max": "0.002400",
                                 "min": "0.000900",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
