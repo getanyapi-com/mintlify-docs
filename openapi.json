@@ -23346,7 +23346,7 @@
         },
         "/v1/run/ebay.search": {
             "post": {
-                "description": "Search eBay active listings by keyword with optional price-range, item-condition, listing-type, and sort filters and get title, price, condition, shipping, and seller in one normalized response.\n\n**Price:** billed per result - \\$1.10 per 1,000 requests base + \\$2.58 per 1,000 results, capped at \\$65.50 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [eBay Search pricing and uptime](https://getanyapi.com/api/ebay/search) - live USD price, lane routing, and measured 30-day uptime. [Every Ebay endpoint](https://getanyapi.com/api/ebay).",
+                "description": "Search eBay active listings by keyword with optional price-range, item-condition, listing-type, and sort filters and get title, price, condition, shipping, and seller in one normalized response.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [eBay Search pricing and uptime](https://getanyapi.com/api/ebay/search) - live USD price, lane routing, and measured 30-day uptime. [Every Ebay endpoint](https://getanyapi.com/api/ebay).",
                 "operationId": "ebay_search",
                 "parameters": [
                     {
@@ -23803,7 +23803,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.065500",
-                        "min": "0.001100",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -23846,7 +23846,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.065500",
-                                "min": "0.001100",
+                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -23879,7 +23879,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.065500",
-                                "min": "0.001100",
+                                "min": "0.000900",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
