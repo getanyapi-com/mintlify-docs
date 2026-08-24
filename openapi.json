@@ -14334,7 +14334,7 @@
         },
         "/v1/run/chatgpt.search": {
             "post": {
-                "description": "Ask ChatGPT a web-grounded question and receive an answer with source citations.\n\n**Price:** \\$3.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [ChatGPT Search pricing and uptime](https://getanyapi.com/api/chatgpt/search) - live USD price, lane routing, and measured 30-day uptime. [Every Chatgpt endpoint](https://getanyapi.com/api/chatgpt).",
+                "description": "Ask ChatGPT a web-grounded question and receive an answer with source citations. ChatGPT composes each answer per request, so the same prompt returns different wording and a different source set.\n\n**Price:** \\$1.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [ChatGPT Search pricing and uptime](https://getanyapi.com/api/chatgpt/search) - live USD price, lane routing, and measured 30-day uptime. [Every Chatgpt endpoint](https://getanyapi.com/api/chatgpt).",
                 "operationId": "chatgpt_search",
                 "parameters": [
                     {
@@ -14398,10 +14398,25 @@
                                     "prompt": "What is AnyAPI at getanyapi.com, and what does it offer?"
                                 },
                                 "properties": {
+                                    "country": {
+                                        "default": "US",
+                                        "description": "ISO-3166 alpha-2 country to ask from, e.g. US, GB, DE. ChatGPT localizes both the pages it retrieves and the answer it writes, so this is the difference between what a US buyer and a UK buyer are told.",
+                                        "pattern": "^[A-Z]{2}$",
+                                        "type": "string"
+                                    },
                                     "prompt": {
                                         "description": "Question or research prompt for ChatGPT to answer using web search.",
                                         "maxLength": 2000,
                                         "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "webSearch": {
+                                        "default": "force",
+                                        "description": "Whether to insist ChatGPT browses the web. force instructs it to search and is the default; auto lets ChatGPT decide, which is cheaper and answers from memory roughly half the time. Check webSearchTriggered for what actually happened - an answer written without a search is not web-grounded.",
+                                        "enum": [
+                                            "force",
+                                            "auto"
+                                        ],
                                         "type": "string"
                                     }
                                 },
@@ -14517,6 +14532,10 @@
                                                                             "description": "Pages ChatGPT retrieved while answering. A SUPERSET of citations: a page can be read and not cited. null means the source that answered cannot report them.",
                                                                             "items": {
                                                                                 "properties": {
+                                                                                    "cited": {
+                                                                                        "description": "Whether this retrieved page made it into citations. false means ChatGPT read the page and chose not to cite it, which is a different and more actionable fact than the page being absent.",
+                                                                                        "type": "boolean"
+                                                                                    },
                                                                                     "title": {
                                                                                         "description": "Title of the retrieved page, empty when the source did not send one.",
                                                                                         "type": "string"
@@ -14776,8 +14795,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.004460",
-                        "min": "0.003600",
+                        "max": "0.003600",
+                        "min": "0.001800",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -14819,8 +14838,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.004460",
-                                "min": "0.003600",
+                                "max": "0.003600",
+                                "min": "0.001800",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -14852,8 +14871,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.004460",
-                                "min": "0.003600",
+                                "max": "0.003600",
+                                "min": "0.001800",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
