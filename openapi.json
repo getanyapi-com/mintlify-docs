@@ -32874,7 +32874,7 @@
         },
         "/v1/run/email.find": {
             "post": {
-                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** billed per result - \\$23.10 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$23.10 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).",
+                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$15.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
                 "operationId": "email_find",
                 "parameters": [
                     {
@@ -32931,18 +32931,18 @@
                         "application/json": {
                             "example": {
                                 "person": {
-                                    "domain": "stripe.com",
-                                    "firstName": "Patrick",
-                                    "surname": "Collison"
+                                    "domain": "google.com",
+                                    "firstName": "Damien",
+                                    "surname": "Neil"
                                 }
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
                                     "person": {
-                                        "domain": "stripe.com",
-                                        "firstName": "Patrick",
-                                        "surname": "Collison"
+                                        "domain": "google.com",
+                                        "firstName": "Damien",
+                                        "surname": "Neil"
                                     }
                                 },
                                 "properties": {
@@ -33021,25 +33021,13 @@
                                                                             "description": "Email lookup records: the discovered email address, verification status, and the matched person and company details. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
-                                                                                    "domain": {
-                                                                                        "type": "string"
-                                                                                    },
                                                                                     "email": {
-                                                                                        "description": "Discovered email address, or empty when none was found. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "The discovered work email address. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "firstName": {
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "isDeliverable": {
-                                                                                        "type": "boolean"
-                                                                                    },
-                                                                                    "lastName": {
-                                                                                        "type": "string"
-                                                                                    },
                                                                                     "status": {
-                                                                                        "description": "Lookup status (e.g. found, not_found). Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Lookup status. Always \"found\": a lookup that finds nothing returns found:false with a null data instead of an item, and is not charged. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     }
@@ -33070,7 +33058,8 @@
                                                         "data"
                                                     ],
                                                     "title": "Email Finder output",
-                                                    "type": "object"
+                                                    "type": "object",
+                                                    "x-anyapi-how-it-works": "AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged."
                                                 },
                                                 {
                                                     "type": "null"
@@ -33284,8 +33273,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.023100",
-                        "min": "0.023100",
+                        "max": "0.033000",
+                        "min": "0.015400",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -33327,8 +33316,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.023100",
-                                "min": "0.023100",
+                                "max": "0.033000",
+                                "min": "0.015400",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -33360,8 +33349,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.023100",
-                                "min": "0.023100",
+                                "max": "0.033000",
+                                "min": "0.015400",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
