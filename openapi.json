@@ -303,6 +303,44 @@
     },
     "openapi": "3.1.0",
     "paths": {
+        "/v1/balance": {
+            "get": {
+                "description": "Remaining USD in the wallet behind your API key. Reading the balance is free. The amount is what is left to spend across all APIs, not a per-request price: compare it against an operation's own USD cost before you run one.",
+                "operationId": "getBalance",
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "usd": {
+                                            "description": "Remaining wallet balance in USD.",
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "usd"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Current wallet balance."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    }
+                },
+                "summary": "Get your wallet balance"
+            }
+        },
         "/v1/requests/{id}": {
             "get": {
                 "description": "Inspect a customer-owned Request. Poll queued or running requests after retryAfterSeconds. Successful output is retained for 24 hours; metadata remains after the result expires.",
