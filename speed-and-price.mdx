@@ -1,0 +1,126 @@
+---
+title: "Speed and price"
+description: "Ask AnyAPI to prefer a faster source when the cheapest one is too slow."
+---
+
+Every API in the catalog can be served by more than one source. By default AnyAPI picks
+the cheapest one that can serve your request, and falls back to the next if it fails.
+
+On many APIs the cheapest source is not the fastest, and the gap is large. Use
+`preferLatencyUnderMs` when waiting costs you more than the price difference does.
+
+## The default: cheapest serves
+
+Send nothing and routing is unchanged. The cheapest source serves, and you are charged
+its price. This is the behavior every API has always had, and it stays the behavior for
+every request that omits the field.
+
+## Prefer a faster source
+
+Add `preferLatencyUnderMs` to the request body, in milliseconds:
+
+```json
+{ "handle": "zachking", "preferLatencyUnderMs": 1000 }
+```
+
+AnyAPI then orders the sources for your request like this:
+
+1. Sources whose published median response time is under your target go first, and the
+   **cheapest of those** serves.
+2. If none is that fast, the request is still served, by whichever source offers the best
+   speed for its price.
+3. Sources we have not timed are tried last.
+
+**Your request is never refused for being slow.** The field is a preference, not a filter:
+it changes the order sources are tried in, and removes none of them, so failover works
+exactly as it does without it.
+
+## It can cost more
+
+This is the trade you are making. When the cheapest source misses your target, a faster
+and dearer one serves, and you are quoted and charged its price.
+
+You can see the difference before you call, without a key. `GET /catalog` publishes each
+source's `pricing` next to `health.latencyP50Ms`, and that median is exactly the number
+routing reads:
+
+```bash
+curl -s https://api.getanyapi.com/catalog \
+  | jq '.apis[] | select(.slug=="tiktok.profile") | .lanes[]
+        | {source: .source.name, per1k: .pricing.maxPer1kUsd, medianMs: .health.latencyP50Ms}'
+```
+
+```json
+{ "source": "Badger",  "per1k": 0.9, "medianMs": 10806 }
+{ "source": "Tiger",   "per1k": 1.2, "medianMs": 476 }
+{ "source": "Giraffe", "per1k": 2,   "medianMs": null }
+```
+
+Reading that: with no preference, Badger serves at $0.0009 a call and a ~10.8 second
+median. With `preferLatencyUnderMs: 1000`, Tiger serves at $0.0012 and a ~0.5 second
+median, so you pay 33% more and wait about a twentieth as long. Giraffe has no median
+published, so it sorts last under a preference.
+
+A target that no source beats costs you nothing extra, because the ordering you get is the
+cheapest-first one you already had.
+
+<Note>
+  The median describes past requests. It is not a ceiling on yours, and it excludes any
+  waiting your own request asks for, such as a `waitFor` on a page render. Treat it as an
+  observation, not a deadline.
+</Note>
+
+## When it does nothing
+
+The field is accepted on every API and is a no-op in three cases, so you can send it
+without special-casing your code:
+
+| Case | What happens |
+|---|---|
+| The API has one source | Nothing to reorder; that source serves |
+| We have not timed the sources | They keep their normal cheapest-first order |
+| Page 2 and later of a paginated walk | The first page picks the source and its price, and the rest of the walk stays there |
+
+The pagination rule follows from how cursors work: a cursor pins the walk to one source so
+your pages stay consistent. See [Pagination](/pagination).
+
+## Example
+
+<CodeGroup>
+```python python
+import requests
+
+response = requests.post(
+    "https://api.getanyapi.com/v1/run/tiktok.profile",
+    headers={"X-API-Key": "YOUR_ANYAPI_KEY"},
+    json={"handle": "zachking", "preferLatencyUnderMs": 1000},
+    timeout=60,
+)
+result = response.json()
+print(result["costUsd"], result["output"]["data"]["followers"])
+```
+
+```javascript node
+const response = await fetch("https://api.getanyapi.com/v1/run/tiktok.profile", {
+  method: "POST",
+  headers: {
+    "X-API-Key": "YOUR_ANYAPI_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ handle: "zachking", preferLatencyUnderMs: 1000 }),
+});
+
+const result = await response.json();
+console.log(result.costUsd, result.output.data.followers);
+```
+
+```bash curl
+curl -s -X POST https://api.getanyapi.com/v1/run/tiktok.profile \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"handle":"zachking","preferLatencyUnderMs":1000}'
+```
+</CodeGroup>
+
+The `costUsd` on the response is what you were actually charged, so compare it across a
+call with and without the field to see the trade in your own numbers.
