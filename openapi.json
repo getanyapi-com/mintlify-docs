@@ -200559,7 +200559,7 @@
         },
         "/v1/run/youtube.search": {
             "post": {
-                "description": "Search YouTube and get matching videos (title, channel, views, length, publish time) as normalized JSON.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Search pricing and uptime](https://getanyapi.com/api/youtube/search) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Search YouTube and get matching videos (title, channel, views, length, publish time) as normalized JSON.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Search pricing and uptime](https://getanyapi.com/api/youtube/search) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_search",
                 "parameters": [
                     {
@@ -200994,7 +200994,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.000900",
+                        "min": "0.000800",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -201070,7 +201070,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.003600",
-                                "min": "0.000900",
+                                "min": "0.000800",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -202114,7 +202114,7 @@
         },
         "/v1/run/youtube.video": {
             "post": {
-                "description": "Fetch a YouTube video's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch a YouTube video's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$1.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video",
                 "parameters": [
                     {
@@ -202520,9 +202520,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.002000",
+                        "min": "0.001250",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -202562,10 +202563,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.002000",
+                                "min": "0.001250",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -202594,10 +202596,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.002000",
+                                "min": "0.001250",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -203638,7 +203641,7 @@
         },
         "/v1/run/youtube.video_transcript": {
             "post": {
-                "description": "Fetch the transcript/captions of a YouTube video by URL or ID.\n\n**Price:** \\$11.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [YouTube Video Transcript pricing and uptime](https://getanyapi.com/api/youtube/video-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch the transcript/captions of a YouTube video by URL or ID.\n\n**Price:** \\$1.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video Transcript pricing and uptime](https://getanyapi.com/api/youtube/video-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video_transcript",
                 "parameters": [
                     {
@@ -204039,9 +204042,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.011000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.011000",
+                        "min": "0.001250",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -204081,10 +204085,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.011000",
                                 "currency": "USD",
+                                "max": "0.011000",
+                                "min": "0.001250",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -204113,10 +204118,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.011000",
                                 "currency": "USD",
+                                "max": "0.011000",
+                                "min": "0.001250",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
