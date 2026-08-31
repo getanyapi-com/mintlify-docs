@@ -190181,11 +190181,12 @@
                                             "markdown",
                                             "html"
                                         ],
-                                        "description": "Which representations of the page to return. Any combination of: markdown (page content as Markdown), html (the page HTML exactly as the browser received it, including head and script tags). Each requested format is returned under the matching output field. Defaults to both.",
+                                        "description": "Which representations of the page to return. Any combination of: markdown (page content as Markdown), html (the page HTML exactly as the browser received it, including head and script tags). Each requested format is returned under the matching output field. Defaults to both. rawHtml is a deprecated alias of html, returned under a rawHtml field for callers that predate the rename; send html instead.",
                                         "items": {
                                             "enum": [
                                                 "markdown",
-                                                "html"
+                                                "html",
+                                                "rawHtml"
                                             ],
                                             "type": "string"
                                         },
@@ -190284,6 +190285,10 @@
                                                                             "description": "The page content as clean Markdown. Present when 'markdown' is among the requested formats (the default). Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "rawHtml": {
+                                                                            "description": "The same bytes as 'html'. Deprecated alias returned only when 'rawHtml' is among the requested formats; use 'html'.",
+                                                                            "type": "string"
                                                                         },
                                                                         "title": {
                                                                             "description": "The page title from its metadata.",
