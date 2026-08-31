@@ -190149,7 +190149,7 @@
                             "example": {
                                 "formats": [
                                     "markdown",
-                                    "rawHtml"
+                                    "html"
                                 ],
                                 "onlyMainContent": false,
                                 "url": "https://example.com"
@@ -190159,7 +190159,7 @@
                                 "example": {
                                     "formats": [
                                         "markdown",
-                                        "rawHtml"
+                                        "html"
                                     ],
                                     "onlyMainContent": false,
                                     "url": "https://example.com"
@@ -190179,14 +190179,13 @@
                                     "formats": {
                                         "default": [
                                             "markdown",
-                                            "rawHtml"
+                                            "html"
                                         ],
-                                        "description": "Which representations of the page to return. Any combination of: markdown (page content as Markdown), html (cleaned HTML), rawHtml (verbatim page HTML). Each requested format is returned under the matching output field. Defaults to Markdown and raw HTML.",
+                                        "description": "Which representations of the page to return. Any combination of: markdown (page content as Markdown), html (the page HTML exactly as the browser received it, including head and script tags). Each requested format is returned under the matching output field. Defaults to both.",
                                         "items": {
                                             "enum": [
                                                 "markdown",
-                                                "html",
-                                                "rawHtml"
+                                                "html"
                                             ],
                                             "type": "string"
                                         },
@@ -190278,17 +190277,13 @@
                                                                             "type": "string"
                                                                         },
                                                                         "html": {
-                                                                            "description": "The cleaned page HTML. Present only when 'html' is among the requested formats.",
+                                                                            "description": "The page HTML exactly as the browser received it, head and script tags included. Present when 'html' is among the requested formats (the default).",
                                                                             "type": "string"
                                                                         },
                                                                         "markdown": {
                                                                             "description": "The page content as clean Markdown. Present when 'markdown' is among the requested formats (the default). Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
-                                                                        },
-                                                                        "rawHtml": {
-                                                                            "description": "The verbatim page HTML before cleaning. Present only when 'rawHtml' is among the requested formats.",
-                                                                            "type": "string"
                                                                         },
                                                                         "title": {
                                                                             "description": "The page title from its metadata.",
