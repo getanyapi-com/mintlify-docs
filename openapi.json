@@ -104958,19 +104958,17 @@
                         "application/json": {
                             "example": {
                                 "location": "San Francisco, CA",
-                                "query": "Blue Bottle Coffee",
-                                "website": "withWebsite"
+                                "query": "Blue Bottle Coffee"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
                                     "location": "San Francisco, CA",
-                                    "query": "Blue Bottle Coffee",
-                                    "website": "withWebsite"
+                                    "query": "Blue Bottle Coffee"
                                 },
                                 "properties": {
                                     "categoryFilterWords": {
-                                        "description": "Optional list of Google Maps place-category names to keep; the match is limited to a place whose category is one of these. Use lowercase category names as shown on Google Maps (e.g. [\"coffee shop\"]). Omit to allow any category.",
+                                        "description": "Optional list of Google Maps place-category names to keep; the match is limited to a place whose category is one of these. Use lowercase category names as shown on Google Maps (e.g. [\"coffee shop\"]). Omit to allow any category and stay on the cheapest price; a category filter routes to a dearer source.",
                                         "items": {
                                             "type": "string"
                                         },
@@ -104986,7 +104984,7 @@
                                         "type": "string"
                                     },
                                     "placeMinimumStars": {
-                                        "description": "Only match a place with at least this average rating: two (2+), twoAndHalf (2.5+), three (3+), threeAndHalf (3.5+), four (4+), or fourAndHalf (4.5+). Places with no reviews are excluded. Omit for no rating filter.",
+                                        "description": "Only match a place with at least this average rating: two (2+), twoAndHalf (2.5+), three (3+), threeAndHalf (3.5+), four (4+), or fourAndHalf (4.5+). Places with no reviews are excluded. Omit this field to stay on the cheapest price; a rating floor routes to a dearer source.",
                                         "enum": [
                                             "two",
                                             "twoAndHalf",
@@ -105007,7 +105005,7 @@
                                         "type": "string"
                                     },
                                     "website": {
-                                        "description": "Filter by whether the place lists a website: allPlaces (default), withWebsite (only if it has a website), or withoutWebsite (only if it has none).",
+                                        "description": "Filter by whether the place lists a website: allPlaces (default), withWebsite (only if it has a website), or withoutWebsite (only if it has none). Omit this field, or send allPlaces, to stay on the cheapest price; withWebsite and withoutWebsite route to a dearer source.",
                                         "enum": [
                                             "allPlaces",
                                             "withWebsite",
@@ -106139,22 +106137,18 @@
                             "example": {
                                 "limit": 3,
                                 "location": "Austin, TX",
-                                "placeMinimumStars": "four",
-                                "query": "coffee",
-                                "website": "withWebsite"
+                                "query": "coffee"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
                                     "limit": 3,
                                     "location": "Austin, TX",
-                                    "placeMinimumStars": "four",
-                                    "query": "coffee",
-                                    "website": "withWebsite"
+                                    "query": "coffee"
                                 },
                                 "properties": {
                                     "categoryFilterWords": {
-                                        "description": "Optional list of Google Maps place-category names to keep; results are limited to places whose category matches one of these. Use lowercase category names as shown on Google Maps (e.g. [\"coffee shop\", \"restaurant\"]). Omit to include all categories.",
+                                        "description": "Optional list of Google Maps place-category names to keep; results are limited to places whose category matches one of these. Use lowercase category names as shown on Google Maps (e.g. [\"coffee shop\", \"restaurant\"]). Omit to include all categories and stay on the cheapest price; a category filter routes to a dearer source.",
                                         "items": {
                                             "type": "string"
                                         },
@@ -106177,7 +106171,7 @@
                                         "type": "string"
                                     },
                                     "placeMinimumStars": {
-                                        "description": "Only return places with at least this average rating: two (2+), twoAndHalf (2.5+), three (3+), threeAndHalf (3.5+), four (4+), or fourAndHalf (4.5+). Places with no reviews are excluded. Omit for no rating filter.",
+                                        "description": "Only return places with at least this average rating: two (2+), twoAndHalf (2.5+), three (3+), threeAndHalf (3.5+), four (4+), or fourAndHalf (4.5+). Places with no reviews are excluded. Omit this field to stay on the cheapest price; a rating floor routes to a dearer source.",
                                         "enum": [
                                             "two",
                                             "twoAndHalf",
@@ -106198,7 +106192,7 @@
                                         "type": "string"
                                     },
                                     "website": {
-                                        "description": "Filter places by whether they list a website: allPlaces (default), withWebsite (only places that have a website), or withoutWebsite (only places without one).",
+                                        "description": "Filter places by whether they list a website: allPlaces (default), withWebsite (only places that have a website), or withoutWebsite (only places without one). Omit this field, or send allPlaces, to stay on the cheapest price; withWebsite and withoutWebsite route to a dearer source.",
                                         "enum": [
                                             "allPlaces",
                                             "withWebsite",
