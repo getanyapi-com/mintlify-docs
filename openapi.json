@@ -33378,7 +33378,7 @@
         },
         "/v1/run/email.verify": {
             "post": {
-                "description": "Verify an email address for deliverability: a status verdict (valid, risky, or invalid) with domain, mailbox, catch-all, disposable, and role signals plus a confidence score. Malformed addresses are rejected by the input schema with no charge; every syntactically valid address returns a billed verdict, including undeliverable ones.\n\n**Price:** billed per result - \\$0.88 per 1,000 results, capped at \\$0.88 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Email Verifier pricing and uptime](https://getanyapi.com/api/email/verify) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).",
+                "description": "Verify an email address for deliverability: a status verdict (good, risky, or bad) with domain, mailbox, catch-all, disposable, and role signals plus a confidence score. Malformed addresses are rejected by the input schema with no charge; every syntactically valid address returns a billed verdict, including undeliverable ones.\n\n**Price:** \\$6.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Verifier pricing and uptime](https://getanyapi.com/api/email/verify) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** One source verifies every call: it opens an SMTP conversation with the receiving mail server and reports what that server said, which is what settles a catch-all domain rather than guessing at one. If it cannot be reached, a second source verifies the same address instead of failing the request. Both answer in the same vocabulary - good, bad or risky - and both report whether the domain accepts every address, so the price is one number either way. The two differ in two optional fields: `reason` is published only by the rescue source, so it is absent on almost every call, and `score` is coarse on the primary (it restates the verdict rather than grading it). Every syntactically valid address returns a billed verdict; a malformed one is rejected by the input schema with no charge.",
                 "operationId": "email_verify",
                 "parameters": [
                     {
@@ -33527,6 +33527,7 @@
                                                                                         "type": "boolean"
                                                                                     },
                                                                                     "reason": {
+                                                                                        "description": "Why the verdict was reached. Published by only one of the two sources, so it is absent on most calls; never treat it as required.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "role": {
@@ -33534,11 +33535,11 @@
                                                                                         "type": "boolean"
                                                                                     },
                                                                                     "score": {
-                                                                                        "description": "Confidence score (0-100).",
+                                                                                        "description": "Confidence in the verdict, 0-100. Coarse rather than graded on most calls: it tracks the status rather than ranking addresses within one.",
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "status": {
-                                                                                        "description": "Deliverability verdict (e.g. valid, risky, invalid). Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Deliverability verdict: good (the mailbox accepted), bad (it was refused), or risky (no source could settle it - usually a catch-all domain that accepts every address, sometimes a receiving server that declined to answer at all). Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     }
@@ -33569,7 +33570,8 @@
                                                         "data"
                                                     ],
                                                     "title": "Email Verifier output",
-                                                    "type": "object"
+                                                    "type": "object",
+                                                    "x-anyapi-how-it-works": "One source verifies every call: it opens an SMTP conversation with the receiving mail server and reports what that server said, which is what settles a catch-all domain rather than guessing at one. If it cannot be reached, a second source verifies the same address instead of failing the request. Both answer in the same vocabulary - good, bad or risky - and both report whether the domain accepts every address, so the price is one number either way. The two differ in two optional fields: `reason` is published only by the rescue source, so it is absent on almost every call, and `score` is coarse on the primary (it restates the verdict rather than grading it). Every syntactically valid address returns a billed verdict; a malformed one is rejected by the input schema with no charge."
                                                 },
                                                 {
                                                     "type": "null"
@@ -33782,10 +33784,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.006600",
                         "currency": "USD",
-                        "max": "0.000880",
-                        "min": "0.000000",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -33825,11 +33826,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.006600",
                                 "currency": "USD",
-                                "max": "0.001000",
-                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -33858,11 +33858,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.006600",
                                 "currency": "USD",
-                                "max": "0.000880",
-                                "min": "0.000000",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
