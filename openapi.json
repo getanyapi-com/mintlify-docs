@@ -48077,7 +48077,10 @@
                                     "page"
                                 ],
                                 "title": "Facebook page contact info input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "url": "page"
+                                }
                             }
                         }
                     },
@@ -154398,13 +154401,21 @@
                                     "query": "trump"
                                 },
                                 "properties": {
+                                    "endDate": {
+                                        "description": "Only return posts published on or before this date, format YYYY-MM-DD (e.g. 2026-08-07). Threads pages backwards in time from here, so narrowing this is how you walk older results.",
+                                        "type": "string"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
                                     },
                                     "query": {
-                                        "description": "Keyword or hashtag to search public Threads posts for; the # prefix is optional (e.g. AI agents).",
+                                        "description": "Keyword or hashtag to search public Threads posts for; the # prefix is optional (e.g. AI agents). Threads matches text in posts, so search a brand or topic rather than a URL - a query that is only a domain is searched by its name (wander.com is searched as wander).",
+                                        "type": "string"
+                                    },
+                                    "startDate": {
+                                        "description": "Only return posts published on or after this date, format YYYY-MM-DD (e.g. 2026-08-01).",
                                         "type": "string"
                                     }
                                 },
@@ -154412,7 +154423,10 @@
                                     "query"
                                 ],
                                 "title": "Threads search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-anyapi-input-normalizers": {
+                                    "query": "bare_domain_to_label"
+                                }
                             }
                         }
                     },
@@ -154446,7 +154460,7 @@
                                                     "additionalProperties": false,
                                                     "properties": {
                                                         "data": {
-                                                            "description": "Wrapper holding the posts array, or null when nothing was found.",
+                                                            "description": "Wrapper holding the posts array. Present whenever the search ran, with an empty array when nothing matched; null only when the search could not run.",
                                                             "oneOf": [
                                                                 {
                                                                     "type": "null"
@@ -154530,7 +154544,7 @@
                                                             ]
                                                         },
                                                         "found": {
-                                                            "description": "True when matching posts were found; false when the search returned nothing.",
+                                                            "description": "True when the search ran. An empty \"posts\" array means the search completed and nothing matched, which is an answer rather than a failure; false is reserved for a search the upstream could not run.",
                                                             "type": "boolean"
                                                         }
                                                     },
@@ -177306,14 +177320,14 @@
                                         "type": "string"
                                     },
                                     "countries": {
-                                        "description": "Only return reviews from reviewers in these ISO 3166-1 alpha-2 countries (e.g. [\"US\", \"GB\"]); omit for all countries.",
+                                        "description": "Only return reviews from reviewers in these ISO 3166-1 alpha-2 countries (e.g. [\"US\", \"GB\"]). Omit this field for all countries and to stay on the cheapest price; a country filter routes to the dearest source.",
                                         "items": {
                                             "type": "string"
                                         },
                                         "type": "array"
                                     },
                                     "languages": {
-                                        "description": "Only return reviews in these ISO 639-1 languages (e.g. [\"en\", \"de\"]); omit for all languages.",
+                                        "description": "Only return reviews in these ISO 639-1 languages (e.g. [\"en\", \"de\"]). Omit this field for all languages and to stay on the cheapest price; a language filter routes to the dearest source.",
                                         "items": {
                                             "type": "string"
                                         },
@@ -177337,16 +177351,16 @@
                                         "type": "string"
                                     },
                                     "stars": {
-                                        "description": "Limit reviews to a single star rating from 1 to 5 (e.g. 5); omit for all ratings.",
+                                        "description": "Limit reviews to a single star rating from 1 to 5 (e.g. 5). Omit this field to stay on the cheapest price; a star filter routes to a dearer source.",
                                         "type": "string"
                                     },
                                     "startDate": {
-                                        "description": "Only return reviews on or after this date, inclusive, in YYYY-MM-DD format (e.g. 2026-01-01).",
+                                        "description": "Only return reviews on or after this date, inclusive, in YYYY-MM-DD format (e.g. 2026-01-01). Omit this field to stay on the cheapest price; a date floor routes to the dearest source.",
                                         "type": "string"
                                     },
                                     "verifiedOnly": {
                                         "default": false,
-                                        "description": "Set true to return only verified reviews (e.g. true).",
+                                        "description": "Set true to return only verified reviews (e.g. true). Omit this field, or send false, to stay on the cheapest price; true routes to a dearer source.",
                                         "type": "boolean"
                                     }
                                 },
@@ -183165,10 +183179,6 @@
                                         "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of search results.",
                                         "type": "string"
                                     },
-                                    "lang": {
-                                        "description": "Optional ISO 639-1 language code to restrict tweets to (e.g. en).",
-                                        "type": "string"
-                                    },
                                     "limit": {
                                         "default": 20,
                                         "description": "Per-page maximum number of results to return (1-50, default 20). A provider may return a smaller native page; follow nextCursor for more.",
@@ -183199,7 +183209,13 @@
                                     "query"
                                 ],
                                 "title": "X / Twitter search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-anyapi-compat-inputs": {
+                                    "lang": {
+                                        "fold_into": "query",
+                                        "template": " lang:{value}"
+                                    }
+                                }
                             }
                         }
                     },
