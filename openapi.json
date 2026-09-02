@@ -202223,7 +202223,7 @@
         },
         "/v1/run/youtube.video": {
             "post": {
-                "description": "Fetch a YouTube video's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$1.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch a YouTube video or Short's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$1.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video",
                 "parameters": [
                     {
@@ -202300,7 +202300,7 @@
                                 },
                                 "properties": {
                                     "id": {
-                                        "description": "YouTube video ID.",
+                                        "description": "YouTube video ID. A Short uses the same ID as any other video.",
                                         "type": "string"
                                     },
                                     "preferLatencyUnderMs": {
@@ -202309,7 +202309,7 @@
                                         "type": "integer"
                                     },
                                     "url": {
-                                        "description": "Full YouTube video URL.",
+                                        "description": "Full YouTube video URL. Shorts (youtube.com/shorts/...), youtu.be, live, and embed URLs all work.",
                                         "type": "string"
                                     }
                                 },
@@ -202735,7 +202735,7 @@
         },
         "/v1/run/youtube.video_comments": {
             "post": {
-                "description": "List the comments on a YouTube video by URL with cursor pagination (text, author, likes, reply count).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video Comments pricing and uptime](https://getanyapi.com/api/youtube/video-comments) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "List the comments on a YouTube video or Short by URL with cursor pagination (text, author, likes, reply count).\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video Comments pricing and uptime](https://getanyapi.com/api/youtube/video-comments) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video_comments",
                 "parameters": [
                     {
@@ -202813,7 +202813,7 @@
                                         "type": "integer"
                                     },
                                     "url": {
-                                        "description": "Full YouTube video URL.",
+                                        "description": "Full YouTube video URL. Shorts (youtube.com/shorts/...) and youtu.be URLs also work.",
                                         "type": "string"
                                     }
                                 },
@@ -203750,7 +203750,7 @@
         },
         "/v1/run/youtube.video_transcript": {
             "post": {
-                "description": "Fetch the transcript/captions of a YouTube video by URL or ID.\n\n**Price:** \\$1.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video Transcript pricing and uptime](https://getanyapi.com/api/youtube/video-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch the transcript/captions of a YouTube video or Short by URL or ID.\n\n**Price:** \\$1.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video Transcript pricing and uptime](https://getanyapi.com/api/youtube/video-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video_transcript",
                 "parameters": [
                     {
@@ -203827,7 +203827,7 @@
                                 },
                                 "properties": {
                                     "id": {
-                                        "description": "YouTube video ID.",
+                                        "description": "YouTube video ID. A Short uses the same ID as any other video.",
                                         "type": "string"
                                     },
                                     "preferLatencyUnderMs": {
@@ -203836,7 +203836,7 @@
                                         "type": "integer"
                                     },
                                     "url": {
-                                        "description": "Full YouTube video URL.",
+                                        "description": "Full YouTube video URL. Shorts (youtube.com/shorts/...), youtu.be, live, and embed URLs all work.",
                                         "type": "string"
                                     }
                                 },
@@ -204257,7 +204257,7 @@
         },
         "/v1/run/youtube.video_transcript_full": {
             "post": {
-                "description": "Fetch a YouTube transcript with timed segments and its provenance: whether the words are creator-written captions or machine speech recognition.\n\n**Price:** billed per result - \\$3.08 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$3.08 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [YouTube Video Transcript (Provenance) pricing and uptime](https://getanyapi.com/api/youtube/video-transcript-full) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch a YouTube video or Short transcript with timed segments and its provenance: whether the words are creator-written captions or machine speech recognition.\n\n**Price:** billed per result - \\$3.08 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$3.08 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [YouTube Video Transcript (Provenance) pricing and uptime](https://getanyapi.com/api/youtube/video-transcript-full) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video_transcript_full",
                 "parameters": [
                     {
@@ -204341,7 +204341,7 @@
                                         "type": "integer"
                                     },
                                     "url": {
-                                        "description": "YouTube video URL (e.g. \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\").",
+                                        "description": "YouTube video or Short URL (e.g. \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" or \"https://www.youtube.com/shorts/Fir1x9cw2vg\").",
                                         "minLength": 1,
                                         "type": "string"
                                     }
