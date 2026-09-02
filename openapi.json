@@ -65712,7 +65712,7 @@
         },
         "/v1/run/google.search": {
             "post": {
-                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.99 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
+                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
                 "operationId": "google_search",
                 "parameters": [
                     {
@@ -66152,7 +66152,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.001260",
-                        "min": "0.000990",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -66228,7 +66228,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.001260",
-                                "min": "0.000990",
+                                "min": "0.000900",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -105742,9 +105742,8 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "placeId": {
-                                                                                        "description": "Google Maps place id the review belongs to. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
+                                                                                        "description": "Google Maps place id the review belongs to. Echoes the requested placeId; a lane that does not repeat it per review omits it.",
+                                                                                        "type": "string"
                                                                                     },
                                                                                     "publishedAgo": {
                                                                                         "description": "Human-relative publish time (e.g. '7 hours ago').",
@@ -176134,7 +176133,7 @@
         },
         "/v1/run/tripadvisor.reviews": {
             "post": {
-                "description": "Fetch the latest reviews for any Tripadvisor hotel, restaurant, or attraction by its page URL: rating, text, date, and trip details as normalized JSON.\n\n**Price:** \\$3.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Tripadvisor Reviews pricing and uptime](https://getanyapi.com/api/tripadvisor/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Tripadvisor endpoint](https://getanyapi.com/api/tripadvisor).",
+                "description": "Fetch the latest reviews for any Tripadvisor hotel, restaurant, or attraction by its page URL: rating, text, date, and trip details as normalized JSON.\n\n**Price:** \\$3.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Tripadvisor Reviews pricing and uptime](https://getanyapi.com/api/tripadvisor/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Tripadvisor endpoint](https://getanyapi.com/api/tripadvisor).",
                 "operationId": "tripadvisor_reviews",
                 "parameters": [
                     {
@@ -176558,7 +176557,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.011000",
-                        "min": "0.003600",
+                        "min": "0.003000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -176601,7 +176600,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.011000",
-                                "min": "0.003600",
+                                "min": "0.003000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -176634,7 +176633,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.011000",
-                                "min": "0.003600",
+                                "min": "0.003000",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -176662,7 +176661,7 @@
         },
         "/v1/run/tripadvisor.search": {
             "post": {
-                "description": "Search Tripadvisor for hotels, restaurants, and attractions in any destination and get rich place records (ratings, review counts, contact details, pricing) as normalized JSON.\n\n**Price:** \\$3.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Tripadvisor Search pricing and uptime](https://getanyapi.com/api/tripadvisor/search) - live USD price, lane routing, and measured 30-day uptime. [Every Tripadvisor endpoint](https://getanyapi.com/api/tripadvisor).",
+                "description": "Search Tripadvisor for hotels, restaurants, and attractions in any destination and get rich place records (ratings, review counts, contact details, pricing) as normalized JSON.\n\n**Price:** \\$3.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Tripadvisor Search pricing and uptime](https://getanyapi.com/api/tripadvisor/search) - live USD price, lane routing, and measured 30-day uptime. [Every Tripadvisor endpoint](https://getanyapi.com/api/tripadvisor).",
                 "operationId": "tripadvisor_search",
                 "parameters": [
                     {
@@ -177145,7 +177144,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.055100",
-                        "min": "0.003600",
+                        "min": "0.003000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -177188,7 +177187,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.055100",
-                                "min": "0.003600",
+                                "min": "0.003000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -177221,7 +177220,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.055100",
-                                "min": "0.003600",
+                                "min": "0.003000",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
