@@ -3764,7 +3764,10 @@
                                     "url"
                                 ],
                                 "title": "Ahrefs domain overview input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "target": "url"
+                                }
                             }
                         }
                     },
@@ -20656,7 +20659,11 @@
                                     }
                                 },
                                 "title": "Company Enrichment - Prospeo input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "domain": "companyWebsite",
+                                    "website": "companyWebsite"
+                                }
                             }
                         }
                     },
@@ -42936,7 +42943,7 @@
         },
         "/v1/run/facebook.ad_transcript": {
             "post": {
-                "description": "Get the spoken-word transcript of a Meta Ad Library video ad by ad ID or URL.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Facebook Ad Transcript pricing and uptime](https://getanyapi.com/api/facebook/ad-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
+                "description": "Get the spoken-word transcript of a Meta Ad Library video ad by ad ID or URL.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Facebook Ad Transcript pricing and uptime](https://getanyapi.com/api/facebook/ad-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
                 "operationId": "facebook_ad_transcript",
                 "parameters": [
                     {
@@ -43314,9 +43321,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.036000",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -43356,10 +43364,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.036000",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -43388,10 +43397,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.036000",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -43417,7 +43427,7 @@
         },
         "/v1/run/facebook.ads_search": {
             "post": {
-                "description": "Search the Meta Ad Library by keyword and get matching ads (advertiser, creative text, CTA, platforms, and run dates) with cursor pagination.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Facebook Ad Search pricing and uptime](https://getanyapi.com/api/facebook/ads-search) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
+                "description": "Search the Meta Ad Library by keyword and get matching ads (advertiser, creative text, CTA, platforms, and run dates) with cursor pagination.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Facebook Ad Search pricing and uptime](https://getanyapi.com/api/facebook/ads-search) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
                 "operationId": "facebook_ads_search",
                 "parameters": [
                     {
@@ -43993,9 +44003,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.018000",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -44035,10 +44046,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.018000",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -44067,10 +44079,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.018000",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -46370,7 +46383,7 @@
         },
         "/v1/run/facebook.events_search": {
             "post": {
-                "description": "Search public Facebook events by keyword and get structured event records (name, schedule, venue, pricing, and attendance) as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Facebook Events Search pricing and uptime](https://getanyapi.com/api/facebook/events-search) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
+                "description": "Search public Facebook events by keyword and get structured event records (name, schedule, venue, pricing, and attendance) as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Facebook Events Search pricing and uptime](https://getanyapi.com/api/facebook/events-search) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
                 "operationId": "facebook_events_search",
                 "parameters": [
                     {
@@ -46812,9 +46825,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003600",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -46854,10 +46868,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -46886,10 +46901,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -47427,7 +47443,7 @@
         },
         "/v1/run/facebook.group_posts": {
             "post": {
-                "description": "Fetch recent posts from any public Facebook group by URL: text, author, reactions, and comment counts.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Facebook Group Posts pricing and uptime](https://getanyapi.com/api/facebook/group-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
+                "description": "Fetch recent posts from any public Facebook group by URL: text, author, reactions, and comment counts.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Facebook Group Posts pricing and uptime](https://getanyapi.com/api/facebook/group-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
                 "operationId": "facebook_group_posts",
                 "parameters": [
                     {
@@ -47867,9 +47883,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003600",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -47909,10 +47926,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -47941,10 +47959,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -47970,7 +47989,7 @@
         },
         "/v1/run/facebook.marketplace": {
             "post": {
-                "description": "Search Facebook Marketplace listings by keyword near a location, filter by price, condition, delivery, recency, and availability, and get title, price, location, and image as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Facebook Marketplace pricing and uptime](https://getanyapi.com/api/facebook/marketplace) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
+                "description": "Search Facebook Marketplace listings by keyword near a location, filter by price, condition, delivery, recency, and availability, and get title, price, location, and image as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Facebook Marketplace pricing and uptime](https://getanyapi.com/api/facebook/marketplace) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
                 "operationId": "facebook_marketplace",
                 "parameters": [
                     {
@@ -48477,9 +48496,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003600",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -48519,10 +48539,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -48551,10 +48572,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -49108,7 +49130,7 @@
         },
         "/v1/run/facebook.marketplace_location_search": {
             "post": {
-                "description": "Resolve a place name to Facebook Marketplace locations with coordinates and metadata as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Facebook Marketplace Location Search pricing and uptime](https://getanyapi.com/api/facebook/marketplace-location-search) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
+                "description": "Resolve a place name to Facebook Marketplace locations with coordinates and metadata as normalized JSON.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Facebook Marketplace Location Search pricing and uptime](https://getanyapi.com/api/facebook/marketplace-location-search) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
                 "operationId": "facebook_marketplace_location_search",
                 "parameters": [
                     {
@@ -49518,9 +49540,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003600",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -49560,10 +49583,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -49592,10 +49616,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -52176,7 +52201,7 @@
         },
         "/v1/run/facebook.profile": {
             "post": {
-                "description": "Fetch a Facebook page's public profile (likes, followers, category, about) by URL or handle.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Facebook Profile pricing and uptime](https://getanyapi.com/api/facebook/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
+                "description": "Fetch a Facebook page's public profile (likes, followers, category, about) by URL or handle.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Facebook Profile pricing and uptime](https://getanyapi.com/api/facebook/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
                 "operationId": "facebook_profile",
                 "parameters": [
                     {
@@ -52575,9 +52600,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003600",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -52617,10 +52643,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -52649,10 +52676,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -57167,7 +57195,10 @@
                                     "prompt"
                                 ],
                                 "title": "Gemini Search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "query": "prompt"
+                                }
                             }
                         }
                     },
@@ -64085,7 +64116,10 @@
                                     "prompt"
                                 ],
                                 "title": "Google AI Overview input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "query": "prompt"
+                                }
                             }
                         }
                     },
@@ -67645,7 +67679,7 @@
         },
         "/v1/run/google.search": {
             "post": {
-                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
+                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
                 "operationId": "google_search",
                 "parameters": [
                     {
@@ -67776,7 +67810,11 @@
                                     "query"
                                 ],
                                 "title": "Google search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "num": "limit",
+                                    "q": "query"
+                                }
                             }
                         }
                     },
@@ -68094,7 +68132,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.001260",
-                        "min": "0.000500",
+                        "min": "0.000900",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -68170,7 +68208,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.001260",
-                                "min": "0.000500",
+                                "min": "0.000900",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -72646,7 +72684,10 @@
                                     "handle"
                                 ],
                                 "title": "Hacker News profile input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "username": "handle"
+                                }
                             }
                         }
                     },
@@ -81375,7 +81416,7 @@
         },
         "/v1/run/instagram.post_comments": {
             "post": {
-                "description": "List the comments on an Instagram post or reel by URL with cursor pagination (text, author, likes).\n\n**Price:** \\$1.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post Comments pricing and uptime](https://getanyapi.com/api/instagram/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "List the comments on an Instagram post or reel by URL with cursor pagination (text, author, likes).\n\n**Price:** \\$1.44 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post Comments pricing and uptime](https://getanyapi.com/api/instagram/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_post_comments",
                 "parameters": [
                     {
@@ -81795,7 +81836,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.018000",
-                        "min": "0.001500",
+                        "min": "0.001440",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -81838,7 +81879,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.018000",
-                                "min": "0.001500",
+                                "min": "0.001440",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -81871,7 +81912,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.018000",
-                                "min": "0.001500",
+                                "min": "0.001440",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -81986,7 +82027,10 @@
                                     "handle"
                                 ],
                                 "title": "Instagram profile input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "username": "handle"
+                                }
                             }
                         }
                     },
@@ -84620,7 +84664,7 @@
         },
         "/v1/run/instagram.search_hashtag": {
             "post": {
-                "description": "Search posts under an Instagram hashtag through a web search index rather than Instagram's own hashtag feed. That is what lets it filter by date and media type and return reels whose like counts have settled, and it is also why results skew older (median around three months) and stop at roughly 110 per hashtag. For Instagram's own live ranking of a tag use instagram.hashtag_top_posts, and for the chronological feed use instagram.hashtag_recent_posts.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Hashtag Search pricing and uptime](https://getanyapi.com/api/instagram/search-hashtag) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Search posts under an Instagram hashtag through a web search index rather than Instagram's own hashtag feed. That is what lets it filter by date and media type and return reels whose like counts have settled, and it is also why results skew older (median around three months) and stop at roughly 110 per hashtag. If that web search index is unavailable, a first-page request that sets no date and no media type is served from Instagram's own live top feed instead. For Instagram's own live ranking of a tag use instagram.hashtag_top_posts, and for the chronological feed use instagram.hashtag_recent_posts.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Hashtag Search pricing and uptime](https://getanyapi.com/api/instagram/search-hashtag) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_search_hashtag",
                 "parameters": [
                     {
@@ -85098,9 +85142,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003120",
+                        "min": "0.002000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -85140,10 +85185,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003120",
+                                "min": "0.002000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -85172,10 +85218,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
                                 "currency": "USD",
+                                "max": "0.003120",
+                                "min": "0.002000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -88395,7 +88442,10 @@
                                     "handle"
                                 ],
                                 "title": "Instagram user posts input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "username": "handle"
+                                }
                             }
                         }
                     },
@@ -88977,7 +89027,10 @@
                                     }
                                 },
                                 "title": "Instagram user reels input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "username": "handle"
+                                }
                             }
                         }
                     },
@@ -96007,7 +96060,10 @@
                                     "profileUrl"
                                 ],
                                 "title": "LinkedIn email finder input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "url": "profileUrl"
+                                }
                             }
                         }
                     },
@@ -102844,7 +102900,10 @@
                                     "query"
                                 ],
                                 "title": "LinkedIn company search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "keyword": "query"
+                                }
                             }
                         }
                     },
@@ -133457,7 +133516,10 @@
                                     "query"
                                 ],
                                 "title": "Reddit search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "time": "timeframe"
+                                }
                             }
                         }
                     },
@@ -135122,7 +135184,10 @@
                                     "subreddit"
                                 ],
                                 "title": "Reddit Subreddit Search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "time": "timeframe"
+                                }
                             }
                         }
                     },
@@ -166803,7 +166868,10 @@
                                     "query"
                                 ],
                                 "title": "TikTok Hashtag Search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-aliases": {
+                                    "hashtag": "query"
+                                }
                             }
                         }
                     },
