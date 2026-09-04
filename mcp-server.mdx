@@ -164,10 +164,14 @@ they do not recalculate relationships between prices, lanes, or failover.
 
     | Field | Type | Required | Description |
     |---|---|---|---|
-    | `query` | string | yes | Free-text search over name, slug, and description |
-    | `category` | string | no | Category slug to narrow the search |
-    | `platform` | string | no | Platform slug to narrow the search |
+    | `query` | string | one of | Free-text search over name, slug, and description |
+    | `category` | string | one of | Category slug to narrow the search |
+    | `platform` | string | one of | Platform slug to narrow the search |
     | `limit` | integer | no | Cap on matches returned (default 25) |
+
+    Pass at least one of `query`, `category`, or `platform`, in any combination. A scope
+    on its own is a complete search: `category` or `platform` with no `query` enumerates
+    it, ordered by slug. Only a call naming none of the three is rejected.
 
     **Returns** `results` with the list fields, including `failover`, plus `description`
     and response-relative `relevance`, `total` before the limit, and `ranking`
