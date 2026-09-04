@@ -108110,7 +108110,7 @@
         },
         "/v1/run/maps.reviews": {
             "post": {
-                "description": "Fetch up to 100 Google Maps reviews for a place by place ID, sorted the way you need, in one normalized response.\n\n**Price:** billed per result - \\$0.06 per 1,000 requests base + \\$0.44 per 1,000 results, capped at \\$44.10 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Google Maps Reviews pricing and uptime](https://getanyapi.com/api/maps/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Maps endpoint](https://getanyapi.com/api/maps).",
+                "description": "Fetch up to 100 Google Maps reviews for a place by place ID, sorted the way you need, in one normalized response.\n\n**Price:** \\$3.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Maps Reviews pricing and uptime](https://getanyapi.com/api/maps/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Maps endpoint](https://getanyapi.com/api/maps).",
                 "operationId": "maps_reviews",
                 "parameters": [
                     {
@@ -108176,15 +108176,13 @@
                         "application/json": {
                             "example": {
                                 "limit": 3,
-                                "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4",
-                                "postedLimit": "year"
+                                "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
                                     "limit": 3,
-                                    "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4",
-                                    "postedLimit": "year"
+                                    "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4"
                                 },
                                 "properties": {
                                     "language": {
@@ -108193,7 +108191,7 @@
                                         "type": "string"
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (1-100, default 100). You are billed per result returned, so a lower limit costs less.",
+                                        "description": "Maximum number of results to return (1-100, default 100).",
                                         "maximum": 100,
                                         "minimum": 1,
                                         "type": "integer"
@@ -108589,7 +108587,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.044100",
-                        "min": "0.000060",
+                        "min": "0.003500",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -108632,7 +108630,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.044100",
-                                "min": "0.001000",
+                                "min": "0.003500",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -108665,7 +108663,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.044100",
-                                "min": "0.000060",
+                                "min": "0.003500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -198828,7 +198826,7 @@
         },
         "/v1/run/yelp.search": {
             "post": {
-                "description": "Search Yelp for businesses by keyword and location: up to 20 listings with ratings, categories, and core business info per request.\n\n**Price:** billed per result - \\$44.00 per 1,000 requests base + \\$0.83 per 1,000 results, capped at \\$60.50 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Yelp Search pricing and uptime](https://getanyapi.com/api/yelp/search) - live USD price, lane routing, and measured 30-day uptime. [Every Yelp endpoint](https://getanyapi.com/api/yelp).",
+                "description": "Search Yelp for businesses by keyword and location: up to 20 listings with ratings, categories, and core business info per request.\n\n**Price:** \\$3.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Yelp Search pricing and uptime](https://getanyapi.com/api/yelp/search) - live USD price, lane routing, and measured 30-day uptime. [Every Yelp endpoint](https://getanyapi.com/api/yelp).",
                 "operationId": "yelp_search",
                 "parameters": [
                     {
@@ -198906,6 +198904,7 @@
                                 },
                                 "properties": {
                                     "limit": {
+                                        "default": 20,
                                         "description": "Maximum number of results to return (1 to 20, default 20).",
                                         "maximum": 20,
                                         "minimum": 1,
@@ -199396,7 +199395,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.060500",
-                        "min": "0.044000",
+                        "min": "0.003500",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -199439,7 +199438,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.060500",
-                                "min": "0.044000",
+                                "min": "0.003500",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -199472,7 +199471,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.060500",
-                                "min": "0.044000",
+                                "min": "0.003500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
