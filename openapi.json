@@ -80953,7 +80953,8 @@
                                         "type": "boolean"
                                     },
                                     "url": {
-                                        "description": "Full Instagram post or reel URL.",
+                                        "description": "Full Instagram post or reel URL, carrying the media shortcode: /p/, /reel/, /reels/, or /tv/. A profile URL such as https://www.instagram.com/username names no post, so it is rejected instead of charged for an empty result.",
+                                        "pattern": "^https?://(?:www\\.)?instagram\\.com/(?:[A-Za-z0-9_.]+/)?(?:p|reel|reels|tv)/[A-Za-z0-9_-]+/?(?:[?#].*)?$",
                                         "type": "string"
                                     }
                                 },
@@ -173877,9 +173878,7 @@
                                                                                         "items": {
                                                                                             "properties": {
                                                                                                 "confidence": {
-                                                                                                    "description": "Recognizer confidence for this word, 0 to 1. Low values mark words the recognizer guessed; they are common on names, jargon, and music.",
-                                                                                                    "maximum": 1,
-                                                                                                    "minimum": 0,
+                                                                                                    "description": "Recognizer score for this word, exactly as the recognizer reported it. It is normally an alignment probability between 0 and 1, but on audio the recognizer could not align it reports a negative log-scale score instead, so read the sign before treating the number as a probability. Either way, lower means less certain, and low values are common on names, jargon, and music.",
                                                                                                     "type": "number"
                                                                                                 },
                                                                                                 "endSeconds": {
@@ -202299,7 +202298,6 @@
                                                                                 "required": [
                                                                                     "id",
                                                                                     "url",
-                                                                                    "title",
                                                                                     "views",
                                                                                     "viewsAvailable",
                                                                                     "likes",
