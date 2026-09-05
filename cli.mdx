@@ -35,7 +35,7 @@ Repo: [github.com/getanyapi-com/cli](https://github.com/getanyapi-com/cli)
 | `anyapi connect` | Starts an OAuth flow to connect a wallet and upgrade past the trial (anyapi-cli >= 0.3.0). |
 | `anyapi login` | Signs in to an AnyAPI account with the cross-device OAuth device flow. It does not bind a localhost callback. |
 | `anyapi login --api-key aa_live_...` | Stores an existing dashboard key locally without starting OAuth. |
-| `anyapi search <query>` | Searches the public catalog and prints matching SKUs, names, and USD price terms. |
+| `anyapi search [query] [--category <category>] [--platform <platform>]` | Searches the public catalog and prints matching SKUs, names, and USD price terms. The query is optional when you pass `--category` or `--platform` (anyapi-cli >= 0.9.0). |
 | `anyapi list [--category <category>]` | Lists catalog APIs, optionally filtered by category. |
 | `anyapi describe <sku>` | Prints the authenticated API definition, including schemas and USD pricing. |
 | `anyapi run <sku> --input '<json>' [-i file] [--no-wait] [--fields a,b] [--max-items N] [--summary] [-o path] [--json]` | Runs an API with JSON input and waits for durable completion by default. |
@@ -47,8 +47,10 @@ Repo: [github.com/getanyapi-com/cli](https://github.com/getanyapi-com/cli)
 | `anyapi init [--all] [--yes]` | Installs bundled agent skills, shows or applies MCP setup snippets, and mints a free trial key if none is stored. |
 | `anyapi setup skills` | Installs only the bundled skills. |
 
-`anyapi search` uses the dedicated ranked catalog search. `anyapi list` only
-browses the catalog and accepts an optional category. Both commands display the
+`anyapi search` uses the dedicated ranked catalog search, which takes any
+non-empty combination of a query, `--category`, and `--platform`: naming only a
+scope is a complete search, and ranking falls back from semantic to keyword.
+`anyapi list` only browses the catalog and accepts an optional category. Both commands display the
 customer-safe USD offer returned by discovery; they never expose an internal
 accounting unit or upstream provider.
 
