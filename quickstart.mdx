@@ -146,9 +146,16 @@ curl -s "https://api.getanyapi.com/catalog?category=social"
 # Search by intent
 curl -s "https://api.getanyapi.com/catalog/search?q=tiktok&limit=10"
 
+# Or scope with no query at all: everything one platform can do
+curl -s "https://api.getanyapi.com/catalog/search?platform=reddit"
+
 # Inspect one API's input and output schemas
 curl -s https://api.getanyapi.com/v1/apis/tiktok.profile -H "X-API-Key: YOUR_ANYAPI_KEY"
 ```
+
+On `/catalog/search`, `q` is optional. Name any of `q`, `category`, or `platform`, in any
+combination: a scope on its own is a complete question, and only a request naming none of
+the three is rejected. Both endpoints are free and need no key.
 
 Treat `inputSchema` as the request contract. Send only properties it declares. A field used by
 one search API, including `limit`, `cursor`, `page`, or `sort`, may be invalid for another.

@@ -1,0 +1,195 @@
+---
+title: "LangChain"
+description: "Give a LangChain agent the whole AnyAPI catalog through five tools, one key, and a USD wallet."
+---
+
+`langchain-anyapi` is the official LangChain integration for AnyAPI. It gives an agent
+hundreds of data and scraping APIs through five tools, one key, and a wallet billed per
+request in real US dollars.
+
+| | |
+|---|---|
+| **Package** | [`langchain-anyapi`](https://pypi.org/project/langchain-anyapi/) |
+| **Source** | [`getanyapi-com/integrations`](https://github.com/getanyapi-com/integrations) |
+| **Python** | 3.10 or newer |
+| **Auth** | `ANYAPI_API_KEY`, or `api_key=` on any tool or the toolkit |
+| **Tools** | `anyapi_search_apis`, `anyapi_list_apis`, `anyapi_get_api`, `anyapi_run_api`, `anyapi_get_balance` |
+
+## Five tools, not one per API
+
+AnyAPI publishes hundreds of APIs. Binding one tool per API would exhaust an agent's
+context before it asked its first question, so this package teaches the loop instead:
+search or list to find an API, read its input schema, then run it. An agent that learns
+those five tools once can reach the entire catalog.
+
+Input schemas are strict. They reject unknown fields rather than ignoring them, so an
+input built from a description instead of a schema usually fails. Always call
+`anyapi_get_api` before the first `anyapi_run_api` on an API.
+
+## Install
+
+The package depends on `langchain-core`, not on `langchain` itself. Install `langchain`
+alongside it if you want the `create_agent` helper used below.
+
+```bash
+pip install langchain langchain-anyapi
+```
+
+## Authenticate
+
+Set `ANYAPI_API_KEY` in the environment, or pass `api_key=` to the toolkit or to any
+individual tool. Need a key? Create one in the [dashboard](https://getanyapi.com/dashboard),
+or see the [Quickstart](/quickstart).
+
+```bash
+export ANYAPI_API_KEY=YOUR_ANYAPI_KEY
+```
+
+The client is built on first use, so importing the package and constructing a tool need
+neither a key nor a network connection. A missing key surfaces only when a tool is
+actually called.
+
+Alongside `api_key`, every tool and the toolkit accept `base_url`, `timeout`, and
+`max_retries`. Omit them to keep the SDK defaults.
+
+## Build an agent
+
+`AnyAPIToolkit().get_tools()` returns all five tools, and `ANYAPI_INSTRUCTIONS` is a
+system prompt that teaches the discover, inspect, run loop and its cost discipline.
+
+```python
+from langchain.agents import create_agent
+from langchain_anyapi import ANYAPI_INSTRUCTIONS, AnyAPIToolkit
+
+agent = create_agent(
+    "anthropic:claude-sonnet-4-5",
+    tools=AnyAPIToolkit().get_tools(),
+    system_prompt=ANYAPI_INSTRUCTIONS,
+)
+```
+
+## Or call one tool at a time
+
+Each tool is a plain LangChain `BaseTool`, so you can invoke it directly or bind a subset
+to your own model.
+
+```python
+from langchain_anyapi import AnyAPIGetAPI, AnyAPIRunAPI, AnyAPISearchAPIs
+
+AnyAPISearchAPIs().invoke({"query": "reddit trending posts"})
+AnyAPIGetAPI().invoke({"sku_id": "reddit.trending_posts"})
+AnyAPIRunAPI().invoke({"sku_id": "reddit.trending_posts", "input": {"limit": 2}})
+```
+
+## Tools
+
+<AccordionGroup>
+  <Accordion title="anyapi_search_apis - find an API by intent" icon="magnifying-glass">
+    Ranked search across the catalog, returning matches with their descriptions and
+    without their schemas. Never charges.
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `query` | string | yes | What you need, in your own words |
+    | `category` | string | no | Category slug to narrow the search |
+    | `platform` | string | no | Platform slug to narrow the search |
+    | `limit` | integer | no | Cap on matches returned |
+
+    **Returns** `results`, `total`, and `ranking`. Each result carries `id`, `platform`,
+    `name`, `description`, `category`, `pricing`, `execution`, and `relevance`.
+
+    This tool requires `query`. The REST endpoint behind it also accepts `category` or
+    `platform` on their own, so reach for `anyapi_list_apis` when you want to enumerate a
+    category rather than search it.
+  </Accordion>
+  <Accordion title="anyapi_list_apis - browse the catalog" icon="list">
+    Browse APIs as lightweight summaries, optionally filtered by category. Descriptions
+    and schemas are omitted, so listing stays cheap in context. Never charges.
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `category` | string | no | Category slug to filter by |
+
+    **Returns** `apis`, an array of `id`, `name`, `category`, `pricing`, `heavy`, and
+    `execution`.
+  </Accordion>
+  <Accordion title="anyapi_get_api - inspect one API" icon="file-lines">
+    Get one API in full, including the strict input schema you need to build a valid
+    payload. Never charges.
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `sku_id` | string | yes | The API slug to describe |
+
+    **Returns** the summary fields plus `description`, `provider`, `method`, `path`,
+    `inputSchema`, `outputSchema`, `lanes`, and `latency`, which is `null` when there are
+    no successful observations to report.
+  </Accordion>
+  <Accordion title="anyapi_run_api - execute an API" icon="bolt">
+    Execute one API with a normalized input payload. This is the only tool that touches
+    your wallet.
+
+    | Field | Type | Required | Description |
+    |---|---|---|---|
+    | `sku_id` | string | yes | The API slug to execute |
+    | `input` | object | yes | Payload matching that API's input schema |
+    | `fields` | array of strings | no | Keys to keep on each result item |
+    | `max_items` | integer | no | Cap the number of result rows returned |
+    | `summary` | boolean | no | Return a structural outline instead of the full data |
+
+    **Returns** `found`, `data`, `provider`, `costUsd`, `items`, and `resultId`.
+
+    `fields`, `max_items`, and `summary` are response-budget controls. They keep a large
+    result from flooding the context window and change only what comes back to you, never
+    what you are charged.
+  </Accordion>
+  <Accordion title="anyapi_get_balance - check your wallet" icon="wallet">
+    Get the remaining wallet balance for the key you authenticate with. Takes no
+    arguments and never charges.
+
+    **Returns** `usd`, the remaining balance.
+  </Accordion>
+</AccordionGroup>
+
+## Async
+
+Every tool has a real async path built on the SDK's async client, not the sync client on
+a worker thread. Use `ainvoke` anywhere you would use `invoke`.
+
+```python
+from langchain_anyapi import AnyAPISearchAPIs
+
+results = await AnyAPISearchAPIs().ainvoke({"query": "tiktok profile"})
+```
+
+## Errors
+
+A failed call returns a readable payload rather than aborting the agent's run. The
+payload carries `error` and `status`, plus `code` and `requestId` when the gateway sends
+them. An agent can read that, adjust, and carry on within the same turn.
+
+Calling a tool with no key resolves at call time and returns this, with nothing charged:
+
+```python
+{"error": "no API key: pass api_key= or set ANYAPI_API_KEY", "status": 0}
+```
+
+## Prices
+
+Prices come off the wire exactly as AnyAPI published them, and this package never
+recomputes one from another. Every static price is quoted twice: `maxUsd` is what one
+request is billed, and `maxPer1kUsd` is the same price per 1,000 requests. Per 1,000 is
+the denomination AnyAPI quotes customers in, because most of the catalog costs a fraction
+of a cent per call.
+
+There is no quote tool here. `anyapi_get_api` already publishes `pricing.from.maxUsd`,
+the most a first-choice run is billed, and `pricing.failoverMaxUsd`, the ceiling for any
+run, so an agent can bound its spend before it calls. A completed run reports its actual
+charge as `costUsd`.
+
+<Tip>
+  Not using LangChain? The same loop is available over the
+  [MCP server](/mcp-server), through the typed [Python and TypeScript SDKs](/sdks), and as
+  an [agent skill](/agent-skills). Need help? Reach out at
+  [support@getanyapi.com](mailto:support@getanyapi.com).
+</Tip>
