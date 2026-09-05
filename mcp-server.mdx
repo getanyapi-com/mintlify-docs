@@ -24,12 +24,12 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 <Note>
   The MCP surface is **API-key only** — session tokens are not accepted. Send your key as
-  `Authorization: Bearer <your-key>`. Connecting is keyless: `initialize` and `tools/list`
-  answer without a credential, so a client can finish the handshake and read the tool list
-  before your key is in place. Every tool call needs a key, including the discovery tools
-  (`list_apis`, `search_apis`, `get_api`); without one they return `unauthorized`. To browse
-  the catalog with no key at all, use the public REST endpoints `GET /catalog` and
-  `GET /catalog/search` instead.
+  `Authorization: Bearer <your-key>`. Browsing is keyless: `initialize`, `tools/list`, and the
+  catalog tools (`list_apis`, `search_apis`, `get_api`, `quote_api`) all answer without a
+  credential, so an agent can find an API, read its schema, and price a call before your key is
+  in place. Running an API and reading anything about your account need the key; without one
+  they return `unauthorized`. The same catalog is also public over REST at `GET /catalog` and
+  `GET /catalog/search`.
 </Note>
 
 ## Connect
@@ -187,9 +187,10 @@ catalog change reaches you without upgrading anything.
   </Tab>
 </Tabs>
 
-`ANYAPI_API_KEY` is optional at startup. Without it the server still starts and lists its
-tools, because the hosted server answers `initialize` and `tools/list` unauthenticated.
-Set the key before your agent calls a tool: every tool call needs one.
+`ANYAPI_API_KEY` is optional at startup. Without it the server still starts, lists its tools,
+and forwards the catalog tools (`list_apis`, `search_apis`, `get_api`, `quote_api`), because the
+hosted server answers all of those unauthenticated. Set the key before your agent runs an API:
+`run_api` and the account tools need one.
 
 The server is listed in the official
 [MCP Registry](https://registry.modelcontextprotocol.io) as
