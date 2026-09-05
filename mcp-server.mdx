@@ -24,9 +24,12 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 <Note>
   The MCP surface is **API-key only** — session tokens are not accepted. Send your key as
-  `Authorization: Bearer <your-key>`. Discovery (`list_apis`, `search_apis`, `get_api`) works
-  **without a key**, so an agent can browse the catalog and read schemas before credentials are
-  set up; `run_api` and `get_balance` require authentication.
+  `Authorization: Bearer <your-key>`. Connecting is keyless: `initialize` and `tools/list`
+  answer without a credential, so a client can finish the handshake and read the tool list
+  before your key is in place. Every tool call needs a key, including the discovery tools
+  (`list_apis`, `search_apis`, `get_api`); without one they return `unauthorized`. To browse
+  the catalog with no key at all, use the public REST endpoints `GET /catalog` and
+  `GET /catalog/search` instead.
 </Note>
 
 ## Connect
@@ -122,6 +125,80 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
     ```
   </Tab>
 </Tabs>
+
+## Run it locally over stdio
+
+Some MCP clients can only launch a local server and speak to it over stdio. For those,
+AnyAPI publishes a small local server that forwards everything to the hosted endpoint
+above.
+
+| | |
+|---|---|
+| **npm** | [`anyapi-mcp`](https://www.npmjs.com/package/anyapi-mcp) |
+| **Image** | `ghcr.io/getanyapi-com/mcp` |
+| **Source** | [`getanyapi-com/mcp`](https://github.com/getanyapi-com/mcp) |
+| **Transport** | stdio |
+| **Auth** | `ANYAPI_API_KEY` in the environment |
+| **Node** | 20 or newer |
+
+It declares no tools of its own. Every listing and every call is forwarded to
+`https://api.getanyapi.com/mcp`, so you get whatever the hosted server publishes, and a
+catalog change reaches you without upgrading anything.
+
+<Tabs>
+  <Tab title="npx">
+    ```json
+    {
+      "mcpServers": {
+        "anyapi": {
+          "command": "npx",
+          "args": ["-y", "anyapi-mcp"],
+          "env": { "ANYAPI_API_KEY": "YOUR_ANYAPI_KEY" }
+        }
+      }
+    }
+    ```
+  </Tab>
+  <Tab title="Claude Code">
+    ```bash
+    claude mcp add anyapi -e ANYAPI_API_KEY=YOUR_ANYAPI_KEY -- npx -y anyapi-mcp
+    ```
+  </Tab>
+  <Tab title="Docker">
+    ```json
+    {
+      "mcpServers": {
+        "anyapi": {
+          "command": "docker",
+          "args": [
+            "run", "-i", "--rm",
+            "-e", "ANYAPI_API_KEY",
+            "ghcr.io/getanyapi-com/mcp"
+          ],
+          "env": { "ANYAPI_API_KEY": "YOUR_ANYAPI_KEY" }
+        }
+      }
+    }
+    ```
+
+    The image is public, so the pull needs no credential. It is built for `linux/amd64`,
+    so Docker runs it under emulation on an Apple Silicon machine and prints a platform
+    warning on startup.
+  </Tab>
+</Tabs>
+
+`ANYAPI_API_KEY` is optional at startup. Without it the server still starts and lists its
+tools, because the hosted server answers `initialize` and `tools/list` unauthenticated.
+Set the key before your agent calls a tool: every tool call needs one.
+
+The server is listed in the official
+[MCP Registry](https://registry.modelcontextprotocol.io) as
+`io.github.getanyapi-com/anyapi`, which declares the hosted endpoint and both packages.
+
+<Note>
+  Prefer the hosted endpoint when your client speaks remote Streamable HTTP. It is one less
+  moving part, with nothing to install and nothing to keep up to date.
+</Note>
 
 ## Tools
 
