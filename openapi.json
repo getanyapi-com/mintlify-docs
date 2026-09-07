@@ -110927,10 +110927,10 @@
                 }
             }
         },
-        "/v1/run/pandaexpress.locations": {
+        "/v1/run/nextdoor.business": {
             "post": {
-                "description": "Find Panda Express restaurants near a latitude/longitude, sorted by distance, with address, phone, hours availability, and pickup/delivery support.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Panda Express Locations pricing and uptime](https://getanyapi.com/api/panda-express/locations) - live USD price, lane routing, and measured 30-day uptime. [Every Pandaexpress endpoint](https://getanyapi.com/api/panda-express).",
-                "operationId": "pandaexpress_locations",
+                "description": "Fetch one Nextdoor business page by its slug, with phone, email, website, and street address.\n\n**Price:** billed per result - \\$5.50 per 1,000 requests base + \\$2.86 per 1,000 results, capped at \\$8.36 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Nextdoor Business pricing and uptime](https://getanyapi.com/api/nextdoor/business) - live USD price, lane routing, and measured 30-day uptime. [Every Nextdoor endpoint](https://getanyapi.com/api/nextdoor).",
+                "operationId": "nextdoor_business",
                 "parameters": [
                     {
                         "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
@@ -110994,1109 +110994,44 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "latitude": 34.0522,
-                                "limit": 5,
-                                "longitude": -118.2437
+                                "pageSlug": "radiant-plumbing-air-conditioning-austin-tx"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "latitude": 34.0522,
-                                    "limit": 5,
-                                    "longitude": -118.2437
+                                    "pageSlug": "radiant-plumbing-air-conditioning-austin-tx"
                                 },
                                 "properties": {
-                                    "latitude": {
-                                        "description": "Latitude of the search center.",
-                                        "maximum": 90,
-                                        "minimum": -90,
-                                        "type": "number"
-                                    },
                                     "limit": {
-                                        "description": "Maximum number of restaurants to return (1-50, default 10).",
-                                        "maximum": 50,
+                                        "description": "Maximum number of records to return. A business page resolves to one record, so this is always 1.",
+                                        "maximum": 1,
                                         "minimum": 1,
                                         "type": "integer"
                                     },
-                                    "longitude": {
-                                        "description": "Longitude of the search center.",
-                                        "maximum": 180,
-                                        "minimum": -180,
-                                        "type": "number"
-                                    },
-                                    "preferLatencyUnderMs": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
-                                        "minimum": 1,
-                                        "type": "integer"
-                                    },
-                                    "radius": {
-                                        "description": "Search radius in miles (default 10).",
-                                        "maximum": 100,
-                                        "minimum": 1,
-                                        "type": "integer"
-                                    }
-                                },
-                                "required": [
-                                    "latitude",
-                                    "longitude"
-                                ],
-                                "title": "Panda Express locations input",
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "costUsd": {
-                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
-                                            "type": "number"
-                                        },
-                                        "hint": {
-                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireCursor: true` to be served only by a source that can page, which may cost more per request.",
-                                            "type": "string"
-                                        },
-                                        "items": {
-                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
-                                            "type": "integer"
-                                        },
-                                        "jqError": {
-                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
-                                            "type": "string"
-                                        },
-                                        "output": {
-                                            "anyOf": [
-                                                {
-                                                    "additionalProperties": false,
-                                                    "properties": {
-                                                        "data": {
-                                                            "oneOf": [
-                                                                {
-                                                                    "type": "null"
-                                                                },
-                                                                {
-                                                                    "additionalProperties": false,
-                                                                    "properties": {
-                                                                        "restaurants": {
-                                                                            "description": "Nearby Panda Express restaurants, nearest first. Populated whenever the provider has data for the entity.",
-                                                                            "items": {
-                                                                                "properties": {
-                                                                                    "address": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "canDeliver": {
-                                                                                        "type": "boolean"
-                                                                                    },
-                                                                                    "canPickup": {
-                                                                                        "type": "boolean"
-                                                                                    },
-                                                                                    "city": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "distanceMiles": {
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "id": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "integer",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "isOpen": {
-                                                                                        "type": "boolean"
-                                                                                    },
-                                                                                    "latitude": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "number",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "longitude": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "number",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "name": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "phone": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "state": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "zip": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    }
-                                                                                },
-                                                                                "required": [
-                                                                                    "id",
-                                                                                    "name",
-                                                                                    "address",
-                                                                                    "city",
-                                                                                    "state",
-                                                                                    "zip",
-                                                                                    "phone",
-                                                                                    "latitude",
-                                                                                    "longitude",
-                                                                                    "distanceMiles",
-                                                                                    "canPickup",
-                                                                                    "canDeliver",
-                                                                                    "isOpen"
-                                                                                ],
-                                                                                "type": "object"
-                                                                            },
-                                                                            "type": "array",
-                                                                            "x-anyapi-must-populate": true
-                                                                        }
-                                                                    },
-                                                                    "required": [
-                                                                        "restaurants"
-                                                                    ],
-                                                                    "type": "object"
-                                                                }
-                                                            ]
-                                                        },
-                                                        "found": {
-                                                            "type": "boolean"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "found",
-                                                        "data"
-                                                    ],
-                                                    "title": "Panda Express locations output",
-                                                    "type": "object"
-                                                },
-                                                {
-                                                    "type": "null"
-                                                }
-                                            ],
-                                            "description": "Normalized output, or null when the replay payload was not retained."
-                                        },
-                                        "provider": {
-                                            "description": "Always \"AnyAPI\".",
-                                            "type": "string"
-                                        },
-                                        "replayed": {
-                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
-                                            "type": "boolean"
-                                        },
-                                        "resultId": {
-                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "output",
-                                        "provider",
-                                        "costUsd",
-                                        "items",
-                                        "replayed"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Normalized result.",
-                        "headers": {
-                            "Idempotency-Replayed": {
-                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
-                                "schema": {
-                                    "enum": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "type": "string"
-                                }
-                            },
-                            "PAYMENT-RESPONSE": {
-                                "description": "Inline x402 payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "Payment-Receipt": {
-                                "description": "Inline mpp payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "X-PAYMENT-RESPONSE": {
-                                "description": "Inline x402 payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Input did not match the schema, or the upstream rejected the request."
-                    },
-                    "401": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Missing or invalid API key."
-                    },
-                    "402": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "oneOf": [
-                                        {
-                                            "$ref": "#/components/schemas/PaymentRequiredError"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/TrialCapReached"
-                                        }
-                                    ]
-                                }
-                            },
-                            "application/problem+json": {
-                                "schema": {
-                                    "properties": {
-                                        "challengeId": {
-                                            "minLength": 1,
-                                            "type": "string"
-                                        },
-                                        "status": {
-                                            "const": 402,
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "required": [
-                                        "status",
-                                        "challengeId"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
-                        "headers": {
-                            "PAYMENT-REQUIRED": {
-                                "description": "Inline x402 payment challenge.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "WWW-Authenticate": {
-                                "description": "Inline mpp payment challenge.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Unknown SKU, or the upstream had no matching resource."
-                    },
-                    "409": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
-                    },
-                    "422": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
-                    },
-                    "429": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
-                    },
-                    "500": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
-                    },
-                    "502": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    },
-                    {
-                        "apiKeyAuth": []
-                    },
-                    {}
-                ],
-                "summary": "Panda Express Locations",
-                "tags": [
-                    "pandaexpress"
-                ],
-                "x-mint": {
-                    "href": "/api-reference/panda-express/locations"
-                },
-                "x-payment-info": {
-                    "price": {
-                        "amount": "0.000900",
-                        "currency": "USD",
-                        "mode": "fixed"
-                    },
-                    "protocols": [
-                        {
-                            "x402": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            }
-                        },
-                        {
-                            "mpp": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            }
-                        }
-                    ],
-                    "rails": [
-                        {
-                            "headers": {
-                                "challenge": [
-                                    "PAYMENT-REQUIRED"
-                                ],
-                                "credential": [
-                                    "PAYMENT-SIGNATURE",
-                                    "X-PAYMENT"
-                                ],
-                                "receipt": [
-                                    "PAYMENT-RESPONSE",
-                                    "X-PAYMENT-RESPONSE"
-                                ]
-                            },
-                            "pricing": {
-                                "amount": "0.001000",
-                                "currency": "USD",
-                                "minimumUsd": "0.001000",
-                                "mode": "fixed",
-                                "quoteBasis": "floor"
-                            },
-                            "protocol": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            },
-                            "rail": "x402",
-                            "settlement": {
-                                "onExecutionFailure": "released",
-                                "onUnknownFinalization": "indeterminate",
-                                "timing": "after_execution"
-                            }
-                        },
-                        {
-                            "headers": {
-                                "challenge": [
-                                    "WWW-Authenticate"
-                                ],
-                                "credential": [
-                                    "Authorization"
-                                ],
-                                "receipt": [
-                                    "Payment-Receipt"
-                                ]
-                            },
-                            "pricing": {
-                                "amount": "0.000900",
-                                "currency": "USD",
-                                "minimumUsd": null,
-                                "mode": "fixed",
-                                "quoteBasis": "funded_ceiling"
-                            },
-                            "protocol": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            },
-                            "rail": "mpp",
-                            "settlement": {
-                                "onExecutionFailure": "charged_undelivered",
-                                "onVerificationError": "indeterminate",
-                                "timing": "before_execution"
-                            }
-                        }
-                    ]
-                }
-            }
-        },
-        "/v1/run/pandaexpress.menu": {
-            "post": {
-                "description": "Get the live menu for a Panda Express restaurant by id: categories with item names, descriptions, and USD prices. Pair with Panda Express Locations to resolve a restaurant id.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Panda Express Menu pricing and uptime](https://getanyapi.com/api/panda-express/menu) - live USD price, lane routing, and measured 30-day uptime. [Every Pandaexpress endpoint](https://getanyapi.com/api/panda-express).",
-                "operationId": "pandaexpress_menu",
-                "parameters": [
-                    {
-                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
-                        "in": "query",
-                        "name": "fields",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
-                        "in": "query",
-                        "name": "max_items",
-                        "required": false,
-                        "schema": {
-                            "minimum": 0,
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
-                        "in": "query",
-                        "name": "summary",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
-                    {
-                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
-                        "in": "query",
-                        "name": "jq",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
-                        "in": "query",
-                        "name": "max_cost_usd",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
-                        "in": "header",
-                        "name": "Idempotency-Key",
-                        "required": false,
-                        "schema": {
-                            "maxLength": 255,
-                            "minLength": 1,
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "example": {
-                                "restaurantId": "112551"
-                            },
-                            "schema": {
-                                "additionalProperties": false,
-                                "example": {
-                                    "restaurantId": "112551"
-                                },
-                                "properties": {
-                                    "preferLatencyUnderMs": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
-                                        "minimum": 1,
-                                        "type": "integer"
-                                    },
-                                    "restaurantId": {
-                                        "description": "Panda Express restaurant id (the `id` from Panda Express Locations).",
+                                    "market": {
+                                        "description": "Nextdoor market the page belongs to: \"us\" (nextdoor.com), \"gb\" (nextdoor.co.uk), or \"ca\" (ca.nextdoor.com). Defaults to \"us\".",
+                                        "enum": [
+                                            "us",
+                                            "gb",
+                                            "ca"
+                                        ],
                                         "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "restaurantId"
-                                ],
-                                "title": "Panda Express menu input",
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "costUsd": {
-                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
-                                            "type": "number"
-                                        },
-                                        "hint": {
-                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireCursor: true` to be served only by a source that can page, which may cost more per request.",
-                                            "type": "string"
-                                        },
-                                        "items": {
-                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
-                                            "type": "integer"
-                                        },
-                                        "jqError": {
-                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
-                                            "type": "string"
-                                        },
-                                        "output": {
-                                            "anyOf": [
-                                                {
-                                                    "additionalProperties": false,
-                                                    "properties": {
-                                                        "data": {
-                                                            "oneOf": [
-                                                                {
-                                                                    "type": "null"
-                                                                },
-                                                                {
-                                                                    "additionalProperties": false,
-                                                                    "properties": {
-                                                                        "categories": {
-                                                                            "description": "Menu categories in display order. Populated whenever the provider has data for the entity.",
-                                                                            "items": {
-                                                                                "description": "Populated whenever the provider has data for the entity.",
-                                                                                "properties": {
-                                                                                    "items": {
-                                                                                        "items": {
-                                                                                            "properties": {
-                                                                                                "calories": {
-                                                                                                    "description": "Base calories when published by the restaurant, else 0.",
-                                                                                                    "type": "integer"
-                                                                                                },
-                                                                                                "description": {
-                                                                                                    "description": "Populated whenever the provider has data for the entity.",
-                                                                                                    "type": "string",
-                                                                                                    "x-anyapi-must-populate": true
-                                                                                                },
-                                                                                                "name": {
-                                                                                                    "type": "string"
-                                                                                                },
-                                                                                                "priceUsd": {
-                                                                                                    "description": "Item price in USD (0 for items priced only via size/option selection).",
-                                                                                                    "type": "number"
-                                                                                                }
-                                                                                            },
-                                                                                            "required": [
-                                                                                                "name",
-                                                                                                "description",
-                                                                                                "priceUsd",
-                                                                                                "calories"
-                                                                                            ],
-                                                                                            "type": "object"
-                                                                                        },
-                                                                                        "type": "array"
-                                                                                    },
-                                                                                    "name": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    }
-                                                                                },
-                                                                                "required": [
-                                                                                    "name",
-                                                                                    "items"
-                                                                                ],
-                                                                                "type": "object",
-                                                                                "x-anyapi-must-populate": true
-                                                                            },
-                                                                            "type": "array",
-                                                                            "x-anyapi-must-populate": true
-                                                                        }
-                                                                    },
-                                                                    "required": [
-                                                                        "categories"
-                                                                    ],
-                                                                    "type": "object"
-                                                                }
-                                                            ]
-                                                        },
-                                                        "found": {
-                                                            "type": "boolean"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "found",
-                                                        "data"
-                                                    ],
-                                                    "title": "Panda Express menu output",
-                                                    "type": "object"
-                                                },
-                                                {
-                                                    "type": "null"
-                                                }
-                                            ],
-                                            "description": "Normalized output, or null when the replay payload was not retained."
-                                        },
-                                        "provider": {
-                                            "description": "Always \"AnyAPI\".",
-                                            "type": "string"
-                                        },
-                                        "replayed": {
-                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
-                                            "type": "boolean"
-                                        },
-                                        "resultId": {
-                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
-                                            "type": "string"
-                                        }
                                     },
-                                    "required": [
-                                        "output",
-                                        "provider",
-                                        "costUsd",
-                                        "items",
-                                        "replayed"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Normalized result.",
-                        "headers": {
-                            "Idempotency-Replayed": {
-                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
-                                "schema": {
-                                    "enum": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "type": "string"
-                                }
-                            },
-                            "PAYMENT-RESPONSE": {
-                                "description": "Inline x402 payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "Payment-Receipt": {
-                                "description": "Inline mpp payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "X-PAYMENT-RESPONSE": {
-                                "description": "Inline x402 payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Input did not match the schema, or the upstream rejected the request."
-                    },
-                    "401": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Missing or invalid API key."
-                    },
-                    "402": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "oneOf": [
-                                        {
-                                            "$ref": "#/components/schemas/PaymentRequiredError"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/TrialCapReached"
-                                        }
-                                    ]
-                                }
-                            },
-                            "application/problem+json": {
-                                "schema": {
-                                    "properties": {
-                                        "challengeId": {
-                                            "minLength": 1,
-                                            "type": "string"
-                                        },
-                                        "status": {
-                                            "const": 402,
-                                            "type": "integer"
-                                        }
+                                    "pageSlug": {
+                                        "description": "Slug of the Nextdoor business page, the last path segment of its /pages/ URL, e.g. \"radiant-plumbing-air-conditioning-austin-tx\".",
+                                        "minLength": 1,
+                                        "type": "string"
                                     },
-                                    "required": [
-                                        "status",
-                                        "challengeId"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
-                        "headers": {
-                            "PAYMENT-REQUIRED": {
-                                "description": "Inline x402 payment challenge.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "WWW-Authenticate": {
-                                "description": "Inline mpp payment challenge.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Unknown SKU, or the upstream had no matching resource."
-                    },
-                    "409": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
-                    },
-                    "422": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
-                    },
-                    "429": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
-                    },
-                    "500": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
-                    },
-                    "502": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    },
-                    {
-                        "apiKeyAuth": []
-                    },
-                    {}
-                ],
-                "summary": "Panda Express Menu",
-                "tags": [
-                    "pandaexpress"
-                ],
-                "x-mint": {
-                    "href": "/api-reference/panda-express/menu"
-                },
-                "x-payment-info": {
-                    "price": {
-                        "amount": "0.000900",
-                        "currency": "USD",
-                        "mode": "fixed"
-                    },
-                    "protocols": [
-                        {
-                            "x402": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            }
-                        },
-                        {
-                            "mpp": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            }
-                        }
-                    ],
-                    "rails": [
-                        {
-                            "headers": {
-                                "challenge": [
-                                    "PAYMENT-REQUIRED"
-                                ],
-                                "credential": [
-                                    "PAYMENT-SIGNATURE",
-                                    "X-PAYMENT"
-                                ],
-                                "receipt": [
-                                    "PAYMENT-RESPONSE",
-                                    "X-PAYMENT-RESPONSE"
-                                ]
-                            },
-                            "pricing": {
-                                "amount": "0.001000",
-                                "currency": "USD",
-                                "minimumUsd": "0.001000",
-                                "mode": "fixed",
-                                "quoteBasis": "floor"
-                            },
-                            "protocol": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            },
-                            "rail": "x402",
-                            "settlement": {
-                                "onExecutionFailure": "released",
-                                "onUnknownFinalization": "indeterminate",
-                                "timing": "after_execution"
-                            }
-                        },
-                        {
-                            "headers": {
-                                "challenge": [
-                                    "WWW-Authenticate"
-                                ],
-                                "credential": [
-                                    "Authorization"
-                                ],
-                                "receipt": [
-                                    "Payment-Receipt"
-                                ]
-                            },
-                            "pricing": {
-                                "amount": "0.000900",
-                                "currency": "USD",
-                                "minimumUsd": null,
-                                "mode": "fixed",
-                                "quoteBasis": "funded_ceiling"
-                            },
-                            "protocol": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            },
-                            "rail": "mpp",
-                            "settlement": {
-                                "onExecutionFailure": "charged_undelivered",
-                                "onVerificationError": "indeterminate",
-                                "timing": "before_execution"
-                            }
-                        }
-                    ]
-                }
-            }
-        },
-        "/v1/run/pandaexpress.nutrition": {
-            "post": {
-                "description": "Look up official Panda Express nutrition facts by item name: serving size, calories, fat, cholesterol, sodium, carbs, fiber, sugars, and protein.\n\n**Price:** \\$6.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Panda Express Nutrition pricing and uptime](https://getanyapi.com/api/panda-express/nutrition) - live USD price, lane routing, and measured 30-day uptime. [Every Pandaexpress endpoint](https://getanyapi.com/api/panda-express).",
-                "operationId": "pandaexpress_nutrition",
-                "parameters": [
-                    {
-                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
-                        "in": "query",
-                        "name": "fields",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
-                        "in": "query",
-                        "name": "max_items",
-                        "required": false,
-                        "schema": {
-                            "minimum": 0,
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
-                        "in": "query",
-                        "name": "summary",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
-                    {
-                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
-                        "in": "query",
-                        "name": "jq",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
-                        "in": "query",
-                        "name": "max_cost_usd",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
-                        "in": "header",
-                        "name": "Idempotency-Key",
-                        "required": false,
-                        "schema": {
-                            "maxLength": 255,
-                            "minLength": 1,
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "example": {
-                                "query": "orange chicken"
-                            },
-                            "schema": {
-                                "additionalProperties": false,
-                                "example": {
-                                    "query": "orange chicken"
-                                },
-                                "properties": {
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
-                                    },
-                                    "query": {
-                                        "description": "Menu item name (or substring) to look up, e.g. \"orange chicken\" or \"chow mein\".",
-                                        "minLength": 2,
-                                        "type": "string"
                                     }
                                 },
                                 "required": [
-                                    "query"
+                                    "pageSlug"
                                 ],
-                                "title": "Panda Express nutrition input",
+                                "title": "Nextdoor Business input",
                                 "type": "object"
                             }
                         }
@@ -112131,6 +111066,7 @@
                                                     "additionalProperties": false,
                                                     "properties": {
                                                         "data": {
+                                                            "description": "Business wrapper, or null when the page slug resolved to no business.",
                                                             "oneOf": [
                                                                 {
                                                                     "type": "null"
@@ -112139,61 +111075,114 @@
                                                                     "additionalProperties": false,
                                                                     "properties": {
                                                                         "items": {
-                                                                            "description": "Matching menu items with official nutrition facts. Populated whenever the provider has data for the entity.",
+                                                                            "description": "The Nextdoor business record for the requested page slug. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
-                                                                                    "calories": {
-                                                                                        "type": "number"
+                                                                                    "address": {
+                                                                                        "description": "Full street address on one line; absent when the business hides or omits it.",
+                                                                                        "type": "string"
                                                                                     },
-                                                                                    "cholesterolMg": {
-                                                                                        "type": "number"
+                                                                                    "addressLine": {
+                                                                                        "description": "Street line of the address; absent when the business hides or omits it.",
+                                                                                        "type": "string"
                                                                                     },
-                                                                                    "dietaryFiberG": {
-                                                                                        "type": "number"
+                                                                                    "addressUnit": {
+                                                                                        "description": "Unit, suite, or floor; absent when the address has none.",
+                                                                                        "type": "string"
                                                                                     },
-                                                                                    "name": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                    "categories": {
+                                                                                        "description": "Nextdoor trade categories the business is listed under, e.g. [\"Plumber\", \"Air conditioning service\"].",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "city": {
+                                                                                        "description": "City or locality; absent when the business hides or omits its address.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "country": {
+                                                                                        "description": "ISO 3166-1 alpha-2 country code, e.g. \"US\".",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "description": {
+                                                                                        "description": "Business description written by the owner; absent when the page has none.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "email": {
+                                                                                        "description": "Primary contact email; absent when the page lists none. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "proteinG": {
+                                                                                    "faveCount": {
+                                                                                        "description": "Number of neighbours who have faved (recommended) the business; 0 when none have.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "hideAddress": {
+                                                                                        "description": "True when the business chose to hide its street address, which is why the address fields can be absent.",
+                                                                                        "type": "boolean"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Stable Nextdoor business id, e.g. \"business_2345302\". Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "latitude": {
+                                                                                        "description": "Latitude of the business address; absent when Nextdoor publishes no coordinates.",
                                                                                         "type": "number"
                                                                                     },
-                                                                                    "saturatedFatG": {
+                                                                                    "licenseId": {
+                                                                                        "description": "Trade or contractor licence number the business published; absent when it published none.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "locationStatus": {
+                                                                                        "description": "Operating status Nextdoor reports, e.g. \"OPEN\" or \"PERMANENTLY_CLOSED\"; empty when unreported.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "longitude": {
+                                                                                        "description": "Longitude of the business address; absent when Nextdoor publishes no coordinates.",
                                                                                         "type": "number"
                                                                                     },
-                                                                                    "servingSizeOz": {
-                                                                                        "type": "number"
+                                                                                    "name": {
+                                                                                        "description": "Business name as listed on Nextdoor. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "sodiumMg": {
-                                                                                        "type": "number"
+                                                                                    "phone": {
+                                                                                        "description": "Primary phone number in E.164 form, e.g. \"+15122639988\"; absent when the page lists none. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "sugarsG": {
-                                                                                        "type": "number"
+                                                                                    "postalCode": {
+                                                                                        "description": "Postal or ZIP code; absent when the business hides or omits its address.",
+                                                                                        "type": "string"
                                                                                     },
-                                                                                    "totalCarbG": {
-                                                                                        "type": "number"
+                                                                                    "slug": {
+                                                                                        "description": "Page slug for this business. Pass it to nextdoor.business to refetch this record on its own. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "totalFatG": {
-                                                                                        "type": "number"
+                                                                                    "state": {
+                                                                                        "description": "State, province, or region code, e.g. \"TX\"; absent when the business hides or omits its address.",
+                                                                                        "type": "string"
                                                                                     },
-                                                                                    "transFatG": {
-                                                                                        "type": "number"
+                                                                                    "url": {
+                                                                                        "description": "Canonical Nextdoor business page URL. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "website": {
+                                                                                        "description": "Business website URL; absent when the page lists none.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
                                                                                     }
                                                                                 },
                                                                                 "required": [
+                                                                                    "id",
                                                                                     "name",
-                                                                                    "servingSizeOz",
-                                                                                    "calories",
-                                                                                    "totalFatG",
-                                                                                    "saturatedFatG",
-                                                                                    "transFatG",
-                                                                                    "cholesterolMg",
-                                                                                    "sodiumMg",
-                                                                                    "totalCarbG",
-                                                                                    "dietaryFiberG",
-                                                                                    "sugarsG",
-                                                                                    "proteinG"
+                                                                                    "slug",
+                                                                                    "url"
                                                                                 ],
                                                                                 "type": "object"
                                                                             },
@@ -112209,6 +111198,7 @@
                                                             ]
                                                         },
                                                         "found": {
+                                                            "description": "True when the page slug resolved to a business.",
                                                             "type": "boolean"
                                                         }
                                                     },
@@ -112216,7 +111206,7 @@
                                                         "found",
                                                         "data"
                                                     ],
-                                                    "title": "Panda Express nutrition output",
+                                                    "title": "Nextdoor Business output",
                                                     "type": "object"
                                                 },
                                                 {
@@ -112421,18 +111411,19 @@
                     },
                     {}
                 ],
-                "summary": "Panda Express Nutrition",
+                "summary": "Nextdoor Business",
                 "tags": [
-                    "pandaexpress"
+                    "nextdoor"
                 ],
                 "x-mint": {
-                    "href": "/api-reference/panda-express/nutrition"
+                    "href": "/api-reference/nextdoor/business"
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.006000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.008360",
+                        "min": "0.005500",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -112472,10 +111463,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.006000",
                                 "currency": "USD",
+                                "max": "0.008360",
+                                "min": "0.005500",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -112504,10 +111496,618 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.006000",
                                 "currency": "USD",
+                                "max": "0.008360",
+                                "min": "0.005500",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/nextdoor.search": {
+            "post": {
+                "description": "Find local businesses listed on Nextdoor by city and trade category, with phone, email, website, and street address.\n\n**Price:** billed per result - \\$5.50 per 1,000 requests base + \\$2.86 per 1,000 results, capped at \\$62.70 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Nextdoor Business Search pricing and uptime](https://getanyapi.com/api/nextdoor/search) - live USD price, lane routing, and measured 30-day uptime. [Every Nextdoor endpoint](https://getanyapi.com/api/nextdoor).",
+                "operationId": "nextdoor_search",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
+                        "in": "query",
+                        "name": "max_cost_usd",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "city": "austin--tx",
+                                "limit": 5,
+                                "query": "plumber"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "city": "austin--tx",
+                                    "limit": 5,
+                                    "query": "plumber"
+                                },
+                                "properties": {
+                                    "city": {
+                                        "description": "Nextdoor city slug, lowercase, with the city and its state or region joined by two hyphens, e.g. \"austin--tx\" or \"york--england\".",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "limit": {
+                                        "description": "Maximum number of businesses to return (1-20, default 20). You are billed per result returned, so a lower limit costs less.",
+                                        "maximum": 20,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "market": {
+                                        "description": "Nextdoor market the city belongs to: \"us\" (nextdoor.com), \"gb\" (nextdoor.co.uk), or \"ca\" (ca.nextdoor.com). Defaults to \"us\".",
+                                        "enum": [
+                                            "us",
+                                            "gb",
+                                            "ca"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "preferLatencyUnderMs": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "query": {
+                                        "description": "Business category to look for in that city, e.g. \"plumber\", \"bakery\", \"electrician\".",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "city",
+                                    "query"
+                                ],
+                                "title": "Nextdoor Business Search input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireCursor: true` to be served only by a source that can page, which may cost more per request.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "Search result wrapper, or null when no business matched.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Nextdoor business records matching the city and category, one per business. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "address": {
+                                                                                        "description": "Full street address on one line; absent when the business hides or omits it.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "addressLine": {
+                                                                                        "description": "Street line of the address; absent when the business hides or omits it.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "addressUnit": {
+                                                                                        "description": "Unit, suite, or floor; absent when the address has none.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "categories": {
+                                                                                        "description": "Nextdoor trade categories the business is listed under, e.g. [\"Plumber\", \"Air conditioning service\"].",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "city": {
+                                                                                        "description": "City or locality; absent when the business hides or omits its address.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "country": {
+                                                                                        "description": "ISO 3166-1 alpha-2 country code, e.g. \"US\".",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "description": {
+                                                                                        "description": "Business description written by the owner; absent when the page has none.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "email": {
+                                                                                        "description": "Primary contact email; absent when the page lists none. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "faveCount": {
+                                                                                        "description": "Number of neighbours who have faved (recommended) the business; 0 when none have.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "hideAddress": {
+                                                                                        "description": "True when the business chose to hide its street address, which is why the address fields can be absent.",
+                                                                                        "type": "boolean"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Stable Nextdoor business id, e.g. \"business_2345302\". Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "latitude": {
+                                                                                        "description": "Latitude of the business address; absent when Nextdoor publishes no coordinates.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "licenseId": {
+                                                                                        "description": "Trade or contractor licence number the business published; absent when it published none.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "locationStatus": {
+                                                                                        "description": "Operating status Nextdoor reports, e.g. \"OPEN\" or \"PERMANENTLY_CLOSED\"; empty when unreported.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "longitude": {
+                                                                                        "description": "Longitude of the business address; absent when Nextdoor publishes no coordinates.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Business name as listed on Nextdoor. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "phone": {
+                                                                                        "description": "Primary phone number in E.164 form, e.g. \"+15122639988\"; absent when the page lists none. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "postalCode": {
+                                                                                        "description": "Postal or ZIP code; absent when the business hides or omits its address.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "slug": {
+                                                                                        "description": "Page slug for this business. Pass it to nextdoor.business to refetch this record on its own. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "state": {
+                                                                                        "description": "State, province, or region code, e.g. \"TX\"; absent when the business hides or omits its address.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Canonical Nextdoor business page URL. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "website": {
+                                                                                        "description": "Business website URL; absent when the page lists none.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id",
+                                                                                    "name",
+                                                                                    "slug",
+                                                                                    "url"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "items"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "True when at least one business matched the city and category.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Nextdoor Business Search output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "Nextdoor Business Search",
+                "tags": [
+                    "nextdoor"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/nextdoor/search"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "currency": "USD",
+                        "max": "0.062700",
+                        "min": "0.005500",
+                        "mode": "dynamic"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.062700",
+                                "min": "0.005500",
+                                "minimumUsd": "0.001000",
+                                "mode": "dynamic",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "currency": "USD",
+                                "max": "0.062700",
+                                "min": "0.005500",
+                                "minimumUsd": null,
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -213680,8 +213280,8 @@
             "x-group": "Naver"
         },
         {
-            "name": "pandaexpress",
-            "x-group": "Pandaexpress"
+            "name": "nextdoor",
+            "x-group": "Nextdoor"
         },
         {
             "name": "people-search",
