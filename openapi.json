@@ -191967,7 +191967,7 @@
         },
         "/v1/run/upwork.jobs": {
             "post": {
-                "description": "Search Upwork job postings by keyword, with up to 25 fresh listings per request.\n\n**Price:** billed per result - \\$3.63 per 1,000 results, capped at \\$90.80 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Upwork Jobs pricing and uptime](https://getanyapi.com/api/upwork/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Upwork endpoint](https://getanyapi.com/api/upwork).",
+                "description": "Search Upwork job postings by keyword, with up to 25 fresh listings per request.\n\n**Price:** billed per result - \\$1.10 per 1,000 requests base + \\$1.10 per 1,000 results, capped at \\$28.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Upwork Jobs pricing and uptime](https://getanyapi.com/api/upwork/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Upwork endpoint](https://getanyapi.com/api/upwork).",
                 "operationId": "upwork_jobs",
                 "parameters": [
                     {
@@ -192053,24 +192053,6 @@
                                         ],
                                         "type": "string"
                                     },
-                                    "fixedPriceRange": {
-                                        "description": "Budget range [min, max] in USD for fixed-price jobs (e.g. [500, 5000]).",
-                                        "items": {
-                                            "type": "number"
-                                        },
-                                        "maxItems": 2,
-                                        "minItems": 2,
-                                        "type": "array"
-                                    },
-                                    "hourlyRateRange": {
-                                        "description": "Hourly rate range [min, max] in USD/hour for hourly jobs (e.g. [20, 50]).",
-                                        "items": {
-                                            "type": "number"
-                                        },
-                                        "maxItems": 2,
-                                        "minItems": 2,
-                                        "type": "array"
-                                    },
                                     "jobType": {
                                         "description": "Filter by payment type: fixed-price or hourly jobs.",
                                         "enum": [
@@ -192080,7 +192062,7 @@
                                         "type": "string"
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (10-25, default 25). You are billed per result returned, so a lower limit costs less. This search has a floor of 10 results per page.",
+                                        "description": "Maximum number of results to return (10-25, default 25). You are billed per result returned, so a lower limit costs less.",
                                         "maximum": 25,
                                         "minimum": 10,
                                         "type": "integer"
@@ -192163,7 +192145,7 @@
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "budget": {
-                                                                                        "description": "Fixed budget or hourly range.",
+                                                                                        "description": "Fixed-price budget in USD (e.g. $4000). Absent on hourly jobs, which carry hourlyRateMin and hourlyRateMax.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "clientLocation": {
@@ -192190,6 +192172,14 @@
                                                                                     "experienceLevel": {
                                                                                         "description": "Required experience level (e.g. Entry, Intermediate, Expert).",
                                                                                         "type": "string"
+                                                                                    },
+                                                                                    "hourlyRateMax": {
+                                                                                        "description": "Upper bound of the client's hourly rate range in USD. Absent on fixed-price jobs.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "hourlyRateMin": {
+                                                                                        "description": "Lower bound of the client's hourly rate range in USD. Absent on fixed-price jobs.",
+                                                                                        "type": "number"
                                                                                     },
                                                                                     "jobId": {
                                                                                         "description": "Upwork job identifier. Populated whenever the provider has data for the entity.",
@@ -192474,8 +192464,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.090800",
-                        "min": "0.000000",
+                        "max": "0.028600",
+                        "min": "0.001100",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -192517,8 +192507,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.090800",
-                                "min": "0.001000",
+                                "max": "0.028600",
+                                "min": "0.001100",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -192550,8 +192540,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.090800",
-                                "min": "0.000000",
+                                "max": "0.028600",
+                                "min": "0.001100",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
