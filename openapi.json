@@ -16425,6 +16425,26 @@
                                         "minLength": 1,
                                         "type": "string"
                                     },
+                                    "requireAds": {
+                                        "default": false,
+                                        "description": "Serve only from a source that can return sponsored placements shown with the answer. One source currently qualifies, so the request cannot fall back when it is unavailable.",
+                                        "type": "boolean"
+                                    },
+                                    "requireEntities": {
+                                        "default": false,
+                                        "description": "Serve only from a source that can return brands and other named entities recognized in the answer. One source currently qualifies, so the request cannot fall back when it is unavailable.",
+                                        "type": "boolean"
+                                    },
+                                    "requirePlaces": {
+                                        "default": false,
+                                        "description": "Serve only from a source that can return places shown with the answer. Leaving this off still returns places whenever the source that answered can. Turning it on selects the single source that guarantees them, which costs more and has nothing to fall back to if it is unavailable.",
+                                        "type": "boolean"
+                                    },
+                                    "requireShoppingCards": {
+                                        "default": false,
+                                        "description": "Serve only from a source that can return shopping cards shown with the answer. Leaving this off still returns shopping cards whenever the source that answered can. Turning it on selects the single source that guarantees them, which costs more and has nothing to fall back to if it is unavailable.",
+                                        "type": "boolean"
+                                    },
                                     "webSearch": {
                                         "default": "force",
                                         "description": "Whether to insist ChatGPT browses the web. force instructs it to search and is the default; auto lets ChatGPT decide, which is cheaper and answers from memory roughly half the time. Check webSearchTriggered for what actually happened - an answer written without a search is not web-grounded.",
@@ -16481,6 +16501,70 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
+                                                                        "ads": {
+                                                                            "description": "Sponsored placements ChatGPT displayed with the answer. null means the source that answered cannot report ads; an empty array means none were shown.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "advertiserName": {
+                                                                                        "description": "Advertiser name.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "advertiserUrl": {
+                                                                                        "description": "Advertiser URL, tracking parameters stripped.",
+                                                                                        "format": "uri",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "domain": {
+                                                                                        "description": "Advertised domain.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "image": {
+                                                                                        "description": "Sponsored image URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "snippet": {
+                                                                                        "description": "Sponsored placement text.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Sponsored placement title.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Sponsored destination URL, tracking parameters stripped.",
+                                                                                        "format": "uri",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "title"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "answer": {
                                                                             "description": "The web-grounded answer as text. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
@@ -16495,6 +16579,13 @@
                                                                             "description": "Sources cited by the answer. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
+                                                                                    "answerPosition": {
+                                                                                        "description": "One-based answer section where ChatGPT cited this source. null means the source that answered cannot report the position.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "title": {
                                                                                         "description": "Source page title when supplied by the search engine.",
                                                                                         "type": "string"
@@ -16511,7 +16602,6 @@
                                                                                 ],
                                                                                 "type": "object"
                                                                             },
-                                                                            "minItems": 1,
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
                                                                         },
@@ -16522,10 +16612,124 @@
                                                                                 "null"
                                                                             ]
                                                                         },
+                                                                        "entities": {
+                                                                            "description": "Brands and other named entities recognized in the answer. null means the source that answered cannot report them; an empty array means none were identified.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "category": {
+                                                                                        "description": "Entity category.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "domain": {
+                                                                                        "description": "Entity domain.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Entity name.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Entity URL, tracking parameters stripped.",
+                                                                                        "format": "uri",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "title"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "model": {
                                                                             "description": "The ChatGPT model that produced the answer. null means the source that answered does not report it, which is not the same as an unknown model.",
                                                                             "type": [
                                                                                 "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "places": {
+                                                                            "description": "Places and local businesses ChatGPT displayed with the answer. null means the source that answered cannot report them; an empty array means none were shown.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "address": {
+                                                                                        "description": "Place address as displayed.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "category": {
+                                                                                        "description": "Place category shown by ChatGPT.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "description": {
+                                                                                        "description": "Place description shown by ChatGPT.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Place or business name.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "phone": {
+                                                                                        "description": "Place phone number as displayed.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "position": {
+                                                                                        "description": "One-based position in the places block.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "rating": {
+                                                                                        "description": "Place rating when the source reports one.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "reviewCount": {
+                                                                                        "description": "Number of reviews behind the displayed rating.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "websiteUrl": {
+                                                                                        "description": "Place website URL, tracking parameters stripped.",
+                                                                                        "format": "uri",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "name"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
                                                                                 "null"
                                                                             ]
                                                                         },
@@ -16561,6 +16765,76 @@
                                                                                         "type": "string"
                                                                                     }
                                                                                 },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "shoppingCards": {
+                                                                            "description": "Products ChatGPT displayed with the answer. null means the source that answered cannot report shopping cards; an empty array means none were shown.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "currency": {
+                                                                                        "description": "ISO 4217 currency code when the source reports it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "description": {
+                                                                                        "description": "Product description shown on the shopping card.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "image": {
+                                                                                        "description": "Product image URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "merchants": {
+                                                                                        "description": "Merchant name shown on the shopping card.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "price": {
+                                                                                        "description": "Displayed product price as a number when the source reports one.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "rating": {
+                                                                                        "description": "Product rating when the source reports one.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Product name shown by ChatGPT.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Product page URL, tracking parameters stripped.",
+                                                                                        "format": "uri",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "title"
+                                                                                ],
                                                                                 "type": "object"
                                                                             },
                                                                             "type": [
