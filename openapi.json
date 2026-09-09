@@ -16810,7 +16810,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.004000",
+                        "max": "0.004800",
                         "min": "0.001800",
                         "mode": "dynamic"
                     },
@@ -16853,7 +16853,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.004000",
+                                "max": "0.004800",
                                 "min": "0.001800",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -16886,7 +16886,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.004000",
+                                "max": "0.004800",
                                 "min": "0.001800",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -57512,7 +57512,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.004000",
+                        "max": "0.004800",
                         "min": "0.002000",
                         "mode": "dynamic"
                     },
@@ -57555,7 +57555,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.004000",
+                                "max": "0.004800",
                                 "min": "0.002000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -57588,7 +57588,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.004000",
+                                "max": "0.004800",
                                 "min": "0.002000",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -67678,7 +67678,7 @@
         },
         "/v1/run/google.search": {
             "post": {
-                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
+                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
                 "operationId": "google_search",
                 "parameters": [
                     {
@@ -68129,10 +68129,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.000900",
                         "currency": "USD",
-                        "max": "0.000900",
-                        "min": "0.000700",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -68172,11 +68171,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001000",
                                 "currency": "USD",
-                                "max": "0.001000",
-                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -68205,11 +68203,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.000900",
                                 "currency": "USD",
-                                "max": "0.000900",
-                                "min": "0.000700",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -142482,7 +142479,7 @@
         },
         "/v1/run/seo.competitors_domain": {
             "post": {
-                "description": "Get AnyAPI SEO competitor domains for a target domain with shared keyword counts and organic metrics as normalized JSON.\n\n**Price:** billed per result - \\$15.60 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$175.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Competitor Domains pricing and uptime](https://getanyapi.com/api/seo/competitors-domain) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Get AnyAPI SEO competitor domains for a target domain with shared keyword counts and organic metrics as normalized JSON.\n\n**Price:** billed per result - \\$28.64 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$188.64 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Competitor Domains pricing and uptime](https://getanyapi.com/api/seo/competitors-domain) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_competitors_domain",
                 "parameters": [
                     {
@@ -142918,8 +142915,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.175600",
-                        "min": "0.015600",
+                        "max": "0.188640",
+                        "min": "0.028640",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -142961,8 +142958,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.188640",
+                                "min": "0.028640",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -142994,8 +142991,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.188640",
+                                "min": "0.028640",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -143023,7 +143020,7 @@
         },
         "/v1/run/seo.domain_intersection": {
             "post": {
-                "description": "Get AnyAPI SEO keyword overlap for two domains with each domain's rankings, URLs, volume, CPC, and difficulty as normalized JSON.\n\n**Price:** billed per result - \\$15.60 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$175.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Domain Intersection pricing and uptime](https://getanyapi.com/api/seo/domain-intersection) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Get AnyAPI SEO keyword overlap for two domains with each domain's rankings, URLs, volume, CPC, and difficulty as normalized JSON.\n\n**Price:** billed per result - \\$28.64 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$188.64 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Domain Intersection pricing and uptime](https://getanyapi.com/api/seo/domain-intersection) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_domain_intersection",
                 "parameters": [
                     {
@@ -143483,8 +143480,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.175600",
-                        "min": "0.015600",
+                        "max": "0.188640",
+                        "min": "0.028640",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -143526,8 +143523,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.188640",
+                                "min": "0.028640",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -143559,8 +143556,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.188640",
+                                "min": "0.028640",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -143588,7 +143585,7 @@
         },
         "/v1/run/seo.domain_rank_overview": {
             "post": {
-                "description": "Get AnyAPI SEO domain ranking, organic traffic, and paid traffic metrics as normalized JSON.\n\n**Price:** billed per result - \\$15.60 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$15.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Domain Rank Overview pricing and uptime](https://getanyapi.com/api/seo/domain-rank-overview) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Get AnyAPI SEO domain ranking, organic traffic, and paid traffic metrics as normalized JSON.\n\n**Price:** billed per result - \\$14.55 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$14.55 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Domain Rank Overview pricing and uptime](https://getanyapi.com/api/seo/domain-rank-overview) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_domain_rank_overview",
                 "parameters": [
                     {
@@ -144029,8 +144026,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.015600",
-                        "min": "0.015600",
+                        "max": "0.014550",
+                        "min": "0.014550",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -144072,8 +144069,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.015600",
-                                "min": "0.015600",
+                                "max": "0.014550",
+                                "min": "0.014550",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -144105,8 +144102,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.015600",
-                                "min": "0.015600",
+                                "max": "0.014550",
+                                "min": "0.014550",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -144134,7 +144131,7 @@
         },
         "/v1/run/seo.domain_technologies": {
             "post": {
-                "description": "Detect the technology stack a website runs: CMS, analytics, marketing, hosting, and security, plus contacts and social profiles as normalized JSON.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Domain Technologies pricing and uptime](https://getanyapi.com/api/seo/domain-technologies) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Detect the technology stack a website runs: CMS, analytics, marketing, hosting, and security, plus contacts and social profiles as normalized JSON.\n\n**Price:** \\$14.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Domain Technologies pricing and uptime](https://getanyapi.com/api/seo/domain-technologies) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_domain_technologies",
                 "parameters": [
                     {
@@ -144553,7 +144550,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.012000",
+                        "amount": "0.014400",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -144595,7 +144592,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.012000",
+                                "amount": "0.014400",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -144627,7 +144624,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.012000",
+                                "amount": "0.014400",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -144656,7 +144653,7 @@
         },
         "/v1/run/seo.domains_by_technology": {
             "post": {
-                "description": "Find websites running a given technology, category, or on-page term: domain, rank, detected stack, contacts, and social profiles as normalized JSON.\n\n**Price:** billed per result - \\$12.00 per 1,000 requests base + \\$1.20 per 1,000 results, capped at \\$132.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Domains By Technology pricing and uptime](https://getanyapi.com/api/seo/domains-by-technology) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Find websites running a given technology, category, or on-page term: domain, rank, detected stack, contacts, and social profiles as normalized JSON.\n\n**Price:** billed per result - \\$14.64 per 1,000 requests base + \\$1.20 per 1,000 results, capped at \\$134.64 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Domains By Technology pricing and uptime](https://getanyapi.com/api/seo/domains-by-technology) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_domains_by_technology",
                 "parameters": [
                     {
@@ -145163,8 +145160,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.132000",
-                        "min": "0.012000",
+                        "max": "0.134640",
+                        "min": "0.014640",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -145206,8 +145203,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.132000",
-                                "min": "0.012000",
+                                "max": "0.134640",
+                                "min": "0.014640",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -145239,8 +145236,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.132000",
-                                "min": "0.012000",
+                                "max": "0.134640",
+                                "min": "0.014640",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -145268,7 +145265,7 @@
         },
         "/v1/run/seo.keyword_difficulty": {
             "post": {
-                "description": "Get AnyAPI SEO keyword difficulty scores for one or more keywords as normalized JSON.\n\n**Price:** billed per keyword - \\$15.60 per 1,000 requests base + \\$0.16 per 1,000 keywords, capped at \\$175.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Keyword Difficulty pricing and uptime](https://getanyapi.com/api/seo/keyword-difficulty) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Get AnyAPI SEO keyword difficulty scores for one or more keywords as normalized JSON.\n\n**Price:** billed per keyword - \\$14.38 per 1,000 requests base + \\$0.16 per 1,000 keywords, capped at \\$174.38 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Keyword Difficulty pricing and uptime](https://getanyapi.com/api/seo/keyword-difficulty) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_keyword_difficulty",
                 "parameters": [
                     {
@@ -145675,8 +145672,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.175600",
-                        "min": "0.015600",
+                        "max": "0.174380",
+                        "min": "0.014380",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -145718,8 +145715,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174380",
+                                "min": "0.014380",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -145751,8 +145748,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174380",
+                                "min": "0.014380",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -145780,7 +145777,7 @@
         },
         "/v1/run/seo.keyword_ideas": {
             "post": {
-                "description": "Find AnyAPI SEO keyword ideas from seed terms with volume, CPC, competition, difficulty, and intent as normalized JSON.\n\n**Price:** billed per result - \\$15.60 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$175.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Keyword Ideas pricing and uptime](https://getanyapi.com/api/seo/keyword-ideas) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Find AnyAPI SEO keyword ideas from seed terms with volume, CPC, competition, difficulty, and intent as normalized JSON.\n\n**Price:** billed per result - \\$14.96 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$174.96 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Keyword Ideas pricing and uptime](https://getanyapi.com/api/seo/keyword-ideas) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_keyword_ideas",
                 "parameters": [
                     {
@@ -146234,8 +146231,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.175600",
-                        "min": "0.015600",
+                        "max": "0.174960",
+                        "min": "0.014960",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -146277,8 +146274,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174960",
+                                "min": "0.014960",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -146310,8 +146307,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174960",
+                                "min": "0.014960",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -146339,7 +146336,7 @@
         },
         "/v1/run/seo.keyword_overview": {
             "post": {
-                "description": "Get AnyAPI SEO keyword metrics including search volume, CPC, competition, difficulty, and search intent as normalized JSON.\n\n**Price:** billed per keyword - \\$15.60 per 1,000 requests base + \\$0.16 per 1,000 keywords, capped at \\$127.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Keyword Overview pricing and uptime](https://getanyapi.com/api/seo/keyword-overview) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Get AnyAPI SEO keyword metrics including search volume, CPC, competition, difficulty, and search intent as normalized JSON.\n\n**Price:** billed per keyword - \\$14.38 per 1,000 requests base + \\$0.16 per 1,000 keywords, capped at \\$126.38 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Keyword Overview pricing and uptime](https://getanyapi.com/api/seo/keyword-overview) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_keyword_overview",
                 "parameters": [
                     {
@@ -146799,8 +146796,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.127600",
-                        "min": "0.015600",
+                        "max": "0.126380",
+                        "min": "0.014380",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -146842,8 +146839,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.127600",
-                                "min": "0.015600",
+                                "max": "0.126380",
+                                "min": "0.014380",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -146875,8 +146872,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.127600",
-                                "min": "0.015600",
+                                "max": "0.126380",
+                                "min": "0.014380",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -146904,7 +146901,7 @@
         },
         "/v1/run/seo.keyword_suggestions": {
             "post": {
-                "description": "Find AnyAPI SEO keyword suggestions from a seed term with volume, CPC, competition, difficulty, and intent as normalized JSON.\n\n**Price:** billed per result - \\$15.60 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$175.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Keyword Suggestions pricing and uptime](https://getanyapi.com/api/seo/keyword-suggestions) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Find AnyAPI SEO keyword suggestions from a seed term with volume, CPC, competition, difficulty, and intent as normalized JSON.\n\n**Price:** billed per result - \\$14.96 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$174.96 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Keyword Suggestions pricing and uptime](https://getanyapi.com/api/seo/keyword-suggestions) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_keyword_suggestions",
                 "parameters": [
                     {
@@ -147350,8 +147347,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.175600",
-                        "min": "0.015600",
+                        "max": "0.174960",
+                        "min": "0.014960",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -147393,8 +147390,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174960",
+                                "min": "0.014960",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -147426,8 +147423,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174960",
+                                "min": "0.014960",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -147455,7 +147452,7 @@
         },
         "/v1/run/seo.local_pack": {
             "post": {
-                "description": "Search AnyAPI SEO local pack results with rankings, ratings, addresses, and contact basics as normalized JSON.\n\n**Price:** billed per result - \\$2.60 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$2.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Local Pack pricing and uptime](https://getanyapi.com/api/seo/local-pack) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Search AnyAPI SEO local pack results with rankings, ratings, addresses, and contact basics as normalized JSON.\n\n**Price:** billed per result - \\$2.40 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$2.40 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Local Pack pricing and uptime](https://getanyapi.com/api/seo/local-pack) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_local_pack",
                 "parameters": [
                     {
@@ -147923,8 +147920,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.002600",
-                        "min": "0.002600",
+                        "max": "0.002400",
+                        "min": "0.002400",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -147966,8 +147963,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.002600",
-                                "min": "0.002600",
+                                "max": "0.002400",
+                                "min": "0.002400",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -147999,8 +147996,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.002600",
-                                "min": "0.002600",
+                                "max": "0.002400",
+                                "min": "0.002400",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -148028,7 +148025,7 @@
         },
         "/v1/run/seo.ranked_keywords": {
             "post": {
-                "description": "Get AnyAPI SEO ranked keywords for a domain with rankings, traffic estimates, volume, CPC, difficulty, and intent as normalized JSON.\n\n**Price:** billed per result - \\$15.60 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$175.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Ranked Keywords pricing and uptime](https://getanyapi.com/api/seo/ranked-keywords) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Get AnyAPI SEO ranked keywords for a domain with rankings, traffic estimates, volume, CPC, difficulty, and intent as normalized JSON.\n\n**Price:** billed per result - \\$14.96 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$174.96 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Ranked Keywords pricing and uptime](https://getanyapi.com/api/seo/ranked-keywords) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_ranked_keywords",
                 "parameters": [
                     {
@@ -148480,8 +148477,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.175600",
-                        "min": "0.015600",
+                        "max": "0.174960",
+                        "min": "0.014960",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -148523,8 +148520,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174960",
+                                "min": "0.014960",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -148556,8 +148553,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174960",
+                                "min": "0.014960",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -148585,7 +148582,7 @@
         },
         "/v1/run/seo.related_keywords": {
             "post": {
-                "description": "Find AnyAPI SEO related keywords from a seed term with volume, CPC, competition, difficulty, and intent as normalized JSON.\n\n**Price:** billed per result - \\$15.60 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$175.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Related Keywords pricing and uptime](https://getanyapi.com/api/seo/related-keywords) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Find AnyAPI SEO related keywords from a seed term with volume, CPC, competition, difficulty, and intent as normalized JSON.\n\n**Price:** billed per result - \\$14.96 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$174.96 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Related Keywords pricing and uptime](https://getanyapi.com/api/seo/related-keywords) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_related_keywords",
                 "parameters": [
                     {
@@ -149038,8 +149035,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.175600",
-                        "min": "0.015600",
+                        "max": "0.174960",
+                        "min": "0.014960",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -149081,8 +149078,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174960",
+                                "min": "0.014960",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -149114,8 +149111,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174960",
+                                "min": "0.014960",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -149143,7 +149140,7 @@
         },
         "/v1/run/seo.search_intent": {
             "post": {
-                "description": "Classify AnyAPI SEO keyword search intent as normalized JSON.\n\n**Price:** billed per keyword - \\$15.60 per 1,000 requests base + \\$0.16 per 1,000 keywords, capped at \\$175.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Search Intent pricing and uptime](https://getanyapi.com/api/seo/search-intent) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Classify AnyAPI SEO keyword search intent as normalized JSON.\n\n**Price:** billed per keyword - \\$14.38 per 1,000 requests base + \\$0.16 per 1,000 keywords, capped at \\$174.38 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Search Intent pricing and uptime](https://getanyapi.com/api/seo/search-intent) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_search_intent",
                 "parameters": [
                     {
@@ -149544,8 +149541,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.175600",
-                        "min": "0.015600",
+                        "max": "0.174380",
+                        "min": "0.014380",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -149587,8 +149584,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174380",
+                                "min": "0.014380",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -149620,8 +149617,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.175600",
-                                "min": "0.015600",
+                                "max": "0.174380",
+                                "min": "0.014380",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -149649,7 +149646,7 @@
         },
         "/v1/run/seo.search_volume": {
             "post": {
-                "description": "Get AnyAPI SEO keyword search volume, CPC, competition, bid estimates, and monthly history as normalized JSON.\n\n**Price:** billed per result - \\$117.00 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$117.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Search Volume pricing and uptime](https://getanyapi.com/api/seo/search-volume) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Get AnyAPI SEO keyword search volume, CPC, competition, bid estimates, and monthly history as normalized JSON.\n\n**Price:** billed per result - \\$108.00 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$108.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Search Volume pricing and uptime](https://getanyapi.com/api/seo/search-volume) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_search_volume",
                 "parameters": [
                     {
@@ -150113,8 +150110,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.117000",
-                        "min": "0.117000",
+                        "max": "0.108000",
+                        "min": "0.108000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -150156,8 +150153,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.117000",
-                                "min": "0.117000",
+                                "max": "0.108000",
+                                "min": "0.108000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -150189,8 +150186,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.117000",
-                                "min": "0.117000",
+                                "max": "0.108000",
+                                "min": "0.108000",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
