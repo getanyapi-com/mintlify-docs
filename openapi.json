@@ -85068,10 +85068,8 @@
                                 },
                                 "properties": {
                                     "datePosted": {
-                                        "description": "Recency hint, not a hard filter. Reel discovery runs on top of Google search, so this window narrows Google's index by when it discovered or last crawled the reel, which is not the same as when the reel was published to Instagram. Returned reels can have a createdUtc outside the requested window, and narrow windows such as last-hour often return older reels or no results. Check createdUtc yourself if you need exact publication-time precision.",
+                                        "description": "Recency hint, not a hard filter. Reel discovery runs on top of Google search, so this window narrows Google's index by when it discovered or last crawled the reel, which is not the same as when the reel was published to Instagram. Returned reels can have a createdUtc outside the requested window, and the narrowest window, last-week, often returns older reels or no results. Check createdUtc yourself if you need exact publication-time precision.",
                                         "enum": [
-                                            "last-hour",
-                                            "last-day",
                                             "last-week",
                                             "last-month",
                                             "last-year"
@@ -135099,6 +135097,10 @@
                                                                                         "description": "Net score (upvotes minus downvotes) at fetch time.",
                                                                                         "type": "integer"
                                                                                     },
+                                                                                    "selftext": {
+                                                                                        "description": "Body text of a self post, as Markdown. Empty on a link post, which has no body.",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "subreddit": {
                                                                                         "description": "Subreddit name, without the r/ prefix. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -168873,12 +168875,14 @@
                                     },
                                     "sortBy": {
                                         "default": 0,
-                                        "description": "Sort order. Use the canonical JSON integer 0 for relevance or 1 for most liked; legacy numeric strings remain accepted.",
+                                        "description": "Sort order. Use the canonical JSON integer 0 for relevance, 1 for most liked, or 2 for newest first; legacy numeric strings remain accepted.",
                                         "enum": [
                                             0,
                                             1,
+                                            2,
                                             "0",
-                                            "1"
+                                            "1",
+                                            "2"
                                         ],
                                         "type": [
                                             "integer",
@@ -168942,6 +168946,10 @@
                                                                             "description": "Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
+                                                                                    "author": {
+                                                                                        "description": "Username (handle) of the account that posted, without the @ prefix.",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "caption": {
                                                                                         "description": "Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -168949,6 +168957,10 @@
                                                                                     },
                                                                                     "comments": {
                                                                                         "type": "integer"
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
                                                                                     },
                                                                                     "id": {
                                                                                         "description": "Populated whenever the provider has data for the entity.",
