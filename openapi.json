@@ -67952,7 +67952,7 @@
         },
         "/v1/run/google.search": {
             "post": {
-                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
+                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
                 "operationId": "google_search",
                 "parameters": [
                     {
@@ -68403,10 +68403,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.000900",
                         "currency": "USD",
-                        "max": "0.000900",
-                        "min": "0.000700",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -68446,11 +68445,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001000",
                                 "currency": "USD",
-                                "max": "0.001000",
-                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -68479,11 +68477,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.000900",
                                 "currency": "USD",
-                                "max": "0.000900",
-                                "min": "0.000700",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
