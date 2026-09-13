@@ -189649,7 +189649,7 @@
         },
         "/v1/run/twitter.following": {
             "post": {
-                "description": "List the accounts a public X (Twitter) account follows by username with cursor pagination. Limit is a per-page maximum; follow the response's nextCursor for more.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [X / Twitter Following pricing and uptime](https://getanyapi.com/api/x-twitter/following) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
+                "description": "List the accounts a public X (Twitter) account follows by username with cursor pagination. Limit is a per-page maximum; follow the response's nextCursor for more.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter Following pricing and uptime](https://getanyapi.com/api/x-twitter/following) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
                 "operationId": "twitter_following",
                 "parameters": [
                     {
@@ -189740,6 +189740,21 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `location`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "items": {
+                                            "enum": [
+                                                "bio",
+                                                "followers",
+                                                "following",
+                                                "location",
+                                                "nextCursor"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "username": {
                                         "description": "The X (Twitter) username to fetch the following list for, without the @ prefix (e.g. elonmusk).",
                                         "type": "string"
@@ -189827,10 +189842,6 @@
                                                                                         "description": "The account's @ handle, without the @ prefix. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "verified": {
-                                                                                        "description": "Whether the account is verified.",
-                                                                                        "type": "boolean"
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -190083,9 +190094,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000500",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.003600",
+                        "min": "0.000500",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -190125,10 +190137,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001000",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -190157,10 +190170,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000500",
                                 "currency": "USD",
+                                "max": "0.003600",
+                                "min": "0.000500",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
