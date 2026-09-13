@@ -99889,6 +99889,626 @@
                 }
             }
         },
+        "/v1/run/linkedin.job": {
+            "post": {
+                "description": "Fetch one LinkedIn job posting by URL: title, full description, location, salary when disclosed, applicant count, employment and workplace type, seniority, benefits, industries, apply links, posting and expiry dates, the hiring team, the applicant tracking system behind it, and the hiring company with its size, follower count, website and description.\n\n**Price:** \\$1.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Job pricing and uptime](https://getanyapi.com/api/linkedin/job) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "operationId": "linkedin_job",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
+                        "in": "query",
+                        "name": "max_cost_usd",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "url": "https://www.linkedin.com/jobs/view/4431721875/"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "url": "https://www.linkedin.com/jobs/view/4431721875/"
+                                },
+                                "properties": {
+                                    "preferLatencyUnderMs": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "url": {
+                                        "description": "Full LinkedIn job posting URL, e.g. https://www.linkedin.com/jobs/view/4431721875/.",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "LinkedIn job input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireFields: [\"nextCursor\"]` to be served only by a source that can page, which may cost more per request.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The job posting record, or null when not found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "description": "A single LinkedIn job posting with full detail: title, description, salary, applicant count, seniority, apply links, hiring team, and the hiring company.",
+                                                                    "properties": {
+                                                                        "applicantTrackingSystem": {
+                                                                            "description": "Applicant tracking system behind the posting (e.g. Workday, Lever, Greenhouse), when LinkedIn reports one.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "applicants": {
+                                                                            "description": "Number of applicants reported by LinkedIn. Populated whenever the provider has data for the entity.",
+                                                                            "type": "integer",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "applyUrl": {
+                                                                            "description": "External company apply URL when the job applies off-site.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "benefits": {
+                                                                            "description": "Listed benefits.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "company": {
+                                                                            "description": "Hiring company details.",
+                                                                            "properties": {
+                                                                                "description": {
+                                                                                    "description": "Company About text.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "employeeCount": {
+                                                                                    "description": "Number of employees LinkedIn reports for the company.",
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "followerCount": {
+                                                                                    "description": "Number of followers of the company page.",
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "linkedinUrl": {
+                                                                                    "description": "Canonical LinkedIn company URL.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "logo": {
+                                                                                    "description": "Company logo image URL.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "name": {
+                                                                                    "description": "Company name. Populated whenever the provider has data for the entity.",
+                                                                                    "type": "string",
+                                                                                    "x-anyapi-must-populate": true
+                                                                                },
+                                                                                "universalName": {
+                                                                                    "description": "Company LinkedIn universal (vanity) name.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "website": {
+                                                                                    "description": "Company website.",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "createdUtc": {
+                                                                            "description": "UTC epoch timestamp in seconds (Unix time) the job was posted. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                            "type": "number"
+                                                                        },
+                                                                        "descriptionText": {
+                                                                            "description": "Full job description as plain text. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "easyApplyUrl": {
+                                                                            "description": "LinkedIn Easy Apply URL when available.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "employmentType": {
+                                                                            "description": "Employment type (e.g. full_time, contract, part_time).",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "experienceLevel": {
+                                                                            "description": "Seniority / experience level (e.g. Mid-Senior level, Entry level).",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "expireUtc": {
+                                                                            "description": "UTC epoch timestamp in seconds (Unix time) the posting expires. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                            "type": "number"
+                                                                        },
+                                                                        "hiringTeam": {
+                                                                            "description": "LinkedIn members named on the posting as the hiring contacts.",
+                                                                            "items": {
+                                                                                "description": "One named hiring contact.",
+                                                                                "properties": {
+                                                                                    "linkedinUrl": {
+                                                                                        "description": "Canonical LinkedIn profile URL.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Member name.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "position": {
+                                                                                        "description": "Member headline or job title.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "id": {
+                                                                            "description": "LinkedIn job posting id.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "industries": {
+                                                                            "description": "Industries associated with the role.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "jobState": {
+                                                                            "description": "Posting state reported by LinkedIn (e.g. LISTED, CLOSED).",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "location": {
+                                                                            "description": "Job location (city, region, or country).",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "salary": {
+                                                                            "description": "Salary range when disclosed by the poster.",
+                                                                            "properties": {
+                                                                                "max": {
+                                                                                    "description": "Maximum salary.",
+                                                                                    "type": "number"
+                                                                                },
+                                                                                "min": {
+                                                                                    "description": "Minimum salary.",
+                                                                                    "type": "number"
+                                                                                },
+                                                                                "text": {
+                                                                                    "description": "Salary as displayed (e.g. '300,000 - 330,000 USD').",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
+                                                                        "title": {
+                                                                            "description": "Job title. Populated whenever the provider has data for the entity.",
+                                                                            "type": "string",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "url": {
+                                                                            "description": "Canonical LinkedIn job posting URL.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "workplaceType": {
+                                                                            "description": "Workplace type (e.g. remote, on_site, hybrid).",
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "title",
+                                                                        "url"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether the job posting was found.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "LinkedIn job output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "LinkedIn Job",
+                "tags": [
+                    "linkedin"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/linkedin/job"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.001500",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.001500",
+                                "currency": "USD",
+                                "minimumUsd": "0.001000",
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.001500",
+                                "currency": "USD",
+                                "minimumUsd": null,
+                                "mode": "fixed",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/linkedin.jobs": {
             "post": {
                 "description": "Search LinkedIn job listings by title and location - full records with description, salary, applicant count, seniority, company details, and benefits. Up to 25 jobs per request.\n\n**Price:** billed per result - \\$1.10 per 1,000 requests base + \\$1.10 per 1,000 results, capped at \\$28.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Jobs pricing and uptime](https://getanyapi.com/api/linkedin/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
@@ -103974,6 +104594,654 @@
                 }
             }
         },
+        "/v1/run/linkedin.profile_comments": {
+            "post": {
+                "description": "List the comments a LinkedIn member has left on other people's posts - the comment text, its permalink and timestamp, plus the post it was left on and that post's author and engagement.\n\n**Price:** \\$5.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Profile Comments pricing and uptime](https://getanyapi.com/api/linkedin/profile-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "operationId": "linkedin_profile_comments",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
+                        "in": "query",
+                        "name": "max_cost_usd",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 10,
+                                "url": "https://www.linkedin.com/in/jeffweiner08"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 10,
+                                    "url": "https://www.linkedin.com/in/jeffweiner08"
+                                },
+                                "properties": {
+                                    "limit": {
+                                        "default": 100,
+                                        "description": "Maximum number of comments to return.",
+                                        "maximum": 100,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "postedLimit": {
+                                        "description": "Only return comments posted within this window (default any).",
+                                        "enum": [
+                                            "any",
+                                            "24h",
+                                            "week",
+                                            "month"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "preferLatencyUnderMs": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "url": {
+                                        "description": "Full URL of the LinkedIn member profile whose comments on other people's posts should be listed.",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "LinkedIn profile comments input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireFields: [\"nextCursor\"]` to be served only by a source that can page, which may cost more per request.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The profile comments result, or null when not found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Comments this member left on other people's posts, newest first, each with the post it was left on. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "actor": {
+                                                                                        "description": "The member who left the comment (a profile or a company).",
+                                                                                        "properties": {
+                                                                                            "image": {
+                                                                                                "description": "Profile picture URL of the commenter. Populated whenever the provider has data for the entity.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "linkedinUrl": {
+                                                                                                "description": "Canonical LinkedIn URL of the commenter. Populated whenever the provider has data for the entity.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "name": {
+                                                                                                "description": "Display name of the commenter. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "position": {
+                                                                                                "description": "Commenter's headline or job title as displayed. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "type": {
+                                                                                                "description": "Commenter kind, e.g. 'profile' or 'company'.",
+                                                                                                "type": "string"
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object"
+                                                                                    },
+                                                                                    "commentary": {
+                                                                                        "description": "Full text of the comment the member left. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "edited": {
+                                                                                        "description": "Whether the comment has been edited.",
+                                                                                        "type": "boolean"
+                                                                                    },
+                                                                                    "engagement": {
+                                                                                        "description": "Engagement metrics for the comment.",
+                                                                                        "properties": {
+                                                                                            "comments": {
+                                                                                                "description": "Number of replies to the comment.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer"
+                                                                                            },
+                                                                                            "likes": {
+                                                                                                "description": "Number of likes on the comment.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer"
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Unique identifier of the comment. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "post": {
+                                                                                        "description": "The post the comment was left on, so the comment can be read in context. Populated whenever the provider has data for the entity.",
+                                                                                        "properties": {
+                                                                                            "author": {
+                                                                                                "description": "Author of the post that was commented on.",
+                                                                                                "properties": {
+                                                                                                    "headline": {
+                                                                                                        "description": "Public headline or company follower summary for the post author.",
+                                                                                                        "type": "string"
+                                                                                                    },
+                                                                                                    "image": {
+                                                                                                        "description": "Profile or company image URL of the post author. Populated whenever the provider has data for the entity.",
+                                                                                                        "format": "uri",
+                                                                                                        "type": "string",
+                                                                                                        "x-anyapi-must-populate": true
+                                                                                                    },
+                                                                                                    "name": {
+                                                                                                        "description": "Display name of the post author. Populated whenever the provider has data for the entity.",
+                                                                                                        "type": "string",
+                                                                                                        "x-anyapi-must-populate": true
+                                                                                                    },
+                                                                                                    "profileUrl": {
+                                                                                                        "description": "Canonical LinkedIn profile or company URL of the post author. Populated whenever the provider has data for the entity.",
+                                                                                                        "format": "uri",
+                                                                                                        "type": "string",
+                                                                                                        "x-anyapi-must-populate": true
+                                                                                                    },
+                                                                                                    "publicIdentifier": {
+                                                                                                        "description": "LinkedIn public identifier (vanity slug) of the post author, for example \"williamhgates\". Stable across lanes, unlike the raw id.",
+                                                                                                        "type": "string"
+                                                                                                    }
+                                                                                                },
+                                                                                                "type": "object"
+                                                                                            },
+                                                                                            "engagement": {
+                                                                                                "description": "Public engagement totals on the post that was commented on.",
+                                                                                                "properties": {
+                                                                                                    "comments": {
+                                                                                                        "description": "Total comment count on the post.",
+                                                                                                        "minimum": 0,
+                                                                                                        "type": "integer"
+                                                                                                    },
+                                                                                                    "reactions": {
+                                                                                                        "description": "Total reaction count on the post.",
+                                                                                                        "minimum": 0,
+                                                                                                        "type": "integer"
+                                                                                                    },
+                                                                                                    "reposts": {
+                                                                                                        "description": "Total repost or share count on the post.",
+                                                                                                        "minimum": 0,
+                                                                                                        "type": "integer"
+                                                                                                    }
+                                                                                                },
+                                                                                                "type": "object"
+                                                                                            },
+                                                                                            "id": {
+                                                                                                "description": "Unique identifier of the LinkedIn post that was commented on.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "postedUtc": {
+                                                                                                "description": "UTC epoch timestamp in seconds (Unix time) when the post was published. Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "number",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "text": {
+                                                                                                "description": "Text content of the post that was commented on. Empty when the post carries no commentary of its own, such as a bare reshare or an image-only post. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "url": {
+                                                                                                "description": "Canonical LinkedIn URL of the post that was commented on. Populated whenever the provider has data for the entity.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Canonical permalink URL of the comment. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id",
+                                                                                    "commentary"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "items"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether comments by this member were found.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "LinkedIn profile comments output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "LinkedIn Profile Comments",
+                "tags": [
+                    "linkedin"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/linkedin/profile-comments"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.005000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.005000",
+                                "currency": "USD",
+                                "minimumUsd": "0.001000",
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.005000",
+                                "currency": "USD",
+                                "minimumUsd": null,
+                                "mode": "fixed",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/linkedin.profile_posts_full": {
             "post": {
                 "description": "Fetch recent public LinkedIn profile posts with enriched author, engagement, article, newsletter, media, annotation, repost, and social activity details.\n\n**Price:** \\$5.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile Posts (full) pricing and uptime](https://getanyapi.com/api/linkedin/profile-posts-full) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
@@ -105584,6 +106852,650 @@
                                 "min": "0.005000",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
+                                "quoteBasis": "funded_ceiling"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/linkedin.profile_reactions": {
+            "post": {
+                "description": "List the posts a LinkedIn member has reacted to - the reaction, its timestamp, and the full post it was made on with author and engagement.\n\n**Price:** \\$5.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Profile Reactions pricing and uptime](https://getanyapi.com/api/linkedin/profile-reactions) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "operationId": "linkedin_profile_reactions",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
+                        "in": "query",
+                        "name": "max_cost_usd",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 10,
+                                "url": "https://www.linkedin.com/in/williamhgates"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 10,
+                                    "url": "https://www.linkedin.com/in/williamhgates"
+                                },
+                                "properties": {
+                                    "limit": {
+                                        "default": 100,
+                                        "description": "Maximum number of reactions to return. One upstream page holds 100.",
+                                        "maximum": 100,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "preferLatencyUnderMs": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "url": {
+                                        "description": "Full URL of the LinkedIn member profile whose reactions to list, for example https://www.linkedin.com/in/williamhgates.",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "url"
+                                ],
+                                "title": "LinkedIn profile reactions input",
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireFields: [\"nextCursor\"]` to be served only by a source that can page, which may cost more per request.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The profile reactions result, or null when not found.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Posts the member has reacted to, newest first. One record per reaction, carrying both the reaction itself and the post it was made on. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "action": {
+                                                                                        "description": "LinkedIn's own display sentence for the reaction, for example \"Bill Gates likes this\" or \"Ali Abdaal liked Tobi Odutola's comment on this\". It is the only place the reaction kind appears on this endpoint, it names the member and sometimes a third party, and it distinguishes a reaction on the post from a reaction on a comment. It is free English text, not an enum: parse it only if you accept that LinkedIn may reword it. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "actor": {
+                                                                                        "description": "The member who reacted - the profile that was asked about. Populated whenever the provider has data for the entity.",
+                                                                                        "properties": {
+                                                                                            "id": {
+                                                                                                "description": "LinkedIn member identifier of the reactor.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "image": {
+                                                                                                "description": "Profile picture URL of the reactor.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "linkedinUrl": {
+                                                                                                "description": "Canonical LinkedIn profile URL of the reactor. Populated whenever the provider has data for the entity.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "LinkedIn activity identifier of the reaction event itself. This is not the identifier of the post that was reacted to - that is post.id. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "post": {
+                                                                                        "description": "The post the member reacted to. Populated whenever the provider has data for the entity.",
+                                                                                        "properties": {
+                                                                                            "author": {
+                                                                                                "description": "Public author identity attached to the post. Populated whenever the provider has data for the entity.",
+                                                                                                "properties": {
+                                                                                                    "headline": {
+                                                                                                        "description": "Public headline for a person, or the follower summary for a company. Populated whenever the provider has data for the entity.",
+                                                                                                        "type": "string",
+                                                                                                        "x-anyapi-must-populate": true
+                                                                                                    },
+                                                                                                    "id": {
+                                                                                                        "description": "LinkedIn identifier for the author.",
+                                                                                                        "type": "string"
+                                                                                                    },
+                                                                                                    "image": {
+                                                                                                        "description": "Public profile or company image URL for the author.",
+                                                                                                        "format": "uri",
+                                                                                                        "type": "string"
+                                                                                                    },
+                                                                                                    "name": {
+                                                                                                        "description": "Display name of the author. Populated whenever the provider has data for the entity.",
+                                                                                                        "type": "string",
+                                                                                                        "x-anyapi-must-populate": true
+                                                                                                    },
+                                                                                                    "profileUrl": {
+                                                                                                        "description": "Canonical LinkedIn profile or company URL for the author. Populated whenever the provider has data for the entity.",
+                                                                                                        "format": "uri",
+                                                                                                        "type": "string",
+                                                                                                        "x-anyapi-must-populate": true
+                                                                                                    },
+                                                                                                    "publicIdentifier": {
+                                                                                                        "description": "LinkedIn public identifier (vanity slug) for the author, for example \"williamhgates\". Absent for company authors, which carry universalName instead.",
+                                                                                                        "type": "string"
+                                                                                                    },
+                                                                                                    "type": {
+                                                                                                        "description": "Author kind, such as profile or company.",
+                                                                                                        "type": "string"
+                                                                                                    },
+                                                                                                    "universalName": {
+                                                                                                        "description": "Universal LinkedIn name used for company authors, when present.",
+                                                                                                        "type": "string"
+                                                                                                    }
+                                                                                                },
+                                                                                                "type": "object",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "engagement": {
+                                                                                                "description": "Public engagement totals attached to the post. Populated whenever the provider has data for the entity.",
+                                                                                                "properties": {
+                                                                                                    "breakdown": {
+                                                                                                        "description": "Reaction counts on the post grouped by LinkedIn reaction type.",
+                                                                                                        "items": {
+                                                                                                            "properties": {
+                                                                                                                "count": {
+                                                                                                                    "description": "Number of reactions of this type.",
+                                                                                                                    "minimum": 0,
+                                                                                                                    "type": "integer"
+                                                                                                                },
+                                                                                                                "type": {
+                                                                                                                    "description": "LinkedIn reaction type.",
+                                                                                                                    "type": "string"
+                                                                                                                }
+                                                                                                            },
+                                                                                                            "required": [
+                                                                                                                "type",
+                                                                                                                "count"
+                                                                                                            ],
+                                                                                                            "type": "object"
+                                                                                                        },
+                                                                                                        "type": "array"
+                                                                                                    },
+                                                                                                    "comments": {
+                                                                                                        "description": "Total comment count.",
+                                                                                                        "minimum": 0,
+                                                                                                        "type": "integer"
+                                                                                                    },
+                                                                                                    "reactions": {
+                                                                                                        "description": "Total reaction count.",
+                                                                                                        "minimum": 0,
+                                                                                                        "type": "integer"
+                                                                                                    },
+                                                                                                    "reposts": {
+                                                                                                        "description": "Total repost or share count.",
+                                                                                                        "minimum": 0,
+                                                                                                        "type": "integer"
+                                                                                                    }
+                                                                                                },
+                                                                                                "type": "object",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "id": {
+                                                                                                "description": "LinkedIn activity identifier of the post that was reacted to. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "repostId": {
+                                                                                                "description": "Unique identifier of the post this one reshares, when it is a reshare.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "text": {
+                                                                                                "description": "Text content of the post. Empty string when the post carries no commentary of its own, such as a bare reshare or an image-only post. Populated whenever the provider has data for the entity.",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            },
+                                                                                            "url": {
+                                                                                                "description": "Canonical LinkedIn URL of the post. Populated whenever the provider has data for the entity.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string",
+                                                                                                "x-anyapi-must-populate": true
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Canonical LinkedIn feed URL of the reaction event. Use post.url for the post itself. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "id",
+                                                                                    "action"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "items"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether reactions were found for the profile.",
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "LinkedIn profile reactions output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown SKU, or the upstream had no matching resource."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "LinkedIn Profile Reactions",
+                "tags": [
+                    "linkedin"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/linkedin/profile-reactions"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.005000",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.005000",
+                                "currency": "USD",
+                                "minimumUsd": "0.001000",
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.005000",
+                                "currency": "USD",
+                                "minimumUsd": null,
+                                "mode": "fixed",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
