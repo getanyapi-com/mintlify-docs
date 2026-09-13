@@ -135664,7 +135664,7 @@
         },
         "/v1/run/reddit.post_comments": {
             "post": {
-                "description": "List the top-level comments on a Reddit post by URL (author, body, score, timestamp).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Post Comments pricing and uptime](https://getanyapi.com/api/reddit/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "List the top-level comments on a Reddit post by URL (author, body, score, timestamp).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Reddit Post Comments pricing and uptime](https://getanyapi.com/api/reddit/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_post_comments",
                 "parameters": [
                     {
@@ -136112,10 +136112,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.001200",
                         "currency": "USD",
-                        "max": "0.001200",
-                        "min": "0.000900",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -136155,11 +136154,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001200",
                                 "currency": "USD",
-                                "max": "0.001200",
-                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -136188,11 +136186,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001200",
                                 "currency": "USD",
-                                "max": "0.001200",
-                                "min": "0.000900",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -195848,7 +195845,7 @@
         },
         "/v1/run/twitter.user_tweets": {
             "post": {
-                "description": "Get up to the requested limit of tweets and replies authored by an X (Twitter) account, with engagement, views, language, and cursor pagination where available.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Tweets and Replies pricing and uptime](https://getanyapi.com/api/x-twitter/user-tweets) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
+                "description": "Get up to the requested limit of tweets and replies authored by an X (Twitter) account, with engagement, views, language, and cursor pagination where available.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Tweets and Replies pricing and uptime](https://getanyapi.com/api/x-twitter/user-tweets) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
                 "operationId": "twitter_user_tweets",
                 "parameters": [
                     {
@@ -195933,8 +195930,8 @@
                                     },
                                     "limit": {
                                         "default": 20,
-                                        "description": "Maximum number of authored tweets and replies to return in the current bulk call (1-1000). The provider may return fewer results.",
-                                        "maximum": 1000,
+                                        "description": "Maximum number of authored tweets and replies to return in THIS page (1-100). Sources return fewer - most cap at 20 - so read `nextCursor` and pass it back as `cursor` to walk further rather than asking for one large page.",
+                                        "maximum": 100,
                                         "minimum": 1,
                                         "type": "integer"
                                     },
@@ -196361,7 +196358,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.220000",
+                        "max": "0.010100",
                         "min": "0.000500",
                         "mode": "dynamic"
                     },
@@ -196404,7 +196401,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.220000",
+                                "max": "0.010100",
                                 "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -196437,7 +196434,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.220000",
+                                "max": "0.010100",
                                 "min": "0.000500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
