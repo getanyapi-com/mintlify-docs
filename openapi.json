@@ -67949,7 +67949,7 @@
         },
         "/v1/run/google.search": {
             "post": {
-                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
+                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
                 "operationId": "google_search",
                 "parameters": [
                     {
@@ -68400,9 +68400,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000900",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.000900",
+                        "min": "0.000500",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -68442,10 +68443,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001000",
                                 "currency": "USD",
+                                "max": "0.001000",
+                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -68474,10 +68476,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000900",
                                 "currency": "USD",
+                                "max": "0.000900",
+                                "min": "0.000500",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
                             },
                             "protocol": {
@@ -132895,6 +132898,14 @@
                                                                             "description": "Preview image for the post, when Reddit generated one. Reddit signs this URL and it is time-limited, so fetch it promptly rather than storing it; the query string carries the signature and must be kept intact. Empty when the post has no preview image.",
                                                                             "type": "string"
                                                                         },
+                                                                        "isArchived": {
+                                                                            "description": "True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                            "type": "boolean"
+                                                                        },
+                                                                        "isLocked": {
+                                                                            "description": "True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                            "type": "boolean"
+                                                                        },
                                                                         "isNsfw": {
                                                                             "description": "True when the post is marked NSFW (over 18).",
                                                                             "type": "boolean"
@@ -133276,7 +133287,7 @@
         },
         "/v1/run/reddit.post_comments": {
             "post": {
-                "description": "List the top-level comments on a Reddit post by URL (author, body, score, timestamp).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Post Comments pricing and uptime](https://getanyapi.com/api/reddit/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "List the top-level comments on a Reddit post by URL (author, body, score, timestamp).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Post Comments pricing and uptime](https://getanyapi.com/api/reddit/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_post_comments",
                 "parameters": [
                     {
@@ -133725,7 +133736,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.018000",
+                        "max": "0.001200",
                         "min": "0.000900",
                         "mode": "dynamic"
                     },
@@ -133768,7 +133779,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.018000",
+                                "max": "0.001200",
                                 "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -133801,7 +133812,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.018000",
+                                "max": "0.001200",
                                 "min": "0.000900",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -134866,7 +134877,7 @@
         },
         "/v1/run/reddit.search": {
             "post": {
-                "description": "Search Reddit posts across all subreddits by query.\n\n**Price:** \\$0.45 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Search pricing and uptime](https://getanyapi.com/api/reddit/search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "Search Reddit posts across all subreddits by query.\n\n**Price:** \\$0.45 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Search pricing and uptime](https://getanyapi.com/api/reddit/search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_search",
                 "parameters": [
                     {
@@ -135047,6 +135058,14 @@
                                                                                         "description": "Reddit post ID (base-36, without the t3_ prefix). Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "isArchived": {
+                                                                                        "description": "True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
+                                                                                    },
+                                                                                    "isLocked": {
+                                                                                        "description": "True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
                                                                                     },
                                                                                     "media": {
                                                                                         "description": "Photo, video, and GIF attachments on the post. Empty when the post has none.",
@@ -135362,7 +135381,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.003600",
+                        "max": "0.001200",
                         "min": "0.000450",
                         "mode": "dynamic"
                     },
@@ -135405,7 +135424,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.003600",
+                                "max": "0.001200",
                                 "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -135438,7 +135457,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.003600",
+                                "max": "0.001200",
                                 "min": "0.000450",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -135467,7 +135486,7 @@
         },
         "/v1/run/reddit.subreddit_details": {
             "post": {
-                "description": "Fetch a subreddit's metadata (weekly active users, description, and category).\n\n**Price:** \\$0.45 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Subreddit Details pricing and uptime](https://getanyapi.com/api/reddit/subreddit-details) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "Fetch a subreddit's metadata (weekly active users, description, and category).\n\n**Price:** \\$0.45 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Subreddit Details pricing and uptime](https://getanyapi.com/api/reddit/subreddit-details) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_subreddit_details",
                 "parameters": [
                     {
@@ -135866,7 +135885,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.003600",
+                        "max": "0.001200",
                         "min": "0.000450",
                         "mode": "dynamic"
                     },
@@ -135909,7 +135928,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.003600",
+                                "max": "0.001200",
                                 "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -135942,7 +135961,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.003600",
+                                "max": "0.001200",
                                 "min": "0.000450",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -136164,6 +136183,14 @@
                                                                                         "description": "Reddit post ID (base-36, without the t3_ prefix). Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "isArchived": {
+                                                                                        "description": "True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
+                                                                                    },
+                                                                                    "isLocked": {
+                                                                                        "description": "True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
                                                                                     },
                                                                                     "numComments": {
                                                                                         "description": "Total number of comments on the post.",
@@ -136551,7 +136578,7 @@
         },
         "/v1/run/reddit.subreddit_search": {
             "post": {
-                "description": "Search posts within a single subreddit by query, sort, and timeframe.\n\n**Price:** \\$0.45 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Subreddit Search pricing and uptime](https://getanyapi.com/api/reddit/subreddit-search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "Search posts within a single subreddit by query, sort, and timeframe.\n\n**Price:** \\$0.45 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Subreddit Search pricing and uptime](https://getanyapi.com/api/reddit/subreddit-search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_subreddit_search",
                 "parameters": [
                     {
@@ -136723,6 +136750,14 @@
                                                                                         "description": "Reddit post ID (base-36, without the t3_ prefix). Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "isArchived": {
+                                                                                        "description": "True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
+                                                                                    },
+                                                                                    "isLocked": {
+                                                                                        "description": "True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
                                                                                     },
                                                                                     "nsfw": {
                                                                                         "description": "Whether the post is marked NSFW (over 18).",
@@ -137010,7 +137045,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.003600",
+                        "max": "0.001200",
                         "min": "0.000450",
                         "mode": "dynamic"
                     },
@@ -137053,7 +137088,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.003600",
+                                "max": "0.001200",
                                 "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -137086,7 +137121,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.003600",
+                                "max": "0.001200",
                                 "min": "0.000450",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -137273,6 +137308,14 @@
                                                                                         "description": "Reddit post ID (base-36, without the t3_ prefix). Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "isArchived": {
+                                                                                        "description": "True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
+                                                                                    },
+                                                                                    "isLocked": {
+                                                                                        "description": "True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
                                                                                     },
                                                                                     "numComments": {
                                                                                         "description": "Total number of comments on the post.",
@@ -138380,6 +138423,14 @@
                                                                                         "description": "Reddit post ID (base-36, without the t3_ prefix). Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "isArchived": {
+                                                                                        "description": "True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
+                                                                                    },
+                                                                                    "isLocked": {
+                                                                                        "description": "True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false.",
+                                                                                        "type": "boolean"
                                                                                     },
                                                                                     "media": {
                                                                                         "description": "Photo, video, and GIF attachments on the post. Empty when the post has none.",
