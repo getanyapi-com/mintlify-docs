@@ -6018,6 +6018,24 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `offersCount` or `categoryName`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a product that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "categoryName",
+                                                "currency",
+                                                "image",
+                                                "offersCount",
+                                                "price",
+                                                "rank",
+                                                "rating",
+                                                "reviewsCount"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "url": {
                                         "description": "Amazon Best Sellers category URL (e.g. https://www.amazon.com/Best-Sellers-Electronics/zgbs/electronics).",
                                         "type": "string"
@@ -6079,8 +6097,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "categoryName": {
-                                                                                        "description": "Best Sellers category name the product ranks in.",
-                                                                                        "type": "string"
+                                                                                        "description": "Best Sellers category name the product ranks in, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "currency": {
                                                                                         "description": "Price currency symbol or code, e.g. \"$\".",
@@ -6091,8 +6112,11 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "offersCount": {
-                                                                                        "description": "Number of available offers; 0 when unknown.",
-                                                                                        "type": "integer"
+                                                                                        "description": "Number of available offers, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "price": {
                                                                                         "description": "Listed price; 0 when no offer is available.",
@@ -7740,6 +7764,25 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `offersCount`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a product that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "currency",
+                                                "image",
+                                                "isSponsored",
+                                                "listPrice",
+                                                "offersCount",
+                                                "position",
+                                                "price",
+                                                "rating",
+                                                "reviewsCount"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "url": {
                                         "description": "Amazon search or category URL to pull results from (e.g. https://www.amazon.com/s?k=gaming+mouse).",
                                         "type": "string"
@@ -7813,12 +7856,18 @@
                                                                                         "type": "boolean"
                                                                                     },
                                                                                     "listPrice": {
-                                                                                        "description": "Pre-discount list price when on sale; 0 when not discounted.",
-                                                                                        "type": "number"
+                                                                                        "description": "Pre-discount list price when on sale, 0 when not discounted, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "offersCount": {
-                                                                                        "description": "Number of available offers; 0 when unknown.",
-                                                                                        "type": "integer"
+                                                                                        "description": "Number of available offers, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "position": {
                                                                                         "description": "1-based position of the result on the search page.",
@@ -107684,7 +107733,7 @@
                                                                             "type": "string"
                                                                         },
                                                                         "articles": {
-                                                                            "description": "The profile's published articles.",
+                                                                            "description": "The profile's published articles, or null when the serving source does not publish them.",
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "createdUtc": {
@@ -107705,7 +107754,10 @@
                                                                                 ],
                                                                                 "type": "object"
                                                                             },
-                                                                            "type": "array"
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "avatarUrl": {
                                                                             "description": "URL of the profile avatar image.",
@@ -107781,7 +107833,7 @@
                                                                             "type": "string"
                                                                         },
                                                                         "recentPosts": {
-                                                                            "description": "The profile's recent posts.",
+                                                                            "description": "The profile's recent posts, or null when the serving source does not publish them.",
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "activityType": {
@@ -107810,7 +107862,10 @@
                                                                                 ],
                                                                                 "type": "object"
                                                                             },
-                                                                            "type": "array"
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -140852,8 +140907,11 @@
                                                                                                     "type": "integer"
                                                                                                 },
                                                                                                 "type": {
-                                                                                                    "description": "One of photo, video, or gif.",
-                                                                                                    "type": "string"
+                                                                                                    "description": "One of photo, video, or gif, or null when the serving source wraps a thumbnail it cannot classify.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
                                                                                                 },
                                                                                                 "url": {
                                                                                                     "description": "Image URL. For a video or GIF this is the poster/thumbnail frame.",
@@ -195260,7 +195318,7 @@
                                         "type": "integer"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isReply`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a tweet that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isPinned` or `isReply`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a tweet that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
                                         "items": {
                                             "enum": [
                                                 "bookmarks",
@@ -195356,8 +195414,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "isPinned": {
-                                                                                        "description": "Whether X marks the post as pinned on the profile.",
-                                                                                        "type": "boolean"
+                                                                                        "description": "Whether X marks the post as pinned on the profile, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "isReply": {
                                                                                         "description": "Whether X marks the record as a reply. Certified Posts-tab captures use this for self-thread continuations.",
@@ -195883,7 +195944,7 @@
                                         "type": "integer"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `media`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isPinned` or `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
                                         "items": {
                                             "enum": [
                                                 "bookmarks",
@@ -195981,7 +196042,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "isPinned": {
-                                                                                        "type": "boolean"
+                                                                                        "description": "Whether X marks the post as pinned on the profile, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "isReply": {
                                                                                         "type": "boolean"
@@ -213561,6 +213626,23 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isAiGenerated`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a transcript that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "channel",
+                                                "durationSeconds",
+                                                "endSeconds",
+                                                "isAiGenerated",
+                                                "startSeconds",
+                                                "text",
+                                                "title"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "url": {
                                         "description": "YouTube video or Short URL (e.g. \"https://www.youtube.com/watch?v=dQw4w9WgXcQ\" or \"https://www.youtube.com/shorts/Fir1x9cw2vg\").",
                                         "minLength": 1,
@@ -213621,8 +213703,11 @@
                                                                             "type": "number"
                                                                         },
                                                                         "isAiGenerated": {
-                                                                            "description": "True when the words were recognized from the audio by the serving lane rather than read from any YouTube caption track.",
-                                                                            "type": "boolean"
+                                                                            "description": "True when the words were recognized from the audio by the serving lane rather than read from any YouTube caption track, or null when the serving source does not say.",
+                                                                            "type": [
+                                                                                "boolean",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "isAutoGenerated": {
                                                                             "description": "True when YouTube generated the caption track by speech recognition rather than the creator supplying it. Automatic captions carry recognition errors, especially on names and jargon. Populated whenever the provider has data for the entity.",
@@ -217514,6 +217599,33 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `yearBuilt`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a listing that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "baths",
+                                                "beds",
+                                                "city",
+                                                "currency",
+                                                "daysOnZillow",
+                                                "latitude",
+                                                "livingArea",
+                                                "longitude",
+                                                "lotSize",
+                                                "price",
+                                                "propertyType",
+                                                "rentZestimate",
+                                                "state",
+                                                "status",
+                                                "yearBuilt",
+                                                "zestimate",
+                                                "zipcode"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "showOnlyPriceReductions": {
                                         "description": "Only show listings with a price reduction. Buy searches only; ignored for rentals (e.g. true).",
                                         "type": "boolean"
@@ -217650,7 +217762,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "yearBuilt": {
-                                                                                        "type": "integer"
+                                                                                        "description": "Year the home was built, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "zestimate": {
                                                                                         "description": "Zillow estimated market value.",
