@@ -178165,7 +178165,7 @@
         },
         "/v1/run/tiktok.video_transcript_full": {
             "post": {
-                "description": "Transcribe the spoken audio of a TikTok video with AnyAPI's own speech-to-text: timed sentence-level segments, speaker labels, detected language, and optional per-word timings, for videos TikTok publishes no caption track for and for videos whose caption track gets the words wrong. AnyAPI downloads the video and runs the audio through MAI-Transcribe-2 rather than reading anything TikTok wrote, which is why it handles non-English speech and hears words the native captions mishear. The answer also carries the video's id, URL, creator handle, and cover image. If you only want whatever TikTok itself published and you want it for a tenth of the price, tiktok.video_transcript is that.\n\n**Price:** billed per audio minute - \\$1.50 per 1,000 requests base + \\$6.00 per 1,000 audio minutes, capped at \\$95.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Video Transcript (AnyAPI speech to text) pricing and uptime](https://getanyapi.com/api/tiktok/video-transcript-full) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Transcribe the spoken audio of a TikTok video with AnyAPI's own speech-to-text: timed sentence-level segments, speaker labels, detected language, and optional per-word timings, for videos TikTok publishes no caption track for and for videos whose caption track gets the words wrong. AnyAPI downloads the video and runs the audio through MAI-Transcribe-2 rather than reading anything TikTok wrote, which is why it handles non-English speech and hears words the native captions mishear. The answer also carries the video's id, URL, creator handle, and cover image. Turn on hostVideo to also get the MP4 on a hosted link that plays without TikTok's signed, short-lived CDN URL expiring on you. If you only want whatever TikTok itself published and you want it for a tenth of the price, tiktok.video_transcript is that.\n\n**Price:** billed per audio minute - \\$1.50 per 1,000 requests base + \\$6.00 per 1,000 audio minutes, capped at \\$95.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Video Transcript (AnyAPI speech to text) pricing and uptime](https://getanyapi.com/api/tiktok/video-transcript-full) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_video_transcript_full",
                 "parameters": [
                     {
@@ -178238,6 +178238,11 @@
                                     "url": "https://www.tiktok.com/@thatdudecancook/video/7649086431641521421"
                                 },
                                 "properties": {
+                                    "hostVideo": {
+                                        "default": false,
+                                        "description": "Also store the video and return a hosted MP4 link that plays without TikTok's signed CDN URL. Charged as an extra on top of the transcript.",
+                                        "type": "boolean"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
@@ -178298,10 +178303,25 @@
                                                                 },
                                                                 {
                                                                     "properties": {
+                                                                        "bytes": {
+                                                                            "description": "Size of the hosted MP4 in bytes.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
                                                                         "durationSeconds": {
                                                                             "description": "Video duration in seconds.",
                                                                             "minimum": 0,
                                                                             "type": "number"
+                                                                        },
+                                                                        "expiresUtc": {
+                                                                            "description": "When the hosted link stops working. UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                            "type": "number"
+                                                                        },
+                                                                        "hostedUrl": {
+                                                                            "description": "Hosted MP4 link, returned only when the request set hostVideo. It plays without TikTok's signed CDN URL and without any cookie, and it stops working at expiresUtc.",
+                                                                            "format": "uri",
+                                                                            "type": "string",
+                                                                            "x-anyapi-domain": "media.getanyapi.com"
                                                                         },
                                                                         "id": {
                                                                             "description": "TikTok video id.",
@@ -178379,7 +178399,11 @@
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "source": {
-                                                                            "description": "How the text was produced. Always \"audio_asr\" on this endpoint: the words come from speech recognition over the audio, not from a caption track TikTok published. For TikTok's own captions, use tiktok.video_transcript. Populated whenever the provider has data for the entity.",
+                                                                            "description": "How the text was produced. \"audio_asr\" means the words come from speech recognition over the video's audio, never from a caption track TikTok published - for TikTok's own captions, use tiktok.video_transcript. \"transcript_unavailable\" means recognition did not complete for this video, so the transcript is empty for that reason rather than because the video has no speech in it; the rest of the record is still what we resolved, and no audio time is charged. Populated whenever the provider has data for the entity.",
+                                                                            "enum": [
+                                                                                "audio_asr",
+                                                                                "transcript_unavailable"
+                                                                            ],
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
                                                                         },
@@ -178631,7 +178655,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.095000",
+                        "max": "0.099500",
                         "min": "0.001500",
                         "mode": "dynamic"
                     },
@@ -178674,7 +178698,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.095000",
+                                "max": "0.099500",
                                 "min": "0.001500",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -178707,7 +178731,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.095000",
+                                "max": "0.099500",
                                 "min": "0.001500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
