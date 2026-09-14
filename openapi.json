@@ -82082,7 +82082,7 @@
         },
         "/v1/run/instagram.post": {
             "post": {
-                "description": "Fetch a single Instagram post or reel by URL (media URLs, like count, owner, type) as normalized JSON.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post pricing and uptime](https://getanyapi.com/api/instagram/post) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Fetch a single Instagram post or reel by URL (media URLs, like count, owner, type) as normalized JSON.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post pricing and uptime](https://getanyapi.com/api/instagram/post) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_post",
                 "parameters": [
                     {
@@ -82499,7 +82499,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.001500",
-                        "min": "0.001200",
+                        "min": "0.000500",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -82542,7 +82542,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.001500",
-                                "min": "0.001200",
+                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -82575,7 +82575,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.001500",
-                                "min": "0.001200",
+                                "min": "0.000500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -84716,7 +84716,7 @@
         },
         "/v1/run/instagram.reel_transcript": {
             "post": {
-                "description": "Turn any public Instagram reel or video post into a full speech transcript, with optional word-level timestamps.\n\n**Price:** billed per result - \\$5.50 per 1,000 requests base + \\$25.30 per 1,000 results, capped at \\$30.80 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Reel Transcript pricing and uptime](https://getanyapi.com/api/instagram/reel-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Download any public Instagram reel or video post to a hosted MP4 link, with an optional full speech transcript, speaker labels, and word-level timestamps. Transcription runs on MAI-Transcribe-2, chosen for its accuracy and its speaker labels. If you only want the text and not the video file, instagram.media_transcript is the cheaper transcript-only option.\n\n**Price:** billed per audio minute - \\$5.00 per 1,000 requests base + \\$6.00 per 1,000 audio minutes, capped at \\$50.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Reel Transcript pricing and uptime](https://getanyapi.com/api/instagram/reel-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_reel_transcript",
                 "parameters": [
                     {
@@ -84781,23 +84781,30 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "url": "https://www.instagram.com/reel/DWzrfE2kaY8/",
+                                "includeTranscript": true,
+                                "url": "https://www.instagram.com/reel/CfY6jCIgH-P/",
                                 "wordTimestamps": false
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "url": "https://www.instagram.com/reel/DWzrfE2kaY8/",
+                                    "includeTranscript": true,
+                                    "url": "https://www.instagram.com/reel/CfY6jCIgH-P/",
                                     "wordTimestamps": false
                                 },
                                 "properties": {
+                                    "includeTranscript": {
+                                        "default": true,
+                                        "description": "Set false to download and host the video only, without transcribing its speech (e.g. false).",
+                                        "type": "boolean"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
                                     },
                                     "url": {
-                                        "description": "The URL of a public Instagram reel or video post with spoken audio (e.g. https://www.instagram.com/reel/C8yKXdRxKqK/).",
+                                        "description": "The URL of a public Instagram reel or video post (e.g. https://www.instagram.com/reel/C8yKXdRxKqK/), or an Instagram CDN media URL you already hold.",
                                         "type": "string"
                                     },
                                     "wordTimestamps": {
@@ -84852,49 +84859,58 @@
                                                                     "additionalProperties": false,
                                                                     "properties": {
                                                                         "items": {
-                                                                            "description": "Transcript record for the requested reel (one item), with the full transcript text, timed segments, and source video metadata. Populated whenever the provider has data for the entity.",
+                                                                            "description": "Record for the requested reel (one item), with its hosted video link, the full transcript text, timed segments, and source video metadata. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
-                                                                                    "caption": {
-                                                                                        "description": "The reel's caption text. Empty when the reel has no caption.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "commentCount": {
-                                                                                        "description": "Number of comments on the reel.",
+                                                                                    "bytes": {
+                                                                                        "description": "Size of the downloaded MP4 in bytes.",
                                                                                         "type": "integer"
                                                                                     },
-                                                                                    "createdUtc": {
-                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                    "durationSeconds": {
+                                                                                        "description": "Video duration in seconds. Absent when there is no transcript, which is what measures it.",
                                                                                         "type": "number"
                                                                                     },
-                                                                                    "durationSeconds": {
-                                                                                        "description": "Video duration in seconds.",
+                                                                                    "expiresUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. After this moment the hosted MP4 is deleted.",
                                                                                         "type": "number"
+                                                                                    },
+                                                                                    "hostedUrl": {
+                                                                                        "description": "A direct link to the downloaded MP4, hosted by AnyAPI and playable without an Instagram session.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
                                                                                     },
                                                                                     "id": {
-                                                                                        "description": "The reel's numeric Instagram media ID, as a string. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "The reel's numeric Instagram media ID, as a string. Empty when the request supplied a CDN media URL, which carries no post record. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "language": {
-                                                                                        "description": "Detected spoken language (ISO 639-1 code, e.g. \"en\"). Empty when the upstream omits it.",
+                                                                                        "description": "Detected spoken language (ISO 639-1 code, e.g. \"en\"). Absent when there is no transcript.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "likeCount": {
-                                                                                        "description": "Number of likes on the reel.",
+                                                                                        "description": "Number of likes on the reel. Absent when the lane that served the lookup does not carry a like count.",
                                                                                         "type": "integer"
                                                                                     },
+                                                                                    "mediaType": {
+                                                                                        "description": "What kind of media this is, as Instagram labels it (for example a video or an image post).",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "ownerUsername": {
-                                                                                        "description": "Username of the reel's owner, without the @ prefix. Empty when the upstream omits it.",
+                                                                                        "description": "Username of the reel's owner, without the @ prefix. Empty when the request supplied a CDN media URL.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "segments": {
-                                                                                        "description": "Time-aligned transcript segments, each with its text and start/end offsets in seconds.",
+                                                                                        "description": "Time-aligned transcript segments, each with its text, speaker label, and start/end offsets in seconds. Empty when includeTranscript was false.",
                                                                                         "items": {
                                                                                             "properties": {
                                                                                                 "end": {
                                                                                                     "description": "Segment end offset in seconds from the start of the video.",
                                                                                                     "type": "number"
+                                                                                                },
+                                                                                                "speaker": {
+                                                                                                    "description": "Which speaker said this segment, as a stable label within this transcript (e.g. \"0\", \"1\").",
+                                                                                                    "type": "string"
                                                                                                 },
                                                                                                 "start": {
                                                                                                     "description": "Segment start offset in seconds from the start of the video.",
@@ -84903,24 +84919,53 @@
                                                                                                 "text": {
                                                                                                     "description": "The segment's transcribed text.",
                                                                                                     "type": "string"
+                                                                                                },
+                                                                                                "words": {
+                                                                                                    "description": "Every word in the segment with its own timing. Present only when wordTimestamps was true.",
+                                                                                                    "items": {
+                                                                                                        "properties": {
+                                                                                                            "end": {
+                                                                                                                "description": "Word end offset in seconds from the start of the video.",
+                                                                                                                "type": "number"
+                                                                                                            },
+                                                                                                            "start": {
+                                                                                                                "description": "Word start offset in seconds from the start of the video.",
+                                                                                                                "type": "number"
+                                                                                                            },
+                                                                                                            "text": {
+                                                                                                                "description": "The word as spoken.",
+                                                                                                                "type": "string"
+                                                                                                            }
+                                                                                                        },
+                                                                                                        "type": "object"
+                                                                                                    },
+                                                                                                    "type": "array"
                                                                                                 }
                                                                                             },
                                                                                             "type": "object"
                                                                                         },
                                                                                         "type": "array"
                                                                                     },
+                                                                                    "shortcode": {
+                                                                                        "description": "The reel's short code, the part of its instagram.com URL after /reel/. Empty when the request supplied a CDN media URL.",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "text": {
-                                                                                        "description": "The full speech transcript. Empty when the reel has no detectable spoken audio. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "The full speech transcript. Empty when the reel has no detectable spoken audio, and when includeTranscript was false. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "thumbnailUrl": {
+                                                                                        "description": "A link to the reel's cover image on Instagram. This link is signed by Instagram and stops working after a short time.",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "url": {
-                                                                                        "description": "Canonical URL of the reel, with tracking query params stripped. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "The reel URL the request asked for, returned as sent. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "viewCount": {
-                                                                                        "description": "Number of video views.",
+                                                                                        "description": "Number of video views. Absent when the lane that served the lookup does not carry a view count.",
                                                                                         "type": "integer"
                                                                                     }
                                                                                 },
@@ -84943,7 +84988,7 @@
                                                             ]
                                                         },
                                                         "found": {
-                                                            "description": "Whether the reel was found and transcribed.",
+                                                            "description": "Whether the reel was found and downloaded.",
                                                             "type": "boolean"
                                                         }
                                                     },
@@ -85167,8 +85212,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.030800",
-                        "min": "0.005500",
+                        "max": "0.050000",
+                        "min": "0.005000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -85210,8 +85255,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.030800",
-                                "min": "0.005500",
+                                "max": "0.050000",
+                                "min": "0.005000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -85243,8 +85288,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.030800",
-                                "min": "0.005500",
+                                "max": "0.050000",
+                                "min": "0.005000",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
