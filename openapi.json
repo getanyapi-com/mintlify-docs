@@ -618,6 +618,37 @@
             },
             "DiscoveryOffer": {
                 "properties": {
+                    "addons": {
+                        "description": "Optional extras this offer sells, absent when it sells none. Each is switched on by a field in the request, so its price is known before the call and never moves. maxUsd bounds the metered charge alone: an extra the caller asked for is billed ON TOP of it, so the most one request can cost is maxUsd plus the extras it switched on.",
+                        "items": {
+                            "properties": {
+                                "field": {
+                                    "description": "The input field that switches it on.",
+                                    "type": "string"
+                                },
+                                "id": {
+                                    "description": "Stable identifier for the extra.",
+                                    "type": "string"
+                                },
+                                "label": {
+                                    "description": "What the money buys, in the customer's words.",
+                                    "type": "string"
+                                },
+                                "usd": {
+                                    "description": "USD added to the request when that field is set.",
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "label",
+                                "field",
+                                "usd"
+                            ],
+                            "type": "object"
+                        },
+                        "type": "array"
+                    },
                     "baseUsd": {
                         "description": "Linear offers only: USD charged for the call before per-unit billing.",
                         "type": "number"
@@ -662,7 +693,7 @@
                         "type": "number"
                     },
                     "failoverMaxUsd": {
-                        "description": "The greatest customer-price maximum across those same sources, in USD.",
+                        "description": "The greatest customer-price maximum across those same sources, in USD, including every optional extra a source sells.",
                         "type": "number"
                     },
                     "from": {
@@ -82067,7 +82098,7 @@
         },
         "/v1/run/instagram.post": {
             "post": {
-                "description": "Fetch a single Instagram post or reel by URL (media URLs, like count, owner, type) as normalized JSON.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post pricing and uptime](https://getanyapi.com/api/instagram/post) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Fetch a single Instagram post or reel by URL (media URLs, like count, owner, type) as normalized JSON. Turn on hostVideo to also get the post's video on a hosted MP4 link that plays without an Instagram session, charged as an extra on top of the price. If you want the spoken words as well, instagram.reel_transcript transcribes the same reel.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post pricing and uptime](https://getanyapi.com/api/instagram/post) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_post",
                 "parameters": [
                     {
@@ -82140,6 +82171,11 @@
                                     "url": "https://www.instagram.com/reel/DWzrfE2kaY8/"
                                 },
                                 "properties": {
+                                    "hostVideo": {
+                                        "default": false,
+                                        "description": "Set true to also get the post's video on a hosted MP4 link that plays without an Instagram session. The file is downloaded and stored for you, and the response adds `hostedUrl`, `expiresUtc` and `bytes`. It is charged as an extra on top of the price, and it never changes which source serves you: every source offers it at the same price. A post with no video, or a post that does not exist, is refused with no charge rather than billed for a file that cannot exist. Omit it and nothing is downloaded, nothing is stored, and nothing extra is charged.",
+                                        "type": "boolean"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
@@ -82215,10 +82251,23 @@
                                                                 },
                                                                 {
                                                                     "properties": {
+                                                                        "bytes": {
+                                                                            "description": "Size of the hosted MP4 in bytes. Present only when the request set `hostVideo` to true.",
+                                                                            "type": "integer"
+                                                                        },
                                                                         "displayUrl": {
                                                                             "description": "Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "expiresUtc": {
+                                                                            "description": "When `hostedUrl` stops working, as a UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Present only when the request set `hostVideo` to true.",
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "hostedUrl": {
+                                                                            "description": "AnyAPI-hosted MP4 of this post's video, playable without an Instagram session. Present only when the request set `hostVideo` to true.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
                                                                         },
                                                                         "id": {
                                                                             "description": "Populated whenever the provider has data for the entity.",
@@ -82483,7 +82532,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.001500",
+                        "max": "0.005000",
                         "min": "0.000500",
                         "mode": "dynamic"
                     },
@@ -82526,7 +82575,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.001500",
+                                "max": "0.005000",
                                 "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -82559,7 +82608,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.001500",
+                                "max": "0.005000",
                                 "min": "0.000500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -83627,7 +83676,7 @@
         },
         "/v1/run/instagram.profile": {
             "post": {
-                "description": "Fetch an Instagram account's public profile (followers, posts, bio, verification) by handle.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Profile pricing and uptime](https://getanyapi.com/api/instagram/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Fetch an Instagram account's public profile (followers, posts, bio, verification) by handle.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Profile pricing and uptime](https://getanyapi.com/api/instagram/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_profile",
                 "parameters": [
                     {
@@ -84081,7 +84130,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.002400",
-                        "min": "0.000500",
+                        "min": "0.001200",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -84124,7 +84173,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.002400",
-                                "min": "0.001000",
+                                "min": "0.001200",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -84157,7 +84206,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.002400",
-                                "min": "0.000500",
+                                "min": "0.001200",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
@@ -84701,7 +84750,7 @@
         },
         "/v1/run/instagram.reel_transcript": {
             "post": {
-                "description": "Download any public Instagram reel or video post to a hosted MP4 link, with an optional full speech transcript, speaker labels, and word-level timestamps. Transcription runs on MAI-Transcribe-2, chosen for its accuracy and its speaker labels. If you only want the text and not the video file, instagram.media_transcript is the cheaper transcript-only option.\n\n**Price:** billed per audio minute - \\$5.00 per 1,000 requests base + \\$6.00 per 1,000 audio minutes, capped at \\$50.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Reel Transcript pricing and uptime](https://getanyapi.com/api/instagram/reel-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Transcribe any public Instagram reel or video post: the full speech transcript, speaker labels, and word-level timestamps, from a reel URL or an Instagram CDN media URL you already hold. Transcription runs on MAI-Transcribe-2, chosen for its accuracy and its speaker labels. Turn on hostVideo to also get the MP4 on a hosted link that plays without an Instagram session. If you only want the text, instagram.media_transcript is the cheaper transcript-only option; if you only want the file, instagram.post is where you go.\n\n**Price:** billed per audio minute - \\$1.50 per 1,000 requests base + \\$6.00 per 1,000 audio minutes, capped at \\$95.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Reel Transcript pricing and uptime](https://getanyapi.com/api/instagram/reel-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_reel_transcript",
                 "parameters": [
                     {
@@ -84766,21 +84815,21 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "includeTranscript": true,
+                                "hostVideo": true,
                                 "url": "https://www.instagram.com/reel/CfY6jCIgH-P/",
                                 "wordTimestamps": false
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "includeTranscript": true,
+                                    "hostVideo": true,
                                     "url": "https://www.instagram.com/reel/CfY6jCIgH-P/",
                                     "wordTimestamps": false
                                 },
                                 "properties": {
-                                    "includeTranscript": {
-                                        "default": true,
-                                        "description": "Set false to download and host the video only, without transcribing its speech (e.g. false).",
+                                    "hostVideo": {
+                                        "default": false,
+                                        "description": "Set true to also get the reel's MP4 on a hosted link you can play without an Instagram session. Charged as an extra on top of the transcript (e.g. true).",
                                         "type": "boolean"
                                     },
                                     "preferLatencyUnderMs": {
@@ -84844,11 +84893,11 @@
                                                                     "additionalProperties": false,
                                                                     "properties": {
                                                                         "items": {
-                                                                            "description": "Record for the requested reel (one item), with its hosted video link, the full transcript text, timed segments, and source video metadata. Populated whenever the provider has data for the entity.",
+                                                                            "description": "Record for the requested reel (one item), with the full transcript text, timed segments, source video metadata, and the hosted video link when hostVideo was asked for. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "bytes": {
-                                                                                        "description": "Size of the downloaded MP4 in bytes.",
+                                                                                        "description": "Size of the hosted MP4 in bytes. Present only when hostVideo was true.",
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "durationSeconds": {
@@ -84856,11 +84905,11 @@
                                                                                         "type": "number"
                                                                                     },
                                                                                     "expiresUtc": {
-                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. After this moment the hosted MP4 is deleted.",
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. After this moment the hosted MP4 is deleted. Present only when hostVideo was true.",
                                                                                         "type": "number"
                                                                                     },
                                                                                     "hostedUrl": {
-                                                                                        "description": "A direct link to the downloaded MP4, hosted by AnyAPI and playable without an Instagram session.",
+                                                                                        "description": "A direct link to the downloaded MP4, hosted by AnyAPI and playable without an Instagram session. Present only when hostVideo was true.",
                                                                                         "format": "uri",
                                                                                         "type": "string"
                                                                                     },
@@ -84886,7 +84935,7 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "segments": {
-                                                                                        "description": "Time-aligned transcript segments, each with its text, speaker label, and start/end offsets in seconds. Empty when includeTranscript was false.",
+                                                                                        "description": "Time-aligned transcript segments, each with its text, speaker label, and start/end offsets in seconds. Empty when the reel has no detectable spoken audio.",
                                                                                         "items": {
                                                                                             "properties": {
                                                                                                 "end": {
@@ -84936,7 +84985,7 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "text": {
-                                                                                        "description": "The full speech transcript. Empty when the reel has no detectable spoken audio, and when includeTranscript was false. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "The full speech transcript. Empty when the reel has no detectable spoken audio. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
@@ -84948,10 +84997,6 @@
                                                                                         "description": "The reel URL the request asked for, returned as sent. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "viewCount": {
-                                                                                        "description": "Number of video views. Absent when the lane that served the lookup does not carry a view count.",
-                                                                                        "type": "integer"
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -84973,7 +85018,7 @@
                                                             ]
                                                         },
                                                         "found": {
-                                                            "description": "Whether the reel was found and downloaded.",
+                                                            "description": "Whether the reel was found and transcribed.",
                                                             "type": "boolean"
                                                         }
                                                     },
@@ -85197,8 +85242,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.050000",
-                        "min": "0.005000",
+                        "max": "0.098500",
+                        "min": "0.001500",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -85240,8 +85285,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.050000",
-                                "min": "0.005000",
+                                "max": "0.098500",
+                                "min": "0.001500",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -85273,8 +85318,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.050000",
-                                "min": "0.005000",
+                                "max": "0.098500",
+                                "min": "0.001500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
