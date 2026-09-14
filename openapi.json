@@ -28940,647 +28940,6 @@
                 }
             }
         },
-        "/v1/run/dexscreener.tokens": {
-            "post": {
-                "description": "List trending tokens on any blockchain from DEX Screener (price, liquidity, volume, transactions, and market cap), sorted how you want, as normalized JSON.\n\n**Price:** billed per result - \\$22.00 per 1,000 requests base + \\$1.65 per 1,000 results, capped at \\$63.30 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [DEX Screener Tokens pricing and uptime](https://getanyapi.com/api/dexscreener/tokens) - live USD price, lane routing, and measured 30-day uptime. [Every Dexscreener endpoint](https://getanyapi.com/api/dexscreener).",
-                "operationId": "dexscreener_tokens",
-                "parameters": [
-                    {
-                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
-                        "in": "query",
-                        "name": "fields",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
-                        "in": "query",
-                        "name": "max_items",
-                        "required": false,
-                        "schema": {
-                            "minimum": 0,
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
-                        "in": "query",
-                        "name": "summary",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
-                    {
-                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
-                        "in": "query",
-                        "name": "jq",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
-                        "in": "query",
-                        "name": "max_cost_usd",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
-                        "in": "header",
-                        "name": "Idempotency-Key",
-                        "required": false,
-                        "schema": {
-                            "maxLength": 255,
-                            "minLength": 1,
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "example": {
-                                "chain": "solana",
-                                "limit": 5,
-                                "min24HVol": 100000
-                            },
-                            "schema": {
-                                "additionalProperties": false,
-                                "example": {
-                                    "chain": "solana",
-                                    "limit": 5,
-                                    "min24HVol": 100000
-                                },
-                                "properties": {
-                                    "chain": {
-                                        "description": "Blockchain network to list tokens for, optionally scoped to a DEX as chain/dex (e.g. solana or ethereum/uniswap).",
-                                        "type": "string"
-                                    },
-                                    "limit": {
-                                        "description": "Maximum number of results to return (1-25, default 25). You are billed per result returned, so a lower limit costs less.",
-                                        "maximum": 25,
-                                        "minimum": 1,
-                                        "type": "integer"
-                                    },
-                                    "max24HChg": {
-                                        "description": "Only include tokens whose 24-hour price change is at most this many percent (e.g. -20 means -20%). Negative values allowed. Omit to skip this filter.",
-                                        "type": "integer"
-                                    },
-                                    "max24HTxns": {
-                                        "description": "Only include tokens with at most this many 24-hour transactions (buys plus sells). Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "max24HVol": {
-                                        "description": "Only include tokens with at most this much 24-hour trading volume, in USD. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "maxAge": {
-                                        "description": "Only include token pairs at most this old, in hours. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "maxFdv": {
-                                        "description": "Only include tokens with at most this fully diluted valuation (FDV), in USD. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "maxLiq": {
-                                        "description": "Only include tokens with at most this much pool liquidity, in USD. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "maxMarketCap": {
-                                        "description": "Only include tokens with at most this market capitalization, in USD. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "min24HBuys": {
-                                        "description": "Only include tokens with at least this many 24-hour buy transactions. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "min24HChg": {
-                                        "description": "Only include tokens whose 24-hour price change is at least this many percent (e.g. 10 means +10%). Negative values allowed. Omit to skip this filter.",
-                                        "type": "integer"
-                                    },
-                                    "min24HSells": {
-                                        "description": "Only include tokens with at least this many 24-hour sell transactions. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "min24HTxns": {
-                                        "description": "Only include tokens with at least this many 24-hour transactions (buys plus sells). Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "min24HVol": {
-                                        "description": "Only include tokens with at least this much 24-hour trading volume, in USD. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "minAge": {
-                                        "description": "Only include token pairs at least this old, in hours. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "minFdv": {
-                                        "description": "Only include tokens with at least this fully diluted valuation (FDV), in USD. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "minLiq": {
-                                        "description": "Only include tokens with at least this much pool liquidity, in USD. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "minMarketCap": {
-                                        "description": "Only include tokens with at least this market capitalization, in USD. Omit to skip this filter.",
-                                        "minimum": 0,
-                                        "type": "integer"
-                                    },
-                                    "order": {
-                                        "description": "Sort direction: desc or asc (e.g. desc).",
-                                        "type": "string"
-                                    },
-                                    "preferLatencyUnderMs": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
-                                        "minimum": 1,
-                                        "type": "integer"
-                                    },
-                                    "rankBy": {
-                                        "description": "Field to sort tokens by (e.g. volume, txns, liquidity, marketCap, trendingScoreH24).",
-                                        "type": "string"
-                                    },
-                                    "timeframe": {
-                                        "default": "24h",
-                                        "description": "Stats timeframe: 24h, 6h, 1h, or 5m (e.g. 24h).",
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "chain"
-                                ],
-                                "title": "DEX Screener tokens input",
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "costUsd": {
-                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
-                                            "type": "number"
-                                        },
-                                        "hint": {
-                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireFields: [\"nextCursor\"]` to be served only by a source that can page, which may cost more per request.",
-                                            "type": "string"
-                                        },
-                                        "items": {
-                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
-                                            "type": "integer"
-                                        },
-                                        "jqError": {
-                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
-                                            "type": "string"
-                                        },
-                                        "output": {
-                                            "anyOf": [
-                                                {
-                                                    "additionalProperties": false,
-                                                    "properties": {
-                                                        "data": {
-                                                            "description": "The result wrapper, or null when nothing was found.",
-                                                            "oneOf": [
-                                                                {
-                                                                    "type": "null"
-                                                                },
-                                                                {
-                                                                    "additionalProperties": false,
-                                                                    "properties": {
-                                                                        "items": {
-                                                                            "description": "Token listing records: token name and symbol, price, liquidity, volume, transaction/maker counts, price change, market cap, and the DEX Screener pair URL. Populated whenever the provider has data for the entity.",
-                                                                            "items": {
-                                                                                "properties": {
-                                                                                    "ageHours": {
-                                                                                        "description": "Age of the token pair in hours.",
-                                                                                        "type": "integer"
-                                                                                    },
-                                                                                    "image": {
-                                                                                        "description": "Token logo image URL.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "liquidityUsd": {
-                                                                                        "description": "Total pool liquidity in USD.",
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "makerCount": {
-                                                                                        "description": "Number of distinct makers over the selected timeframe.",
-                                                                                        "type": "integer"
-                                                                                    },
-                                                                                    "marketCapUsd": {
-                                                                                        "description": "Token market capitalization in USD.",
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "name": {
-                                                                                        "description": "Token full name. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "poolAddress": {
-                                                                                        "description": "On-chain address of the liquidity pool.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "price": {
-                                                                                        "description": "Current token price in USD. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "number",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "priceChange1h": {
-                                                                                        "description": "Fractional price change over the past hour.",
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "priceChange24h": {
-                                                                                        "description": "Fractional price change over the past 24 hours.",
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "symbol": {
-                                                                                        "description": "Token ticker symbol. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "transactionCount": {
-                                                                                        "description": "Number of transactions over the selected timeframe.",
-                                                                                        "type": "integer"
-                                                                                    },
-                                                                                    "url": {
-                                                                                        "description": "DEX Screener URL for the trading pair. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "volumeUsd": {
-                                                                                        "description": "Trading volume in USD over the selected timeframe.",
-                                                                                        "type": "number"
-                                                                                    }
-                                                                                },
-                                                                                "required": [
-                                                                                    "symbol",
-                                                                                    "price"
-                                                                                ],
-                                                                                "type": "object"
-                                                                            },
-                                                                            "type": "array",
-                                                                            "x-anyapi-must-populate": true
-                                                                        }
-                                                                    },
-                                                                    "required": [
-                                                                        "items"
-                                                                    ],
-                                                                    "type": "object"
-                                                                }
-                                                            ]
-                                                        },
-                                                        "found": {
-                                                            "description": "True when at least one token record was returned.",
-                                                            "type": "boolean"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "found",
-                                                        "data"
-                                                    ],
-                                                    "title": "DEX Screener tokens output",
-                                                    "type": "object"
-                                                },
-                                                {
-                                                    "type": "null"
-                                                }
-                                            ],
-                                            "description": "Normalized output, or null when the replay payload was not retained."
-                                        },
-                                        "provider": {
-                                            "description": "Always \"AnyAPI\".",
-                                            "type": "string"
-                                        },
-                                        "replayed": {
-                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
-                                            "type": "boolean"
-                                        },
-                                        "resultId": {
-                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "output",
-                                        "provider",
-                                        "costUsd",
-                                        "items",
-                                        "replayed"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Normalized result.",
-                        "headers": {
-                            "Idempotency-Replayed": {
-                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
-                                "schema": {
-                                    "enum": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "type": "string"
-                                }
-                            },
-                            "PAYMENT-RESPONSE": {
-                                "description": "Inline x402 payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "Payment-Receipt": {
-                                "description": "Inline mpp payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "X-PAYMENT-RESPONSE": {
-                                "description": "Inline x402 payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Input did not match the schema, or the upstream rejected the request."
-                    },
-                    "401": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Missing or invalid API key."
-                    },
-                    "402": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "oneOf": [
-                                        {
-                                            "$ref": "#/components/schemas/PaymentRequiredError"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/TrialCapReached"
-                                        }
-                                    ]
-                                }
-                            },
-                            "application/problem+json": {
-                                "schema": {
-                                    "properties": {
-                                        "challengeId": {
-                                            "minLength": 1,
-                                            "type": "string"
-                                        },
-                                        "status": {
-                                            "const": 402,
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "required": [
-                                        "status",
-                                        "challengeId"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
-                        "headers": {
-                            "PAYMENT-REQUIRED": {
-                                "description": "Inline x402 payment challenge.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "WWW-Authenticate": {
-                                "description": "Inline mpp payment challenge.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Unknown SKU, or the upstream had no matching resource."
-                    },
-                    "409": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
-                    },
-                    "422": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
-                    },
-                    "429": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
-                    },
-                    "500": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
-                    },
-                    "502": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    },
-                    {
-                        "apiKeyAuth": []
-                    },
-                    {}
-                ],
-                "summary": "DEX Screener Tokens",
-                "tags": [
-                    "dexscreener"
-                ],
-                "x-mint": {
-                    "href": "/api-reference/dexscreener/tokens"
-                },
-                "x-payment-info": {
-                    "price": {
-                        "currency": "USD",
-                        "max": "0.063300",
-                        "min": "0.022000",
-                        "mode": "dynamic"
-                    },
-                    "protocols": [
-                        {
-                            "x402": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            }
-                        },
-                        {
-                            "mpp": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            }
-                        }
-                    ],
-                    "rails": [
-                        {
-                            "headers": {
-                                "challenge": [
-                                    "PAYMENT-REQUIRED"
-                                ],
-                                "credential": [
-                                    "PAYMENT-SIGNATURE",
-                                    "X-PAYMENT"
-                                ],
-                                "receipt": [
-                                    "PAYMENT-RESPONSE",
-                                    "X-PAYMENT-RESPONSE"
-                                ]
-                            },
-                            "pricing": {
-                                "currency": "USD",
-                                "max": "0.063300",
-                                "min": "0.022000",
-                                "minimumUsd": "0.001000",
-                                "mode": "dynamic",
-                                "quoteBasis": "floor"
-                            },
-                            "protocol": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            },
-                            "rail": "x402",
-                            "settlement": {
-                                "onExecutionFailure": "released",
-                                "onUnknownFinalization": "indeterminate",
-                                "timing": "after_execution"
-                            }
-                        },
-                        {
-                            "headers": {
-                                "challenge": [
-                                    "WWW-Authenticate"
-                                ],
-                                "credential": [
-                                    "Authorization"
-                                ],
-                                "receipt": [
-                                    "Payment-Receipt"
-                                ]
-                            },
-                            "pricing": {
-                                "currency": "USD",
-                                "max": "0.063300",
-                                "min": "0.022000",
-                                "minimumUsd": null,
-                                "mode": "dynamic",
-                                "quoteBasis": "funded_ceiling"
-                            },
-                            "protocol": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            },
-                            "rail": "mpp",
-                            "settlement": {
-                                "onExecutionFailure": "charged_undelivered",
-                                "onVerificationError": "indeterminate",
-                                "timing": "before_execution"
-                            }
-                        }
-                    ]
-                }
-            }
-        },
         "/v1/run/douyin.profile": {
             "post": {
                 "description": "Look up a public Douyin profile by sec_user_id and return normalized profile statistics.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Douyin Profile pricing and uptime](https://getanyapi.com/api/douyin/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Douyin endpoint](https://getanyapi.com/api/douyin).",
@@ -42224,12 +41583,12 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "id": "1249043200627555"
+                                "id": "962050096457659"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "id": "1249043200627555"
+                                    "id": "962050096457659"
                                 },
                                 "oneOf": [
                                     {
@@ -42853,16 +42212,16 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "id": "1519158199783790"
+                                "id": "962050096457659"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "id": "1519158199783790"
+                                    "id": "962050096457659"
                                 },
                                 "properties": {
                                     "id": {
-                                        "description": "Meta Ad Library ad ID - the numeric id in an Ad Library URL (e.g. \"1519158199783790\" from https://www.facebook.com/ads/library/?id=1519158199783790).",
+                                        "description": "Meta Ad Library ad ID - the numeric id in an Ad Library URL (e.g. \"962050096457659\" from https://www.facebook.com/ads/library/?id=962050096457659).",
                                         "minLength": 1,
                                         "type": "string"
                                     },
@@ -47988,12 +47347,12 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "url": "https://www.facebook.com/groups/1270525996445602/"
+                                "url": "https://www.facebook.com/groups/instantpotcommunity/"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "url": "https://www.facebook.com/groups/1270525996445602/"
+                                    "url": "https://www.facebook.com/groups/instantpotcommunity/"
                                 },
                                 "properties": {
                                     "cursor": {
@@ -48016,7 +47375,7 @@
                                         "type": "string"
                                     },
                                     "url": {
-                                        "description": "The URL of a public Facebook group to fetch posts from (e.g. https://www.facebook.com/groups/1270525996445602/).",
+                                        "description": "The URL of a public Facebook group to fetch posts from (e.g. https://www.facebook.com/groups/instantpotcommunity/).",
                                         "type": "string"
                                     }
                                 },
@@ -48094,9 +47453,6 @@
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "permalink": {
-                                                                                        "type": "string"
-                                                                                    },
                                                                                     "publishTime": {
                                                                                         "description": "Populated whenever the provider has data for the entity.",
                                                                                         "type": "integer",
@@ -48120,7 +47476,6 @@
                                                                                     "id",
                                                                                     "text",
                                                                                     "url",
-                                                                                    "permalink",
                                                                                     "publishTime",
                                                                                     "reactionCount",
                                                                                     "commentCount",
@@ -143281,11 +142636,6 @@
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "ipLocation": {
-                                                                                        "description": "IP-based location shown for the commenter. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
                                                                                     "likeCount": {
                                                                                         "description": "Number of likes on the comment.",
                                                                                         "type": "integer"
@@ -164733,7 +164083,7 @@
         },
         "/v1/run/tiktok.ad_library_search": {
             "post": {
-                "description": "Search TikTok's ad library by keyword (top ads with brand, title, spend, CTR, likes, and video info).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Ad Library Search pricing and uptime](https://getanyapi.com/api/tiktok/ad-library-search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Search TikTok's ad library by keyword (top ads with advertiser, title, audience band, and video info).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Ad Library Search pricing and uptime](https://getanyapi.com/api/tiktok/ad-library-search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_ad_library_search",
                 "parameters": [
                     {
@@ -165007,44 +164357,30 @@
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "adId": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                        "description": "TikTok ad id. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "adTitle": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Ad title as shown in TikTok's ad library. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "brandName": {
+                                                                                        "description": "Advertiser name on the ad.",
                                                                                         "type": "string"
                                                                                     },
-                                                                                    "cost": {
-                                                                                        "type": "number"
-                                                                                    },
                                                                                     "coverUrl": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Cover image URL of the ad's first video. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "ctr": {
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "industry": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "likes": {
-                                                                                        "type": "integer"
-                                                                                    },
-                                                                                    "objective": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
+                                                                                    "estimatedAudience": {
+                                                                                        "description": "Audience size band TikTok publishes for the ad, for example \"100K-200K\".",
+                                                                                        "type": "string"
                                                                                     },
                                                                                     "videoUrl": {
-                                                                                        "description": "Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Playable URL of the ad's first video. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     }
@@ -165053,11 +164389,7 @@
                                                                                     "adId",
                                                                                     "adTitle",
                                                                                     "brandName",
-                                                                                    "cost",
-                                                                                    "ctr",
-                                                                                    "likes",
-                                                                                    "industry",
-                                                                                    "objective",
+                                                                                    "estimatedAudience",
                                                                                     "videoUrl",
                                                                                     "coverUrl"
                                                                                 ],
@@ -179526,7 +178858,7 @@
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "categoryId": {
-                                                                                        "description": "TikTok Shop category id. Pass this to tiktok_shop.category_products. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "TikTok Shop category id. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
@@ -179813,547 +179145,6 @@
                 ],
                 "x-mint": {
                     "href": "/api-reference/tiktok-shop/categories"
-                },
-                "x-payment-info": {
-                    "price": {
-                        "amount": "0.001200",
-                        "currency": "USD",
-                        "mode": "fixed"
-                    },
-                    "protocols": [
-                        {
-                            "x402": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            }
-                        },
-                        {
-                            "mpp": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            }
-                        }
-                    ],
-                    "rails": [
-                        {
-                            "headers": {
-                                "challenge": [
-                                    "PAYMENT-REQUIRED"
-                                ],
-                                "credential": [
-                                    "PAYMENT-SIGNATURE",
-                                    "X-PAYMENT"
-                                ],
-                                "receipt": [
-                                    "PAYMENT-RESPONSE",
-                                    "X-PAYMENT-RESPONSE"
-                                ]
-                            },
-                            "pricing": {
-                                "amount": "0.001200",
-                                "currency": "USD",
-                                "minimumUsd": "0.001000",
-                                "mode": "fixed",
-                                "quoteBasis": "floor"
-                            },
-                            "protocol": {
-                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                                "network": "eip155:8453",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "scheme": "exact"
-                            },
-                            "rail": "x402",
-                            "settlement": {
-                                "onExecutionFailure": "released",
-                                "onUnknownFinalization": "indeterminate",
-                                "timing": "after_execution"
-                            }
-                        },
-                        {
-                            "headers": {
-                                "challenge": [
-                                    "WWW-Authenticate"
-                                ],
-                                "credential": [
-                                    "Authorization"
-                                ],
-                                "receipt": [
-                                    "Payment-Receipt"
-                                ]
-                            },
-                            "pricing": {
-                                "amount": "0.001200",
-                                "currency": "USD",
-                                "minimumUsd": null,
-                                "mode": "fixed",
-                                "quoteBasis": "funded_ceiling"
-                            },
-                            "protocol": {
-                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
-                                "currency": "USD",
-                                "intent": "charge",
-                                "method": "tempo",
-                                "network": "tempo",
-                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
-                                "rail": "tempo",
-                                "scheme": "exact"
-                            },
-                            "rail": "mpp",
-                            "settlement": {
-                                "onExecutionFailure": "charged_undelivered",
-                                "onVerificationError": "indeterminate",
-                                "timing": "before_execution"
-                            }
-                        }
-                    ]
-                }
-            }
-        },
-        "/v1/run/tiktok_shop.category_products": {
-            "post": {
-                "description": "Browse TikTok Shop products inside a category by category id: price, discount, rating, sales count, seller, and product URL per product.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Shop Category Products pricing and uptime](https://getanyapi.com/api/tiktok-shop/category-products) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok Shop endpoint](https://getanyapi.com/api/tiktok-shop).",
-                "operationId": "tiktok_shop_category_products",
-                "parameters": [
-                    {
-                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item. Keys are matched relative to each result item after the `data`/`items` envelope is unwrapped, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
-                        "in": "query",
-                        "name": "fields",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. Does not change cost.",
-                        "in": "query",
-                        "name": "max_items",
-                        "required": false,
-                        "schema": {
-                            "minimum": 0,
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
-                        "in": "query",
-                        "name": "summary",
-                        "required": false,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    },
-                    {
-                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
-                        "in": "query",
-                        "name": "jq",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
-                        "in": "query",
-                        "name": "max_cost_usd",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
-                        "in": "header",
-                        "name": "Idempotency-Key",
-                        "required": false,
-                        "schema": {
-                            "maxLength": 255,
-                            "minLength": 1,
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "example": {
-                                "categoryId": "700645",
-                                "region": "US"
-                            },
-                            "schema": {
-                                "additionalProperties": false,
-                                "example": {
-                                    "categoryId": "700645",
-                                    "region": "US"
-                                },
-                                "properties": {
-                                    "categoryId": {
-                                        "description": "TikTok Shop category id, from tiktok_shop.categories (e.g. 700645 for Health).",
-                                        "type": "string"
-                                    },
-                                    "preferLatencyUnderMs": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
-                                        "minimum": 1,
-                                        "type": "integer"
-                                    },
-                                    "region": {
-                                        "default": "US",
-                                        "description": "Two-letter country code of the TikTok Shop market (e.g. US).",
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "categoryId"
-                                ],
-                                "title": "TikTok Shop category products input",
-                                "type": "object"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "costUsd": {
-                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
-                                            "type": "number"
-                                        },
-                                        "hint": {
-                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireFields: [\"nextCursor\"]` to be served only by a source that can page, which may cost more per request.",
-                                            "type": "string"
-                                        },
-                                        "items": {
-                                            "description": "Number of result rows returned. For per-result SKUs the per-item cost is charged against this count; for input-priced SKUs the charge is per submitted input, independent of this count.",
-                                            "type": "integer"
-                                        },
-                                        "jqError": {
-                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
-                                            "type": "string"
-                                        },
-                                        "output": {
-                                            "anyOf": [
-                                                {
-                                                    "additionalProperties": false,
-                                                    "properties": {
-                                                        "data": {
-                                                            "oneOf": [
-                                                                {
-                                                                    "type": "null"
-                                                                },
-                                                                {
-                                                                    "additionalProperties": false,
-                                                                    "properties": {
-                                                                        "hasMore": {
-                                                                            "description": "True when the category has further pages upstream.",
-                                                                            "type": "boolean"
-                                                                        },
-                                                                        "items": {
-                                                                            "description": "Product records in the category: id, title, price, rating, sales count, seller, and product URL. Populated whenever the provider has data for the entity.",
-                                                                            "items": {
-                                                                                "properties": {
-                                                                                    "currency": {
-                                                                                        "description": "ISO currency name, e.g. USD.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "discountPct": {
-                                                                                        "description": "Discount off the original price as a percentage, e.g. 10 for 10% off. Omitted when the product is not discounted.",
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "image": {
-                                                                                        "description": "Primary product image URL.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "originalPrice": {
-                                                                                        "description": "Pre-discount list price (0 when not on sale).",
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "price": {
-                                                                                        "description": "Current sale price.",
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "productId": {
-                                                                                        "description": "TikTok Shop product id. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "rating": {
-                                                                                        "description": "Average review score.",
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "reviewCount": {
-                                                                                        "description": "Number of reviews.",
-                                                                                        "type": "integer"
-                                                                                    },
-                                                                                    "sellerId": {
-                                                                                        "description": "TikTok Shop seller id, for joining to the seller's other products.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "shopName": {
-                                                                                        "description": "Seller shop name.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "soldCount": {
-                                                                                        "description": "Units sold.",
-                                                                                        "type": "integer"
-                                                                                    },
-                                                                                    "title": {
-                                                                                        "description": "Product title. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    },
-                                                                                    "url": {
-                                                                                        "description": "Canonical product detail page URL. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
-                                                                                    }
-                                                                                },
-                                                                                "required": [
-                                                                                    "productId",
-                                                                                    "title"
-                                                                                ],
-                                                                                "type": "object"
-                                                                            },
-                                                                            "type": "array",
-                                                                            "x-anyapi-must-populate": true
-                                                                        }
-                                                                    },
-                                                                    "required": [
-                                                                        "items"
-                                                                    ],
-                                                                    "type": "object"
-                                                                }
-                                                            ]
-                                                        },
-                                                        "found": {
-                                                            "type": "boolean"
-                                                        }
-                                                    },
-                                                    "required": [
-                                                        "found",
-                                                        "data"
-                                                    ],
-                                                    "title": "TikTok Shop category products output",
-                                                    "type": "object"
-                                                },
-                                                {
-                                                    "type": "null"
-                                                }
-                                            ],
-                                            "description": "Normalized output, or null when the replay payload was not retained."
-                                        },
-                                        "provider": {
-                                            "description": "Always \"AnyAPI\".",
-                                            "type": "string"
-                                        },
-                                        "replayed": {
-                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
-                                            "type": "boolean"
-                                        },
-                                        "resultId": {
-                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "output",
-                                        "provider",
-                                        "costUsd",
-                                        "items",
-                                        "replayed"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Normalized result.",
-                        "headers": {
-                            "Idempotency-Replayed": {
-                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
-                                "schema": {
-                                    "enum": [
-                                        "false",
-                                        "true"
-                                    ],
-                                    "type": "string"
-                                }
-                            },
-                            "PAYMENT-RESPONSE": {
-                                "description": "Inline x402 payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "Payment-Receipt": {
-                                "description": "Inline mpp payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "X-PAYMENT-RESPONSE": {
-                                "description": "Inline x402 payment receipt.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Input did not match the schema, or the upstream rejected the request."
-                    },
-                    "401": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Missing or invalid API key."
-                    },
-                    "402": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "oneOf": [
-                                        {
-                                            "$ref": "#/components/schemas/PaymentRequiredError"
-                                        },
-                                        {
-                                            "$ref": "#/components/schemas/TrialCapReached"
-                                        }
-                                    ]
-                                }
-                            },
-                            "application/problem+json": {
-                                "schema": {
-                                    "properties": {
-                                        "challengeId": {
-                                            "minLength": 1,
-                                            "type": "string"
-                                        },
-                                        "status": {
-                                            "const": 402,
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "required": [
-                                        "status",
-                                        "challengeId"
-                                    ],
-                                    "type": "object"
-                                }
-                            }
-                        },
-                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
-                        "headers": {
-                            "PAYMENT-REQUIRED": {
-                                "description": "Inline x402 payment challenge.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "WWW-Authenticate": {
-                                "description": "Inline mpp payment challenge.",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Unknown SKU, or the upstream had no matching resource."
-                    },
-                    "409": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
-                    },
-                    "422": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
-                    },
-                    "429": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "The upstream was rate limited; inspect `payment` when present before deciding whether to retry."
-                    },
-                    "500": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
-                    },
-                    "502": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Error"
-                                }
-                            }
-                        },
-                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
-                    }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    },
-                    {
-                        "apiKeyAuth": []
-                    },
-                    {}
-                ],
-                "summary": "TikTok Shop Category Products",
-                "tags": [
-                    "tiktok-shop"
-                ],
-                "x-mint": {
-                    "href": "/api-reference/tiktok-shop/category-products"
                 },
                 "x-payment-info": {
                     "price": {
@@ -186042,7 +184833,7 @@
         },
         "/v1/run/trustpilot.reviews": {
             "post": {
-                "description": "Pull Trustpilot reviews for any company by brand name: star ratings, review text, dates, and reviewer details as clean JSON.\n\n**Price:** \\$2.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Trustpilot Reviews pricing and uptime](https://getanyapi.com/api/trustpilot/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Trustpilot endpoint](https://getanyapi.com/api/trustpilot).",
+                "description": "Pull Trustpilot reviews for any company by brand name: star ratings, review text, dates, and reviewer details as clean JSON.\n\n**Price:** \\$2.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Trustpilot Reviews pricing and uptime](https://getanyapi.com/api/trustpilot/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Trustpilot endpoint](https://getanyapi.com/api/trustpilot).",
                 "operationId": "trustpilot_reviews",
                 "parameters": [
                     {
@@ -187179,12 +185970,12 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "handle": "realDonaldTrump"
+                                "handle": "DevinNunes"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "handle": "realDonaldTrump"
+                                    "handle": "DevinNunes"
                                 },
                                 "properties": {
                                     "handle": {
@@ -218894,10 +217685,6 @@
         {
             "name": "congress",
             "x-group": "Congress"
-        },
-        {
-            "name": "dexscreener",
-            "x-group": "Dexscreener"
         },
         {
             "name": "douyin",
