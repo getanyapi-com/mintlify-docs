@@ -81887,7 +81887,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.005000",
+                        "max": "0.006000",
                         "min": "0.000500",
                         "mode": "dynamic"
                     },
@@ -81930,7 +81930,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.005000",
+                                "max": "0.006000",
                                 "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -81963,7 +81963,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.005000",
+                                "max": "0.006000",
                                 "min": "0.000500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -84105,7 +84105,7 @@
         },
         "/v1/run/instagram.reel_transcript": {
             "post": {
-                "description": "Transcribe any public Instagram reel or video post: the full speech transcript, speaker labels, and word-level timestamps, from a reel URL or an Instagram CDN media URL you already hold. Transcription runs on MAI-Transcribe-2, chosen for its accuracy and its speaker labels. Turn on hostVideo to also get the MP4 on a hosted link that plays without an Instagram session. If you only want the text, instagram.media_transcript is the cheaper transcript-only option; if you only want the file, instagram.post is where you go.\n\n**Price:** billed per audio minute - \\$1.50 per 1,000 requests base + \\$6.00 per 1,000 audio minutes, capped at \\$95.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Reel Transcript pricing and uptime](https://getanyapi.com/api/instagram/reel-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Transcribe any public Instagram reel or video post: the full speech transcript, speaker labels, and word-level timestamps, from a reel, /p/, or /tv/ URL or an Instagram CDN media URL you already hold. A video post is transcribed exactly like a reel. A photo post comes back found with its record and an empty transcript, charged the request price only. Transcription runs on MAI-Transcribe-2, chosen for its accuracy and its speaker labels. Turn on hostVideo to also get the MP4 on a hosted link that plays without an Instagram session. If you only want the text, instagram.media_transcript is the cheaper transcript-only option; if you only want the file, instagram.post is where you go.\n\n**Price:** billed per audio minute - \\$1.50 per 1,000 requests base + \\$6.00 per 1,000 audio minutes, capped at \\$95.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Instagram Reel Transcript pricing and uptime](https://getanyapi.com/api/instagram/reel-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_reel_transcript",
                 "parameters": [
                     {
@@ -84184,7 +84184,7 @@
                                 "properties": {
                                     "hostVideo": {
                                         "default": false,
-                                        "description": "Set true to also get the reel's MP4 on a hosted link you can play without an Instagram session. Charged as an extra on top of the transcript (e.g. true).",
+                                        "description": "Set true to also get the reel's MP4 on a hosted link you can play without an Instagram session. Charged as an extra on top of the transcript (e.g. true). A photo post has no file to host, so a request that sets this on one is refused with no charge; send it without hostVideo to get the post record instead.",
                                         "type": "boolean"
                                     },
                                     "preferLatencyUnderMs": {
@@ -84282,7 +84282,7 @@
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "mediaType": {
-                                                                                        "description": "What kind of media this is, as Instagram labels it (for example a video or an image post).",
+                                                                                        "description": "What kind of media this is, as Instagram labels it (for example a video or an image post). On a photo post this is how you tell that the empty transcript is the answer rather than silence.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "ownerUsername": {
@@ -84340,7 +84340,7 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "text": {
-                                                                                        "description": "The full speech transcript. Empty when the reel has no detectable spoken audio. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "The full speech transcript. Empty when the reel has no detectable spoken audio, or when the post is a photo with no video to transcribe. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
@@ -84373,7 +84373,7 @@
                                                             ]
                                                         },
                                                         "found": {
-                                                            "description": "Whether the reel was found and transcribed.",
+                                                            "description": "Whether the post was found. A reel or video post is found and transcribed. A photo post is found too: its record comes back with an empty transcript and is charged the request price only, with no audio minutes. A post that does not exist is not found and is free.",
                                                             "type": "boolean"
                                                         }
                                                     },
@@ -84597,7 +84597,7 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.098500",
+                        "max": "0.099500",
                         "min": "0.001500",
                         "mode": "dynamic"
                     },
@@ -84640,7 +84640,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.098500",
+                                "max": "0.099500",
                                 "min": "0.001500",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
@@ -84673,7 +84673,7 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.098500",
+                                "max": "0.099500",
                                 "min": "0.001500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
@@ -177693,7 +177693,7 @@
         },
         "/v1/run/tiktok.video_transcript": {
             "post": {
-                "description": "Fetch the spoken-word transcript of a TikTok video by URL.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Video Transcript pricing and uptime](https://getanyapi.com/api/tiktok/video-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Fetch the caption track TikTok itself published for a video, as TikTok wrote it. It is the cheapest way to get the words, and it is only as good as TikTok's own transcription: it mishears names and uncommon words, and many videos - especially non-English ones - have no caption track at all, which comes back as not found. When you need the words to be right, or there is no track to read, tiktok.video_transcript_full transcribes the audio with AnyAPI's own speech-to-text instead.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Video Transcript (native captions) pricing and uptime](https://getanyapi.com/api/tiktok/video-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_video_transcript",
                 "parameters": [
                     {
@@ -178050,7 +178050,7 @@
                     },
                     {}
                 ],
-                "summary": "TikTok Video Transcript",
+                "summary": "TikTok Video Transcript (native captions)",
                 "tags": [
                     "tiktok"
                 ],
@@ -178165,7 +178165,7 @@
         },
         "/v1/run/tiktok.video_transcript_full": {
             "post": {
-                "description": "Transcribe the spoken audio of a TikTok video with timed segments, speaker labels, and per-word confidence - for videos TikTok publishes no subtitle track for.\n\n**Price:** billed per result - \\$17.60 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$17.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Video Transcript (Audio) pricing and uptime](https://getanyapi.com/api/tiktok/video-transcript-full) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Transcribe the spoken audio of a TikTok video with AnyAPI's own speech-to-text: timed sentence-level segments, speaker labels, detected language, and optional per-word timings, for videos TikTok publishes no caption track for and for videos whose caption track gets the words wrong. AnyAPI downloads the video and runs the audio through MAI-Transcribe-2 rather than reading anything TikTok wrote, which is why it handles non-English speech and hears words the native captions mishear. The answer also carries the video's id, URL, creator handle, and cover image. If you only want whatever TikTok itself published and you want it for a tenth of the price, tiktok.video_transcript is that.\n\n**Price:** billed per audio minute - \\$1.50 per 1,000 requests base + \\$6.00 per 1,000 audio minutes, capped at \\$95.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Video Transcript (AnyAPI speech to text) pricing and uptime](https://getanyapi.com/api/tiktok/video-transcript-full) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_video_transcript_full",
                 "parameters": [
                     {
@@ -178247,6 +178247,11 @@
                                         "description": "TikTok video URL (e.g. \"https://www.tiktok.com/@user/video/1234567890\").",
                                         "minLength": 1,
                                         "type": "string"
+                                    },
+                                    "wordTimestamps": {
+                                        "default": false,
+                                        "description": "Return per-word timings inside each segment. Words carry timings only; the recognizer scores a phrase rather than a word, so there is no per-word confidence to report.",
+                                        "type": "boolean"
                                     }
                                 },
                                 "required": [
@@ -178298,16 +178303,24 @@
                                                                             "minimum": 0,
                                                                             "type": "number"
                                                                         },
+                                                                        "id": {
+                                                                            "description": "TikTok video id.",
+                                                                            "type": "string"
+                                                                        },
                                                                         "language": {
                                                                             "description": "Detected spoken language of the audio (BCP-47 style code, e.g. \"en\").",
                                                                             "type": "string"
                                                                         },
+                                                                        "ownerUsername": {
+                                                                            "description": "Creator handle, without the leading @.",
+                                                                            "type": "string"
+                                                                        },
                                                                         "segments": {
-                                                                            "description": "Timed transcript segments in playback order, each with the recognizer's per-word confidence so low-confidence text can be treated as uncertain rather than quoted. Populated whenever the provider has data for the entity.",
+                                                                            "description": "Timed transcript segments in playback order, one per sentence, so a segment locates a specific line in the video rather than a whole speaker turn. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "endSeconds": {
-                                                                                        "description": "Segment end offset in seconds.",
+                                                                                        "description": "Segment end offset in seconds, taken from the last word it contains.",
                                                                                         "minimum": 0,
                                                                                         "type": "number"
                                                                                     },
@@ -178316,11 +178329,11 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "speaker": {
-                                                                                        "description": "Recognizer speaker label for this segment (e.g. \"SPEAKER_00\"). Diarization is a guess, not an identification.",
+                                                                                        "description": "Speaker label for this segment, stable within one response and meaningless across responses. Telling voices apart is a guess, not an identification, and the label is not a name.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "startSeconds": {
-                                                                                        "description": "Segment start offset in seconds.",
+                                                                                        "description": "Segment start offset in seconds, taken from the first word it contains.",
                                                                                         "minimum": 0,
                                                                                         "type": "number"
                                                                                     },
@@ -178329,35 +178342,26 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "words": {
-                                                                                        "description": "Per-word timing and recognizer confidence for this segment.",
+                                                                                        "description": "Per-word timings for this segment, returned only when the request set wordTimestamps. Words carry no confidence score: the recognizer scores a phrase rather than a word.",
                                                                                         "items": {
                                                                                             "properties": {
-                                                                                                "confidence": {
-                                                                                                    "description": "Recognizer score for this word, exactly as the recognizer reported it. It is normally an alignment probability between 0 and 1, but on audio the recognizer could not align it reports a negative log-scale score instead, so read the sign before treating the number as a probability. Either way, lower means less certain, and low values are common on names, jargon, and music.",
-                                                                                                    "type": "number"
-                                                                                                },
                                                                                                 "endSeconds": {
                                                                                                     "description": "Word end offset in seconds.",
                                                                                                     "minimum": 0,
                                                                                                     "type": "number"
-                                                                                                },
-                                                                                                "speaker": {
-                                                                                                    "description": "Recognizer speaker label for this word.",
-                                                                                                    "type": "string"
                                                                                                 },
                                                                                                 "startSeconds": {
                                                                                                     "description": "Word start offset in seconds.",
                                                                                                     "minimum": 0,
                                                                                                     "type": "number"
                                                                                                 },
-                                                                                                "word": {
-                                                                                                    "description": "The recognized word.",
+                                                                                                "text": {
+                                                                                                    "description": "The recognized word, in display form with its own punctuation.",
                                                                                                     "type": "string"
                                                                                                 }
                                                                                             },
                                                                                             "required": [
-                                                                                                "word",
-                                                                                                "confidence"
+                                                                                                "text"
                                                                                             ],
                                                                                             "type": "object"
                                                                                         },
@@ -178375,14 +178379,24 @@
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "source": {
-                                                                            "description": "How the text was produced. Always \"audio_asr\" on this endpoint: the words come from automatic speech recognition over the audio, not from a caption track the platform published. Populated whenever the provider has data for the entity.",
+                                                                            "description": "How the text was produced. Always \"audio_asr\" on this endpoint: the words come from speech recognition over the audio, not from a caption track TikTok published. For TikTok's own captions, use tiktok.video_transcript. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
                                                                         },
+                                                                        "thumbnailUrl": {
+                                                                            "description": "Cover image for the video. A signed, short-lived TikTok CDN URL, often served as HEIC rather than JPEG, so fetch it promptly and transcode if you need broad browser support.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
+                                                                        },
                                                                         "transcript": {
-                                                                            "description": "Full spoken-word transcript, machine-transcribed from the video's audio track. Populated whenever the provider has data for the entity.",
+                                                                            "description": "Full spoken-word transcript, recognized from the video's audio track. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "url": {
+                                                                            "description": "Canonical URL of the video this transcript came from.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
                                                                         }
                                                                     },
                                                                     "required": [
@@ -178401,7 +178415,7 @@
                                                         "found",
                                                         "data"
                                                     ],
-                                                    "title": "TikTok Video Transcript (Audio) output",
+                                                    "title": "TikTok Video Transcript (AnyAPI speech to text) output",
                                                     "type": "object",
                                                     "x-anyapi-heavy": true
                                                 },
@@ -178607,7 +178621,7 @@
                     },
                     {}
                 ],
-                "summary": "TikTok Video Transcript (Audio)",
+                "summary": "TikTok Video Transcript (AnyAPI speech to text)",
                 "tags": [
                     "tiktok"
                 ],
@@ -178617,8 +178631,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.017600",
-                        "min": "0.017600",
+                        "max": "0.095000",
+                        "min": "0.001500",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -178660,8 +178674,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.017600",
-                                "min": "0.017600",
+                                "max": "0.095000",
+                                "min": "0.001500",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -178693,8 +178707,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.017600",
-                                "min": "0.017600",
+                                "max": "0.095000",
+                                "min": "0.001500",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
