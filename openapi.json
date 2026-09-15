@@ -164083,7 +164083,7 @@
         },
         "/v1/run/tiktok.ad_library_search": {
             "post": {
-                "description": "Search TikTok's ad library by keyword (top ads with advertiser, title, audience band, and video info).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Ad Library Search pricing and uptime](https://getanyapi.com/api/tiktok/ad-library-search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Search TikTok's public Ads Library by keyword or advertiser (advertiser, title, audience band, run dates, library link, and video).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Ad Library Search pricing and uptime](https://getanyapi.com/api/tiktok/ad-library-search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_ad_library_search",
                 "parameters": [
                     {
@@ -164148,150 +164148,45 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "limit": 20,
-                                "objective": "conversions",
-                                "period": 30,
                                 "query": "spotify"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "limit": 20,
-                                    "objective": "conversions",
-                                    "period": 30,
                                     "query": "spotify"
                                 },
+                                "oneOf": [
+                                    {
+                                        "not": {
+                                            "required": [
+                                                "advertiserName"
+                                            ]
+                                        },
+                                        "required": [
+                                            "query"
+                                        ]
+                                    },
+                                    {
+                                        "not": {
+                                            "required": [
+                                                "query"
+                                            ]
+                                        },
+                                        "required": [
+                                            "advertiserName"
+                                        ]
+                                    }
+                                ],
                                 "properties": {
-                                    "adFormat": {
-                                        "description": "Ad format filter.",
-                                        "enum": [
-                                            "spark_ads",
-                                            "non_spark_ads"
-                                        ],
-                                        "type": "string"
-                                    },
-                                    "adLanguage": {
-                                        "description": "Ad language filter.",
-                                        "enum": [
-                                            "en",
-                                            "es",
-                                            "ar",
-                                            "vi",
-                                            "th",
-                                            "de",
-                                            "id",
-                                            "pt",
-                                            "fr",
-                                            "ms",
-                                            "nl",
-                                            "ja",
-                                            "it",
-                                            "ro",
-                                            "zh-Hant",
-                                            "ko"
-                                        ],
-                                        "type": "string"
-                                    },
                                     "advertiserName": {
-                                        "description": "Filter to a specific advertiser by name (searches the public TikTok Ads Library by advertiser).",
+                                        "description": "Advertiser name to list ads for (e.g. Spotify). Provide advertiserName or query, never both.",
+                                        "minLength": 1,
+                                        "pattern": "\\S",
                                         "type": "string"
                                     },
                                     "cursor": {
-                                        "description": "Page number for pagination (defaults to 1).",
+                                        "description": "Opaque cursor from a previous response's nextCursor. Omit it for the first page.",
                                         "type": "string"
-                                    },
-                                    "duration": {
-                                        "description": "Video duration bucket filter.",
-                                        "enum": [
-                                            "under_10s",
-                                            "10_20s",
-                                            "20_30s",
-                                            "30_40s",
-                                            "40_50s",
-                                            "over_50s"
-                                        ],
-                                        "type": "string"
-                                    },
-                                    "industry": {
-                                        "description": "Advertiser industry filter.",
-                                        "enum": [
-                                            "apparel_accessories",
-                                            "appliances",
-                                            "apps",
-                                            "baby_kids_maternity",
-                                            "beauty_personal_care",
-                                            "business_services",
-                                            "ecommerce_non_app",
-                                            "education",
-                                            "financial_services",
-                                            "food_beverage",
-                                            "games",
-                                            "health",
-                                            "home_improvement",
-                                            "household_products",
-                                            "life_services",
-                                            "news_entertainment",
-                                            "pets",
-                                            "sports_outdoor",
-                                            "tech_electronics",
-                                            "travel",
-                                            "vehicle_transportation"
-                                        ],
-                                        "type": "string"
-                                    },
-                                    "likes": {
-                                        "description": "Likes percentile bucket filter (top_1_20 is the top-performing 20 percent).",
-                                        "enum": [
-                                            "top_1_20",
-                                            "top_21_40",
-                                            "top_41_60",
-                                            "top_61_80",
-                                            "top_81_100"
-                                        ],
-                                        "type": "string"
-                                    },
-                                    "limit": {
-                                        "default": 20,
-                                        "description": "Results per page, with an existing maximum of 50 (default 20). Use a canonical JSON integer; legacy numeric strings remain accepted.",
-                                        "maximum": 50,
-                                        "minimum": 0,
-                                        "pattern": "^0*(?:[0-9]|[1-4][0-9]|50)$",
-                                        "type": [
-                                            "integer",
-                                            "string"
-                                        ]
-                                    },
-                                    "objective": {
-                                        "description": "Campaign objective filter.",
-                                        "enum": [
-                                            "app_installs",
-                                            "conversions",
-                                            "lead_generation",
-                                            "product_sales",
-                                            "reach",
-                                            "traffic",
-                                            "video_views"
-                                        ],
-                                        "type": "string"
-                                    },
-                                    "orderBy": {
-                                        "description": "Sort metric: for_you, impression, play_2s_rate, play_6s_rate, cvr, ctr, or like.",
-                                        "type": "string"
-                                    },
-                                    "period": {
-                                        "description": "Time window for top ads. Use the canonical JSON integer 7, 30, or 180; legacy numeric strings remain accepted.",
-                                        "enum": [
-                                            7,
-                                            30,
-                                            180,
-                                            "7",
-                                            "30",
-                                            "180"
-                                        ],
-                                        "type": [
-                                            "integer",
-                                            "string"
-                                        ]
                                     },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
@@ -164299,17 +164194,12 @@
                                         "type": "integer"
                                     },
                                     "query": {
-                                        "description": "Keyword to search ad titles and content (e.g. spotify).",
-                                        "type": "string"
-                                    },
-                                    "region": {
-                                        "description": "Country code (defaults to US).",
+                                        "description": "Keyword to search ad titles and content (e.g. spotify). Provide query or advertiserName, never both.",
+                                        "minLength": 1,
+                                        "pattern": "\\S",
                                         "type": "string"
                                     }
                                 },
-                                "required": [
-                                    "query"
-                                ],
                                 "title": "TikTok Ad Library Search input",
                                 "type": "object"
                             }
@@ -164377,6 +164267,18 @@
                                                                                     },
                                                                                     "estimatedAudience": {
                                                                                         "description": "Audience size band TikTok publishes for the ad, for example \"100K-200K\".",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "firstShownUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time) when TikTok first showed the ad. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "lastShownUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time) when TikTok last showed the ad. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Link to the ad's detail page in TikTok's public Ads Library.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "videoUrl": {
@@ -174324,7 +174226,7 @@
         },
         "/v1/run/tiktok.top_ads_search": {
             "post": {
-                "description": "Search TikTok Creative Center top video ads by keyword with explicit performance, objective, region, language, and time-window filters.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Top Ads Search pricing and uptime](https://getanyapi.com/api/tiktok/top-ads-search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Search TikTok Creative Center top video ads by keyword, with campaign objective, performance percentile, and time-window filters.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Top Ads Search pricing and uptime](https://getanyapi.com/api/tiktok/top-ads-search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_top_ads_search",
                 "parameters": [
                     {
@@ -174397,29 +174299,6 @@
                                     "query": "glasses"
                                 },
                                 "properties": {
-                                    "adLanguage": {
-                                        "default": "en",
-                                        "description": "Language code for returned ads (default en).",
-                                        "enum": [
-                                            "en",
-                                            "es",
-                                            "ar",
-                                            "vi",
-                                            "th",
-                                            "de",
-                                            "id",
-                                            "pt",
-                                            "fr",
-                                            "ms",
-                                            "nl",
-                                            "ja",
-                                            "it",
-                                            "ro",
-                                            "zh-Hant",
-                                            "ko"
-                                        ],
-                                        "type": "string"
-                                    },
                                     "limit": {
                                         "default": 20,
                                         "description": "Maximum number of ads requested for this page, from 1 through 20 (default 20).",
@@ -174428,8 +174307,7 @@
                                         "type": "integer"
                                     },
                                     "objective": {
-                                        "default": "traffic",
-                                        "description": "Campaign objective filter (default traffic).",
+                                        "description": "Campaign objective filter. Omit it to search every objective.",
                                         "enum": [
                                             "traffic",
                                             "app_installs",
@@ -174441,15 +174319,6 @@
                                         ],
                                         "type": "string"
                                     },
-                                    "orderBy": {
-                                        "default": "for_you",
-                                        "description": "Result ordering: Creative Center recommendations or like count (default for_you).",
-                                        "enum": [
-                                            "for_you",
-                                            "likes"
-                                        ],
-                                        "type": "string"
-                                    },
                                     "page": {
                                         "default": 1,
                                         "description": "One-based provider page number (default 1).",
@@ -174457,8 +174326,7 @@
                                         "type": "integer"
                                     },
                                     "performanceRank": {
-                                        "default": "top_1_20",
-                                        "description": "Ad performance percentile bucket, where top_1_20 is the highest-performing 20 percent (default top_1_20).",
+                                        "description": "Ad performance percentile bucket, where top_1_20 is the highest-performing 20 percent. Omit it to search every bucket.",
                                         "enum": [
                                             "top_1_20",
                                             "top_21_40",
@@ -174485,11 +174353,6 @@
                                     "query": {
                                         "description": "Keyword to search in TikTok Creative Center top video ads.",
                                         "minLength": 1,
-                                        "type": "string"
-                                    },
-                                    "region": {
-                                        "default": "US",
-                                        "description": "Country code used to select the Creative Center market (default US).",
                                         "type": "string"
                                     }
                                 },
@@ -176680,7 +176543,7 @@
         },
         "/v1/run/tiktok.video_comments": {
             "post": {
-                "description": "List the comments on a TikTok video by URL with cursor pagination (text, author, likes, reply count).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Video Comments pricing and uptime](https://getanyapi.com/api/tiktok/video-comments) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "List the comments on a TikTok video by URL with cursor pagination (text, author, likes, reply count).\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Video Comments pricing and uptime](https://getanyapi.com/api/tiktok/video-comments) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_video_comments",
                 "parameters": [
                     {
@@ -177093,7 +176956,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.001200",
+                        "min": "0.000800",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -177136,7 +176999,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.003600",
-                                "min": "0.001200",
+                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -177169,7 +177032,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.003600",
-                                "min": "0.001200",
+                                "min": "0.000800",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
