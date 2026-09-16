@@ -111298,13 +111298,61 @@
                                     "query": "recruiter"
                                 },
                                 "properties": {
+                                    "currentCompanyId": {
+                                        "description": "Filter by current employer, using a numeric LinkedIn company id. Comma-separate for several.",
+                                        "type": "string"
+                                    },
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; a page holds 10 profiles.",
+                                        "type": "string"
+                                    },
+                                    "firstName": {
+                                        "description": "Filter by first name (e.g. Jane).",
+                                        "type": "string"
+                                    },
+                                    "followerOfUrn": {
+                                        "description": "Return only people who follow this member, given the member's LinkedIn URN.",
+                                        "type": "string"
+                                    },
+                                    "industryId": {
+                                        "description": "Filter by industry, using a LinkedIn industry id.",
+                                        "type": "string"
+                                    },
+                                    "lastName": {
+                                        "description": "Filter by last name (e.g. Okafor).",
+                                        "type": "string"
+                                    },
+                                    "locationId": {
+                                        "description": "Filter by location, using a LinkedIn geocode id.",
+                                        "type": "string"
+                                    },
+                                    "pastCompanyId": {
+                                        "description": "Filter by a previous employer, using a numeric LinkedIn company id.",
+                                        "type": "string"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "profileLanguage": {
+                                        "description": "Filter by the language the profile is written in (ISO 2-letter code, e.g. en).",
+                                        "type": "string"
+                                    },
                                     "query": {
                                         "description": "Search query for LinkedIn profiles - a role, name, or keywords (e.g. 'Marketing Manager').",
+                                        "type": "string"
+                                    },
+                                    "schoolId": {
+                                        "description": "Filter by school, using a LinkedIn school id.",
+                                        "type": "string"
+                                    },
+                                    "serviceCategoryId": {
+                                        "description": "Filter by service category, using a numeric service-category id.",
+                                        "type": "string"
+                                    },
+                                    "title": {
+                                        "description": "Filter by job title or headline (e.g. Head of Talent).",
                                         "type": "string"
                                     }
                                 },
@@ -111398,6 +111446,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of profiles, or null/empty when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -132920,8 +132975,12 @@
                                     "query": "home decor"
                                 },
                                 "properties": {
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page.",
+                                        "type": "string"
+                                    },
                                     "limit": {
-                                        "description": "Maximum number of results to return (1-20, default 20).",
+                                        "description": "Maximum number of results to return from this page (1-20).",
                                         "maximum": 20,
                                         "minimum": 1,
                                         "type": "integer"
@@ -133017,6 +133076,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of results, or null/empty when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -186400,6 +186466,10 @@
                                     "handle": "realDonaldTrump"
                                 },
                                 "properties": {
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; a page holds 20 posts.",
+                                        "type": "string"
+                                    },
                                     "handle": {
                                         "description": "Truth Social handle without the @, e.g. \"realDonaldTrump\".",
                                         "type": "string"
@@ -186456,6 +186526,13 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of posts, or null/empty when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "posts": {
                                                                             "description": "The user's recent posts. Populated whenever the provider has data for the entity.",
                                                                             "items": {
