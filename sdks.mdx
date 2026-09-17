@@ -165,8 +165,9 @@ successful answer, not an error. Use `unwrap` to get the data or raise
 `ResultNotFoundError` when the result is empty.
 
 Every outcome maps to exactly one shape, and every `found: false` answer says why in
-`output.reason`. The reason is one word from a fixed list that is part of every API's output
-schema, so it is typed in both SDKs and never the source's own wording:
+`output.reason`. Each API's output schema lists the exact words that API can answer with,
+so the schema is that API's contract for a miss, it is typed in both SDKs, and it is never
+the source's own wording:
 
 | You asked for | You get |
 | --- | --- |
@@ -184,9 +185,10 @@ miss the source refused without billing is free, and `costUsd` / `cost_usd` on t
 result is always what the call actually cost you.
 
 `reason` is present only on a miss. In TypeScript it is the `NotFoundReason` union on the
-`found: false` branch of `Output<T>`; in Python it is `OutputNotFound.reason`. New words can
-be added to the list; read it from the API's `outputSchema` in `/v1/apis/{slug}` or the
-OpenAPI document rather than hardcoding it.
+`found: false` branch of `Output<T>`; in Python it is `OutputNotFound.reason`. Every API can
+answer `not_found`; an API lists `suspended` only when one of its sources can tell a suspended
+account apart. An API can gain a word later, so read the list from its `outputSchema` in
+`/v1/apis/{slug}` or the OpenAPI document rather than hardcoding it.
 
 <CodeGroup>
 ```ts TypeScript
