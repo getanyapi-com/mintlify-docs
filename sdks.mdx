@@ -164,6 +164,22 @@ flag: `output.found` is `false` when the upstream had no matching entity, which 
 successful answer, not an error. Use `unwrap` to get the data or raise
 `ResultNotFoundError` when the result is empty.
 
+Every outcome maps to exactly one shape:
+
+| You asked for | You get |
+| --- | --- |
+| An account, post, video, or channel that does not exist, or a search with no matches | `200` with `output.found: false` and `data: null` |
+| An account that is suspended, deleted, or removed by the platform | `200` with `output.found: false` |
+| A target the first source returns nothing for, on an API that has more than one source | Some APIs ask the next source before answering `found: false`; a source that states the target does not exist is taken at its word |
+| An API slug that does not exist | `404` `NotFoundError` |
+| Input the API cannot accept, such as a malformed URL or a field combination no source serves | `400` `BadRequestError`, never charged |
+| A site this API cannot serve | `422` with an `alternatives` list naming the APIs that can |
+| Every source failing on a well-formed request | `502` `UpstreamError`, never charged |
+
+A `found: false` answer is billed only when the source charged AnyAPI for the lookup. A
+miss the source refused without billing is free, and `costUsd` / `cost_usd` on the
+result is always what the call actually cost you.
+
 <CodeGroup>
 ```ts TypeScript
 import { unwrap, ResultNotFoundError } from "@getanyapi/sdk";
@@ -299,7 +315,7 @@ parsing the message text. Existing clients that only read `error` remain compati
 | `BadRequestError` | 400 | Input failed validation |
 | `AuthenticationError` | 401 | Missing or invalid API key |
 | `InsufficientBalanceError` | 402 | Wallet balance or per-key cap exceeded |
-| `NotFoundError` | 404 | Slug or resource does not exist |
+| `NotFoundError` | 404 | The API slug does not exist; a missing target is `found: false`, not a 404 |
 | `ResultNotFoundError` | - | `unwrap` on an empty found-data result |
 | `RateLimitedError` | 429 | Too many requests (retried automatically) |
 | `UpstreamError` | 502 | An upstream request failed |

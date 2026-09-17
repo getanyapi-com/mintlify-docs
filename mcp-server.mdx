@@ -534,10 +534,11 @@ Tool failures come back as MCP tool errors with a short machine-readable prefix:
 | `scrape_failed` | The run ended without a confirmed outcome | Unknown - check `get_balance`; repeating the same call within a few minutes cannot double charge |
 
 A completed lookup that returns a normalized empty result such as `found: false` is not a
-tool error. It is a successful answer: the lookup ran and no matching entity was found. It
-is charged like any other successful answer, because most sources charge for the lookup
-whether or not they find anything - read `costUsd` for what the call actually cost, which is
-`0` when nothing was charged for it.
+tool error. It is a successful answer: the lookup ran and the account, post, video, or
+page does not exist, was removed or suspended, or the search matched nothing. It is
+charged only when the source charged AnyAPI for the lookup; a miss the source did not bill
+is free. Read `costUsd` for what the call actually cost, which is `0` when nothing was
+charged for it.
 
 <Tip>
   Pair the MCP server with the official [agent skill](/agent-skills) — the skill teaches
