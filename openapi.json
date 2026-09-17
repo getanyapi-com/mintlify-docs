@@ -189901,7 +189901,7 @@
                                     },
                                     "datePosted": {
                                         "default": 0,
-                                        "description": "Time frame filter. Use a canonical JSON integer that is nonnegative; common values are 0 for any time, 1 for the past 24 hours, 7 for the past week, and 30 for the past month. Legacy numeric strings remain accepted.",
+                                        "description": "Time frame filter, in days back from now. Use a canonical JSON integer that is nonnegative: 0 for any time, 1 for the past 24 hours, 7 for the past week, 30 for the past month, 90 for the past three months, or 180 for the past six months. Any other number is not guaranteed to filter anything. Legacy numeric strings remain accepted.",
                                         "minimum": 0,
                                         "pattern": "^[0-9]+$",
                                         "type": [
@@ -191624,7 +191624,7 @@
         },
         "/v1/run/tiktok.search_top": {
             "post": {
-                "description": "Search TikTok's top results for a keyword (caption, views, likes, comments, shares) with cursor pagination.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Top Search pricing and uptime](https://getanyapi.com/api/tiktok/search-top) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Search TikTok's top results for a keyword (caption, views, likes, comments, shares) with cursor pagination.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Top Search pricing and uptime](https://getanyapi.com/api/tiktok/search-top) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_search_top",
                 "parameters": [
                     {
@@ -192127,7 +192127,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.003600",
-                        "min": "0.000900",
+                        "min": "0.001200",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -192170,7 +192170,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.003600",
-                                "min": "0.001000",
+                                "min": "0.001200",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -192203,7 +192203,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.003600",
-                                "min": "0.000900",
+                                "min": "0.001200",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "funded_ceiling"
