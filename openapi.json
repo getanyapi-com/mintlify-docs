@@ -152789,7 +152789,8 @@
                                         "uniqueItems": true
                                     },
                                     "url": {
-                                        "description": "Full Reddit post URL.",
+                                        "description": "Full Reddit post URL on reddit.com. A gallery link (https://www.reddit.com/gallery/<id>) is read as the post it belongs to.",
+                                        "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*(?:reddit\\.com|redd\\.it)(?:[/?#]|$)",
                                         "type": "string"
                                     }
                                 },
@@ -152797,7 +152798,10 @@
                                     "url"
                                 ],
                                 "title": "Reddit post comments input",
-                                "type": "object"
+                                "type": "object",
+                                "x-anyapi-input-normalizers": {
+                                    "url": "reddit_gallery_to_post"
+                                }
                             }
                         }
                     },
