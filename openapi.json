@@ -38442,7 +38442,7 @@
         },
         "/v1/run/email.find": {
             "post": {
-                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$15.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
+                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$15.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
                 "operationId": "email_find",
                 "parameters": [
                     {
@@ -121225,7 +121225,7 @@
         },
         "/v1/run/linkedin.search_posts": {
             "post": {
-                "description": "Search public LinkedIn posts by keyword (text, link, publish date).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Post Search pricing and uptime](https://getanyapi.com/api/linkedin/search-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Search public LinkedIn posts by keyword (text, link, publish date).\n\n**Price:** \\$18.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Post Search pricing and uptime](https://getanyapi.com/api/linkedin/search-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_search_posts",
                 "parameters": [
                     {
@@ -121732,7 +121732,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
+                        "amount": "0.018000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -121774,7 +121774,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.018000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -121806,7 +121806,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.018000",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -225574,7 +225574,7 @@
         },
         "/v1/run/web.scrape": {
             "post": {
-                "description": "Scrape any web page and get its content back as clean Markdown (or HTML, or raw HTML) plus title and metadata.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Web Scrape pricing and uptime](https://getanyapi.com/api/web/scrape) - live USD price, lane routing, and measured 30-day uptime. [Every Web endpoint](https://getanyapi.com/api/web).",
+                "description": "Scrape any web page and get its content back as clean Markdown (or HTML, or raw HTML) plus title and metadata.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Web Scrape pricing and uptime](https://getanyapi.com/api/web/scrape) - live USD price, lane routing, and measured 30-day uptime. [Every Web endpoint](https://getanyapi.com/api/web).",
                 "operationId": "web_scrape",
                 "parameters": [
                     {
@@ -232831,7 +232831,7 @@
         },
         "/v1/run/youtube.channel_contact": {
             "post": {
-                "description": "Reveal the business inquiry email a YouTube creator publishes behind the channel's View email address button. YouTube gates that address behind a signed-in Google session and a CAPTCHA, so it is absent from the channel page a logged-out scraper reads.\n\n**Price:** billed per result - \\$71.80 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$71.80 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [YouTube Channel Contact Email pricing and uptime](https://getanyapi.com/api/youtube/channel-contact) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Reveal the business inquiry email a YouTube creator publishes behind the channel's View email address button. YouTube gates that address behind a signed-in Google session and a CAPTCHA, so it is absent from the channel page a logged-out scraper reads.\n\n**Price:** billed per result - \\$71.80 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$71.80 per 1,000 requests.\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Channel Contact Email pricing and uptime](https://getanyapi.com/api/youtube/channel-contact) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_channel_contact",
                 "parameters": [
                     {
