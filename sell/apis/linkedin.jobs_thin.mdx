@@ -1,0 +1,283 @@
+---
+title: "LinkedIn Jobs (index)"
+description: "Sell linkedin.jobs_thin on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Cheap job index: title, company, location, posted date, URL. No description, salary, applicant counts, or seniority - for those use linkedin.jobs.
+
+This page is the seller-facing summary of one catalog API, `linkedin.jobs_thin`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `companyId` | string | no | Filter to a specific company by its LinkedIn numeric company id. |
+| `employmentType` | string | no | Filter by employment type. One of: `full-time`, `part-time`, `contract`, `internship`, `temporary`. |
+| `experienceLevel` | string | no | Filter by required seniority/experience level. One of: `internship`, `entry`, `associate`, `mid-senior`, `director`, `executive`. |
+| `geoId` | string | no | LinkedIn geo id to target a precise location (e.g. 103644278 for the United States); more exact than the free-text location. |
+| `limit` | integer | no | Maximum number of results to return (1-25, default 25). |
+| `location` | string | no | City, region, or country to search within. |
+| `postedLimit` | string | no | Only jobs posted within this window (past 24 hours, week, or month). One of: `24h`, `week`, `month`. |
+| `query` | string | yes | Job title or keywords to search. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `logoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a listing that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `workplaceType` | string | no | Filter by workplace type (remote, hybrid, or onsite). One of: `remote`, `hybrid`, `onsite`. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.jobs_thin.input.json",
+  "example": {
+    "query": "software engineer",
+    "location": "United States",
+    "workplaceType": "remote",
+    "limit": 3
+  },
+  "title": "LinkedIn Jobs (index) input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 25,
+      "description": "Maximum number of results to return (1-25, default 25)."
+    },
+    "query": {
+      "type": "string",
+      "description": "Job title or keywords to search."
+    },
+    "location": {
+      "type": "string",
+      "description": "City, region, or country to search within."
+    },
+    "employmentType": {
+      "type": "string",
+      "enum": [
+        "full-time",
+        "part-time",
+        "contract",
+        "internship",
+        "temporary"
+      ],
+      "description": "Filter by employment type."
+    },
+    "workplaceType": {
+      "type": "string",
+      "enum": [
+        "remote",
+        "hybrid",
+        "onsite"
+      ],
+      "description": "Filter by workplace type (remote, hybrid, or onsite)."
+    },
+    "experienceLevel": {
+      "type": "string",
+      "enum": [
+        "internship",
+        "entry",
+        "associate",
+        "mid-senior",
+        "director",
+        "executive"
+      ],
+      "description": "Filter by required seniority/experience level."
+    },
+    "postedLimit": {
+      "type": "string",
+      "enum": [
+        "24h",
+        "week",
+        "month"
+      ],
+      "description": "Only jobs posted within this window (past 24 hours, week, or month)."
+    },
+    "geoId": {
+      "type": "string",
+      "description": "LinkedIn geo id to target a precise location (e.g. 103644278 for the United States); more exact than the free-text location."
+    },
+    "companyId": {
+      "type": "string",
+      "description": "Filter to a specific company by its LinkedIn numeric company id."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "companyUrl",
+          "createdUtc",
+          "id",
+          "logoUrl"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `logoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a listing that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The results wrapper, or null when nothing was found. |
+| `data.items` | array | yes | Job listing index records for the search. |
+| `data.items[].company` | string | no | Hiring company name. |
+| `data.items[].companyUrl` | string | no | Canonical LinkedIn company URL. |
+| `data.items[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.items[].id` | string | no | LinkedIn job listing id. |
+| `data.items[].location` | string | no | Job location (city, region). |
+| `data.items[].logoUrl` | string | no | Hiring company logo image URL. |
+| `data.items[].title` | string | yes | Job title. |
+| `data.items[].url` | string | yes | Canonical LinkedIn job listing URL. |
+| `found` | boolean | yes | True when at least one job listing was returned. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.jobs_thin.output.json",
+  "title": "LinkedIn Jobs (index) output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "True when at least one job listing was returned."
+    },
+    "data": {
+      "description": "The results wrapper, or null when nothing was found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Job listing index records for the search.",
+              "items": {
+                "type": "object",
+                "description": "A LinkedIn job listing index entry: title, company, location, posting date, and the listing URL.",
+                "required": [
+                  "title",
+                  "url"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "LinkedIn job listing id."
+                  },
+                  "title": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Job title."
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Canonical LinkedIn job listing URL."
+                  },
+                  "company": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Hiring company name."
+                  },
+                  "companyUrl": {
+                    "type": "string",
+                    "description": "Canonical LinkedIn company URL."
+                  },
+                  "logoUrl": {
+                    "type": "string",
+                    "description": "Hiring company logo image URL."
+                  },
+                  "location": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Job location (city, region)."
+                  },
+                  "createdUtc": {
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `company`
+- `items`
+- `location`
+- `title`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "software engineer",
+  "location": "United States",
+  "workplaceType": "remote",
+  "limit": 3
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

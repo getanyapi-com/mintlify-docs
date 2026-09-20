@@ -1,0 +1,455 @@
+---
+title: "LinkedIn Post Search (full)"
+description: "Sell linkedin.search_posts_full on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Search public LinkedIn posts with rich author, engagement, attachment, and poll details.
+
+This page is the seller-facing summary of one catalog API, `linkedin.search_posts_full`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$5.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `authorCompanyNames` | array | no | Only return posts by people associated with these company names. |
+| `authorIndustryIds` | array | no | Only return posts by authors associated with these LinkedIn industry IDs. |
+| `authorKeywords` | string | no | Only return posts whose author profile headline or job title contains at least one of these keywords. |
+| `authorUrls` | array | no | Only return posts authored by these LinkedIn profile or company URLs. |
+| `contentType` | string | no | Only return posts carrying this content type. One of: `all`, `videos`, `images`, `jobs`, `live-videos`, `documents`, `collaborative-articles`. |
+| `datePosted` | string | no | Only return posts published within this relative time window. Last-hour and windows beyond one month route to the provider that supports them. One of: `last-hour`, `last-day`, `last-week`, `last-month`, `last-three-months`, `last-six-months`, `last-year`. Default `"last-day"`. |
+| `limit` | integer | no | Maximum number of posts to return (1-100, default 10). The upper bound is one LinkedIn search page. Default `10`. |
+| `mentioningMemberUrls` | array | no | Only return posts mentioning these LinkedIn member profile URLs. |
+| `query` | string | yes | LinkedIn post search query, including quoted terms or Boolean operators accepted by LinkedIn search. |
+| `sort` | string | no | Order results by search relevance or publication date. One of: `relevance`, `date`. Default `"relevance"`. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.search_posts_full.input.json",
+  "example": {
+    "query": "artificial intelligence",
+    "limit": 10,
+    "datePosted": "last-week",
+    "sort": "relevance"
+  },
+  "title": "LinkedIn Post Search (full) input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "minLength": 1,
+      "description": "LinkedIn post search query, including quoted terms or Boolean operators accepted by LinkedIn search."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 10,
+      "description": "Maximum number of posts to return (1-100, default 10). The upper bound is one LinkedIn search page."
+    },
+    "datePosted": {
+      "type": "string",
+      "enum": [
+        "last-hour",
+        "last-day",
+        "last-week",
+        "last-month",
+        "last-three-months",
+        "last-six-months",
+        "last-year"
+      ],
+      "default": "last-day",
+      "description": "Only return posts published within this relative time window. Last-hour and windows beyond one month route to the provider that supports them."
+    },
+    "sort": {
+      "type": "string",
+      "enum": [
+        "relevance",
+        "date"
+      ],
+      "default": "relevance",
+      "description": "Order results by search relevance or publication date."
+    },
+    "authorUrls": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "Only return posts authored by these LinkedIn profile or company URLs."
+    },
+    "authorCompanyNames": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Only return posts by people associated with these company names."
+    },
+    "mentioningMemberUrls": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "Only return posts mentioning these LinkedIn member profile URLs."
+    },
+    "contentType": {
+      "type": "string",
+      "enum": [
+        "all",
+        "videos",
+        "images",
+        "jobs",
+        "live-videos",
+        "documents",
+        "collaborative-articles"
+      ],
+      "description": "Only return posts carrying this content type."
+    },
+    "authorIndustryIds": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Only return posts by authors associated with these LinkedIn industry IDs."
+    },
+    "authorKeywords": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Only return posts whose author profile headline or job title contains at least one of these keywords."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The matching LinkedIn posts, or null when no result was found. |
+| `data.posts` | array | yes | LinkedIn posts matching the search query. |
+| `data.posts[].attachmentDescription` | string | no | Short description of the attached content, as LinkedIn shows it on the preview card. Best effort on article attachments: depending on the search it may be absent, so treat it as optional. To read an article's content reliably, pass attachmentUrl to the linkedin.article endpoint. |
+| `data.posts[].attachmentImage` | string | no | Image URL associated with the attachment. |
+| `data.posts[].attachmentSubtitle` | string | no | Subtitle of the attached structured content. |
+| `data.posts[].attachmentTitle` | string | no | Title of the attached article, job, or other structured content. |
+| `data.posts[].attachmentType` | string | no | Kind of structured content attached to the post, such as article, job, poll, video, or document. |
+| `data.posts[].attachmentUrl` | string | no | Canonical destination URL of the attachment. When attachmentType is article, pass this URL to the linkedin.article endpoint to read the article's full body text. |
+| `data.posts[].author` | object | yes | Public author identity attached to the post. |
+| `data.posts[].author.headline` | string | no | Public headline or company follower summary for the author. |
+| `data.posts[].author.id` | string | no | LinkedIn identifier for the author. |
+| `data.posts[].author.image` | string | no | Public profile or company image URL for the author. |
+| `data.posts[].author.name` | string | no | Display name of the author. |
+| `data.posts[].author.profileUrl` | string | no | Canonical LinkedIn profile or company URL for the author. |
+| `data.posts[].author.publicIdentifier` | string | no | LinkedIn public identifier (vanity slug) for the author, for example "williamhgates". Stable across lanes, unlike the raw id. |
+| `data.posts[].author.type` | string | no | Kind of LinkedIn entity that authored the post, derived from the author URL. One of: `person`, `company`, `showcase`. |
+| `data.posts[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.posts[].engagement` | object | yes | Public engagement totals attached to the post. |
+| `data.posts[].engagement.breakdown` | array | no | Reaction counts grouped by LinkedIn reaction type. |
+| `data.posts[].engagement.breakdown[].count` | integer | yes | Number of reactions of this type. |
+| `data.posts[].engagement.breakdown[].type` | string | yes | LinkedIn reaction type. |
+| `data.posts[].engagement.comments` | integer | no | Total comment count. |
+| `data.posts[].engagement.reactions` | integer | no | Total reaction count. |
+| `data.posts[].engagement.reposts` | integer | no | Total repost or share count. |
+| `data.posts[].id` | string | yes | Stable LinkedIn activity identifier for the post. |
+| `data.posts[].pollClosed` | boolean | no | Whether the attached poll is closed. |
+| `data.posts[].pollOptions` | array | no | Options and public vote counts for an attached poll. |
+| `data.posts[].pollOptions[].text` | string | yes | Poll option text. |
+| `data.posts[].pollOptions[].votes` | integer | yes | Votes recorded for this option. |
+| `data.posts[].pollQuestion` | string | no | Question asked by an attached LinkedIn poll. |
+| `data.posts[].pollTotalVotes` | integer | no | Total votes recorded by the attached poll. |
+| `data.posts[].text` | string | yes | Text content of the post. Empty string when the post carries no commentary of its own, such as a bare article share or an image-only post. |
+| `data.posts[].url` | string | yes | Canonical URL of the LinkedIn post. |
+| `found` | boolean | yes | Whether matching LinkedIn posts were found. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.search_posts_full.output.json",
+  "title": "LinkedIn Post Search (full) output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "Whether matching LinkedIn posts were found."
+    },
+    "data": {
+      "description": "The matching LinkedIn posts, or null when no result was found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "posts"
+          ],
+          "properties": {
+            "posts": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "LinkedIn posts matching the search query.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "url",
+                  "text",
+                  "createdUtc",
+                  "author",
+                  "engagement"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Stable LinkedIn activity identifier for the post."
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Canonical URL of the LinkedIn post."
+                  },
+                  "text": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Text content of the post. Empty string when the post carries no commentary of its own, such as a bare article share or an image-only post."
+                  },
+                  "createdUtc": {
+                    "x-anyapi-must-populate": true,
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "author": {
+                    "x-anyapi-must-populate": true,
+                    "type": "object",
+                    "description": "Public author identity attached to the post.",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "LinkedIn identifier for the author."
+                      },
+                      "name": {
+                        "type": "string",
+                        "description": "Display name of the author."
+                      },
+                      "headline": {
+                        "type": "string",
+                        "description": "Public headline or company follower summary for the author."
+                      },
+                      "profileUrl": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Canonical LinkedIn profile or company URL for the author."
+                      },
+                      "image": {
+                        "type": "string",
+                        "format": "uri",
+                        "description": "Public profile or company image URL for the author."
+                      },
+                      "publicIdentifier": {
+                        "type": "string",
+                        "description": "LinkedIn public identifier (vanity slug) for the author, for example \"williamhgates\". Stable across lanes, unlike the raw id."
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "person",
+                          "company",
+                          "showcase"
+                        ],
+                        "description": "Kind of LinkedIn entity that authored the post, derived from the author URL."
+                      }
+                    }
+                  },
+                  "engagement": {
+                    "x-anyapi-must-populate": true,
+                    "type": "object",
+                    "description": "Public engagement totals attached to the post.",
+                    "properties": {
+                      "reactions": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Total reaction count."
+                      },
+                      "comments": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Total comment count."
+                      },
+                      "reposts": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Total repost or share count."
+                      },
+                      "breakdown": {
+                        "type": "array",
+                        "description": "Reaction counts grouped by LinkedIn reaction type.",
+                        "items": {
+                          "type": "object",
+                          "required": [
+                            "type",
+                            "count"
+                          ],
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "description": "LinkedIn reaction type."
+                            },
+                            "count": {
+                              "type": "integer",
+                              "minimum": 0,
+                              "description": "Number of reactions of this type."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "attachmentType": {
+                    "type": "string",
+                    "description": "Kind of structured content attached to the post, such as article, job, poll, video, or document."
+                  },
+                  "attachmentTitle": {
+                    "type": "string",
+                    "description": "Title of the attached article, job, or other structured content."
+                  },
+                  "attachmentSubtitle": {
+                    "type": "string",
+                    "description": "Subtitle of the attached structured content."
+                  },
+                  "attachmentUrl": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Canonical destination URL of the attachment. When attachmentType is article, pass this URL to the linkedin.article endpoint to read the article's full body text."
+                  },
+                  "attachmentDescription": {
+                    "type": "string",
+                    "description": "Short description of the attached content, as LinkedIn shows it on the preview card. Best effort on article attachments: depending on the search it may be absent, so treat it as optional. To read an article's content reliably, pass attachmentUrl to the linkedin.article endpoint."
+                  },
+                  "attachmentImage": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Image URL associated with the attachment."
+                  },
+                  "pollQuestion": {
+                    "type": "string",
+                    "description": "Question asked by an attached LinkedIn poll."
+                  },
+                  "pollTotalVotes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Total votes recorded by the attached poll."
+                  },
+                  "pollClosed": {
+                    "type": "boolean",
+                    "description": "Whether the attached poll is closed."
+                  },
+                  "pollOptions": {
+                    "type": "array",
+                    "description": "Options and public vote counts for an attached poll.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "text",
+                        "votes"
+                      ],
+                      "properties": {
+                        "text": {
+                          "type": "string",
+                          "description": "Poll option text."
+                        },
+                        "votes": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Votes recorded for this option."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `author`
+- `createdUtc`
+- `engagement`
+- `id`
+- `posts`
+- `text`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `posts` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "artificial intelligence",
+  "limit": 10,
+  "datePosted": "last-week",
+  "sort": "relevance"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

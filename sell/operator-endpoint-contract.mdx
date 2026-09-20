@@ -7,6 +7,12 @@ Your endpoint serves one catalog API. AnyAPI sends it signed POST requests in th
 canonical input format; your endpoint answers in the canonical output format. This page is
 the whole contract.
 
+<Info>
+  Only some catalog APIs are open for self-serve registration. The list, with the request,
+  response, and published price for each one, is [APIs open to sellers](/sell/apis/index).
+  To sell any other API, email [support@getanyapi.com](mailto:support@getanyapi.com).
+</Info>
+
 ## The request you receive
 
 AnyAPI POSTs the API's input as JSON to your registered path (default `/run`):
@@ -245,3 +251,21 @@ so you can fix and rerun — unlimited retries.
 
 During the live trial, mirrored requests additionally carry `X-AnyAPI-Trial: 1` so you
 can tell trial traffic from paid traffic in your logs.
+
+## How the live trial works
+
+An endpoint in the trial receives up to 500 mirrored real customer requests, paced evenly
+across 7 days from its first request. Nobody is billed for trial traffic and you are not
+paid for it.
+
+Every trial response is compared with what the customer was actually served:
+
+- Agreeing on an empty list, or agreeing on `found: false`, counts as a pass.
+- A non-2xx, a timeout, or output that does not validate against the schema counts as a
+  failure.
+
+Graduation needs at least 95% of compared requests passing, over at least 200 compared
+requests spanning at least 7 days, with no fabricated or injected content.
+
+If you ship a fix part-way through the trial, it is measured by the paced requests that
+are still to come, so a bad first day is not permanent.

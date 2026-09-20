@@ -1,0 +1,237 @@
+---
+title: "Google Search"
+description: "Sell google.search on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.
+
+This page is the seller-facing summary of one catalog API, `google.search`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `autocorrect` | boolean | no | Toggle Google spelling autocorrect (default true). Set false to search the exact query without correction. |
+| `cursor` | string | no | Continuation token from a previous response's nextCursor. Pass it back to fetch the next page of results. |
+| `gl` | string | no | Two-letter country code for result localization (e.g. us, gb, de). Default `"us"`. |
+| `hl` | string | no | Two-letter interface and results language code (e.g. en, es, de). Default `"en"`. |
+| `limit` | integer | no | Maximum number of organic results to return in this response. Google stopped honoring bulk result counts in September 2025, so one page is about 10 results and a limit above 10 is accepted but will not return more than that. To go deeper, either page through with cursor (about 10 results per call, each billed as a request) or use google.search_100, which returns up to 100 ranked results in a single call for one flat charge and is cheaper past roughly 20 results. Price is flat per request. Default `10`. |
+| `location` | string | no | Fine-grained location to localize results to, more specific than the country-level gl. Must exactly match an Active Canonical Name from Google's geo-target list, which uses no space after each comma: 'New York,New York,United States', 'Austin,Texas,United States', 'London,England,United Kingdom'. A value that does not match is rejected rather than quietly searched from somewhere else. |
+| `query` | string | yes | The Google search query. |
+| `requireCursor` | boolean | no | Deprecated. Every source for this search returns a nextCursor, so this changes nothing about the price or which source serves you; it stays accepted so callers that already send it keep working. |
+| `timeframe` | string | no | Restrict results to a recent time window: 1h, 1d, 7d, 1y, or all. Default all (no time restriction). |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/google.search.input.json",
+  "example": {
+    "query": "best coffee maker",
+    "gl": "us",
+    "hl": "en",
+    "limit": 10
+  },
+  "title": "Google search input",
+  "type": "object",
+  "additionalProperties": false,
+  "x-aliases": {
+    "q": "query",
+    "num": "limit"
+  },
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "The Google search query."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 10,
+      "description": "Maximum number of organic results to return in this response. Google stopped honoring bulk result counts in September 2025, so one page is about 10 results and a limit above 10 is accepted but will not return more than that. To go deeper, either page through with cursor (about 10 results per call, each billed as a request) or use google.search_100, which returns up to 100 ranked results in a single call for one flat charge and is cheaper past roughly 20 results. Price is flat per request."
+    },
+    "requireCursor": {
+      "type": "boolean",
+      "deprecated": true,
+      "description": "Deprecated. Every source for this search returns a nextCursor, so this changes nothing about the price or which source serves you; it stays accepted so callers that already send it keep working."
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Continuation token from a previous response's nextCursor. Pass it back to fetch the next page of results."
+    },
+    "gl": {
+      "type": "string",
+      "default": "us",
+      "description": "Two-letter country code for result localization (e.g. us, gb, de)."
+    },
+    "hl": {
+      "type": "string",
+      "default": "en",
+      "description": "Two-letter interface and results language code (e.g. en, es, de)."
+    },
+    "location": {
+      "type": "string",
+      "description": "Fine-grained location to localize results to, more specific than the country-level gl. Must exactly match an Active Canonical Name from Google's geo-target list, which uses no space after each comma: 'New York,New York,United States', 'Austin,Texas,United States', 'London,England,United Kingdom'. A value that does not match is rejected rather than quietly searched from somewhere else."
+    },
+    "timeframe": {
+      "type": "string",
+      "description": "Restrict results to a recent time window: 1h, 1d, 7d, 1y, or all. Default all (no time restriction)."
+    },
+    "autocorrect": {
+      "type": "boolean",
+      "description": "Toggle Google spelling autocorrect (default true). Set false to search the exact query without correction."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.nextCursor` | string or null | no | Opaque cursor for the next page of results, or null when this lane has no more. Pass it back as cursor to continue. |
+| `data.query` | string | yes |  |
+| `data.results` | array | yes |  |
+| `data.results[].link` | string | yes |  |
+| `data.results[].position` | integer | yes |  |
+| `data.results[].snippet` | string | yes |  |
+| `data.results[].title` | string | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/google.search.output.json",
+  "title": "Google search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "query",
+            "results"
+          ],
+          "properties": {
+            "query": {
+              "type": "string"
+            },
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of results, or null when this lane has no more. Pass it back as cursor to continue."
+            },
+            "results": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "link",
+                  "snippet",
+                  "position"
+                ],
+                "properties": {
+                  "title": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "link": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "snippet": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "position": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `link`
+- `results`
+- `snippet`
+- `title`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `results` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "best coffee maker",
+  "gl": "us",
+  "hl": "en",
+  "limit": 10
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

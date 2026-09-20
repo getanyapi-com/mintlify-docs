@@ -1,0 +1,227 @@
+---
+title: "Twitter Profile"
+description: "Sell twitter.profile on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch a Twitter/X account's public profile (followers, tweets, bio, verification) by handle.
+
+This page is the seller-facing summary of one catalog API, `twitter.profile`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.22 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `handle` | string | yes | Twitter/X handle without the leading @. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/twitter.profile.input.json",
+  "example": {
+    "handle": "nasa"
+  },
+  "title": "Twitter profile input",
+  "type": "object",
+  "additionalProperties": false,
+  "x-aliases": {
+    "username": "handle"
+  },
+  "required": [
+    "handle"
+  ],
+  "properties": {
+    "handle": {
+      "type": "string",
+      "description": "Twitter/X handle without the leading @."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.avatarUrl` | string | yes |  |
+| `data.bio` | string | yes |  |
+| `data.coverUrl` | string | no | Profile banner image URL of the account. |
+| `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time) the account was created. Multiply by 1000 for a JS Date in milliseconds. |
+| `data.displayName` | string | yes |  |
+| `data.followers` | integer | yes |  |
+| `data.following` | integer | yes |  |
+| `data.handle` | string | yes |  |
+| `data.id` | string | no | Numeric X user id of the account, as a string. |
+| `data.location` | string | no | Location text on the account's profile. |
+| `data.mediaCount` | integer | no | Number of media items the account has posted. |
+| `data.pinnedPostIds` | array | no | Ids of the posts pinned to the account's profile. |
+| `data.private` | boolean | no | Whether the account is protected (private). |
+| `data.tweets` | integer | yes |  |
+| `data.verified` | boolean | yes |  |
+| `data.website` | string | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/twitter.profile.output.json",
+  "title": "Twitter profile output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "handle",
+            "displayName",
+            "followers",
+            "following",
+            "tweets",
+            "bio",
+            "verified",
+            "avatarUrl",
+            "website"
+          ],
+          "properties": {
+            "handle": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "displayName": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "followers": {
+              "type": "integer"
+            },
+            "following": {
+              "type": "integer"
+            },
+            "tweets": {
+              "type": "integer"
+            },
+            "bio": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "verified": {
+              "type": "boolean"
+            },
+            "avatarUrl": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "website": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string",
+              "description": "Numeric X user id of the account, as a string."
+            },
+            "location": {
+              "type": "string",
+              "description": "Location text on the account's profile."
+            },
+            "createdUtc": {
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time) the account was created. Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "mediaCount": {
+              "type": "integer",
+              "description": "Number of media items the account has posted."
+            },
+            "private": {
+              "type": "boolean",
+              "description": "Whether the account is protected (private)."
+            },
+            "coverUrl": {
+              "type": "string",
+              "description": "Profile banner image URL of the account."
+            },
+            "pinnedPostIds": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Ids of the posts pinned to the account's profile."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `avatarUrl`
+- `bio`
+- `displayName`
+- `handle`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `pinnedPostIds` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "handle": "nasa"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Behavior
+
+- The input is a handle with no leading @, and username is accepted as another spelling of handle.
+- There is no empty result: a handle with no account behind it returns found false with data null.
+- A found profile always carries handle, displayName, followers, following, tweets, bio, verified, avatarUrl and website, using an empty string or zero for a value the account has not set rather than dropping the key.
+- createdUtc is the account creation time as a UTC epoch in seconds, not a date string.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

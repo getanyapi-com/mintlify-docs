@@ -1,0 +1,283 @@
+---
+title: "Instagram Post"
+description: "Sell instagram.post on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch a single Instagram post or reel by URL (media URLs, like count, owner, type) as normalized JSON. Turn on hostVideo to also get the post's video on a hosted MP4 link that plays without an Instagram session, charged as an extra on top of the price. If you want the spoken words as well, instagram.reel_transcript transcribes the same reel.
+
+This page is the seller-facing summary of one catalog API, `instagram.post`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `hostVideo` | boolean | no | Set true to also get the post's video on a hosted MP4 link that plays without an Instagram session. The file is downloaded and stored for you, and the response adds `hostedUrl`, `expiresUtc` and `bytes`. It is charged as an extra on top of the price, and it never changes which source serves you: every source offers it at the same price. A post with no video, or a post that does not exist, is refused with no charge rather than billed for a file that cannot exist. Omit it and nothing is downloaded, nothing is stored, and nothing extra is charged. Default `false`. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `plays`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `requirePlayCount` | boolean | no | Deprecated; send `requireFields: ["plays"]` instead, which does exactly the same thing. Set true to be served only by a source that reports a reel's play count. Omit it and routing is unchanged, with the cheapest source serving, which does not carry play counts, so `plays` is absent from its responses. This can raise your price: opting in routes to a source that reports the count, and you are quoted and charged its price. It stays accepted so callers that already send it keep working. |
+| `url` | string | yes | Full Instagram post or reel URL, carrying the media shortcode: /p/, /reel/, /reels/, or /tv/. A profile URL such as https://www.instagram.com/username names no post, so it is rejected instead of charged for an empty result - send that account's handle to instagram.profile, or its posts to instagram.user_posts. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/instagram.post.input.json",
+  "example": {
+    "url": "https://www.instagram.com/reel/DWzrfE2kaY8/"
+  },
+  "title": "Instagram post input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "pattern": "^https?://(?:www\\.)?instagram\\.com/(?:[A-Za-z0-9_.]+/)?(?:p|reel|reels|tv)/[A-Za-z0-9_-]+/?(?:[?#].*)?$",
+      "description": "Full Instagram post or reel URL, carrying the media shortcode: /p/, /reel/, /reels/, or /tv/. A profile URL such as https://www.instagram.com/username names no post, so it is rejected instead of charged for an empty result - send that account's handle to instagram.profile, or its posts to instagram.user_posts."
+    },
+    "hostVideo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Set true to also get the post's video on a hosted MP4 link that plays without an Instagram session. The file is downloaded and stored for you, and the response adds `hostedUrl`, `expiresUtc` and `bytes`. It is charged as an extra on top of the price, and it never changes which source serves you: every source offers it at the same price. A post with no video, or a post that does not exist, is refused with no charge rather than billed for a file that cannot exist. Omit it and nothing is downloaded, nothing is stored, and nothing extra is charged."
+    },
+    "requirePlayCount": {
+      "type": "boolean",
+      "deprecated": true,
+      "description": "Deprecated; send `requireFields: [\"plays\"]` instead, which does exactly the same thing. Set true to be served only by a source that reports a reel's play count. Omit it and routing is unchanged, with the cheapest source serving, which does not carry play counts, so `plays` is absent from its responses. This can raise your price: opting in routes to a source that reports the count, and you are quoted and charged its price. It stays accepted so callers that already send it keep working."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "avatarUrl",
+          "comments",
+          "createdUtc",
+          "displayName",
+          "hasAudio",
+          "likes",
+          "locationId",
+          "locationName",
+          "paidPartnership",
+          "plays",
+          "productType",
+          "shortcode",
+          "type",
+          "userId",
+          "verified",
+          "videoUrl"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `plays`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.avatarUrl` | string | no | Profile picture URL of the posting account. |
+| `data.bytes` | integer | no | Size of the hosted MP4 in bytes. Present only when the request set `hostVideo` to true. |
+| `data.comments` | integer | no | Number of comments on the post. |
+| `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.displayName` | string | no | Display name of the posting account. |
+| `data.displayUrl` | string | yes |  |
+| `data.expiresUtc` | integer | no | When `hostedUrl` stops working, as a UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Present only when the request set `hostVideo` to true. |
+| `data.hasAudio` | boolean | no | True when the media carries an audio track. |
+| `data.hostedUrl` | string | no | AnyAPI-hosted MP4 of this post's video, playable without an Instagram session. Present only when the request set `hostVideo` to true. |
+| `data.id` | string | yes |  |
+| `data.likes` | integer | yes |  |
+| `data.locationId` | string | no | Instagram id of the tagged place, when the post tags one. |
+| `data.locationName` | string | no | Name of the tagged place, when the post tags one. |
+| `data.owner` | string | yes |  |
+| `data.paidPartnership` | boolean | no | True when the post is tagged as a paid partnership. |
+| `data.plays` | integer | no | Number of plays of the reel or video. Absent when Instagram does not expose a play count for this media, and on lanes that cannot serve it. |
+| `data.productType` | string | no | Instagram product type of the media, for example feed, clips or igtv. |
+| `data.shortcode` | string | yes |  |
+| `data.type` | string | yes |  |
+| `data.userId` | string | no | Instagram user id of the posting account. |
+| `data.verified` | boolean | no | True when the posting account carries a verified badge. |
+| `data.videoUrl` | string | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/instagram.post.output.json",
+  "title": "Instagram post output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "shortcode",
+            "type",
+            "owner",
+            "likes",
+            "displayUrl",
+            "videoUrl"
+          ],
+          "properties": {
+            "id": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "shortcode": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "owner": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "likes": {
+              "type": "integer"
+            },
+            "plays": {
+              "type": "integer",
+              "description": "Number of plays of the reel or video. Absent when Instagram does not expose a play count for this media, and on lanes that cannot serve it."
+            },
+            "displayUrl": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "videoUrl": {
+              "type": "string"
+            },
+            "comments": {
+              "type": "integer",
+              "description": "Number of comments on the post."
+            },
+            "createdUtc": {
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "hasAudio": {
+              "type": "boolean",
+              "description": "True when the media carries an audio track."
+            },
+            "paidPartnership": {
+              "type": "boolean",
+              "description": "True when the post is tagged as a paid partnership."
+            },
+            "productType": {
+              "type": "string",
+              "description": "Instagram product type of the media, for example feed, clips or igtv."
+            },
+            "avatarUrl": {
+              "type": "string",
+              "description": "Profile picture URL of the posting account."
+            },
+            "verified": {
+              "type": "boolean",
+              "description": "True when the posting account carries a verified badge."
+            },
+            "displayName": {
+              "type": "string",
+              "description": "Display name of the posting account."
+            },
+            "userId": {
+              "type": "string",
+              "description": "Instagram user id of the posting account."
+            },
+            "locationId": {
+              "type": "string",
+              "description": "Instagram id of the tagged place, when the post tags one."
+            },
+            "locationName": {
+              "type": "string",
+              "description": "Name of the tagged place, when the post tags one."
+            },
+            "hostedUrl": {
+              "type": "string",
+              "format": "uri",
+              "description": "AnyAPI-hosted MP4 of this post's video, playable without an Instagram session. Present only when the request set `hostVideo` to true."
+            },
+            "expiresUtc": {
+              "type": "integer",
+              "description": "When `hostedUrl` stops working, as a UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Present only when the request set `hostVideo` to true."
+            },
+            "bytes": {
+              "type": "integer",
+              "description": "Size of the hosted MP4 in bytes. Present only when the request set `hostVideo` to true."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `displayUrl`
+- `id`
+- `owner`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty result is not a not-found: when the entity exists but carries nothing, answer 2xx with `found: true` and the empty values.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.instagram.com/reel/DWzrfE2kaY8/"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

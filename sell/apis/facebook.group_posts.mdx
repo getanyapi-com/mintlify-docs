@@ -1,0 +1,218 @@
+---
+title: "Facebook Group Posts"
+description: "Sell facebook.group_posts on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch recent posts from any public Facebook group by URL: text, author, reactions, and comment counts.
+
+This page is the seller-facing summary of one catalog API, `facebook.group_posts`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `cursor` | string | no | Pagination cursor from a previous response to fetch the next page. |
+| `sort` | string | no | Ordering for the returned posts (e.g. TOP_POSTS). One of: `TOP_POSTS`, `RECENT_ACTIVITY`, `CHRONOLOGICAL`, `CHRONOLOGICAL_LISTINGS`. |
+| `url` | string | yes | The URL of a public Facebook group to fetch posts from (e.g. https://www.facebook.com/groups/instantpotcommunity/). |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/facebook.group_posts.input.json",
+  "example": {
+    "url": "https://www.facebook.com/groups/instantpotcommunity/"
+  },
+  "title": "Facebook Group Posts input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "The URL of a public Facebook group to fetch posts from (e.g. https://www.facebook.com/groups/instantpotcommunity/)."
+    },
+    "sort": {
+      "type": "string",
+      "enum": [
+        "TOP_POSTS",
+        "RECENT_ACTIVITY",
+        "CHRONOLOGICAL",
+        "CHRONOLOGICAL_LISTINGS"
+      ],
+      "description": "Ordering for the returned posts (e.g. TOP_POSTS)."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Pagination cursor from a previous response to fetch the next page."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.nextCursor` | string or null | yes | Opaque cursor for the next page of posts, or null when this lane has no more. Pass it back as cursor to continue. |
+| `data.posts` | array | yes |  |
+| `data.posts[].authorId` | string | yes |  |
+| `data.posts[].authorName` | string | yes |  |
+| `data.posts[].commentCount` | integer | yes |  |
+| `data.posts[].id` | string | yes |  |
+| `data.posts[].publishTime` | integer | yes |  |
+| `data.posts[].reactionCount` | integer | yes |  |
+| `data.posts[].text` | string | yes |  |
+| `data.posts[].url` | string | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/facebook.group_posts.output.json",
+  "title": "Facebook Group Posts output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "nextCursor",
+            "posts"
+          ],
+          "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of posts, or null when this lane has no more. Pass it back as cursor to continue."
+            },
+            "posts": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text",
+                  "url",
+                  "publishTime",
+                  "reactionCount",
+                  "commentCount",
+                  "authorName",
+                  "authorId"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "text": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "publishTime": {
+                    "x-anyapi-must-populate": true,
+                    "type": "integer"
+                  },
+                  "reactionCount": {
+                    "type": "integer"
+                  },
+                  "commentCount": {
+                    "type": "integer"
+                  },
+                  "authorName": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "authorId": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `authorId`
+- `authorName`
+- `id`
+- `posts`
+- `publishTime`
+- `text`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `posts` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.facebook.com/groups/instantpotcommunity/"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

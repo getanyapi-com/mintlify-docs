@@ -1,0 +1,355 @@
+---
+title: "X / Twitter User Posts"
+description: "Sell twitter.user_posts on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Get an X (Twitter) account's profile Posts-tab timeline by handle. Results follow profile order: a pinned post may appear first, followed by otherwise reverse-chronological authored posts, reposts, quotes, and self-thread continuations.
+
+This page is the seller-facing summary of one catalog API, `twitter.user_posts`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page. |
+| `handle` | string | yes | Twitter/X handle without the leading @. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isPinned` or `isReply`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a tweet that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/twitter.user_posts.input.json",
+  "example": {
+    "handle": "levelsio"
+  },
+  "title": "X / Twitter user posts input",
+  "type": "object",
+  "additionalProperties": false,
+  "x-aliases": {
+    "username": "handle"
+  },
+  "required": [
+    "handle"
+  ],
+  "properties": {
+    "handle": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Twitter/X handle without the leading @."
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "authorHandle",
+          "authorId",
+          "authorImage",
+          "authorName",
+          "bookmarks",
+          "conversationId",
+          "isPinned",
+          "isReply",
+          "lang",
+          "likes",
+          "media",
+          "nextCursor",
+          "quotes",
+          "replies",
+          "retweets",
+          "source",
+          "views"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isPinned` or `isReply`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a tweet that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The Posts-tab timeline page, or null when the account was not found. |
+| `data.nextCursor` | string or null | yes | Opaque cursor for the next native Posts-tab page, or null when no more pages are available. |
+| `data.tweets` | array | yes | Posts in profile order. A pinned post may appear before otherwise reverse-chronological results. |
+| `data.tweets[].authorHandle` | string | no | Handle of the account that posted. |
+| `data.tweets[].authorId` | string | no | Numeric X user id of the account that posted, as a string. |
+| `data.tweets[].authorImage` | string | no | Avatar image URL of the account that posted. |
+| `data.tweets[].authorName` | string | no | Display name of the account that posted. |
+| `data.tweets[].bookmarks` | integer | yes | Number of bookmarks. |
+| `data.tweets[].conversationId` | string | no | Id of the conversation the post belongs to, as a string. |
+| `data.tweets[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.tweets[].id` | string | yes | The post's numeric tweet ID, represented as a string. |
+| `data.tweets[].isPinned` | boolean or null | yes | Whether X marks the post as pinned on the profile, or null when the serving source does not publish it. |
+| `data.tweets[].isReply` | boolean | no | Whether X marks the record as a reply. Certified Posts-tab captures use this for self-thread continuations. |
+| `data.tweets[].lang` | string | no | Language code reported for the post, when available. |
+| `data.tweets[].likes` | integer | yes | Number of likes. |
+| `data.tweets[].media` | array | no | Photo, video, and GIF attachments on the post. Empty when the post has none. |
+| `data.tweets[].media[].height` | integer | no |  |
+| `data.tweets[].media[].type` | string | yes | One of photo, video, or gif. |
+| `data.tweets[].media[].url` | string | yes | Image URL. For a video or GIF this is the poster/thumbnail frame. X media URLs on pbs.twimg.com are publicly fetchable without authentication; append ?name=orig for the full-resolution original. |
+| `data.tweets[].media[].videoUrl` | string | no | Playable video file URL. Present only for video and gif items. |
+| `data.tweets[].media[].width` | integer | no |  |
+| `data.tweets[].quotes` | integer | no | Number of quote posts. |
+| `data.tweets[].replies` | integer | yes | Number of replies. |
+| `data.tweets[].retweets` | integer | yes | Number of reposts or retweets. |
+| `data.tweets[].source` | string | no | Client the post was sent from, e.g. "Twitter Web App". |
+| `data.tweets[].text` | string | yes | The post text. Empty for media-only posts. |
+| `data.tweets[].url` | string | yes | Canonical x.com URL of the post. |
+| `data.tweets[].views` | integer | yes | Number of views. |
+| `found` | boolean | yes | Whether the account's Posts-tab timeline was returned. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/twitter.user_posts.output.json",
+  "title": "X / Twitter user posts output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "Whether the account's Posts-tab timeline was returned."
+    },
+    "data": {
+      "description": "The Posts-tab timeline page, or null when the account was not found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tweets",
+            "nextCursor"
+          ],
+          "properties": {
+            "tweets": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Posts in profile order. A pinned post may appear before otherwise reverse-chronological results.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "url",
+                  "text",
+                  "createdUtc",
+                  "likes",
+                  "retweets",
+                  "replies",
+                  "views",
+                  "bookmarks",
+                  "isPinned"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "The post's numeric tweet ID, represented as a string."
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Canonical x.com URL of the post."
+                  },
+                  "text": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "The post text. Empty for media-only posts."
+                  },
+                  "createdUtc": {
+                    "x-anyapi-must-populate": true,
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "lang": {
+                    "type": "string",
+                    "description": "Language code reported for the post, when available."
+                  },
+                  "likes": {
+                    "type": "integer",
+                    "description": "Number of likes."
+                  },
+                  "retweets": {
+                    "type": "integer",
+                    "description": "Number of reposts or retweets."
+                  },
+                  "replies": {
+                    "type": "integer",
+                    "description": "Number of replies."
+                  },
+                  "quotes": {
+                    "type": "integer",
+                    "description": "Number of quote posts."
+                  },
+                  "views": {
+                    "type": "integer",
+                    "description": "Number of views."
+                  },
+                  "bookmarks": {
+                    "type": "integer",
+                    "description": "Number of bookmarks."
+                  },
+                  "isReply": {
+                    "type": "boolean",
+                    "description": "Whether X marks the record as a reply. Certified Posts-tab captures use this for self-thread continuations."
+                  },
+                  "isPinned": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether X marks the post as pinned on the profile, or null when the serving source does not publish it."
+                  },
+                  "media": {
+                    "type": "array",
+                    "description": "Photo, video, and GIF attachments on the post. Empty when the post has none.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "type",
+                        "url"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "One of photo, video, or gif."
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Image URL. For a video or GIF this is the poster/thumbnail frame. X media URLs on pbs.twimg.com are publicly fetchable without authentication; append ?name=orig for the full-resolution original."
+                        },
+                        "videoUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Playable video file URL. Present only for video and gif items."
+                        },
+                        "width": {
+                          "type": "integer"
+                        },
+                        "height": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  },
+                  "conversationId": {
+                    "type": "string",
+                    "description": "Id of the conversation the post belongs to, as a string."
+                  },
+                  "source": {
+                    "type": "string",
+                    "description": "Client the post was sent from, e.g. \"Twitter Web App\"."
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "description": "Numeric X user id of the account that posted, as a string."
+                  },
+                  "authorName": {
+                    "type": "string",
+                    "description": "Display name of the account that posted."
+                  },
+                  "authorHandle": {
+                    "type": "string",
+                    "description": "Handle of the account that posted."
+                  },
+                  "authorImage": {
+                    "type": "string",
+                    "description": "Avatar image URL of the account that posted."
+                  }
+                }
+              }
+            },
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next native Posts-tab page, or null when no more pages are available."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `createdUtc`
+- `id`
+- `text`
+- `tweets`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `tweets` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "handle": "levelsio"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Behavior
+
+- This is the profile Posts tab, so results follow profile order: a pinned post may come first and the rest are otherwise reverse-chronological.
+- The tab includes reposts, quotes and self-thread continuations, and isReply is true on a self-thread continuation.
+- isPinned has three states: true or false when the serving source publishes it, and null when it does not.
+- An account that cannot be resolved returns found false with data null; an account whose Posts tab is empty returns found true with an empty tweets array.
+- nextCursor is null when no further page of the tab is available.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

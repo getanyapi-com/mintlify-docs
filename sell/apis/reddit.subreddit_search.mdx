@@ -1,0 +1,288 @@
+---
+title: "Reddit Subreddit Search"
+description: "Sell reddit.subreddit_search on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Search posts within a single subreddit by query, sort, and timeframe.
+
+This page is the seller-facing summary of one catalog API, `reddit.subreddit_search`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `cursor` | string | no | Optional pagination token from a previous response. |
+| `query` | string | no | Optional search query to match posts (e.g. 'push ups'). |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived` or `selftext`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
+| `sort` | string | no | Optional sort order: relevance, hot, top, new, comments. |
+| `subreddit` | string | yes | Subreddit name without the r/ prefix (e.g. 'Fitness'). |
+| `timeframe` | string | no | Optional time filter: all, year, month, week, day, hour. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/reddit.subreddit_search.input.json",
+  "example": {
+    "subreddit": "Fitness",
+    "query": "push ups"
+  },
+  "title": "Reddit Subreddit Search input",
+  "type": "object",
+  "additionalProperties": false,
+  "x-aliases": {
+    "time": "timeframe",
+    "time_filter": "timeframe",
+    "q": "query"
+  },
+  "required": [
+    "subreddit"
+  ],
+  "properties": {
+    "subreddit": {
+      "type": "string",
+      "description": "Subreddit name without the r/ prefix (e.g. 'Fitness')."
+    },
+    "query": {
+      "type": "string",
+      "description": "Optional search query to match posts (e.g. 'push ups')."
+    },
+    "sort": {
+      "type": "string",
+      "description": "Optional sort order: relevance, hot, top, new, comments."
+    },
+    "timeframe": {
+      "type": "string",
+      "description": "Optional time filter: all, year, month, week, day, hour."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Optional pagination token from a previous response."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "author",
+          "authorId",
+          "createdUtc",
+          "isArchived",
+          "isLocked",
+          "nextCursor",
+          "nsfw",
+          "numComments",
+          "score",
+          "selftext"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived` or `selftext`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.nextCursor` | string or null | yes | Opaque cursor for the next page of posts, or null when this lane has no more. Pass it back as cursor to continue. |
+| `data.posts` | array | yes |  |
+| `data.posts[].author` | string | yes | Author username, without the u/ prefix. Empty when the upstream omits it. |
+| `data.posts[].authorId` | string | no | Reddit account ID of the author, without the t2_ prefix. |
+| `data.posts[].createdUtc` | number | yes | Post creation time as a UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.posts[].id` | string | yes | Reddit post ID (base-36, without the t3_ prefix). |
+| `data.posts[].isArchived` | boolean | no | True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false. |
+| `data.posts[].isLocked` | boolean | no | True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false. |
+| `data.posts[].nsfw` | boolean | yes | Whether the post is marked NSFW (over 18). |
+| `data.posts[].numComments` | integer | yes | Total number of comments on the post. |
+| `data.posts[].permalink` | string | yes | Canonical reddit.com thread path for the post (e.g. "/r/golang/comments/abc123/..."). Differs from url, which is the destination link. |
+| `data.posts[].score` | integer | yes | Net score (upvotes minus downvotes) at fetch time. |
+| `data.posts[].selftext` | string | no | Body text of a self post, as Markdown. Empty on a link post, which has no body. |
+| `data.posts[].subreddit` | string | yes | Subreddit name, without the r/ prefix. |
+| `data.posts[].title` | string | yes | Post title. |
+| `data.posts[].url` | string | yes | The post's destination link (the external URL for link posts, or the thread URL for self posts). |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/reddit.subreddit_search.output.json",
+  "title": "Reddit Subreddit Search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "nextCursor",
+            "posts"
+          ],
+          "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of posts, or null when this lane has no more. Pass it back as cursor to continue."
+            },
+            "posts": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "title",
+                  "author",
+                  "url",
+                  "permalink",
+                  "score",
+                  "numComments",
+                  "createdUtc",
+                  "subreddit",
+                  "nsfw"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Reddit post ID (base-36, without the t3_ prefix)."
+                  },
+                  "title": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Post title."
+                  },
+                  "selftext": {
+                    "type": "string",
+                    "description": "Body text of a self post, as Markdown. Empty on a link post, which has no body."
+                  },
+                  "author": {
+                    "type": "string",
+                    "description": "Author username, without the u/ prefix. Empty when the upstream omits it."
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts)."
+                  },
+                  "permalink": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Canonical reddit.com thread path for the post (e.g. \"/r/golang/comments/abc123/...\"). Differs from url, which is the destination link."
+                  },
+                  "score": {
+                    "type": "integer",
+                    "description": "Net score (upvotes minus downvotes) at fetch time."
+                  },
+                  "numComments": {
+                    "type": "integer",
+                    "description": "Total number of comments on the post."
+                  },
+                  "createdUtc": {
+                    "type": "number",
+                    "description": "Post creation time as a UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "subreddit": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Subreddit name, without the r/ prefix."
+                  },
+                  "isArchived": {
+                    "type": "boolean",
+                    "description": "True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false."
+                  },
+                  "isLocked": {
+                    "type": "boolean",
+                    "description": "True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false."
+                  },
+                  "nsfw": {
+                    "type": "boolean",
+                    "description": "Whether the post is marked NSFW (over 18)."
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "description": "Reddit account ID of the author, without the t2_ prefix."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `id`
+- `permalink`
+- `posts`
+- `subreddit`
+- `title`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `posts` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "subreddit": "Fitness",
+  "query": "push ups"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

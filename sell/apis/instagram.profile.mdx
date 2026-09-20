@@ -1,0 +1,247 @@
+---
+title: "Instagram Profile"
+description: "Sell instagram.profile on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch an Instagram account's public profile (followers, posts, bio, verification) by handle.
+
+This page is the seller-facing summary of one catalog API, `instagram.profile`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `handle` | string | yes | Instagram username without the leading @. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/instagram.profile.input.json",
+  "example": {
+    "handle": "nasa"
+  },
+  "title": "Instagram profile input",
+  "type": "object",
+  "additionalProperties": false,
+  "x-aliases": {
+    "username": "handle"
+  },
+  "required": [
+    "handle"
+  ],
+  "properties": {
+    "handle": {
+      "type": "string",
+      "description": "Instagram username without the leading @."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.avatarUrl` | string | yes | Profile picture URL at the highest resolution the account exposes. |
+| `data.bio` | string | yes | Profile biography text. |
+| `data.bioLinks` | array | no | Every link the account publishes in its bio, in the order Instagram returns them. Business accounts often list several here while externalUrl carries only the first. |
+| `data.bioLinks[].title` | string | no | Display label for the link, empty when the account set none. |
+| `data.bioLinks[].url` | string | yes | Destination URL, exactly as the account published it. |
+| `data.category` | string | no | Instagram's category label for the account (for example "Government Agencies" or "Coffee shop"). Absent when the account publishes no category. |
+| `data.contactMethod` | string | no | The contact button Instagram shows on the profile, for example CALL, TEXT, EMAIL, or UNKNOWN. Absent when the account exposes no contact button. Instagram no longer publishes the underlying email or phone number to unauthenticated callers. |
+| `data.displayName` | string | yes | Account display name. |
+| `data.externalUrl` | string | no | The single website link on the profile. Absent when the account publishes no link. |
+| `data.followers` | integer | yes | Follower count. |
+| `data.following` | integer | yes | Number of accounts this account follows. |
+| `data.handle` | string | yes | Instagram username without the leading @. |
+| `data.isBusiness` | boolean | no | Whether Instagram flags the account as a business account. |
+| `data.posts` | integer | yes | Number of posts on the account. |
+| `data.private` | boolean | yes | Whether the account is private. |
+| `data.userId` | string | no | Instagram's numeric account id, as a string. |
+| `data.verified` | boolean | yes | Whether the account carries Instagram's verified badge. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/instagram.profile.output.json",
+  "title": "Instagram profile output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "handle",
+            "displayName",
+            "followers",
+            "following",
+            "posts",
+            "bio",
+            "verified",
+            "private",
+            "avatarUrl"
+          ],
+          "properties": {
+            "handle": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Instagram username without the leading @."
+            },
+            "displayName": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Account display name."
+            },
+            "userId": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Instagram's numeric account id, as a string."
+            },
+            "followers": {
+              "type": "integer",
+              "description": "Follower count."
+            },
+            "following": {
+              "type": "integer",
+              "description": "Number of accounts this account follows."
+            },
+            "posts": {
+              "type": "integer",
+              "description": "Number of posts on the account."
+            },
+            "bio": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Profile biography text."
+            },
+            "verified": {
+              "type": "boolean",
+              "description": "Whether the account carries Instagram's verified badge."
+            },
+            "private": {
+              "type": "boolean",
+              "description": "Whether the account is private."
+            },
+            "avatarUrl": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Profile picture URL at the highest resolution the account exposes."
+            },
+            "externalUrl": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "The single website link on the profile. Absent when the account publishes no link."
+            },
+            "bioLinks": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Every link the account publishes in its bio, in the order Instagram returns them. Business accounts often list several here while externalUrl carries only the first.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Display label for the link, empty when the account set none."
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Destination URL, exactly as the account published it."
+                  }
+                }
+              }
+            },
+            "category": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Instagram's category label for the account (for example \"Government Agencies\" or \"Coffee shop\"). Absent when the account publishes no category."
+            },
+            "isBusiness": {
+              "type": "boolean",
+              "description": "Whether Instagram flags the account as a business account."
+            },
+            "contactMethod": {
+              "type": "string",
+              "description": "The contact button Instagram shows on the profile, for example CALL, TEXT, EMAIL, or UNKNOWN. Absent when the account exposes no contact button. Instagram no longer publishes the underlying email or phone number to unauthenticated callers."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `avatarUrl`
+- `bio`
+- `bioLinks`
+- `category`
+- `displayName`
+- `externalUrl`
+- `handle`
+- `userId`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `bioLinks` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "handle": "nasa"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

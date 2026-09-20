@@ -1,0 +1,213 @@
+---
+title: "YouTube Video Comments"
+description: "Sell youtube.video_comments on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+List the comments on a YouTube video or Short by URL with cursor pagination (text, author, likes, reply count).
+
+This page is the seller-facing summary of one catalog API, `youtube.video_comments`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `cursor` | string | no | Continuation token from a previous response for pagination. |
+| `order` | string | no | Comment order (e.g. top, newest). |
+| `url` | string | yes | Full YouTube video URL. Shorts (youtube.com/shorts/...) and youtu.be URLs also work. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.video_comments.input.json",
+  "example": {
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  },
+  "title": "YouTube video comments input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Full YouTube video URL. Shorts (youtube.com/shorts/...) and youtu.be URLs also work."
+    },
+    "order": {
+      "type": "string",
+      "description": "Comment order (e.g. top, newest)."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Continuation token from a previous response for pagination."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.comments` | array | yes |  |
+| `data.comments[].author` | string | yes |  |
+| `data.comments[].authorAvatarUrl` | string | no | URL of the comment author's avatar image. |
+| `data.comments[].authorId` | string | no | The comment author's YouTube channel ID. |
+| `data.comments[].authorUrl` | string | no | Canonical URL of the comment author's channel, tracking query parameters stripped. |
+| `data.comments[].id` | string | yes |  |
+| `data.comments[].likes` | integer | yes |  |
+| `data.comments[].publishedTime` | string | yes |  |
+| `data.comments[].replies` | integer | yes |  |
+| `data.comments[].text` | string | yes |  |
+| `data.nextCursor` | string or null | yes | Opaque cursor for the next page of comments, or null when this lane has no more. Pass it back as cursor to continue. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.video_comments.output.json",
+  "title": "YouTube video comments output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "comments",
+            "nextCursor"
+          ],
+          "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of comments, or null when this lane has no more. Pass it back as cursor to continue."
+            },
+            "comments": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text",
+                  "author",
+                  "likes",
+                  "replies",
+                  "publishedTime"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "text": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "author": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "likes": {
+                    "type": "integer"
+                  },
+                  "replies": {
+                    "type": "integer"
+                  },
+                  "publishedTime": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "description": "The comment author's YouTube channel ID."
+                  },
+                  "authorUrl": {
+                    "type": "string",
+                    "description": "Canonical URL of the comment author's channel, tracking query parameters stripped."
+                  },
+                  "authorAvatarUrl": {
+                    "type": "string",
+                    "description": "URL of the comment author's avatar image."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `author`
+- `comments`
+- `id`
+- `publishedTime`
+- `text`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `comments` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

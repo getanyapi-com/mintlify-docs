@@ -1,0 +1,218 @@
+---
+title: "Google News"
+description: "Sell google.news on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Search Google News by keyword and get fresh articles (headlines, sources, links, and publish times) as clean JSON.
+
+This page is the seller-facing summary of one catalog API, `google.news`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.99 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `gl` | string | no | Two-letter country code for result localization (e.g. us, gb, de). Default `"us"`. |
+| `hl` | string | no | Two-letter interface and results language code (e.g. en, es, de). Default `"en"`. |
+| `limit` | integer | no | Requested article count (1-20, default 20). Google News returns its latest matching articles and may return more or fewer than requested. Price is flat per request. |
+| `location` | string | no | Fine-grained location for result localization, given as a canonical Google location string (e.g. 'New York, United States', 'London, United Kingdom'). More specific than the country-level gl. |
+| `query` | string | yes | News search query; supports operators like '-', 'OR', and 'site:' (e.g. bitcoin site:cnn.com). |
+| `timeframe` | string | no | How far back to search, written as a count plus a unit: h hours, d days, w weeks, m months, y years. So 2h is the last two hours, 30d the last thirty days, 6m the last six months. Omit this field, or send 'all', to search without a time limit. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/google.news.input.json",
+  "example": {
+    "query": "openai",
+    "gl": "us",
+    "hl": "en"
+  },
+  "title": "Google News input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Requested article count (1-20, default 20). Google News returns its latest matching articles and may return more or fewer than requested. Price is flat per request."
+    },
+    "query": {
+      "type": "string",
+      "description": "News search query; supports operators like '-', 'OR', and 'site:' (e.g. bitcoin site:cnn.com)."
+    },
+    "gl": {
+      "type": "string",
+      "default": "us",
+      "description": "Two-letter country code for result localization (e.g. us, gb, de)."
+    },
+    "hl": {
+      "type": "string",
+      "default": "en",
+      "description": "Two-letter interface and results language code (e.g. en, es, de)."
+    },
+    "location": {
+      "type": "string",
+      "description": "Fine-grained location for result localization, given as a canonical Google location string (e.g. 'New York, United States', 'London, United Kingdom'). More specific than the country-level gl."
+    },
+    "timeframe": {
+      "type": "string",
+      "pattern": "^(all|[1-9][0-9]*[hdwmy])$",
+      "description": "How far back to search, written as a count plus a unit: h hours, d days, w weeks, m months, y years. So 2h is the last two hours, 30d the last thirty days, 6m the last six months. Omit this field, or send 'all', to search without a time limit."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | Result payload, or null when nothing was found. |
+| `data.items` | array | yes | Article records: headline, source name, article link, and publish time. |
+| `data.items[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.items[].image` | string | no | Thumbnail image URL for the article. The query string carries the image identity, so it is kept. |
+| `data.items[].snippet` | string | no | Article snippet when available. |
+| `data.items[].source` | string | no | Publisher name. |
+| `data.items[].title` | string | yes | Article headline. |
+| `data.items[].url` | string | yes | Article link. |
+| `found` | boolean | yes | True when the search returned at least one article. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/google.news.output.json",
+  "title": "Google News output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "True when the search returned at least one article."
+    },
+    "data": {
+      "description": "Result payload, or null when nothing was found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Article records: headline, source name, article link, and publish time.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "url"
+                ],
+                "properties": {
+                  "title": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Article headline."
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Article link."
+                  },
+                  "source": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Publisher name."
+                  },
+                  "snippet": {
+                    "type": "string",
+                    "description": "Article snippet when available."
+                  },
+                  "createdUtc": {
+                    "x-anyapi-must-populate": true,
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Thumbnail image URL for the article. The query string carries the image identity, so it is kept."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `createdUtc`
+- `items`
+- `source`
+- `title`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "openai",
+  "gl": "us",
+  "hl": "en"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

@@ -1,0 +1,229 @@
+---
+title: "TikTok Video"
+description: "Sell tiktok.video on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch a single TikTok video by URL with its caption and engagement counts (views, likes, comments, shares, saves).
+
+This page is the seller-facing summary of one catalog API, `tiktok.video`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.45 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+This API takes no input fields.
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.video.input.json",
+  "example": {
+    "url": "https://www.tiktok.com/@mrbeast/video/7654638524729216287?_r=1&u_code=elgjf3ff8cajhk&preview_pb=0&sharer_language=en&_d=elh6737j6kjl71&share_item_id=7654638524729216287&source=h5_m"
+  },
+  "title": "TikTok video input",
+  "type": "object",
+  "additionalProperties": false,
+  "x-aliases": {
+    "videoId": "id"
+  },
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Full TikTok video URL."
+    },
+    "id": {
+      "type": "string",
+      "description": "TikTok video ID, the numeric run at the end of a video URL. Use it when a listing SKU handed you an id and no URL."
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "required": [
+        "id"
+      ]
+    }
+  ]
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.authorHandle` | string | no | Author's TikTok handle, without the leading @. |
+| `data.authorImage` | string | no | Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.authorName` | string | no | Author's display name. |
+| `data.authorUserId` | string | no | Author's numeric TikTok user id. |
+| `data.caption` | string | yes |  |
+| `data.comments` | integer | yes |  |
+| `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.durationSeconds` | number | no | Video duration in seconds. |
+| `data.id` | string | yes |  |
+| `data.image` | string | no | URL of the video's cover/thumbnail image. A signed, short-lived TikTok CDN URL (typically expires within about a day; query params are load-bearing and kept intact), often served as HEIC rather than JPEG, so fetch it promptly and transcode if you need broad browser support. Absent when the upstream provides no cover. |
+| `data.likes` | integer | yes |  |
+| `data.region` | string | yes |  |
+| `data.saves` | integer | yes |  |
+| `data.shares` | integer | yes |  |
+| `data.url` | string | no | Canonical TikTok URL of the video. |
+| `data.videoUrl` | string | no | Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.views` | integer | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.video.output.json",
+  "title": "TikTok video output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "caption",
+            "region",
+            "views",
+            "likes",
+            "comments",
+            "shares",
+            "saves"
+          ],
+          "properties": {
+            "id": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "caption": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "image": {
+              "type": "string",
+              "description": "URL of the video's cover/thumbnail image. A signed, short-lived TikTok CDN URL (typically expires within about a day; query params are load-bearing and kept intact), often served as HEIC rather than JPEG, so fetch it promptly and transcode if you need broad browser support. Absent when the upstream provides no cover."
+            },
+            "region": {
+              "type": "string"
+            },
+            "views": {
+              "type": "integer"
+            },
+            "likes": {
+              "type": "integer"
+            },
+            "comments": {
+              "type": "integer"
+            },
+            "shares": {
+              "type": "integer"
+            },
+            "saves": {
+              "type": "integer"
+            },
+            "url": {
+              "type": "string",
+              "description": "Canonical TikTok URL of the video."
+            },
+            "createdUtc": {
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "authorHandle": {
+              "type": "string",
+              "description": "Author's TikTok handle, without the leading @."
+            },
+            "authorName": {
+              "type": "string",
+              "description": "Author's display name."
+            },
+            "authorUserId": {
+              "type": "string",
+              "description": "Author's numeric TikTok user id."
+            },
+            "authorImage": {
+              "type": "string",
+              "description": "Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+            },
+            "durationSeconds": {
+              "type": "number",
+              "description": "Video duration in seconds."
+            },
+            "videoUrl": {
+              "type": "string",
+              "description": "Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `caption`
+- `id`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty result is not a not-found: when the entity exists but carries nothing, answer 2xx with `found: true` and the empty values.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.tiktok.com/@mrbeast/video/7654638524729216287?_r=1&u_code=elgjf3ff8cajhk&preview_pb=0&sharer_language=en&_d=elh6737j6kjl71&share_item_id=7654638524729216287&source=h5_m"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

@@ -1,0 +1,245 @@
+---
+title: "TikTok Keyword Search"
+description: "Sell tiktok.search_keyword on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Search TikTok by keyword and get matching videos (caption, views, likes, comments, shares) as normalized JSON.
+
+This page is the seller-facing summary of one catalog API, `tiktok.search_keyword`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.70 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `cursor` | string | no | Pagination cursor from a previous response. |
+| `datePosted` | integer or string | no | Time frame filter, in days back from now. Use a canonical JSON integer that is nonnegative: 0 for any time, 1 for the past 24 hours, 7 for the past week, 30 for the past month, 90 for the past three months, or 180 for the past six months. Any other number is not guaranteed to filter anything. Legacy numeric strings remain accepted. Default `0`. |
+| `query` | string | yes | The keyword to search TikTok for. |
+| `requireCursor` | boolean | no | Deprecated. Every source for this search returns a nextCursor, so this changes nothing about the price or which source serves you; it stays accepted so callers that already send it keep working. |
+| `sortBy` | integer or string | no | Sort order. Use the canonical JSON integer 0 for relevance, 1 for most liked, or 2 for newest first; legacy numeric strings remain accepted. One of: `0`, `1`, `2`, `0`, `1`, `2`. Default `0`. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.search_keyword.input.json",
+  "example": {
+    "query": "cooking",
+    "datePosted": 0,
+    "sortBy": 0
+  },
+  "title": "TikTok keyword search input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "The keyword to search TikTok for."
+    },
+    "datePosted": {
+      "type": [
+        "integer",
+        "string"
+      ],
+      "minimum": 0,
+      "pattern": "^[0-9]+$",
+      "default": 0,
+      "description": "Time frame filter, in days back from now. Use a canonical JSON integer that is nonnegative: 0 for any time, 1 for the past 24 hours, 7 for the past week, 30 for the past month, 90 for the past three months, or 180 for the past six months. Any other number is not guaranteed to filter anything. Legacy numeric strings remain accepted."
+    },
+    "sortBy": {
+      "type": [
+        "integer",
+        "string"
+      ],
+      "enum": [
+        0,
+        1,
+        2,
+        "0",
+        "1",
+        "2"
+      ],
+      "default": 0,
+      "description": "Sort order. Use the canonical JSON integer 0 for relevance, 1 for most liked, or 2 for newest first; legacy numeric strings remain accepted."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Pagination cursor from a previous response."
+    },
+    "requireCursor": {
+      "type": "boolean",
+      "deprecated": true,
+      "description": "Deprecated. Every source for this search returns a nextCursor, so this changes nothing about the price or which source serves you; it stays accepted so callers that already send it keep working."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.nextCursor` | string or null | no | Opaque cursor for the next page of videos, or null when this lane has no more. Pass it back as cursor to continue. |
+| `data.videos` | array | yes |  |
+| `data.videos[].author` | string | no | Username (handle) of the account that posted, without the @ prefix. |
+| `data.videos[].caption` | string | yes |  |
+| `data.videos[].comments` | integer | yes |  |
+| `data.videos[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.videos[].id` | string | yes |  |
+| `data.videos[].likes` | integer | yes |  |
+| `data.videos[].region` | string | yes |  |
+| `data.videos[].saves` | integer | no |  |
+| `data.videos[].shares` | integer | yes |  |
+| `data.videos[].views` | integer | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.search_keyword.output.json",
+  "title": "TikTok keyword search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "videos"
+          ],
+          "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of videos, or null when this lane has no more. Pass it back as cursor to continue."
+            },
+            "videos": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "caption",
+                  "region",
+                  "views",
+                  "likes",
+                  "comments",
+                  "shares"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "caption": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "author": {
+                    "type": "string",
+                    "description": "Username (handle) of the account that posted, without the @ prefix."
+                  },
+                  "createdUtc": {
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "region": {
+                    "type": "string"
+                  },
+                  "views": {
+                    "type": "integer"
+                  },
+                  "likes": {
+                    "type": "integer"
+                  },
+                  "comments": {
+                    "type": "integer"
+                  },
+                  "shares": {
+                    "type": "integer"
+                  },
+                  "saves": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `caption`
+- `id`
+- `videos`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `videos` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "cooking",
+  "datePosted": 0,
+  "sortBy": 0
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

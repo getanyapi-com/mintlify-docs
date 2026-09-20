@@ -1,0 +1,247 @@
+---
+title: "TikTok Shop Search"
+description: "Sell tiktok_shop.search on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Search TikTok Shop products by keyword across 15 countries: price, sales, rating, and seller info per product, in one normalized response.
+
+This page is the seller-facing summary of one catalog API, `tiktok_shop.search`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `country` | string | no | Country code of the TikTok Shop market to search (e.g. US). One of: `US`, `VN`, `TH`, `PH`, `MY`, `ID`, `GB`, `SG`, `ES`, `MX`, `DE`, `IT`, `FR`, `BR`, `JP`. Default `"US"`. |
+| `limit` | integer | no | Maximum number of results to return (1-10, default 10). |
+| `query` | string | yes | Search keyword for TikTok Shop products (e.g. wireless earbuds). |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok_shop.search.input.json",
+  "example": {
+    "query": "phone case",
+    "limit": 3
+  },
+  "title": "TikTok Shop search input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "Maximum number of results to return (1-10, default 10)."
+    },
+    "query": {
+      "type": "string",
+      "description": "Search keyword for TikTok Shop products (e.g. wireless earbuds)."
+    },
+    "country": {
+      "type": "string",
+      "enum": [
+        "US",
+        "VN",
+        "TH",
+        "PH",
+        "MY",
+        "ID",
+        "GB",
+        "SG",
+        "ES",
+        "MX",
+        "DE",
+        "IT",
+        "FR",
+        "BR",
+        "JP"
+      ],
+      "default": "US",
+      "description": "Country code of the TikTok Shop market to search (e.g. US)."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.items` | array | yes | Product records matching the search query: id, title, price, sales count, rating, seller, and product URL. |
+| `data.items[].currency` | string | no | ISO currency name, e.g. USD. |
+| `data.items[].discountPct` | number | no | Discount off the original price as a percentage, e.g. 10 for 10% off. Omitted when the product is not discounted. |
+| `data.items[].image` | string | no | Product image URL. |
+| `data.items[].originalPrice` | number | no | Pre-discount list price (0 when not on sale). |
+| `data.items[].price` | number | no | Current sale price. |
+| `data.items[].productId` | string | yes | TikTok Shop product id. |
+| `data.items[].rating` | number | no | Average review score. |
+| `data.items[].reviewCount` | integer | no | Number of reviews. Omitted when the lane that served this request does not report it. |
+| `data.items[].sellerId` | string | no | TikTok Shop seller id, for joining to the seller's other products. |
+| `data.items[].shopName` | string | no | Seller shop name. |
+| `data.items[].soldCount` | integer | no | Units sold. |
+| `data.items[].title` | string | yes | Product title. |
+| `data.items[].url` | string | no | Canonical product detail page URL. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok_shop.search.output.json",
+  "title": "TikTok Shop search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Product records matching the search query: id, title, price, sales count, rating, seller, and product URL.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "productId",
+                  "title"
+                ],
+                "properties": {
+                  "productId": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "TikTok Shop product id."
+                  },
+                  "title": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Product title."
+                  },
+                  "price": {
+                    "type": "number",
+                    "description": "Current sale price."
+                  },
+                  "originalPrice": {
+                    "type": "number",
+                    "description": "Pre-discount list price (0 when not on sale)."
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "ISO currency name, e.g. USD."
+                  },
+                  "rating": {
+                    "type": "number",
+                    "description": "Average review score."
+                  },
+                  "soldCount": {
+                    "type": "integer",
+                    "description": "Units sold."
+                  },
+                  "shopName": {
+                    "type": "string",
+                    "description": "Seller shop name."
+                  },
+                  "sellerId": {
+                    "type": "string",
+                    "description": "TikTok Shop seller id, for joining to the seller's other products."
+                  },
+                  "reviewCount": {
+                    "type": "integer",
+                    "description": "Number of reviews. Omitted when the lane that served this request does not report it."
+                  },
+                  "discountPct": {
+                    "type": "number",
+                    "description": "Discount off the original price as a percentage, e.g. 10 for 10% off. Omitted when the product is not discounted."
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Canonical product detail page URL."
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Product image URL."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `items`
+- `productId`
+- `title`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "phone case",
+  "limit": 3
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

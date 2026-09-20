@@ -1,0 +1,264 @@
+---
+title: "TikTok Top Search"
+description: "Sell tiktok.search_top on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Search TikTok's top results for a keyword (caption, views, likes, comments, shares) with cursor pagination.
+
+This page is the seller-facing summary of one catalog API, `tiktok.search_top`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `cursor` | string | no | Pagination cursor from a previous response. |
+| `publishTime` | string | no | Time-frame filter: yesterday, this-week, this-month, last-3-months, last-6-months, all-time. |
+| `query` | string | yes | Keyword to search for (e.g. "funny"). |
+| `region` | string | no | 2-letter country code for the proxy location (e.g. US, GB, FR). |
+| `sortBy` | string | no | Sort order: relevance, most-liked, date-posted. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.search_top.input.json",
+  "example": {
+    "query": "funny"
+  },
+  "title": "TikTok Top Search input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Keyword to search for (e.g. \"funny\")."
+    },
+    "publishTime": {
+      "type": "string",
+      "description": "Time-frame filter: yesterday, this-week, this-month, last-3-months, last-6-months, all-time."
+    },
+    "sortBy": {
+      "type": "string",
+      "description": "Sort order: relevance, most-liked, date-posted."
+    },
+    "region": {
+      "type": "string",
+      "description": "2-letter country code for the proxy location (e.g. US, GB, FR)."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Pagination cursor from a previous response."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.items` | array | yes |  |
+| `data.items[].author` | string | yes |  |
+| `data.items[].authorImage` | string | no | Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.items[].authorName` | string | no | Author's display name. |
+| `data.items[].authorUserId` | string | no | Author's numeric TikTok user id. |
+| `data.items[].caption` | string | yes |  |
+| `data.items[].comments` | integer | yes |  |
+| `data.items[].contentType` | string | yes |  |
+| `data.items[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.items[].durationSeconds` | number | no | Media duration in seconds. |
+| `data.items[].id` | string | yes |  |
+| `data.items[].image` | string | no | URL of the item's cover image. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.items[].likes` | integer | yes |  |
+| `data.items[].saves` | integer | no |  |
+| `data.items[].shares` | integer | yes |  |
+| `data.items[].url` | string | yes |  |
+| `data.items[].videoUrl` | string | no | Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.items[].views` | integer | yes |  |
+| `data.nextCursor` | string or null | yes | Opaque cursor for the next page of results, or null when this lane has no more. Pass it back as cursor to continue. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.search_top.output.json",
+  "title": "TikTok Top Search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items",
+            "nextCursor"
+          ],
+          "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of results, or null when this lane has no more. Pass it back as cursor to continue."
+            },
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "caption",
+                  "contentType",
+                  "url",
+                  "author",
+                  "views",
+                  "likes",
+                  "comments",
+                  "shares"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "caption": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "contentType": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "author": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "views": {
+                    "type": "integer"
+                  },
+                  "likes": {
+                    "type": "integer"
+                  },
+                  "comments": {
+                    "type": "integer"
+                  },
+                  "shares": {
+                    "type": "integer"
+                  },
+                  "saves": {
+                    "type": "integer"
+                  },
+                  "createdUtc": {
+                    "x-anyapi-must-populate": true,
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "URL of the item's cover image. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  },
+                  "videoUrl": {
+                    "type": "string",
+                    "description": "Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  },
+                  "durationSeconds": {
+                    "type": "number",
+                    "description": "Media duration in seconds."
+                  },
+                  "authorName": {
+                    "type": "string",
+                    "description": "Author's display name."
+                  },
+                  "authorUserId": {
+                    "type": "string",
+                    "description": "Author's numeric TikTok user id."
+                  },
+                  "authorImage": {
+                    "type": "string",
+                    "description": "Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `author`
+- `caption`
+- `createdUtc`
+- `id`
+- `items`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "funny"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

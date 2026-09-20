@@ -1,0 +1,211 @@
+---
+title: "TikTok Profile"
+description: "Sell tiktok.profile on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch a TikTok creator's public profile (followers, likes, bio, verification) by handle.
+
+This page is the seller-facing summary of one catalog API, `tiktok.profile`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.45 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `handle` | string | yes | TikTok username without the leading @ (e.g. "stoolpresidente"). |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.profile.input.json",
+  "example": {
+    "handle": "zachking"
+  },
+  "title": "TikTok profile input",
+  "type": "object",
+  "additionalProperties": false,
+  "x-aliases": {
+    "username": "handle"
+  },
+  "required": [
+    "handle"
+  ],
+  "properties": {
+    "handle": {
+      "type": "string",
+      "description": "TikTok username without the leading @ (e.g. \"stoolpresidente\")."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.avatarUrl` | string | yes |  |
+| `data.bio` | string | yes |  |
+| `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.displayName` | string | yes |  |
+| `data.externalUrl` | string | no | The single link the account publishes in its bio, normalized to an absolute URL. Absent when the account publishes no link. |
+| `data.followers` | integer | yes |  |
+| `data.following` | integer | yes |  |
+| `data.handle` | string | yes |  |
+| `data.likes` | integer | yes |  |
+| `data.private` | boolean | no | Whether the account is private. |
+| `data.secUid` | string | no | TikTok's sec_uid: the opaque account identifier TikTok's own web and app endpoints key on, and the id most third-party TikTok tools ask for. |
+| `data.userId` | string | no | TikTok's numeric internal user id for the account. Unlike the handle it never changes, so store it as the account's key. |
+| `data.verified` | boolean | yes |  |
+| `data.videos` | integer | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.profile.output.json",
+  "title": "TikTok profile output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "handle",
+            "displayName",
+            "followers",
+            "following",
+            "likes",
+            "videos",
+            "bio",
+            "verified",
+            "avatarUrl"
+          ],
+          "properties": {
+            "handle": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "userId": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "TikTok's numeric internal user id for the account. Unlike the handle it never changes, so store it as the account's key."
+            },
+            "secUid": {
+              "type": "string",
+              "description": "TikTok's sec_uid: the opaque account identifier TikTok's own web and app endpoints key on, and the id most third-party TikTok tools ask for."
+            },
+            "displayName": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "followers": {
+              "type": "integer"
+            },
+            "following": {
+              "type": "integer"
+            },
+            "likes": {
+              "type": "integer"
+            },
+            "videos": {
+              "type": "integer"
+            },
+            "bio": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "verified": {
+              "type": "boolean"
+            },
+            "avatarUrl": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "externalUrl": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "The single link the account publishes in its bio, normalized to an absolute URL. Absent when the account publishes no link."
+            },
+            "private": {
+              "type": "boolean",
+              "description": "Whether the account is private."
+            },
+            "createdUtc": {
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `avatarUrl`
+- `bio`
+- `displayName`
+- `externalUrl`
+- `handle`
+- `userId`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty result is not a not-found: when the entity exists but carries nothing, answer 2xx with `found: true` and the empty values.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "handle": "zachking"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

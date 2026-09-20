@@ -1,0 +1,242 @@
+---
+title: "Reddit Post"
+description: "Sell reddit.post on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch a single Reddit post by URL, including its full body text, score, comment count, upvote ratio, and subreddit, as normalized JSON.
+
+This page is the seller-facing summary of one catalog API, `reddit.post`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `url` | string | yes | Full Reddit post URL in the /r/&lt;subreddit&gt;/comments/&lt;id&gt;/&lt;slug&gt;/ form, e.g. "https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/". The short "reddit.com/comments/&lt;id&gt;" form is not accepted. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/reddit.post.input.json",
+  "example": {
+    "url": "https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/"
+  },
+  "title": "Reddit post input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full Reddit post URL in the /r/<subreddit>/comments/<id>/<slug>/ form, e.g. \"https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/\". The short \"reddit.com/comments/<id>\" form is not accepted."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The post record, or null when nothing was found. |
+| `data.author` | string | yes | Author username, without the u/ prefix. |
+| `data.authorId` | string | no | Reddit account ID of the author, without the t2_ prefix. |
+| `data.body` | string | no | The post's own body text (selftext), as Markdown. Empty for link posts, which carry no body. |
+| `data.createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.domain` | string | no | Domain the post links to, for example "self.IAmA" for a text post. |
+| `data.editedUtc` | number | no | UTC epoch timestamp in seconds (Unix time) of the last edit. Multiply by 1000 for a JS Date in milliseconds. |
+| `data.id` | string | yes | Reddit post ID (base-36, without the t3_ prefix). |
+| `data.image` | string | no | Preview image for the post, when Reddit generated one. Reddit signs this URL and it is time-limited, so fetch it promptly rather than storing it; the query string carries the signature and must be kept intact. Empty when the post has no preview image. |
+| `data.isArchived` | boolean | no | True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false. |
+| `data.isLocked` | boolean | no | True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false. |
+| `data.isNsfw` | boolean | no | True when the post is marked NSFW (over 18). |
+| `data.numComments` | integer | yes | Total number of comments on the post. |
+| `data.permalink` | string | yes | Canonical reddit.com thread path for the post (e.g. "/r/golang/comments/abc123/..."). Differs from url, which is the destination link. Empty if the upstream omits it. |
+| `data.score` | integer | yes | Net score (upvotes minus downvotes) at fetch time. |
+| `data.subreddit` | string | yes | Subreddit name, without the r/ prefix. |
+| `data.title` | string | yes | Post title. |
+| `data.upvoteRatio` | number | no | Fraction of votes that are upvotes, between 0 and 1. Zero when the upstream does not report it. |
+| `data.url` | string | yes | The post's destination link (the external URL for link posts, or the thread URL for self posts). |
+| `found` | boolean | yes | True when the post was found; false when the lookup returned nothing. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/reddit.post.output.json",
+  "title": "Reddit post output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "True when the post was found; false when the lookup returned nothing."
+    },
+    "data": {
+      "description": "The post record, or null when nothing was found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "title",
+            "author",
+            "score",
+            "numComments",
+            "url",
+            "permalink",
+            "createdUtc",
+            "subreddit"
+          ],
+          "properties": {
+            "id": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Reddit post ID (base-36, without the t3_ prefix)."
+            },
+            "title": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Post title."
+            },
+            "author": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Author username, without the u/ prefix."
+            },
+            "body": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "The post's own body text (selftext), as Markdown. Empty for link posts, which carry no body."
+            },
+            "score": {
+              "type": "integer",
+              "description": "Net score (upvotes minus downvotes) at fetch time."
+            },
+            "numComments": {
+              "type": "integer",
+              "description": "Total number of comments on the post."
+            },
+            "upvoteRatio": {
+              "type": "number",
+              "description": "Fraction of votes that are upvotes, between 0 and 1. Zero when the upstream does not report it."
+            },
+            "url": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts)."
+            },
+            "permalink": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Canonical reddit.com thread path for the post (e.g. \"/r/golang/comments/abc123/...\"). Differs from url, which is the destination link. Empty if the upstream omits it."
+            },
+            "createdUtc": {
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "subreddit": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Subreddit name, without the r/ prefix."
+            },
+            "isArchived": {
+              "type": "boolean",
+              "description": "True when Reddit has archived the thread, which blocks new comments and votes. Archiving is a per-community setting, so an old thread is not necessarily archived. Absent when the source that served this request does not report it, which means unknown rather than false."
+            },
+            "isLocked": {
+              "type": "boolean",
+              "description": "True when a moderator has locked the thread, which blocks new comments. Absent when the source that served this request does not report it, which means unknown rather than false."
+            },
+            "image": {
+              "type": "string",
+              "description": "Preview image for the post, when Reddit generated one. Reddit signs this URL and it is time-limited, so fetch it promptly rather than storing it; the query string carries the signature and must be kept intact. Empty when the post has no preview image."
+            },
+            "isNsfw": {
+              "type": "boolean",
+              "description": "True when the post is marked NSFW (over 18)."
+            },
+            "domain": {
+              "type": "string",
+              "description": "Domain the post links to, for example \"self.IAmA\" for a text post."
+            },
+            "editedUtc": {
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time) of the last edit. Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "authorId": {
+              "type": "string",
+              "description": "Reddit account ID of the author, without the t2_ prefix."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `author`
+- `body`
+- `id`
+- `permalink`
+- `subreddit`
+- `title`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty result is not a not-found: when the entity exists but carries nothing, answer 2xx with `found: true` and the empty values.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

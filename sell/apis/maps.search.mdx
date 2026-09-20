@@ -1,0 +1,345 @@
+---
+title: "Google Maps Search"
+description: "Sell maps.search on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Search Google Maps for places matching a query and location: up to 20 normalized place records with ratings, addresses, and contact basics per request.
+
+This page is the seller-facing summary of one catalog API, `maps.search`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.75 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `categoryFilterWords` | array | no | Optional list of Google Maps place-category names to keep; results are limited to places whose category matches one of these. Use lowercase category names as shown on Google Maps (e.g. ["coffee shop", "restaurant"]). Omit to include all categories and stay on the cheapest price; a category filter routes to a dearer source. |
+| `language` | string | no | Two-letter language code for the results (e.g. en). Default `"en"`. |
+| `limit` | integer | no | Maximum number of results to return (1-20, default 20). Pricing depends on the selected provider and may be flat per request. |
+| `location` | string | yes | Free-text location to search in, ideally city plus country (e.g. Austin, USA). |
+| `placeMinimumStars` | string | no | Only return places with at least this average rating: two (2+), twoAndHalf (2.5+), three (3+), threeAndHalf (3.5+), four (4+), or fourAndHalf (4.5+). Places with no reviews are excluded. Omit this field to stay on the cheapest price; a rating floor routes to a dearer source. One of: `two`, `twoAndHalf`, `three`, `threeAndHalf`, `four`, `fourAndHalf`. |
+| `query` | string | yes | What you would type in the Google Maps search bar (e.g. coffee shop). |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `cid` or `street`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a place that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `website` | string | no | Filter places by whether they list a website: allPlaces (default), withWebsite (only places that have a website), or withoutWebsite (only places without one). Omit this field, or send allPlaces, to stay on the cheapest price; withWebsite and withoutWebsite route to a dearer source. One of: `allPlaces`, `withWebsite`, `withoutWebsite`. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/maps.search.input.json",
+  "example": {
+    "query": "coffee",
+    "location": "Austin, TX",
+    "limit": 3
+  },
+  "title": "Google Maps search input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query",
+    "location"
+  ],
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Maximum number of results to return (1-20, default 20). Pricing depends on the selected provider and may be flat per request."
+    },
+    "query": {
+      "type": "string",
+      "description": "What you would type in the Google Maps search bar (e.g. coffee shop)."
+    },
+    "location": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Free-text location to search in, ideally city plus country (e.g. Austin, USA)."
+    },
+    "language": {
+      "type": "string",
+      "default": "en",
+      "description": "Two-letter language code for the results (e.g. en)."
+    },
+    "categoryFilterWords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Optional list of Google Maps place-category names to keep; results are limited to places whose category matches one of these. Use lowercase category names as shown on Google Maps (e.g. [\"coffee shop\", \"restaurant\"]). Omit to include all categories and stay on the cheapest price; a category filter routes to a dearer source."
+    },
+    "website": {
+      "type": "string",
+      "enum": [
+        "allPlaces",
+        "withWebsite",
+        "withoutWebsite"
+      ],
+      "description": "Filter places by whether they list a website: allPlaces (default), withWebsite (only places that have a website), or withoutWebsite (only places without one). Omit this field, or send allPlaces, to stay on the cheapest price; withWebsite and withoutWebsite route to a dearer source."
+    },
+    "placeMinimumStars": {
+      "type": "string",
+      "enum": [
+        "two",
+        "twoAndHalf",
+        "three",
+        "threeAndHalf",
+        "four",
+        "fourAndHalf"
+      ],
+      "description": "Only return places with at least this average rating: two (2+), twoAndHalf (2.5+), three (3+), threeAndHalf (3.5+), four (4+), or fourAndHalf (4.5+). Places with no reviews are excluded. Omit this field to stay on the cheapest price; a rating floor routes to a dearer source."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "address",
+          "categories",
+          "category",
+          "cid",
+          "city",
+          "countryCode",
+          "image",
+          "latitude",
+          "longitude",
+          "permanentlyClosed",
+          "phone",
+          "postalCode",
+          "priceLevel",
+          "rating",
+          "reviewCount",
+          "state",
+          "street",
+          "website"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `cid` or `street`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a place that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The result wrapper, or null when nothing matched. |
+| `data.items` | array | yes | Matching Google Maps place records. |
+| `data.items[].address` | string | no | Full formatted street address. |
+| `data.items[].categories` | array | no | Every Google Maps category listed for the place. |
+| `data.items[].category` | string | no | Primary place category (e.g. Coffee shop). |
+| `data.items[].cid` | string | no | Google customer/place id (cid). |
+| `data.items[].city` | string | no | City the place is in. |
+| `data.items[].countryCode` | string | no | Two-letter country code. |
+| `data.items[].image` | string | no | Primary place photo URL. |
+| `data.items[].latitude` | number | no | Latitude of the place in decimal degrees. |
+| `data.items[].longitude` | number | no | Longitude of the place in decimal degrees. |
+| `data.items[].name` | string | yes | Place name. |
+| `data.items[].permanentlyClosed` | boolean | no | True when the place is marked permanently closed. |
+| `data.items[].phone` | string | no | Business phone number in E.164 format, when listed. |
+| `data.items[].placeId` | string | yes | Google Maps place id (stable identifier for the place). |
+| `data.items[].postalCode` | string | no | Postal code of the place. |
+| `data.items[].priceLevel` | string | no | Relative price level indicator (e.g. $, $10-20). |
+| `data.items[].rating` | number | no | Average star rating out of 5. |
+| `data.items[].reviewCount` | number | no | Total number of reviews. |
+| `data.items[].state` | string | no | State or region the place is in. |
+| `data.items[].street` | string | no | Street line of the address. |
+| `data.items[].url` | string | yes | Canonical Google Maps URL for the place. |
+| `data.items[].website` | string | no | The place's own website URL, when listed. |
+| `found` | boolean | yes | True when the search returned at least one matching place. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/maps.search.output.json",
+  "title": "Google Maps search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "True when the search returned at least one matching place."
+    },
+    "data": {
+      "description": "The result wrapper, or null when nothing matched.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Matching Google Maps place records.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "placeId",
+                  "name",
+                  "url"
+                ],
+                "properties": {
+                  "placeId": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Google Maps place id (stable identifier for the place)."
+                  },
+                  "cid": {
+                    "type": "string",
+                    "description": "Google customer/place id (cid)."
+                  },
+                  "name": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Place name."
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Canonical Google Maps URL for the place."
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "Primary place category (e.g. Coffee shop)."
+                  },
+                  "categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Every Google Maps category listed for the place."
+                  },
+                  "address": {
+                    "type": "string",
+                    "description": "Full formatted street address."
+                  },
+                  "street": {
+                    "type": "string",
+                    "description": "Street line of the address."
+                  },
+                  "city": {
+                    "type": "string",
+                    "description": "City the place is in."
+                  },
+                  "state": {
+                    "type": "string",
+                    "description": "State or region the place is in."
+                  },
+                  "postalCode": {
+                    "type": "string",
+                    "description": "Postal code of the place."
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "description": "Two-letter country code."
+                  },
+                  "latitude": {
+                    "type": "number",
+                    "description": "Latitude of the place in decimal degrees."
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "description": "Longitude of the place in decimal degrees."
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "Business phone number in E.164 format, when listed."
+                  },
+                  "website": {
+                    "type": "string",
+                    "description": "The place's own website URL, when listed."
+                  },
+                  "rating": {
+                    "type": "number",
+                    "description": "Average star rating out of 5."
+                  },
+                  "reviewCount": {
+                    "type": "number",
+                    "description": "Total number of reviews."
+                  },
+                  "priceLevel": {
+                    "type": "string",
+                    "description": "Relative price level indicator (e.g. $, $10-20)."
+                  },
+                  "permanentlyClosed": {
+                    "type": "boolean",
+                    "description": "True when the place is marked permanently closed."
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Primary place photo URL."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `items`
+- `name`
+- `placeId`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "coffee",
+  "location": "Austin, TX",
+  "limit": 3
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

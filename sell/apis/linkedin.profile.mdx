@@ -1,0 +1,514 @@
+---
+title: "LinkedIn Profile"
+description: "Sell linkedin.profile on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch a rich LinkedIn member profile by URL: name, headline, avatar, location, connections and followers, current position, and full work experience with job titles, descriptions, dates, employment/workplace type, and per-role skills, plus education, skills, certifications, honors and awards, languages, projects, publications, and verified/premium/open-to-work flags.
+
+This page is the seller-facing summary of one catalog API, `linkedin.profile`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$4.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `url` | string | yes | Full LinkedIn profile URL. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.profile.input.json",
+  "example": {
+    "url": "https://www.linkedin.com/in/patrickcollison"
+  },
+  "title": "LinkedIn profile input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Full LinkedIn profile URL."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The profile result, or null when not found. |
+| `data.about` | string | no | About/summary text of the profile. |
+| `data.certifications` | array | no | Licenses and certifications. |
+| `data.certifications[].issuedAt` | string | no | Issue date text. |
+| `data.certifications[].issuedBy` | string | no | Issuing organization. |
+| `data.certifications[].title` | string | no | Certification title. |
+| `data.city` | string | no | City of the profile owner. |
+| `data.connectionsCount` | integer | no | Number of connections. |
+| `data.country` | string | no | Country of the profile owner. |
+| `data.countryCode` | string | no | Two-letter country code of the profile owner. |
+| `data.coverImage` | string | no | Profile cover (banner) image URL. The query string is a signed token, so keep the URL intact. |
+| `data.creator` | boolean | no | Whether the member is in LinkedIn creator mode. |
+| `data.currentPosition` | array | no | The member's current role(s). |
+| `data.currentPosition[].companyId` | string | no | LinkedIn's numeric company id, as a string. |
+| `data.currentPosition[].companyLinkedinUrl` | string | no | Company LinkedIn URL. |
+| `data.currentPosition[].companyName` | string | no | Company name. |
+| `data.currentPosition[].duration` | string | no | Human-readable tenure, e.g. '12 yrs 6 mos'. |
+| `data.currentPosition[].location` | string | no | Role location. |
+| `data.currentPosition[].position` | string | no | Job title. |
+| `data.education` | array | no | Education entries. |
+| `data.education[].degree` | string | no | Degree earned. |
+| `data.education[].endDate` | string | no | End date text. |
+| `data.education[].fieldOfStudy` | string | no | Field of study. |
+| `data.education[].school` | string | yes | School name. |
+| `data.education[].schoolId` | string | no | LinkedIn's numeric school id, as a string. |
+| `data.education[].schoolUrl` | string | no | School LinkedIn URL. |
+| `data.education[].startDate` | string | no | Start date text. |
+| `data.experience` | array | no | Full work experience with titles, descriptions, dates, and per-role skills. |
+| `data.experience[].companyId` | string | no | LinkedIn's numeric company id, as a string. |
+| `data.experience[].companyLinkedinUrl` | string | no | Company LinkedIn URL. |
+| `data.experience[].companyName` | string | no | Company name. |
+| `data.experience[].description` | string | no | Role description. |
+| `data.experience[].duration` | string | no | Human-readable tenure, e.g. '3 yrs 2 mos'. |
+| `data.experience[].employmentType` | string | no | Employment type, e.g. 'Full-time'. |
+| `data.experience[].endDate` | string | no | End date text, e.g. 'Present'. |
+| `data.experience[].location` | string | no | Role location. |
+| `data.experience[].position` | string | yes | Job title. |
+| `data.experience[].skills` | array | no | Skills associated with this role. |
+| `data.experience[].startDate` | string | no | Start date text, e.g. 'Feb 2014'. |
+| `data.experience[].workplaceType` | string | no | Workplace type, e.g. 'Remote' or 'On-site'. |
+| `data.firstName` | string | yes | First name of the profile owner. |
+| `data.followerCount` | integer | no | Number of followers. |
+| `data.headline` | string | yes | Professional headline shown under the name. |
+| `data.hiring` | boolean | no | Whether the member shows the Hiring badge. |
+| `data.honorsAndAwards` | array | no | Honors and awards. |
+| `data.honorsAndAwards[].description` | string | no | Award description. |
+| `data.honorsAndAwards[].issuedAt` | string | no | Issue date text. |
+| `data.honorsAndAwards[].issuedBy` | string | no | Issuing organization. |
+| `data.honorsAndAwards[].title` | string | no | Award title. |
+| `data.id` | string | no | LinkedIn member identifier. |
+| `data.influencer` | boolean | no | Whether LinkedIn marks the member as an influencer. |
+| `data.languages` | array | no | Languages, as returned by LinkedIn when present. |
+| `data.lastName` | string | yes | Last name of the profile owner. |
+| `data.location` | string | no | Location of the profile owner. |
+| `data.openToWork` | boolean | no | Whether the member is open to work. |
+| `data.photo` | string | no | URL of the profile photo. |
+| `data.premium` | boolean | no | Whether the member has LinkedIn Premium. |
+| `data.projects` | array | no | Projects, as returned by LinkedIn when present. |
+| `data.publicIdentifier` | string | no | LinkedIn public identifier (the /in/ handle). |
+| `data.publications` | array | no | Publications. |
+| `data.publications[].description` | string | no | Publication description. |
+| `data.publications[].publishedText` | string | no | Publisher and/or date text as shown on LinkedIn. |
+| `data.publications[].title` | string | no | Publication title. |
+| `data.skills` | array | no | The member's skills, as free-form strings when present. |
+| `data.state` | string | no | State or region of the profile owner. |
+| `data.topSkills` | array | no | The member's top skills, as free-form strings when present. |
+| `data.url` | string | yes | Canonical LinkedIn profile URL. |
+| `data.verified` | boolean | no | Whether the profile is identity-verified. |
+| `found` | boolean | yes | Whether the profile was found. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.profile.output.json",
+  "title": "LinkedIn profile output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "Whether the profile was found."
+    },
+    "data": {
+      "description": "The profile result, or null when not found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "firstName",
+            "lastName",
+            "headline",
+            "url"
+          ],
+          "properties": {
+            "firstName": {
+              "type": "string",
+              "description": "First name of the profile owner."
+            },
+            "lastName": {
+              "type": "string",
+              "description": "Last name of the profile owner."
+            },
+            "headline": {
+              "type": "string",
+              "x-anyapi-must-populate": true,
+              "description": "Professional headline shown under the name."
+            },
+            "publicIdentifier": {
+              "type": "string",
+              "description": "LinkedIn public identifier (the /in/ handle)."
+            },
+            "url": {
+              "type": "string",
+              "description": "Canonical LinkedIn profile URL."
+            },
+            "location": {
+              "type": "string",
+              "description": "Location of the profile owner."
+            },
+            "id": {
+              "type": "string",
+              "description": "LinkedIn member identifier."
+            },
+            "city": {
+              "type": "string",
+              "description": "City of the profile owner."
+            },
+            "state": {
+              "type": "string",
+              "description": "State or region of the profile owner."
+            },
+            "country": {
+              "type": "string",
+              "description": "Country of the profile owner."
+            },
+            "countryCode": {
+              "type": "string",
+              "description": "Two-letter country code of the profile owner."
+            },
+            "coverImage": {
+              "type": "string",
+              "description": "Profile cover (banner) image URL. The query string is a signed token, so keep the URL intact."
+            },
+            "hiring": {
+              "type": "boolean",
+              "description": "Whether the member shows the Hiring badge."
+            },
+            "influencer": {
+              "type": "boolean",
+              "description": "Whether LinkedIn marks the member as an influencer."
+            },
+            "creator": {
+              "type": "boolean",
+              "description": "Whether the member is in LinkedIn creator mode."
+            },
+            "about": {
+              "type": "string",
+              "description": "About/summary text of the profile."
+            },
+            "photo": {
+              "type": "string",
+              "description": "URL of the profile photo."
+            },
+            "connectionsCount": {
+              "type": "integer",
+              "description": "Number of connections."
+            },
+            "followerCount": {
+              "type": "integer",
+              "description": "Number of followers."
+            },
+            "verified": {
+              "type": "boolean",
+              "description": "Whether the profile is identity-verified."
+            },
+            "premium": {
+              "type": "boolean",
+              "description": "Whether the member has LinkedIn Premium."
+            },
+            "openToWork": {
+              "type": "boolean",
+              "description": "Whether the member is open to work."
+            },
+            "topSkills": {
+              "type": "array",
+              "description": "The member's top skills, as free-form strings when present.",
+              "items": {}
+            },
+            "currentPosition": {
+              "type": "array",
+              "description": "The member's current role(s).",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "type": "string",
+                    "description": "Job title."
+                  },
+                  "companyName": {
+                    "type": "string",
+                    "description": "Company name."
+                  },
+                  "companyLinkedinUrl": {
+                    "type": "string",
+                    "description": "Company LinkedIn URL."
+                  },
+                  "companyId": {
+                    "type": "string",
+                    "description": "LinkedIn's numeric company id, as a string."
+                  },
+                  "duration": {
+                    "type": "string",
+                    "description": "Human-readable tenure, e.g. '12 yrs 6 mos'."
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "Role location."
+                  }
+                }
+              }
+            },
+            "experience": {
+              "type": "array",
+              "x-anyapi-must-populate": true,
+              "description": "Full work experience with titles, descriptions, dates, and per-role skills.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "position"
+                ],
+                "properties": {
+                  "position": {
+                    "type": "string",
+                    "x-anyapi-must-populate": true,
+                    "description": "Job title."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Role description."
+                  },
+                  "duration": {
+                    "type": "string",
+                    "description": "Human-readable tenure, e.g. '3 yrs 2 mos'."
+                  },
+                  "employmentType": {
+                    "type": "string",
+                    "description": "Employment type, e.g. 'Full-time'."
+                  },
+                  "workplaceType": {
+                    "type": "string",
+                    "description": "Workplace type, e.g. 'Remote' or 'On-site'."
+                  },
+                  "companyName": {
+                    "type": "string",
+                    "description": "Company name."
+                  },
+                  "companyLinkedinUrl": {
+                    "type": "string",
+                    "description": "Company LinkedIn URL."
+                  },
+                  "companyId": {
+                    "type": "string",
+                    "description": "LinkedIn's numeric company id, as a string."
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "Role location."
+                  },
+                  "skills": {
+                    "type": "array",
+                    "description": "Skills associated with this role.",
+                    "items": {}
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "description": "Start date text, e.g. 'Feb 2014'."
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "description": "End date text, e.g. 'Present'."
+                  }
+                }
+              }
+            },
+            "education": {
+              "type": "array",
+              "description": "Education entries.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "school"
+                ],
+                "properties": {
+                  "school": {
+                    "type": "string",
+                    "description": "School name."
+                  },
+                  "schoolUrl": {
+                    "type": "string",
+                    "description": "School LinkedIn URL."
+                  },
+                  "schoolId": {
+                    "type": "string",
+                    "description": "LinkedIn's numeric school id, as a string."
+                  },
+                  "degree": {
+                    "type": "string",
+                    "description": "Degree earned."
+                  },
+                  "fieldOfStudy": {
+                    "type": "string",
+                    "description": "Field of study."
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "description": "Start date text."
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "description": "End date text."
+                  }
+                }
+              }
+            },
+            "skills": {
+              "type": "array",
+              "description": "The member's skills, as free-form strings when present.",
+              "items": {}
+            },
+            "certifications": {
+              "type": "array",
+              "description": "Licenses and certifications.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Certification title."
+                  },
+                  "issuedBy": {
+                    "type": "string",
+                    "description": "Issuing organization."
+                  },
+                  "issuedAt": {
+                    "type": "string",
+                    "description": "Issue date text."
+                  }
+                }
+              }
+            },
+            "honorsAndAwards": {
+              "type": "array",
+              "description": "Honors and awards.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Award title."
+                  },
+                  "issuedBy": {
+                    "type": "string",
+                    "description": "Issuing organization."
+                  },
+                  "issuedAt": {
+                    "type": "string",
+                    "description": "Issue date text."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Award description."
+                  }
+                }
+              }
+            },
+            "languages": {
+              "type": "array",
+              "description": "Languages, as returned by LinkedIn when present.",
+              "items": {}
+            },
+            "projects": {
+              "type": "array",
+              "description": "Projects, as returned by LinkedIn when present.",
+              "items": {}
+            },
+            "publications": {
+              "type": "array",
+              "description": "Publications.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Publication title."
+                  },
+                  "publishedText": {
+                    "type": "string",
+                    "description": "Publisher and/or date text as shown on LinkedIn."
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Publication description."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `experience`
+- `headline`
+- `position`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `certifications` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.linkedin.com/in/patrickcollison"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

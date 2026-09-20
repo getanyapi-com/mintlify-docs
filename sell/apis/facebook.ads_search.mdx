@@ -1,0 +1,430 @@
+---
+title: "Facebook Ad Search"
+description: "Sell facebook.ads_search on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Search the Meta Ad Library by keyword and get matching ads (advertiser, creative text, CTA, platforms, and run dates) with cursor pagination.
+
+This page is the seller-facing summary of one catalog API, `facebook.ads_search`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `adType` | string | no | Restrict to all ads (default) or only political and issue ads. One of: `all`, `political_and_issue_ads`. |
+| `country` | string | no | Two-letter country code to scope results. Omit for all countries. |
+| `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. |
+| `endDate` | string | no | Filter to ads with impressions on or before this date, in YYYY-MM-DD format. |
+| `mediaType` | string | no | Creative media type filter. One of: `ALL`, `IMAGE`, `VIDEO`, `MEME`, `IMAGE_AND_MEME`, `NONE`. |
+| `query` | string | yes | Keyword to search the Meta Ad Library for (e.g. "protein powder"). |
+| `searchType` | string | no | Match mode for the query: loose keyword match (keyword_unordered, the default) or exact phrase (keyword_exact_phrase). One of: `keyword_unordered`, `keyword_exact_phrase`. |
+| `sortBy` | string | no | Sort order: impressions (highest first, the default) or recent (most recent). One of: `impressions`, `recent`. |
+| `startDate` | string | no | Filter to ads with impressions on or after this date, in YYYY-MM-DD format. |
+| `status` | string | no | Ad status filter. One of: `ALL`, `ACTIVE`, `INACTIVE`. Default `"ACTIVE"`. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/facebook.ads_search.input.json",
+  "example": {
+    "query": "nike",
+    "country": "US",
+    "searchType": "keyword_exact_phrase"
+  },
+  "title": "Facebook ad search input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Keyword to search the Meta Ad Library for (e.g. \"protein powder\")."
+    },
+    "country": {
+      "type": "string",
+      "description": "Two-letter country code to scope results. Omit for all countries."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ALL",
+        "ACTIVE",
+        "INACTIVE"
+      ],
+      "default": "ACTIVE",
+      "description": "Ad status filter."
+    },
+    "mediaType": {
+      "type": "string",
+      "enum": [
+        "ALL",
+        "IMAGE",
+        "VIDEO",
+        "MEME",
+        "IMAGE_AND_MEME",
+        "NONE"
+      ],
+      "description": "Creative media type filter."
+    },
+    "searchType": {
+      "type": "string",
+      "enum": [
+        "keyword_unordered",
+        "keyword_exact_phrase"
+      ],
+      "description": "Match mode for the query: loose keyword match (keyword_unordered, the default) or exact phrase (keyword_exact_phrase)."
+    },
+    "adType": {
+      "type": "string",
+      "enum": [
+        "all",
+        "political_and_issue_ads"
+      ],
+      "description": "Restrict to all ads (default) or only political and issue ads."
+    },
+    "sortBy": {
+      "type": "string",
+      "enum": [
+        "impressions",
+        "recent"
+      ],
+      "description": "Sort order: impressions (highest first, the default) or recent (most recent)."
+    },
+    "startDate": {
+      "type": "string",
+      "description": "Filter to ads with impressions on or after this date, in YYYY-MM-DD format."
+    },
+    "endDate": {
+      "type": "string",
+      "description": "Filter to ads with impressions on or before this date, in YYYY-MM-DD format."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque pagination cursor from a previous response's nextCursor."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.ads` | array | yes |  |
+| `data.ads[].active` | boolean | yes |  |
+| `data.ads[].adCount` | integer | yes | Number of ads in this campaign (collation count). |
+| `data.ads[].caption` | string | no | Caption line of the ad creative, usually the advertiser's display domain. |
+| `data.ads[].categories` | array | no | Ad Library categories the ad is filed under. |
+| `data.ads[].ctaText` | string | yes |  |
+| `data.ads[].ctaType` | string | yes |  |
+| `data.ads[].displayFormat` | string | yes |  |
+| `data.ads[].endDate` | integer | yes | Epoch seconds. |
+| `data.ads[].id` | string | yes | Ad Library archive ID. |
+| `data.ads[].isReshared` | boolean | no | Whether the ad creative is a reshare of another post. |
+| `data.ads[].linkDescription` | string | no | Description text shown under the ad's link. |
+| `data.ads[].linkUrl` | string | yes |  |
+| `data.ads[].media` | array | no | Creative attached to the ad: one element per image, video, or carousel card, in the order the ad presents them. Empty when the ad has none. |
+| `data.ads[].media[].height` | integer | no | Pixel height of the media item, when the lane reports it. |
+| `data.ads[].media[].type` | string | yes | One of photo, video, or gif. |
+| `data.ads[].media[].url` | string | yes | Image URL. For a video or GIF this is the poster/thumbnail frame. |
+| `data.ads[].media[].videoUrl` | string | no | Playable video file URL. Present only for video and gif items. |
+| `data.ads[].media[].width` | integer | no | Pixel width of the media item, when the lane reports it. |
+| `data.ads[].pageCategories` | array | no | Categories Facebook lists the advertising page under. |
+| `data.ads[].pageDeleted` | boolean | no | Whether the advertising page has been deleted. |
+| `data.ads[].pageId` | string | yes |  |
+| `data.ads[].pageLikes` | integer | no | Like count of the advertising page. |
+| `data.ads[].pageName` | string | yes |  |
+| `data.ads[].pageProfilePicture` | string | no | Profile picture of the advertising page. This is the advertiser's identity image, not ad creative. |
+| `data.ads[].pageUrl` | string | no | Canonical Facebook URL of the advertising page. |
+| `data.ads[].platforms` | array | yes |  |
+| `data.ads[].sourceUrl` | string | yes | Inspectable Meta Ad Library URL for this ad. |
+| `data.ads[].startDate` | integer | yes | Epoch seconds. |
+| `data.ads[].text` | string | yes | Ad body text. |
+| `data.ads[].title` | string | yes |  |
+| `data.nextCursor` | string or null | yes | Opaque cursor for the next page of ads, or null when this lane has no more. Pass it back as cursor to continue. |
+| `data.totalResults` | integer | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/facebook.ads_search.output.json",
+  "title": "Facebook ad search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "totalResults",
+            "nextCursor",
+            "ads"
+          ],
+          "properties": {
+            "totalResults": {
+              "type": "integer"
+            },
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of ads, or null when this lane has no more. Pass it back as cursor to continue."
+            },
+            "ads": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "sourceUrl",
+                  "pageId",
+                  "pageName",
+                  "active",
+                  "startDate",
+                  "endDate",
+                  "text",
+                  "title",
+                  "ctaText",
+                  "ctaType",
+                  "linkUrl",
+                  "displayFormat",
+                  "platforms",
+                  "adCount"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Ad Library archive ID."
+                  },
+                  "sourceUrl": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Inspectable Meta Ad Library URL for this ad."
+                  },
+                  "pageId": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "pageName": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "active": {
+                    "type": "boolean"
+                  },
+                  "startDate": {
+                    "x-anyapi-must-populate": true,
+                    "type": "integer",
+                    "description": "Epoch seconds."
+                  },
+                  "endDate": {
+                    "type": "integer",
+                    "description": "Epoch seconds."
+                  },
+                  "text": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Ad body text."
+                  },
+                  "title": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "ctaText": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "ctaType": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "linkUrl": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "displayFormat": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "platforms": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "adCount": {
+                    "type": "integer",
+                    "description": "Number of ads in this campaign (collation count)."
+                  },
+                  "pageProfilePicture": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Profile picture of the advertising page. This is the advertiser's identity image, not ad creative."
+                  },
+                  "media": {
+                    "type": "array",
+                    "description": "Creative attached to the ad: one element per image, video, or carousel card, in the order the ad presents them. Empty when the ad has none.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "type",
+                        "url"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "One of photo, video, or gif."
+                        },
+                        "url": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Image URL. For a video or GIF this is the poster/thumbnail frame."
+                        },
+                        "videoUrl": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Playable video file URL. Present only for video and gif items."
+                        },
+                        "width": {
+                          "type": "integer",
+                          "description": "Pixel width of the media item, when the lane reports it."
+                        },
+                        "height": {
+                          "type": "integer",
+                          "description": "Pixel height of the media item, when the lane reports it."
+                        }
+                      }
+                    }
+                  },
+                  "caption": {
+                    "type": "string",
+                    "description": "Caption line of the ad creative, usually the advertiser's display domain."
+                  },
+                  "linkDescription": {
+                    "type": "string",
+                    "description": "Description text shown under the ad's link."
+                  },
+                  "pageUrl": {
+                    "type": "string",
+                    "description": "Canonical Facebook URL of the advertising page."
+                  },
+                  "pageCategories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Categories Facebook lists the advertising page under."
+                  },
+                  "pageLikes": {
+                    "type": "integer",
+                    "description": "Like count of the advertising page."
+                  },
+                  "isReshared": {
+                    "type": "boolean",
+                    "description": "Whether the ad creative is a reshare of another post."
+                  },
+                  "pageDeleted": {
+                    "type": "boolean",
+                    "description": "Whether the advertising page has been deleted."
+                  },
+                  "categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Ad Library categories the ad is filed under."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `ctaText`
+- `ctaType`
+- `displayFormat`
+- `id`
+- `linkUrl`
+- `pageId`
+- `pageName`
+- `platforms`
+- `sourceUrl`
+- `startDate`
+- `text`
+- `title`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `ads` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "nike",
+  "country": "US",
+  "searchType": "keyword_exact_phrase"
+}
+```
+
+The compatibility checks fire the schema's example at your endpoint. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).
