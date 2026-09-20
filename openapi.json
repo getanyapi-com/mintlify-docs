@@ -58053,6 +58053,29 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `videoId` or `authorId`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "authorId",
+                                                "authorImage",
+                                                "authorName",
+                                                "authorVerified",
+                                                "comments",
+                                                "createdUtc",
+                                                "durationSeconds",
+                                                "image",
+                                                "likes",
+                                                "shares",
+                                                "url",
+                                                "videoId",
+                                                "views"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -58139,7 +58162,7 @@
                                                                             "type": "number"
                                                                         },
                                                                         "id": {
-                                                                            "description": "Populated whenever the provider has data for the entity.",
+                                                                            "description": "Facebook post id. For a reel or video post this is NOT the id in the /reel/ URL; that one is videoId. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
                                                                         },
@@ -58161,6 +58184,13 @@
                                                                         "url": {
                                                                             "description": "Canonical Facebook URL of the post.",
                                                                             "type": "string"
+                                                                        },
+                                                                        "videoId": {
+                                                                            "description": "Facebook video id of the post's reel or video, the id that appears in its /reel/<id> URL. Null when the post carries no video or this lane cannot read it.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "views": {
                                                                             "type": "integer"
@@ -61690,6 +61720,13 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of reels, or null when this lane has no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "reels": {
                                                                             "description": "The profile's reels. Populated whenever the provider has data for the entity.",
                                                                             "items": {
@@ -246725,7 +246762,7 @@
         },
         "/v1/run/youtube.video_transcript": {
             "post": {
-                "description": "Fetch the transcript/captions of a YouTube video or Short by URL or ID.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video Transcript pricing and uptime](https://getanyapi.com/api/youtube/video-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch the transcript/captions of a YouTube video or Short by URL or ID.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video Transcript pricing and uptime](https://getanyapi.com/api/youtube/video-transcript) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video_transcript",
                 "parameters": [
                     {
@@ -247211,7 +247248,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
+                        "amount": "0.000900",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -247253,7 +247290,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.001000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -247285,7 +247322,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.000900",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
