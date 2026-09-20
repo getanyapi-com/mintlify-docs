@@ -33924,7 +33924,7 @@
                                 "duration": "0",
                                 "publishedWithin": 0,
                                 "query": "\u673a\u5668\u4eba",
-                                "sort": 0
+                                "sort": "relevance"
                             },
                             "schema": {
                                 "additionalProperties": false,
@@ -33932,7 +33932,7 @@
                                     "duration": "0",
                                     "publishedWithin": 0,
                                     "query": "\u673a\u5668\u4eba",
-                                    "sort": 0
+                                    "sort": "relevance"
                                 },
                                 "properties": {
                                     "allowFallbacks": {
@@ -34002,20 +34002,14 @@
                                         "type": "string"
                                     },
                                     "sort": {
-                                        "default": 0,
-                                        "description": "Sort order. Use the canonical JSON integer 0 for comprehensive, 1 for most liked, or 2 for newest; legacy numeric strings remain accepted.",
+                                        "default": "relevance",
+                                        "description": "Sort order: relevance (Douyin's comprehensive ranking), most-liked, date-posted.",
                                         "enum": [
-                                            0,
-                                            1,
-                                            2,
-                                            "0",
-                                            "1",
-                                            "2"
+                                            "relevance",
+                                            "most-liked",
+                                            "date-posted"
                                         ],
-                                        "type": [
-                                            "integer",
-                                            "string"
-                                        ]
+                                        "type": "string"
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -34031,7 +34025,14 @@
                                     "query"
                                 ],
                                 "title": "Douyin video search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-anyapi-compat-values": {
+                                    "sort": {
+                                        "0": "relevance",
+                                        "1": "most-liked",
+                                        "2": "date-posted"
+                                    }
+                                }
                             }
                         }
                     },
@@ -34637,14 +34638,14 @@
                             "example": {
                                 "limit": 20,
                                 "secUserId": "MS4wLjABAAAANXSltcLCzDGmdNFI2Q_QixVTr67NiYzjKOIP5s03CAE",
-                                "sort": 0
+                                "sort": "newest"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
                                     "limit": 20,
                                     "secUserId": "MS4wLjABAAAANXSltcLCzDGmdNFI2Q_QixVTr67NiYzjKOIP5s03CAE",
-                                    "sort": 0
+                                    "sort": "newest"
                                 },
                                 "properties": {
                                     "allowFallbacks": {
@@ -34681,18 +34682,13 @@
                                         "type": "string"
                                     },
                                     "sort": {
-                                        "default": 0,
-                                        "description": "Post order. Use the canonical JSON integer 0 for newest or 1 for most popular; legacy numeric strings remain accepted.",
+                                        "default": "newest",
+                                        "description": "Post order: newest, most-popular.",
                                         "enum": [
-                                            0,
-                                            1,
-                                            "0",
-                                            "1"
+                                            "newest",
+                                            "most-popular"
                                         ],
-                                        "type": [
-                                            "integer",
-                                            "string"
-                                        ]
+                                        "type": "string"
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -34708,7 +34704,13 @@
                                     "secUserId"
                                 ],
                                 "title": "Douyin user posts input",
-                                "type": "object"
+                                "type": "object",
+                                "x-anyapi-compat-values": {
+                                    "sort": {
+                                        "0": "newest",
+                                        "1": "most-popular"
+                                    }
+                                }
                             }
                         }
                     },
@@ -199124,14 +199126,14 @@
                             "example": {
                                 "datePosted": 0,
                                 "query": "cooking",
-                                "sortBy": 0
+                                "sortBy": "relevance"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
                                     "datePosted": 0,
                                     "query": "cooking",
-                                    "sortBy": 0
+                                    "sortBy": "relevance"
                                 },
                                 "properties": {
                                     "allowFallbacks": {
@@ -199177,20 +199179,14 @@
                                         "type": "boolean"
                                     },
                                     "sortBy": {
-                                        "default": 0,
-                                        "description": "Sort order. Use the canonical JSON integer 0 for relevance, 1 for most liked, or 2 for newest first; legacy numeric strings remain accepted.",
+                                        "default": "relevance",
+                                        "description": "Sort order: relevance, most-liked, date-posted.",
                                         "enum": [
-                                            0,
-                                            1,
-                                            2,
-                                            "0",
-                                            "1",
-                                            "2"
+                                            "relevance",
+                                            "most-liked",
+                                            "date-posted"
                                         ],
-                                        "type": [
-                                            "integer",
-                                            "string"
-                                        ]
+                                        "type": "string"
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -199206,7 +199202,16 @@
                                     "query"
                                 ],
                                 "title": "TikTok keyword search input",
-                                "type": "object"
+                                "type": "object",
+                                "x-anyapi-compat-values": {
+                                    "sortBy": {
+                                        "0": "relevance",
+                                        "1": "most-liked",
+                                        "2": "date-posted",
+                                        "like": "most-liked",
+                                        "popular": "most-liked"
+                                    }
+                                }
                             }
                         }
                     },
