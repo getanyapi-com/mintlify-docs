@@ -73,6 +73,13 @@
                         "description": "Display name.",
                         "type": "string"
                     },
+                    "notServingSources": {
+                        "description": "Sources that belong to this API but are not being called right now: each served until it was withdrawn after failures, and each returns on its own once it passes again. Absent when every source is serving. Never merge these into the list above: the prices here cannot be charged and a failed call is not retried on them.",
+                        "items": {
+                            "$ref": "#/components/schemas/APISourceOffer"
+                        },
+                        "type": "array"
+                    },
                     "outputSchema": {
                         "description": "This API's normalized output as a JSON Schema document.",
                         "type": "object"
@@ -210,6 +217,13 @@
                         "description": "Display name.",
                         "type": "string"
                     },
+                    "notServingSources": {
+                        "description": "Sources that belong to this API but are not being called right now: each served until it was withdrawn after failures, and each returns on its own once it passes again. Absent when every source is serving. Never merge these into the list above: the prices here cannot be charged and a failed call is not retried on them.",
+                        "items": {
+                            "$ref": "#/components/schemas/APISourceOffer"
+                        },
+                        "type": "array"
+                    },
                     "path": {
                         "description": "Concrete gateway path for this API. Gateway authority: use it rather than rebuilding a route from the slug.",
                         "type": "string"
@@ -331,6 +345,13 @@
                     "name": {
                         "description": "Display name.",
                         "type": "string"
+                    },
+                    "notServingSources": {
+                        "description": "Sources that belong to this API but are not being called right now: each served until it was withdrawn after failures, and each returns on its own once it passes again. Absent when every source is serving. Never merge these into the list above: the prices here cannot be charged and a failed call is not retried on them.",
+                        "items": {
+                            "$ref": "#/components/schemas/CatalogSourceOffer"
+                        },
+                        "type": "array"
                     },
                     "path": {
                         "description": "Concrete gateway path for this API. Gateway authority: use it rather than rebuilding a route from the slug.",
@@ -77338,7 +77359,7 @@
         },
         "/v1/run/google.search": {
             "post": {
-                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
+                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
                 "operationId": "google_search",
                 "parameters": [
                     {
@@ -93055,7 +93076,7 @@
         },
         "/v1/run/instagram.post": {
             "post": {
-                "description": "Fetch a single Instagram post or reel by URL (media URLs, like count, owner, type) as normalized JSON. Turn on hostVideo to also get the post's video on a hosted MP4 link that plays without an Instagram session, charged as an extra on top of the price. If you want the spoken words as well, instagram.reel_transcript transcribes the same reel.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post pricing and uptime](https://getanyapi.com/api/instagram/post) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Fetch a single Instagram post or reel by URL (media URLs, like count, owner, type) as normalized JSON. Turn on hostVideo to also get the post's video on a hosted MP4 link that plays without an Instagram session, charged as an extra on top of the price. If you want the spoken words as well, instagram.reel_transcript transcribes the same reel.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post pricing and uptime](https://getanyapi.com/api/instagram/post) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_post",
                 "parameters": [
                     {
@@ -123773,7 +123794,7 @@
         },
         "/v1/run/linkedin.search_posts": {
             "post": {
-                "description": "Search public LinkedIn posts by keyword (text, link, publish date).\n\n**Price:** \\$18.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Post Search pricing and uptime](https://getanyapi.com/api/linkedin/search-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Search public LinkedIn posts by keyword (text, link, publish date).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Post Search pricing and uptime](https://getanyapi.com/api/linkedin/search-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_search_posts",
                 "parameters": [
                     {
@@ -124280,7 +124301,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.018000",
+                        "amount": "0.001200",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -124322,7 +124343,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.018000",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -124354,7 +124375,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.018000",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
