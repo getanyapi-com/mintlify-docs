@@ -123,10 +123,11 @@ Prefer to do it yourself? Follow the manual steps below.
       `{ "found": false, "data": null, "reason": "not_found" }`. You get it when the
       account, post, video, or page you named does not exist, has been removed, or a search
       matched nothing; a suspended account says `"reason": "suspended"` on an API whose source
-      can tell. Each API's output schema lists the exact reasons it can answer with. You are charged for it only when the
-      source charged AnyAPI for the lookup; a miss the source did not bill is free. Failed
-      calls are never charged, and `costUsd` is always what this call actually cost you -
-      `0` when nothing was charged for it. See [Not found vs error](/sdks#not-found-vs-error)
+      can tell. Each API's output schema lists the exact reasons it can answer with. You are charged for it only when a
+      source charged AnyAPI for the lookup. When AnyAPI asked more than one source, each one
+      that charged is billed at its own price, up to the API's published maximum; a miss no
+      source billed is free. Failed calls are never charged, and `costUsd` is always what
+      this call actually cost you - `0` when nothing was charged for it. See [Not found vs error](/sdks#not-found-vs-error)
       for the full list of outcomes.
     </Note>
   </Step>

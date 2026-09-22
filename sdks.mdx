@@ -180,9 +180,11 @@ the source's own wording:
 | A site this API cannot serve | `422` with an `alternatives` list naming the APIs that can |
 | Every source failing on a well-formed request | `502` `UpstreamError`, never charged |
 
-A `found: false` answer is billed only when the source charged AnyAPI for the lookup. A
-miss the source refused without billing is free, and `costUsd` / `cost_usd` on the
-result is always what the call actually cost you.
+A `found: false` answer is billed only when a source charged AnyAPI for the lookup. On an
+API with more than one source, every source AnyAPI asked that charged for the call is
+billed at its own price, and the total never exceeds the API's published maximum. A miss
+the sources refused without billing is free, and `costUsd` / `cost_usd` on the result is
+always what the call actually cost you.
 
 `reason` is present only on a miss. In TypeScript it is the `NotFoundReason` union on the
 `found: false` branch of `Output<T>`; in Python it is `OutputNotFound.reason`. Every API can
