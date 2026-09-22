@@ -78,6 +78,10 @@ curl -s https://api.getanyapi.com/v1/run/instagram.followers \
   is sealed and tied to one walk.
 - **`nextCursor`** is in the response at `output.data.nextCursor`. A non-null value means
   there is more; `null` means you have reached the end of this walk.
+- **`page`**, on APIs whose schema declares it (today `google.search`), picks a page directly:
+  send `page: 2`, `page: 3` and so on, each billed as one request. Any source can serve any
+  page, so a page never depends on the source that served the one before it. On those APIs
+  `cursor` is deprecated but still accepted.
 
 <Note>
   The selected SKU's schema defines its page-size constraints. Do not copy a `limit` value
