@@ -3,26 +3,21 @@ title: "Quickstart"
 description: "From zero to your first AnyAPI call in five minutes."
 ---
 
-This guide takes you from signup to a live response. You'll create a key, top up
-your wallet, and run your first API.
-
 ## The fastest path: hand it to your coding agent
 
 If you use a coding agent (Claude Code, Cursor, Codex, or any MCP-capable
-assistant), the simplest way to start is to give it one line. Paste this into your
-agent and it wires up AnyAPI for you, from key to first live call, without leaving
-your editor:
+assistant), paste this line into it:
 
 ```text
 Set up https://getanyapi.com/SKILL.md
 ```
 
-The agent reads the AnyAPI skill, sets up a key, and runs its first API on its own.
-Prefer to do it yourself? Follow the manual steps below.
+The agent reads the AnyAPI skill, sets up a key, and runs its first API. To do it
+yourself, follow the steps below.
 
 ## Prerequisites
 
-- An AnyAPI account — sign up at [getanyapi.com](https://getanyapi.com/dashboard).
+- An AnyAPI account. Sign up at [getanyapi.com](https://getanyapi.com/dashboard).
 - A terminal with `curl` (or any HTTP client).
 
 ## Get started
@@ -30,14 +25,13 @@ Prefer to do it yourself? Follow the manual steps below.
 <Steps>
   <Step title="Create an API key">
     In the [dashboard](https://getanyapi.com/dashboard), open **API Keys** and create a new
-    key. Copy it somewhere safe — it's shown only once.
+    key. Copy it now: it is shown only once.
 
-    New accounts start with about **100 free requests**, so you can make your first calls
-    before topping up.
+    New accounts start with about **100 free requests**.
 
     <Tip>
-      Prefer not to leave your terminal? Mint a free trial key with one request - no
-      dashboard, no sign-in, no account:
+      To stay in your terminal, mint a free trial key with one request. No dashboard,
+      sign-in, or account:
 
       ```bash
       curl -s -X POST https://api.getanyapi.com/agent/signup \
@@ -45,9 +39,9 @@ Prefer to do it yourself? Follow the manual steps below.
         -d '{ "label": "quickstart" }'
       ```
 
-      The body is optional; `label` just tags the key. The response includes your
-      `aa_live_…` key (shown once). It works immediately on a free trial budget of about
-      $0.05, creates no account, and self-expires in 7 days. When the budget runs out, calls
+      The body is optional; `label` tags the key. The response includes your
+      `aa_live_...` key (shown once). It works immediately on a free trial budget of about
+      $0.05 and expires in 7 days. When the budget runs out, calls
       return `402 trial_cap_reached`; run `anyapi connect` or open the
       [dashboard](https://getanyapi.com/dashboard) to connect a wallet and keep going. See
       [Let your agent onboard itself](/agent-self-signup).
@@ -58,11 +52,9 @@ Prefer to do it yourself? Follow the manual steps below.
     `X-API-Key` header (or `Authorization: Bearer`) and the SKU's normalized input
     as the JSON body.
 
-    The example below uses the published `tiktok.profile` input. When you integrate a
-    different SKU, fetch `GET /v1/apis/{sku}` first and construct the body from its
-    `inputSchema`. Do not transfer fields from another API or retry invalid input with
-    guessed aliases. That selected-SKU response also includes observed latency for
-    choosing your HTTP client deadline.
+    The example uses `tiktok.profile`. For any other SKU, fetch `GET /v1/apis/{sku}` first
+    and build the body from its `inputSchema`. Do not copy fields from another API or retry
+    invalid input with guessed aliases.
 
     <CodeGroup>
     ```bash curl
@@ -97,17 +89,15 @@ Prefer to do it yourself? Follow the manual steps below.
     </CodeGroup>
 
     <Note>
-      Building an agent? `/v1/run/{sku}` accepts optional **query parameters** that
-      shrink the response so a large result doesn't flood your context window:
-      `fields` (keep only these keys), `max_items` (cap the rows), and `summary`
-      (outline only). They trim what's returned, never what you're billed. See the
-      [MCP server](/mcp-server) page for details.
+      `/v1/run/{sku}` accepts optional **query parameters** that shrink the response, for
+      example to keep it out of an agent's context window: `fields` (keep only these keys),
+      `max_items` (cap the rows), and `summary` (outline only). They trim what is returned,
+      not what you are billed. See [MCP server](/mcp-server).
     </Note>
   </Step>
   <Step title="Read the response">
-    You get a normalized envelope. `output` is the result, `costUsd` is what this
-    call cost you in real dollars, and `items` is the number of results you were
-    charged for (on per-result APIs).
+    `output` is the result, `costUsd` is what this call cost you in USD, and `items` is the
+    number of results you were charged for (on per-result APIs).
 
     ```json
     {
@@ -123,21 +113,18 @@ Prefer to do it yourself? Follow the manual steps below.
       `{ "found": false, "data": null, "reason": "not_found" }`. You get it when the
       account, post, video, or page you named does not exist, has been removed, or a search
       matched nothing; a suspended account says `"reason": "suspended"` on an API whose source
-      can tell. Each API's output schema lists the exact reasons it can answer with. You are charged for it only when a
-      source charged AnyAPI for the lookup. When AnyAPI asked more than one source, each one
-      that charged is billed at its own price, up to the API's published maximum; a miss no
-      source billed is free. Failed calls are never charged, and `costUsd` is always what
-      this call actually cost you - `0` when nothing was charged for it. See [Not found vs error](/sdks#not-found-vs-error)
-      for the full list of outcomes.
+      can tell. Each API's output schema lists the reasons it can return. A miss is billed
+      only when a source charged AnyAPI for the lookup; see [Pricing](/#pricing).
+      `costUsd` is always what this call cost you, `0` when nothing was charged. See
+      [Not found vs error](/sdks#not-found-vs-error) for every outcome.
     </Note>
   </Step>
 </Steps>
 
 ## Find an API
 
-You don't need to know SKUs ahead of time. To browse by eye, every platform has a
-catalog page listing its endpoints, schemas, and USD prices: start at
-[the full catalog](https://getanyapi.com/catalog), or jump straight to a platform such as
+To browse by eye, start at [the full catalog](https://getanyapi.com/catalog) or a
+platform page such as
 [Instagram](https://getanyapi.com/api/instagram),
 [TikTok](https://getanyapi.com/api/tiktok),
 [LinkedIn](https://getanyapi.com/api/linkedin), or
@@ -159,50 +146,32 @@ curl -s "https://api.getanyapi.com/catalog/search?platform=reddit"
 curl -s https://api.getanyapi.com/v1/apis/tiktok.profile -H "X-API-Key: YOUR_ANYAPI_KEY"
 ```
 
-On `/catalog/search`, `q` is optional. Name any of `q`, `category`, or `platform`, in any
-combination: a scope on its own is a complete question, and only a request naming none of
-the three is rejected. Both endpoints are free and need no key.
+On `/catalog/search`, `q` is optional. Name any combination of `q`, `category`, and
+`platform`; only a request naming none of them is rejected. Both endpoints are free and
+need no key.
 
-Treat `inputSchema` as the request contract. Send only properties it declares. A field used by
-one search API, including `limit`, `cursor`, `page`, or `sort`, may be invalid for another.
+Send only properties the selected `inputSchema` declares. A field one API accepts, such as
+`limit`, `cursor`, `page`, or `sort`, may be invalid for another.
 
-Browse and search results report `provider: "AnyAPI"` and nested USD `pricing`.
-`pricing.from` is the primary static offer, `pricing.failoverMaxUsd` is the maximum
-fallback ceiling, and `failover` reports whether AnyAPI currently has an alternate
-route.
+Browse and search results report `provider: "AnyAPI"`, nested USD `pricing`, and
+`failover`, which says whether AnyAPI currently has an alternate route. The
+[pricing fields](/#pricing) are explained on the introduction page. Do not infer failover
+from the number of lanes or recompute `pricing.from` from lane prices.
 
-Behind most endpoints the request goes to established providers such as Apify and
-ScrapeCreators under volume contracts, with the lower price passed through to you, plus smaller
-specialist sources that automatic failover makes safe to use. The
-[providers page](https://getanyapi.com/providers) lists every source and the traffic it served.
+Most endpoints are served by established providers such as Apify and ScrapeCreators,
+under volume contracts whose lower prices reach you, plus smaller specialist sources that
+failover makes safe to use. The [providers page](https://getanyapi.com/providers) lists
+every source and the traffic it served.
 
-Each of those maximums arrives in two denominations. `pricing.from.maxUsd` and
-`pricing.failoverMaxUsd` are what one request can be billed;
-`pricing.from.maxPer1kUsd` and `pricing.failoverMaxPer1kUsd` are the same ceilings per
-1,000 requests. **Per 1,000 requests is the denomination AnyAPI quotes customers in**,
-because most of the catalog costs a fraction of a cent per call and per-request figures
-cannot be compared by eye. Show `$96.60/1k req` rather than `$0.0966 per request`, and
-read the published per-1k field instead of multiplying `maxUsd`, which drifts in
-floating point (`0.0966 * 1000` is `96.60000000000001` in most languages). `baseUsd`
-and `perUnitUsd` have no per-1k twin, because they are charged per billable item inside
-one call. The `costUsd` on a completed run and your wallet balance stay per request.
-
-These values come from the gateway. The gateway owns input validation, provider
-selection, route and lane order, failover, pricing, health semantics, and billing.
-Do not infer failover from the number of lanes or recompute `pricing.from` from lane
-prices.
-
-If you build a discovery wrapper, treat response objects as extensible. Read the
-known fields your application needs, ignore safe additions, and preserve input and
-output JSON Schemas as opaque objects. This lets the gateway add customer-safe
-metadata without forcing a wrapper release.
+If you build a discovery wrapper, treat response objects as extensible: read the fields
+you need, ignore additions, and pass input and output JSON Schemas through as opaque
+objects.
 
 The full catalog with typed schemas also lives in the [API Reference](/api-reference/tiktok/tiktok-profile).
 
 ## Choose request deadlines from observed latency
 
-Before you set an HTTP client timeout, inspect the selected SKU rather than using one
-short timeout for the whole catalog:
+Set your HTTP client timeout per SKU, from its observed latency:
 
 ```bash
 curl -s https://api.getanyapi.com/v1/apis/google.search \
@@ -217,8 +186,7 @@ wall-clock time also includes the waiting requested in your input.
 
 `latency` is `null` when there are no successful observations or metrics could not be
 read. A p99 value is an observation, not a maximum or a recommended timeout. Browse and
-search responses omit `latency`; fetch the selected-SKU detail before choosing a
-deadline.
+search responses omit `latency`.
 
 ## Retry safely after a disconnect
 
@@ -253,12 +221,11 @@ it charges normally exactly once even if the original client disconnected. Calls
 curl -s https://api.getanyapi.com/v1/balance -H "X-API-Key: YOUR_ANYAPI_KEY"
 ```
 
-Top up any time from the [dashboard](https://getanyapi.com/dashboard) - your wallet is a
-USD balance you draw down per request. Pay on Stripe's secure hosted checkout page; enabled
-methods fund the same USD wallet with no AnyAPI top-up fee. The balance changes only after
-the verified payment settles.
+Top up from the [dashboard](https://getanyapi.com/dashboard). You pay on Stripe's hosted
+checkout page with no AnyAPI top-up fee, and the USD balance changes only after the
+verified payment settles.
 
 <Tip>
-  Building an AI agent? Skip the per-endpoint wiring and connect the whole catalog
-  over MCP instead — see [Connect over MCP](/mcp-server).
+  Building an AI agent? Connect the whole catalog over MCP instead. See
+  [Connect over MCP](/mcp-server).
 </Tip>

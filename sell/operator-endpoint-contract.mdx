@@ -1,16 +1,15 @@
 ---
 title: "The operator endpoint contract"
-description: "The exact request your endpoint receives from AnyAPI, how to verify the signature, and the response it must return — with copy-paste verification code in TypeScript, Python, and Go."
+description: "The request your endpoint receives from AnyAPI, how to verify its signature, and the response it must return, with verification code in TypeScript, Python, and Go."
 ---
 
 Your endpoint serves one catalog API. AnyAPI sends it signed POST requests in that API's
-canonical input format; your endpoint answers in the canonical output format. This page is
-the whole contract.
+input format, and your endpoint answers in its output format.
 
 <Info>
-  Only some catalog APIs are open for self-serve registration. The list, with the request,
-  response, and published price for each one, is [APIs open to sellers](/sell/apis/index).
-  To sell any other API, email [support@getanyapi.com](mailto:support@getanyapi.com).
+  [APIs open to sellers](/sell/apis/index) lists the APIs you can register, with each one's
+  request, response, and published price. To sell any other API, email
+  [support@getanyapi.com](mailto:support@getanyapi.com).
 </Info>
 
 ## The request you receive
@@ -29,7 +28,7 @@ X-AnyAPI-Signature: 8d1f0a5b9c3e...
 {"query": "best pizza brooklyn", "limit": 10}
 ```
 
-The body always matches the API's **input JSON Schema**. Read it (and the output schema)
+The body always matches the API's **input JSON Schema**. Read it and the output schema
 from the catalog:
 
 ```bash
@@ -37,8 +36,8 @@ curl https://api.getanyapi.com/v1/apis/{sku} \
   -H "Authorization: Bearer aa_live_..."
 ```
 
-The response includes `inputSchema` and `outputSchema` — the same schemas the
-compatibility checks and the live trial judge against. The register dialog in the
+The response includes `inputSchema` and `outputSchema`, which the compatibility checks and
+the live trial judge against. The register dialog in the
 [dashboard](https://getanyapi.com/dashboard/sell/endpoints) shows them too.
 
 Redirects are never followed, so answer directly at the registered URL.
@@ -54,17 +53,21 @@ Every request carries four headers:
 | `X-AnyAPI-Nonce` | random 128-bit hex, unique per request |
 | `X-AnyAPI-Signature` | HMAC-SHA256, lowercase hex |
 
-Recompute the signature over the canonical string — five dot-joined parts:
+Recompute the signature over this dot-joined string:
 
 ```text
 <timestamp>.<nonce>.<method>.<path>.<sha256hex(body)>
 ```
 
-where `method` is `POST`, `path` is your registered path, and `sha256hex(body)` is the
-lowercase-hex SHA-256 of the raw body bytes. HMAC-SHA256 that string with the signing
-secret you got at registration, compare against the header in constant time, reject
-timestamps older than about 5 minutes, and remember nonces for that window to block
-replays. Reject failures with 401 and never process an unverified body.
+`method` is `POST`, `path` is your registered path, and `sha256hex(body)` is the
+lowercase-hex SHA-256 of the raw body bytes. Then:
+
+1. HMAC-SHA256 the string with the signing secret you got at registration.
+2. Compare it with the header in constant time.
+3. Reject timestamps older than about 5 minutes.
+4. Remember nonces for that window to block replays.
+
+Reject failures with 401 and never process an unverified body.
 
 <CodeGroup>
 
@@ -200,15 +203,14 @@ func verify(secret string, r *http.Request, path string, rawBody []byte) bool {
 </CodeGroup>
 
 <Note>
-  Rotating the secret (dashboard → endpoint → Rotate secret, or
-  `POST /v1/operator/endpoints/{id}/rotate-secret`) starts a 24-hour window where both the
-  old and new secret verify, so you can roll your deployment without dropping requests.
+  Rotating the secret (dashboard > endpoint > Rotate secret, or
+  `POST /v1/operator/endpoints/{id}/rotate-secret`) starts a 24-hour window in which both
+  the old and new secret verify, so you can roll your deployment without dropping requests.
 </Note>
 
 ## The response you must return
 
-Reply `2xx` with JSON that validates against the API's output schema. The envelope is
-always:
+Reply `2xx` with JSON that validates against the API's output schema, in this envelope:
 
 ```json
 {
@@ -217,14 +219,13 @@ always:
 }
 ```
 
-- **Extra fields are welcome; missing declared fields fail.** You can return more than the
-  schema declares (it's preserved for the customer), but every declared field must be
-  present.
-- **No result is not an error.** When the entity legitimately doesn't exist, return the
-  schema's `found: false` shape with a 2xx — that's a valid, billable answer.
-- A non-2xx status, output that doesn't validate, or a timeout counts as a failed attempt:
-  the request fails over to another provider, you don't earn it, and repeated failures
-  pause the endpoint.
+- **Extra fields are kept; missing declared fields fail.** Anything beyond the schema is
+  passed to the customer, but every declared field must be present.
+- **No result is not an error.** When the entity does not exist, return the schema's
+  `found: false` shape with a 2xx. That is a valid, billable answer.
+- A non-2xx status, output that does not validate, or a timeout is a failed attempt. The
+  request fails over to another provider, you do not earn it, and repeated failures pause
+  the endpoint.
 
 ## Budgets
 
@@ -236,8 +237,8 @@ always:
 
 ## What the compatibility checks test
 
-When you run the checks from the dashboard (or
-`POST /v1/operator/endpoints/{id}/conformance`), AnyAPI fires the API's schema examples at
+When you run the checks from the dashboard or
+`POST /v1/operator/endpoints/{id}/conformance`, AnyAPI sends the API's schema examples to
 your endpoint as signed requests and verifies, per request:
 
 1. HTTP 2xx
@@ -246,19 +247,18 @@ your endpoint as signed requests and verifies, per request:
 4. Answer within the 15-second budget
 5. Body under the 8 MB cap
 
-Every check must pass to enter the live trial. A failed run returns the per-check report
-so you can fix and rerun — unlimited retries.
+Every check must pass to enter the live trial. A failed run returns a per-check report,
+and you can rerun without limit.
 
-During the live trial, mirrored requests additionally carry `X-AnyAPI-Trial: 1` so you
-can tell trial traffic from paid traffic in your logs.
+During the live trial, mirrored requests also carry `X-AnyAPI-Trial: 1`, so you can tell
+trial traffic from paid traffic in your logs.
 
 ## How the live trial works
 
 An endpoint in the trial receives up to 500 mirrored real customer requests, paced evenly
-across 7 days from its first request. Nobody is billed for trial traffic and you are not
-paid for it.
+across 7 days from its first request. Trial traffic is neither billed nor paid.
 
-Every trial response is compared with what the customer was actually served:
+Each trial response is compared with what the customer was served:
 
 - Agreeing on an empty list, or agreeing on `found: false`, counts as a pass.
 - A non-2xx, a timeout, or output that does not validate against the schema counts as a
@@ -267,5 +267,5 @@ Every trial response is compared with what the customer was actually served:
 Graduation needs at least 95% of compared requests passing, over at least 200 compared
 requests spanning at least 7 days, with no fabricated or injected content.
 
-If you ship a fix part-way through the trial, it is measured by the paced requests that
-are still to come, so a bad first day is not permanent.
+A fix shipped part-way through the trial is measured by the remaining paced requests,
+so a bad first day is not permanent.

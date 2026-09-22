@@ -3,18 +3,14 @@ title: "Agent skills"
 description: "Install the official AnyAPI skill so your coding agent knows how to discover, price, and run any API in the catalog."
 ---
 
-AnyAPI ships an official [Agent Skill](https://agentskills.io) that teaches your agent
-the AnyAPI workflow — discover an API, read its schema, run it, and handle pricing and
-errors correctly. It complements the [MCP server](/mcp-server): **the skill teaches the
-workflow; MCP provides the live tools.** The skill also works without MCP by falling
-back to plain REST.
+The official [Agent Skill](https://agentskills.io) teaches your agent to discover an API,
+read its schema, run it, and handle pricing and errors. **The skill teaches the workflow;
+the [MCP server](/mcp-server) provides the live tools.** Without MCP, the skill uses REST.
 
 <Info>
-  **Which page do you want?** This page is for **integrating AnyAPI into your app** — your
-  coding agent runs against a key on your funded account (it can mint one for you and you
-  claim it, or you create one in the [dashboard](https://getanyapi.com/dashboard/keys)),
-  and the app is the caller in production. If instead you're running an **autonomous agent
-  that calls AnyAPI itself at runtime**, it provisions and holds its own key — see
+  This page is for **integrating AnyAPI into your app**: your coding agent uses a key on
+  your funded account, and the app is the caller in production. For an **autonomous agent
+  that calls AnyAPI at runtime** with its own key, see
   [Let your agent onboard itself](/agent-self-signup).
 </Info>
 
@@ -28,14 +24,14 @@ back to plain REST.
 
 <Tabs>
   <Tab title="Any agent (skills CLI)">
-    Works with every agent that reads `.agents/skills/`:
+    For any agent that reads `.agents/skills/`:
 
     ```bash
     npx skills add getanyapi-com/skills
     ```
   </Tab>
   <Tab title="Claude Code (plugin)">
-    Installs the skill **and** the AnyAPI MCP server in one step:
+    Installs the skill **and** the AnyAPI MCP server:
 
     ```bash
     claude plugin marketplace add getanyapi-com/skills
@@ -54,35 +50,31 @@ back to plain REST.
 
 ## Setup
 
-The skill handles the key for you. On first use it reads `ANYAPI_API_KEY`; if that's empty,
-it asks which email to tie the account to and mints a key — no dashboard trip.
-
 <Steps>
   <Step title="Already have a key? Export it">
-    The skill reads the key from the environment — it never hardcodes credentials:
+    The skill reads the key from the environment:
 
     ```bash
     export ANYAPI_API_KEY=your-key
     ```
 
-    No key yet? Skip this step — the skill provisions one on first use.
+    No key yet? Skip this step.
   </Step>
   <Step title="Let the skill provision a key">
-    With nothing in `ANYAPI_API_KEY`, the skill asks for your email and calls the public
-    self-signup endpoint, drops the new key into the environment, and starts working on a
-    small starter credit. It never prints the secret.
+    With `ANYAPI_API_KEY` empty, the skill asks for your email, calls the public self-signup
+    endpoint, and puts the new key in the environment without printing it. It starts on a
+    small starter credit.
   </Step>
   <Step title="Claim it for the full credit">
     The starter key is capped and expires in 7 days until you claim it. Sign in at the
     [dashboard](https://getanyapi.com/dashboard/keys) with that email, open **API keys →
     Claim agent key**, and paste the claim token the skill shows you. Claiming lifts the
-    cap, makes the key permanent, and starts your account with about **100 free requests** —
-    the same key keeps working, now on your funded wallet.
+    cap, makes the key permanent, and starts your account with about **100 free requests**.
+    The same key keeps working on your funded wallet.
   </Step>
   <Step title="Ask for data">
-    Ask your agent for third-party data — "get the top posts in r/golang", "scrape this
-    TikTok profile" — and it will discover the right API, check its published USD
-    price, and run it.
+    Ask your agent for third-party data, such as "get the top posts in r/golang". It finds
+    the API, checks its USD price, and runs it.
   </Step>
 </Steps>
 
@@ -93,12 +85,6 @@ it asks which email to tie the account to and mints a key — no dashboard trip.
   or MCP tool deadline, while treating p99 as an observation rather than a maximum.
 - **Cost discipline:** reading nested flat or linear USD offers, estimating bulk-job
   cost up front, and checking the wallet balance.
-- **Result semantics:** the `{found, data}` envelope — a `found: false` is a successful
+- **Result semantics:** the `{found, data}` envelope; `found: false` is a successful
   answer, not an error.
-- **Error handling:** every machine-readable error prefix and what the agent should do
-  about each (none are charged).
-
-<Tip>
-  Prefer giving your agent live tools instead of (or alongside) the skill? Connect the
-  [MCP server](/mcp-server) directly.
-</Tip>
+- **Error handling:** every machine-readable error prefix and what to do about each.

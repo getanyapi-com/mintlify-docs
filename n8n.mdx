@@ -3,11 +3,9 @@ title: "n8n community node"
 description: "Run any AnyAPI endpoint inside an n8n workflow on one credential, billed per request in USD."
 ---
 
-AnyAPI ships an official [n8n](https://n8n.io) community node so you can run any API
-in the catalog from inside a workflow. Add one credential, drop in the **AnyAPI** node,
-pick an API from a live dropdown, and pass its normalized input. The same node reaches the
-whole catalog, so a single workflow can fan out to many AnyAPI endpoints on one key and
-merge the results.
+The official [n8n](https://n8n.io) community node runs any API in the catalog inside a
+workflow. Add one credential, add the **AnyAPI** node, pick an API from the dropdown, and
+pass its input.
 
 | | |
 |---|---|
@@ -19,8 +17,8 @@ merge the results.
 ## Prerequisites
 
 - An AnyAPI key. Create one in the [dashboard](https://getanyapi.com/dashboard) under **API keys**.
-- A funded USD wallet. **Run API** bills your wallet per successful request; discovery is free.
-  New accounts start with a small free credit, so you can test before topping up.
+- A funded USD wallet. **Run API** bills your wallet per request; discovery is free. New
+  accounts start with a small free balance.
 - An n8n instance where you can install community nodes (self-hosted, or any plan that allows them).
 
 ## Install
@@ -36,9 +34,8 @@ merge the results.
     n8n-nodes-anyapi
     ```
 
-    n8n downloads and installs the node. See the
-    [community nodes installation guide](https://docs.n8n.io/integrations/community-nodes/installation/)
-    for details.
+    See n8n's
+    [community nodes installation guide](https://docs.n8n.io/integrations/community-nodes/installation/).
   </Step>
   <Step title="Add the AnyAPI node">
     In any workflow, search for **AnyAPI** in the node panel and add it.
@@ -46,8 +43,6 @@ merge the results.
 </Steps>
 
 ## Create the AnyAPI credential
-
-The node authenticates with one **AnyAPI API** credential.
 
 <Steps>
   <Step title="Add a new credential">
@@ -60,26 +55,23 @@ The node authenticates with one **AnyAPI API** credential.
     self-hosted or staging gateway.
   </Step>
   <Step title="Save">
-    On save, n8n validates the key against the wallet balance endpoint. A valid key with a
-    reachable wallet passes; an invalid one is rejected before you build a workflow.
+    On save, n8n checks the key against the wallet balance endpoint and rejects an invalid key.
   </Step>
 </Steps>
 
 ## Operations
 
-The single **AnyAPI** node exposes execution, Request retrieval, discovery, and balance operations.
-
 <AccordionGroup>
   <Accordion title="Run API - execute any API by SKU" icon="bolt">
-    Run an API by its SKU with a normalized JSON **Input** payload. The **API** dropdown loads
-    live from the public catalog, so available SKUs appear without being hard-coded into the node.
+    Run an API by its SKU with a JSON **Input** payload. The **API** dropdown loads live from
+    the public catalog.
 
-    Returns the normalized `output`, the serving `provider` (always **AnyAPI**), the `costUsd`
-    of the call in real dollars, and `items` (the number of results charged for). You are billed
-    on success only.
+    Returns the normalized `output`, `provider` (always **AnyAPI**), `costUsd`, and `items`
+    (the number of results charged for). A failed call is free; see
+    [Not found vs error](/sdks#not-found-vs-error) for when a miss is billed.
 
-    The node waits and polls long-running calls by default. Enable **Return Immediately** to emit a
-    resumable Request ID. The node sends the paid POST once and polls AnyAPI's Request state.
+    The node polls long-running calls until they finish. Enable **Return Immediately** to emit a
+    resumable Request ID. The node sends the paid POST once.
   </Accordion>
   <Accordion title="Get or Wait Request - resume long-running work" icon="clock">
     **Get Request** returns the current stored state. **Wait for Request** polls that state until the
@@ -87,8 +79,7 @@ The single **AnyAPI** node exposes execution, Request retrieval, discovery, and 
     **Return Immediately**.
   </Accordion>
   <Accordion title="Get API Schema - inspect input and output" icon="file-lines">
-    Fetch the input and output JSON Schema for one API. Use the input schema to build a valid
-    payload for **Run API**.
+    Fetch one API's input and output JSON Schema. Build the **Run API** payload from the input schema.
   </Accordion>
   <Accordion title="List APIs - browse the catalog" icon="list">
     Browse the AnyAPI catalog, optionally narrowed with **Category** (a category slug).
@@ -96,41 +87,24 @@ The single **AnyAPI** node exposes execution, Request retrieval, discovery, and 
   </Accordion>
   <Accordion title="Search APIs - find an API by intent" icon="magnifying-glass">
     Run a ranked free-text catalog search, optionally narrowed with **Category** or
-    **Platform**. Results include the description and relevance metadata you need to
-    choose a SKU.
+    **Platform**. Results include each API's description and relevance.
   </Accordion>
   <Accordion title="Get Balance - check your wallet" icon="wallet">
     Return the remaining wallet balance in USD for the key on the credential. Never charges.
   </Accordion>
 </AccordionGroup>
 
-## Gateway and node responsibilities
+## Pricing fields
 
-The node is a lightweight n8n transport and presentation adapter. It uses n8n's native
-HTTP and credential helpers, projects the discovery fields its UI needs, and tolerates
-safe additions to catalog responses.
-
-The AnyAPI gateway owns input validation, provider selection, routing, failover, pricing,
-health semantics, and billing. Discovery operations display those gateway-published facts:
-`pricing.from` is the primary static offer, `pricing.failoverMaxUsd` is the fallback
-ceiling, and `failover` reports whether AnyAPI currently has an alternate route. The node
-does not calculate these values from `lanes`, and input and output schemas pass through as
-opaque JSON Schema objects.
-
-Each static maximum is published in two denominations: `maxUsd` for one request and
-`maxPer1kUsd` for 1,000 of them, with `failoverMaxPer1kUsd` beside `failoverMaxUsd`.
-**Per 1,000 requests is the denomination AnyAPI quotes customers in**, because most of
-the catalog costs a fraction of a cent per call and per-request figures cannot be
-compared by eye. Read the published per-1k field rather than scaling `maxUsd` yourself,
-which drifts in floating point (`0.0966 * 1000` is `96.60000000000001` in most
-languages). `baseUsd` and `perUnitUsd` have no per-1k twin, because they are charged per
-billable item inside one call, and the `costUsd` on a completed run stays per request.
+Discovery operations show prices as the gateway publishes them: `pricing.from` is the
+primary static offer, `pricing.failoverMaxUsd` is the fallback ceiling, and `failover`
+reports whether AnyAPI currently has an alternate route. The node never calculates these
+from `lanes`. See [Pricing](/#pricing) for every price field.
 
 ## Response budget options (Run API)
 
-**Run API** has three optional controls under **Options** that shrink the response payload so a
-large result does not flood the next node. They change only what is returned to you, never what you
-are billed (`costUsd` reflects the full result the API produced):
+**Run API** has three optional controls under **Options** that shrink the response. They never
+change what you are billed (`costUsd` reflects the full result the API produced):
 
 | Option | Effect |
 |---|---|
@@ -147,7 +121,7 @@ Add an **AnyAPI** node, select **Run API**, pick **Reddit Search** (`reddit.sear
 { "query": "apify alternative" }
 ```
 
-Execute. The node returns the normalized envelope, including the exact `costUsd` of the call:
+Execute. The node returns:
 
 ```json
 {
@@ -162,19 +136,11 @@ Execute. The node returns the normalized envelope, including the exact `costUsd`
 }
 ```
 
-`provider` is always **AnyAPI** and `costUsd` is what the call cost you in real dollars. Pricing is
-pay per request in USD, with no subscription, and failed calls are never charged.
-
-## One key, many APIs
-
-Because every API shares one credential and the same response envelope (`output` plus `costUsd`),
-a single workflow can fan out across many AnyAPI endpoints (for example Google News, Trustpilot,
-Similarweb, Reddit, LinkedIn, Google Search, and X / Twitter), then merge them with a **Merge** node
-and hand the combined result to an AI Agent. Adding a sixth source is just another AnyAPI node on the
-same key.
+Every API returns the same envelope on the same credential, so one workflow can run several
+AnyAPI nodes and combine them with a **Merge** node.
 
 <Tip>
-  Prefer to call AnyAPI directly? The same catalog is available over plain REST (see the
-  [Quickstart](/quickstart)) and through one [MCP server](/mcp-server) for AI agents. Need help?
-  Reach out at [support@getanyapi.com](mailto:support@getanyapi.com).
+  The same catalog is available over REST (see the [Quickstart](/quickstart)) and the
+  [MCP server](/mcp-server). Need help? Email
+  [support@getanyapi.com](mailto:support@getanyapi.com).
 </Tip>

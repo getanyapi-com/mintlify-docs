@@ -4,15 +4,14 @@ description: "Start long-running AnyAPI calls safely, poll their Request state, 
 ---
 
 Some APIs need more time than one HTTP connection can reliably stay open. AnyAPI runs those calls
-as durable Requests. The work continues if your client disconnects or your process restarts.
+as durable Requests, which continue if your client disconnects or your process restarts.
 
-AnyAPI submits a paid provider job at most once. If the provider accepts a submission but the
-network response is lost, AnyAPI keeps the Request in a safe recovery state and never blindly
-repeats the paid operation. When the provider offers no correlation lookup, that rare Request can
-expire instead of risking duplicate spend.
+AnyAPI submits a paid provider job at most once. If the provider's response to a submission is
+lost, AnyAPI never repeats the paid operation; when the provider offers no way to look the job up,
+that Request can expire instead.
 
-Your normal `POST /v1/run/{sku}` call still returns the standard success envelope when the result is
-ready during the initial wait. Otherwise, it returns `202 Accepted` with a Request ID.
+`POST /v1/run/{sku}` returns the standard success envelope when the result is ready during the
+initial wait. Otherwise it returns `202 Accepted` with a Request ID.
 
 ## Start a durable call
 
@@ -47,8 +46,8 @@ A pending response includes `Location`, `Retry-After`, and `X-Anyapi-Request-Id`
 
 ## Poll the Request
 
-Read the Request from the URL in `Location`. Customer polling reads AnyAPI's stored state. It does
-not repeat the paid operation.
+Read the Request from the URL in `Location`. Polling reads stored state and never repeats the paid
+operation.
 
 ```bash
 curl https://api.getanyapi.com/v1/requests/req_123 \

@@ -3,17 +3,13 @@ title: "Speed and price"
 description: "Ask AnyAPI to prefer a faster source when the cheapest one is too slow."
 ---
 
-Every API in the catalog can be served by more than one source. By default AnyAPI picks
-the cheapest one that can serve your request, and falls back to the next if it fails.
-
-On many APIs the cheapest source is not the fastest, and the gap is large. Use
-`preferLatencyUnderMs` when waiting costs you more than the price difference does.
+By default AnyAPI picks the cheapest source that can serve your request, and falls back to
+the next if it fails. On many APIs the cheapest source is also much slower. Use
+`preferLatencyUnderMs` when waiting costs you more than the price difference.
 
 ## The default: cheapest serves
 
-Send nothing and routing is unchanged. The cheapest source serves, and you are charged
-its price. This is the behavior every API has always had, and it stays the behavior for
-every request that omits the field.
+Without the field, the cheapest source serves and you are charged its price.
 
 ## Prefer a faster source
 
@@ -31,18 +27,16 @@ AnyAPI then orders the sources for your request like this:
    speed for its price.
 3. Sources we have not timed are tried last.
 
-**Your request is never refused for being slow.** The field is a preference, not a filter:
-it changes the order sources are tried in, and removes none of them, so failover works
-exactly as it does without it.
+**Your request is never refused for being slow.** The field changes the order sources are
+tried in and removes none of them, so failover works as it does without it.
 
 ## It can cost more
 
-This is the trade you are making. When the cheapest source misses your target, a faster
-and dearer one serves, and you are quoted and charged its price.
+When the cheapest source misses your target, a faster and dearer one serves, and you are
+quoted and charged its price.
 
-You can see the difference before you call, without a key. `GET /catalog` publishes each
-source's `pricing` next to `health.latencyP50Ms`, and that median is exactly the number
-routing reads:
+You can compare before you call, without a key. `GET /catalog` publishes each source's
+`pricing` next to `health.latencyP50Ms`, the median routing reads:
 
 ```bash
 curl -s https://api.getanyapi.com/catalog \
@@ -56,7 +50,7 @@ curl -s https://api.getanyapi.com/catalog \
 { "source": "Giraffe", "per1k": 2,   "medianMs": null }
 ```
 
-Reading that: with no preference, Badger serves at $0.0009 a call and a ~10.8 second
+With no preference, Badger serves at $0.0009 a call and a ~10.8 second
 median. With `preferLatencyUnderMs: 1000`, Tiger serves at $0.0012 and a ~0.5 second
 median, so you pay 33% more and wait about a twentieth as long. Giraffe has no median
 published, so it sorts last under a preference.
@@ -72,8 +66,7 @@ cheapest-first one you already had.
 
 ## When it does nothing
 
-The field is accepted on every API and is a no-op in three cases, so you can send it
-without special-casing your code:
+The field is accepted on every API and does nothing in these cases:
 
 | Case | What happens |
 |---|---|
@@ -81,8 +74,7 @@ without special-casing your code:
 | We have not timed the sources | They keep their normal cheapest-first order |
 | Page 2 and later of a paginated walk | The first page picks the source and its price, and the rest of the walk stays there |
 
-The pagination rule follows from how cursors work: a cursor pins the walk to one source so
-your pages stay consistent. See [Pagination](/pagination).
+A cursor pins the walk to one source. See [Pagination](/pagination).
 
 ## Example
 
@@ -122,5 +114,4 @@ curl -s -X POST https://api.getanyapi.com/v1/run/tiktok.profile \
 ```
 </CodeGroup>
 
-The `costUsd` on the response is what you were actually charged, so compare it across a
-call with and without the field to see the trade in your own numbers.
+Compare `costUsd` on calls with and without the field to see the trade in your own numbers.

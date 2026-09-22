@@ -4,21 +4,15 @@ description: "Install the official AnyAPI CLI, manage auth, discover APIs, and r
 ---
 
 The official AnyAPI CLI is the npm package `anyapi-cli` with the `anyapi` binary.
-Use it to install agent skills, register MCP, mint or store a key, discover APIs, and
-run SKUs from a terminal.
 
 ## Install
-
-Run the one-line setup:
 
 ```bash
 npx -y anyapi-cli@latest init
 ```
 
-`anyapi init` installs the AnyAPI agent skills into detected agents, offers MCP
-registration, and mints a free trial key if no key is available.
-
-For a global binary:
+`anyapi init` installs the agent skills into detected agents, offers MCP
+registration, and mints a free trial key if none is stored. For a global binary:
 
 ```bash
 npm i -g anyapi-cli
@@ -47,40 +41,17 @@ Repo: [github.com/getanyapi-com/cli](https://github.com/getanyapi-com/cli)
 | `anyapi init [--all] [--yes]` | Installs bundled agent skills, shows or applies MCP setup snippets, and mints a free trial key if none is stored. |
 | `anyapi setup skills` | Installs only the bundled skills. |
 
-`anyapi search` uses the dedicated ranked catalog search, which takes any
-non-empty combination of a query, `--category`, and `--platform`: naming only a
-scope is a complete search, and ranking falls back from semantic to keyword.
-`anyapi list` only browses the catalog and accepts an optional category. Both commands display the
-customer-safe USD offer returned by discovery; they never expose an internal
-accounting unit or upstream provider.
+`anyapi search` takes any non-empty combination of a query, `--category`, and
+`--platform`; ranking falls back from semantic to keyword. `anyapi list` only browses,
+with an optional category. Both print the USD offer from discovery.
 
-Static discovery pricing is nested. `pricing.from` is either a flat offer
-(`model`, `unit: "request"`, `maxUsd`, `maxPer1kUsd`) or a linear offer (`model`,
-`unit`, `baseUsd`, `perUnitUsd`, `maxUsd`, `maxPer1kUsd`). `pricing.failoverMaxUsd`
-is the greatest fallback ceiling, published beside its per-1,000-request twin
-`pricing.failoverMaxPer1kUsd`. The optional `failover` boolean reports whether AnyAPI
-currently has an alternate route. Use the displayed unit when estimating a linear
-call, or run `anyapi describe <sku>` to inspect the complete offer before execution.
-
-Every maximum arrives in two denominations: `maxUsd` for one request and
-`maxPer1kUsd` for 1,000 of them. **Per 1,000 requests is the denomination AnyAPI
-quotes customers in**, because most of the catalog costs a fraction of a cent per call
-and per-request figures cannot be compared by eye. Read the published per-1k field
-instead of multiplying `maxUsd`, which drifts in floating point (`0.0966 * 1000` is
-`96.60000000000001` in most languages). `baseUsd` and `perUnitUsd` have no per-1k
-twin, because they are charged per billable item inside one call, and the `costUsd` of
-a completed run and the balance from `anyapi balance` stay per request.
-
-## Gateway and CLI responsibilities
-
-The gateway owns input validation, provider normalization, pricing, lane order,
-routing, failover, health semantics, and billing. The CLI is a thin transport and
-presentation adapter. It projects the discovery fields it displays, tolerates safe
-new fields, and preserves input and output schemas as opaque JSON.
-
-Treat `pricing.from`, `pricing.failoverMaxUsd`, `failover`, and lane order as
-gateway-published facts. The CLI does not derive them from one another or repair
-their relationships.
+`pricing.from` is either a flat offer (`model`, `unit: "request"`, `maxUsd`,
+`maxPer1kUsd`) or a linear offer (`model`, `unit`, `baseUsd`, `perUnitUsd`, `maxUsd`,
+`maxPer1kUsd`). `pricing.failoverMaxUsd` and `pricing.failoverMaxPer1kUsd` are the
+greatest fallback ceiling, and `failover` reports whether AnyAPI currently has an
+alternate route. The CLI shows these as the gateway publishes them and never derives
+one from another. Run `anyapi describe <sku>` to see the complete offer, and see
+[Pricing](/#pricing) for what each field means.
 
 ## Authentication
 
@@ -91,27 +62,21 @@ The CLI resolves auth in this order:
 3. `~/.anyapi/config.json`
 4. Interactive self-signup for commands that require auth
 
-Application code should read `ANYAPI_API_KEY`. Do not make production app code depend
-on `~/.anyapi/config.json`.
+Application code should read `ANYAPI_API_KEY`, not `~/.anyapi/config.json`.
 
 ## Sign in to an account
-
-Run `anyapi login` to use account-backed OAuth immediately:
 
 ```bash
 anyapi login
 ```
 
-The CLI prints a verification URL and user code, then opens the complete URL when
-possible. You can approve from any browser or device while the CLI polls at the
-server-provided interval. It saves the access token, refresh token, expiry, and scope
-to `~/.anyapi/config.json` after approval, then refreshes the account session
-automatically before the access token expires.
+The CLI prints a verification URL and user code and opens the URL when it can. Approve
+from any browser or device. The CLI saves the access token, refresh token, expiry, and
+scope to `~/.anyapi/config.json` and refreshes the token before it expires. This is
+separate from `anyapi connect`, which upgrades a saved free trial and preserves its
+trial receipt.
 
-This device flow does not bind a localhost callback. It is separate from
-`anyapi connect`, which upgrades a saved free trial and preserves its trial receipt.
-
-To use an existing dashboard key without OAuth, store it locally:
+To store an existing dashboard key without OAuth:
 
 ```bash
 anyapi login --api-key aa_live_...
@@ -119,16 +84,15 @@ anyapi login --api-key aa_live_...
 
 ## Self-signup
 
-Use `anyapi signup` to call the same self-signup endpoint documented in
+`anyapi signup` calls the endpoint described in
 [Let your agent onboard itself](/agent-self-signup):
 
 ```bash
 npx -y anyapi-cli@latest signup --label my-agent
 ```
 
-This mints a free trial key, stores it in `~/.anyapi/config.json`, and prints trial
-guidance. It does not print the secret key unless you pass `--show-key`. The trial key
-carries a budget of about $0.05, creates no account, and self-expires in 7 days.
+The key is stored in `~/.anyapi/config.json`. The trial key carries a budget of about
+$0.05, creates no account, and self-expires in 7 days.
 
 ## Run output
 
@@ -139,19 +103,16 @@ By default, `anyapi run` writes JSON to:
 ```
 
 The command prints the output path, `costUsd`, and item count. Use `--json` to print the
-response JSON to stdout instead, or `-o path` to choose the output file.
+response to stdout, or `-o path` to choose the file. The CLI does not rewrite `output`.
 
-The gateway normalizes the successful response. The CLI preserves the `output` object
-as customer data instead of recursively deleting or rewriting its keys.
-
-For a long-running API, the CLI waits and polls the returned Request by default. Pass `--no-wait`
-to return its Request ID immediately. If you press Ctrl-C after acceptance, the CLI prints the
-`anyapi requests wait <request-id>` command you can use to resume. Automatic idempotency uses a
-fresh random key for each logical CLI invocation.
+For a long-running API, the CLI polls the Request until it finishes. Pass `--no-wait` to
+return its Request ID immediately. If you press Ctrl-C after acceptance, the CLI prints the
+`anyapi requests wait <request-id>` command to resume. Each CLI invocation uses a fresh
+random idempotency key.
 
 ## Context-budget flags
 
-Use these flags when a result would be too large for an agent context window:
+Use these flags when a result is too large for an agent's context window:
 
 | Flag | Effect |
 | --- | --- |
@@ -159,23 +120,21 @@ Use these flags when a result would be too large for an agent context window:
 | `--max-items N` | Caps returned rows. |
 | `--summary` | Returns a structural outline instead of the bulk data. |
 
-These flags trim only what is returned to you. They do not change the amount charged.
-`costUsd` reflects the full result the API produced.
+They trim only what is returned. `costUsd` still reflects the full result the API produced.
 
 ## 402 and upgrading past the trial
 
-A free trial key is capped at about $0.05 of requests. When the trial budget is spent, a
-run returns `402 trial_cap_reached`. To keep going, connect a wallet (anyapi-cli >= 0.3.0):
+When the trial budget is spent, a run returns `402 trial_cap_reached`. To keep going,
+connect a wallet (anyapi-cli >= 0.3.0):
 
 ```bash
 anyapi connect
 ```
 
-This starts an OAuth flow with a localhost callback and prints a single consent URL. Hand
-that URL to a human: they open it, sign in at the
-[dashboard](https://getanyapi.com/dashboard/authorize), set a spend limit, and approve. The
-CLI then holds an OAuth access token and the agent keeps working on the same session.
+This starts an OAuth flow with a localhost callback and prints one consent URL. A human
+opens it, signs in at the [dashboard](https://getanyapi.com/dashboard/authorize), sets a
+spend limit, and approves. The agent then keeps working on the same session.
 
-If a human already has a funded account, they can create a full, non-expiring key at the
+A human with a funded account can instead create a non-expiring key at the
 [dashboard](https://getanyapi.com/dashboard/keys) and store it with
-`anyapi login --api-key aa_live_...` instead.
+`anyapi login --api-key aa_live_...`.

@@ -3,9 +3,8 @@ title: "Pagination"
 description: "Follow a SKU's declared cursor contract across a large result set."
 ---
 
-Some APIs return more results than fit in one response: an account's followers, a
-search with thousands of hits. Pagination support is SKU-specific. Inspect the API's
-input and output schemas before adding pagination fields.
+Some APIs return more results than fit in one response, such as an account's followers.
+Pagination support is SKU-specific.
 
 ## Confirm pagination support
 
@@ -14,9 +13,8 @@ pagination only when `inputSchema` declares `cursor` and the output schema decla
 `nextCursor`. Include `limit` or `requireSinglePage` only when `inputSchema` also declares
 those fields.
 
-For an API that declares this contract, call again with `data.nextCursor` as `cursor`.
-When `nextCursor` is `null`, you have reached the end. The examples below use
-`instagram.followers`, whose schema declares these fields.
+Call again with `data.nextCursor` as `cursor` until `nextCursor` is `null`. The examples
+use `instagram.followers`, whose schema declares these fields.
 
 <CodeGroup>
 ```python python
@@ -74,14 +72,13 @@ curl -s https://api.getanyapi.com/v1/run/instagram.followers \
 - **`limit`**, when declared, is the most items you want in **this** response: a page
   cap, not a grand total. Follow `nextCursor` for more.
 - **`cursor`** is an opaque token from a previous response's `nextCursor`. Pass it to
-  continue, or omit it to start from the first page. Do not parse or build it yourself: it
-  is sealed and tied to one walk.
+  continue, or omit it to start from the first page. Do not parse or build it: it is sealed
+  and tied to one walk.
 - **`nextCursor`** is in the response at `output.data.nextCursor`. A non-null value means
   there is more; `null` means you have reached the end of this walk.
 - **`page`**, on APIs whose schema declares it (today `google.search`), picks a page directly:
   send `page: 2`, `page: 3` and so on, each billed as one request. Any source can serve any
-  page, so a page never depends on the source that served the one before it. On those APIs
-  `cursor` is deprecated but still accepted.
+  page. On those APIs `cursor` is deprecated but still accepted.
 
 <Note>
   The selected SKU's schema defines its page-size constraints. Do not copy a `limit` value
@@ -90,8 +87,7 @@ curl -s https://api.getanyapi.com/v1/run/instagram.followers \
 
 ## Get everything in one call
 
-If you cannot loop, for a spreadsheet import, a no-code tool, or a one-shot job, check
-whether the selected `inputSchema` declares `requireSinglePage`. When it does, set
+If you cannot loop and the selected `inputSchema` declares `requireSinglePage`, set
 **`requireSinglePage: true`** to request up to the schema's allowed `limit` in one response.
 This route can cost more than walking pages.
 
@@ -105,10 +101,3 @@ curl -s https://api.getanyapi.com/v1/run/instagram.followers \
 
 Check the selected API's `pricing` before choosing between paging and a supported
 single-page request. Your exact charge in USD is returned as `costUsd`.
-
-<Tip>
-  Not sure whether an API paginates? Inspect its schema with
-  `curl https://api.getanyapi.com/v1/apis/instagram.followers`. An input that declares
-  `cursor`, plus an output that declares `nextCursor`, means it supports cursor pagination.
-  Other controls are available only when the input schema declares them.
-</Tip>

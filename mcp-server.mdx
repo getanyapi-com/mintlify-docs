@@ -3,10 +3,8 @@ title: "MCP server"
 description: "Connect AI agents to every AnyAPI through one Model Context Protocol endpoint, one key, and a USD wallet."
 ---
 
-AnyAPI ships a [Model Context Protocol](https://modelcontextprotocol.io) server so agents
-can discover and run any API in the catalog without bespoke integrations. Point your MCP
-client at one endpoint, authenticate with your AnyAPI key, and your agent gets a
-registry-driven tool surface that covers the entire catalog — no tool-per-API sprawl.
+The AnyAPI [Model Context Protocol](https://modelcontextprotocol.io) server lets an agent
+discover and run every API in the catalog through the same small set of tools.
 
 | | |
 |---|---|
@@ -18,18 +16,15 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 ## Prerequisites
 
 - An AnyAPI key. Create one in the [dashboard](https://getanyapi.com/dashboard) under **API keys**.
-- A funded USD wallet. `run_api` bills your wallet per successful request; discovery is free.
-- An MCP-capable client (Claude Code, Claude Desktop, Cursor, Codex, or any client that
-  speaks Streamable HTTP).
+- A funded USD wallet. `run_api` bills it; discovery is free.
+- An MCP client that speaks Streamable HTTP, such as Claude Code, Claude Desktop, Cursor, or Codex.
 
 <Note>
-  The MCP surface is **API-key only** — session tokens are not accepted. Send your key as
-  `Authorization: Bearer <your-key>`. Browsing is keyless: `initialize`, `tools/list`, and the
-  catalog tools (`list_apis`, `search_apis`, `get_api`, `quote_api`) all answer without a
-  credential, so an agent can find an API, read its schema, and price a call before your key is
-  in place. Running an API and reading anything about your account need the key; without one
-  they return `unauthorized`. The same catalog is also public over REST at `GET /catalog` and
-  `GET /catalog/search`.
+  The MCP surface accepts **API keys only**, not session tokens. Send
+  `Authorization: Bearer <your-key>`. `initialize`, `tools/list`, and the catalog tools
+  (`list_apis`, `search_apis`, `get_api`, `quote_api`) answer without a key. Running an API
+  and reading account data need the key; without one they return `unauthorized`. The same
+  catalog is public over REST at `GET /catalog` and `GET /catalog/search`.
 </Note>
 
 ## Connect
@@ -128,9 +123,8 @@ registry-driven tool surface that covers the entire catalog — no tool-per-API 
 
 ## Run it locally over stdio
 
-Some MCP clients can only launch a local server and speak to it over stdio. For those,
-AnyAPI publishes a small local server that forwards everything to the hosted endpoint
-above.
+For clients that can only launch a local stdio server, AnyAPI publishes one that forwards
+every listing and call to `https://api.getanyapi.com/mcp`.
 
 | | |
 |---|---|
@@ -141,9 +135,7 @@ above.
 | **Auth** | `ANYAPI_API_KEY` in the environment |
 | **Node** | 20 or newer |
 
-It declares no tools of its own. Every listing and every call is forwarded to
-`https://api.getanyapi.com/mcp`, so you get whatever the hosted server publishes, and a
-catalog change reaches you without upgrading anything.
+It declares no tools of its own, so catalog changes reach you without an upgrade.
 
 <Tabs>
   <Tab title="npx">
@@ -181,45 +173,28 @@ catalog change reaches you without upgrading anything.
     }
     ```
 
-    The image is public, so the pull needs no credential. It is built for `linux/amd64`,
-    so Docker runs it under emulation on an Apple Silicon machine and prints a platform
-    warning on startup.
+    The image is public. It is built for `linux/amd64`, so on Apple Silicon Docker runs it
+    under emulation and prints a platform warning.
   </Tab>
 </Tabs>
 
-`ANYAPI_API_KEY` is optional at startup. Without it the server still starts, lists its tools,
-and forwards the catalog tools (`list_apis`, `search_apis`, `get_api`, `quote_api`), because the
-hosted server answers all of those unauthenticated. Set the key before your agent runs an API:
-`run_api` and the account tools need one.
+`ANYAPI_API_KEY` is optional at startup: the catalog tools work without it. `run_api` and
+the account tools need it.
 
-The server is listed in the official
-[MCP Registry](https://registry.modelcontextprotocol.io) as
-`io.github.getanyapi-com/anyapi`, which declares the hosted endpoint and both packages.
-
-<Note>
-  Prefer the hosted endpoint when your client speaks remote Streamable HTTP. It is one less
-  moving part, with nothing to install and nothing to keep up to date.
-</Note>
+The server is listed in the official [MCP Registry](https://registry.modelcontextprotocol.io)
+as `io.github.getanyapi-com/anyapi`, with the hosted endpoint and both packages. If your
+client speaks remote Streamable HTTP, use the hosted endpoint instead; there is nothing to
+install.
 
 ## Tools
 
-Discovery (`list_apis`, `search_apis`, `get_api`) is free; only `run_api` touches your
-wallet. `get_balance` reports what's left in it, and `report_bug` and `send_feedback`
-let an agent tell us when something is wrong without leaving the session.
-
-The MCP tools are a lightweight transport and projection over the same AnyAPI gateway
-used by REST. The gateway owns input validation, provider selection, routing, failover,
-pricing, health semantics, response normalization, and billing. Discovery tools return
-those gateway-published facts and tolerate safe additions to the underlying catalog;
-they do not recalculate relationships between prices, lanes, or failover.
+Only `run_api` touches your wallet. The tools run on the same gateway as REST, so
+validation, routing, failover, pricing, and billing are identical.
 
 <AccordionGroup>
-  <Accordion title="list_apis — browse the catalog" icon="list">
-    Browse APIs as lightweight summaries, optionally filtered by category. Summaries carry
-    the SKU, name, category, provider, nested USD pricing, and failover status, but
-    **no descriptions or schemas**, so listing the whole catalog stays token-cheap.
-    To find an API by keyword (with descriptions), use
-    `search_apis`; for one API's schemas, use `get_api`.
+  <Accordion title="list_apis - browse the catalog" icon="list">
+    Browse API summaries, optionally filtered by category. Summaries omit descriptions and
+    schemas, so listing the whole catalog is cheap in tokens.
 
     **Input**
 
@@ -230,13 +205,11 @@ they do not recalculate relationships between prices, lanes, or failover.
     **Returns** `scrapers`, an array containing `id`, `slug`, `name`, `category`,
     `provider`, nested `pricing`, `failover`, and optional `heavy` and
     `excludesCallerDelay`. `failover` reports whether AnyAPI currently has an alternate
-    route. Descriptions, lanes, health, schemas, latency, eligibility, and relevance are
-    omitted. Use `search_apis` for every ranked free-text query.
+    route. Use `search_apis` for free-text queries and `get_api` for schemas.
   </Accordion>
-  <Accordion title="search_apis — find an API by intent" icon="magnifying-glass">
-    Search APIs by meaning and keyword across name, slug, and description, returning matches **with
-    their descriptions** (schemas omitted). This is the targeted lookup: use it to find the
-    right SKU before reading its schema with `get_api`.
+  <Accordion title="search_apis - find an API by intent" icon="magnifying-glass">
+    Search by meaning and keyword across name, slug, and description. Matches include
+    descriptions but not schemas.
 
     **Input**
 
@@ -247,18 +220,16 @@ they do not recalculate relationships between prices, lanes, or failover.
     | `platform` | string | one of | Platform slug to narrow the search |
     | `limit` | integer | no | Cap on matches returned (default 25) |
 
-    Pass at least one of `query`, `category`, or `platform`, in any combination. A scope
-    on its own is a complete search: `category` or `platform` with no `query` enumerates
-    it, ordered by slug. Only a call naming none of the three is rejected.
+    Pass at least one of `query`, `category`, or `platform`. `category` or `platform`
+    without `query` enumerates that scope, ordered by slug.
 
     **Returns** `results` with the list fields, including `failover`, plus `description`
     and response-relative `relevance`, `total` before the limit, and `ranking`
     (`semantic` or `keyword`). Lanes, health, schemas, latency, and eligibility are
     omitted.
   </Accordion>
-  <Accordion title="get_api — inspect input and output schemas" icon="file-lines">
-    Get the full definition of one API by SKU, including its normalized input and output
-    JSON schemas.
+  <Accordion title="get_api - inspect input and output schemas" icon="file-lines">
+    Get the full definition of one API by SKU.
 
     **Input**
 
@@ -268,7 +239,7 @@ they do not recalculate relationships between prices, lanes, or failover.
 
     **Returns** the list fields, including `failover`, plus `description`, anonymous lane
     pricing, input/output JSON schemas, nullable `latency`, and optional `tryEligible`.
-    Lane health is omitted. Use the input schema to build a valid payload for `run_api`.
+    Lane health is omitted. Build the `run_api` payload from the input schema.
 
     `latency` describes successful end-to-end requests after AnyAPI failover over the
     trailing 30 days:
@@ -280,15 +251,14 @@ they do not recalculate relationships between prices, lanes, or failover.
     | `sample` | Successful requests included in the percentiles |
     | `basis` | `service_time_excludes_caller_requested_delay` |
 
-    The value is `null` when there are no successful observations or metrics could not
-    be read. A p99 is an observation, not a maximum or a recommended timeout. If
-    `excludesCallerDelay` is true, add the waiting requested in your input when reasoning
-    about wall-clock time.
+    The value is `null` when there are no observations or metrics could not be read. A p99
+    is an observation, not a maximum or a recommended timeout. If `excludesCallerDelay` is
+    true, add any wait your input requests to estimate wall-clock time.
   </Accordion>
-  <Accordion title="run_api — execute an API" icon="bolt">
-    Execute an API by SKU with a normalized input payload. Requires a valid AnyAPI key.
-    Billed to your USD wallet on success only. Before choosing an MCP tool deadline, call
-    `get_api` and inspect its observed latency.
+  <Accordion title="run_api - execute an API" icon="bolt">
+    Execute an API by SKU. Requires an AnyAPI key and bills your USD wallet (see
+    [Errors](#errors) for what is free). Check `get_api` latency before choosing a tool
+    deadline.
 
     **Input**
 
@@ -300,27 +270,23 @@ they do not recalculate relationships between prices, lanes, or failover.
     | `max_items` | integer | no | Cap the number of result rows returned; a `_truncated` note reports how many were withheld. Trims the response, not the charge. |
     | `summary` | boolean | no | Return only a structural outline (top-level keys and item counts) instead of the full data. Trims the response, not the charge. |
 
-    The last three are **opt-in response-budget controls** — they keep a large result
-    from flooding your context window. They change only what is returned to you, never
-    what you are billed (`costUsd` reflects the full result the API produced).
+    The last three keep a large result out of your context window. `costUsd` still
+    reflects the full result.
 
-    **Returns** the normalized `output`, the serving `provider` (always **AnyAPI**),
-    `costUsd`, `items` (the number of results charged for), and `replayed`. Most APIs
-    are priced per result — `baseUsd + perUnitUsd × items` — so cap results (and cost)
-    with `limit` in your input; simple lookups are flat per request. Invalid input,
-    insufficient funds, and total upstream failure are **not** charged.
+    **Returns** the normalized `output`, `provider` (always **AnyAPI**), `costUsd`, `items`
+    (the number of results charged for), and `replayed`. Most APIs are priced per result
+    (`baseUsd + perUnitUsd × items`), so a result cap in the input schema, when it declares
+    one, also caps cost. Simple lookups are flat per request. Invalid input, insufficient
+    funds, and total upstream failure are **not** charged.
 
-    **Duplicate calls are not charged twice.** MCP clients re-issue a tool call on
-    their own judgment: the model reads a result as truncated, the user re-runs the
-    turn, a conversation branch is replayed. AnyAPI derives a duplicate-protection
-    key automatically, with no argument for you to pass.
+    **Duplicate calls are not charged twice.** When a client re-issues the same tool call,
+    AnyAPI detects it automatically; you pass nothing.
 
-    For long-running work, `run_api` waits briefly and then returns a Request ID with a
-    machine-actionable `nextAction`. Call `get_request` instead of repeating `run_api`.
+    For long-running work, `run_api` waits briefly, then returns a Request ID with a
+    `nextAction`. Call `get_request` instead of repeating `run_api`.
   </Accordion>
-  <Accordion title="get_request — resume durable work" icon="clock">
-    Retrieve a durable Request by ID. This reads AnyAPI's stored state and never repeats the paid
-    operation.
+  <Accordion title="get_request - resume durable work" icon="clock">
+    Retrieve a durable Request by ID. It never repeats the paid operation.
 
     **Input**
 
@@ -331,19 +297,14 @@ they do not recalculate relationships between prices, lanes, or failover.
     **Returns** the Request status and either its terminal result or a `nextAction` telling the
     agent when to call `get_request` again.
   </Accordion>
-  <Accordion title="get_balance — check your wallet" icon="wallet">
-    Get the remaining wallet balance for the API key you authenticate with. Requires a
-    valid AnyAPI key; never charges.
+  <Accordion title="get_balance - check your wallet" icon="wallet">
+    Requires an AnyAPI key; free. No input.
 
-    **Input** — none.
-
-    **Returns** `balanceUsd`, the remaining wallet balance in USD. Use it to confirm
-    there are funds before a `run_api` call, or to surface the balance to a user.
+    **Returns** `balanceUsd`, the remaining wallet balance in USD.
   </Accordion>
   <Accordion title="report_bug - tell us something is broken" icon="bug">
-    Report a defect: a `run_api` call that returned wrong, empty, or malformed data for
-    input you believe is valid, an error message that was misleading or unactionable, or a
-    price or schema that looks wrong. Free; nothing is charged.
+    Report wrong, empty, or malformed data for valid input, a misleading error, or a price or
+    schema that looks wrong. Free.
 
     | Field | Type | Required | Description |
     |---|---|---|---|
@@ -353,44 +314,32 @@ they do not recalculate relationships between prices, lanes, or failover.
     | `request_id` | string | no | The `requestId` or `resultId` from the failing run |
     | `contact` | string | no | An email to reply to |
 
-    **Returns** the stored report `id`. Pass `request_id` whenever you have one: it reaches
-    the stored run and its upstream error body, so you never need to paste the payload.
-    File the report and continue with the best alternative you have.
+    **Returns** the stored report `id`. Pass `request_id` when you have one so you need not
+    paste the payload, then continue with your best alternative.
   </Accordion>
   <Accordion title="send_feedback - tell us what is missing" icon="comment">
-    Send feedback that is not a defect: an API you wanted and could not find in the catalog,
-    a field missing from a result you needed, a confusing part of the docs, or what would
-    have made a task easier. Same fields as `report_bug`, and also free.
+    Send feedback that is not a defect: a missing API or field, confusing docs, or what would
+    have made a task easier. Same fields as `report_bug`; free.
   </Accordion>
 </AccordionGroup>
 
 ## How an agent uses it
 
-A typical flow chains the tools - discover, inspect, run:
-
 <Steps>
   <Step title="Discover">
-    The agent calls `search_apis` with a query (for example, "instagram") to find a matching
-    SKU and read its description. (Use `list_apis` instead to browse the whole catalog as
-    lightweight summaries.)
+    `search_apis` with a query such as "instagram" finds a SKU. `list_apis` browses instead.
   </Step>
   <Step title="Inspect">
-    It calls `get_api` with that `sku_id` to read the input schema, inspect observed
-    latency before choosing a tool deadline, and build a valid payload.
+    `get_api` returns the input schema and observed latency.
   </Step>
   <Step title="Run">
-    It calls `run_api` with the `sku_id` and `input`. AnyAPI routes to a provider,
-    normalizes the response, falls back automatically on error, and returns the result.
+    `run_api` with the `sku_id` and `input`. AnyAPI routes, normalizes, and falls back on error.
   </Step>
 </Steps>
 
-Because every API shares the same tools and one normalized schema convention, an
-agent that learns this flow once can use the entire catalog.
-
 ### Worked example
 
-Discover Reddit APIs, inspect one, and run it. Tool results carry both a JSON text block
-and `structuredContent` with these shapes:
+Tool results carry a JSON text block and `structuredContent` with these shapes:
 
 ```json
 // search_apis {"query": "reddit"} → structuredContent
@@ -422,30 +371,15 @@ and `structuredContent` with these shapes:
 }
 ```
 
-`list_apis` returns the same identity and pricing fields without `description` or
-`relevance` (and wrapped in `scrapers`). Neither tool returns lanes, health, or schemas,
-so browsing and searching stay token-cheap. Reach for `list_apis` when you want to
-enumerate rather than search.
+`list_apis` returns the same fields without `description` or `relevance`, wrapped in
+`scrapers`.
 
-This API's `pricing.from.model` is `flat`, so `maxUsd` is what one request is billed.
-`failover` is the gateway's authoritative routing fact; do not infer it from lanes. A
-linear offer instead carries `unit`, `baseUsd`, `perUnitUsd`, `maxUsd`, and
-`maxPer1kUsd`. For example, an API billed per result reports `unit: "result"`; the
-actual successful charge is the base plus the per-unit amount, capped at `maxUsd`.
-
-Every static offer publishes its maximum twice: `maxUsd` for one request and
-`maxPer1kUsd` for 1,000 of them, with `failoverMaxPer1kUsd` as the twin of
-`failoverMaxUsd`. Lane-level `pricing` objects carry `maxPer1kUsd` too.
-**Per 1,000 requests is the denomination AnyAPI quotes customers in**, because most of
-the catalog costs a fraction of a cent per call and per-request figures cannot be
-compared by eye. Surface `$0.90/1k req` rather than `$0.0009 per request`, and read the
-published field instead of multiplying `maxUsd`, which drifts in floating point
-(`0.0966 * 1000` is `96.60000000000001` in most languages).
-
-`baseUsd` and `perUnitUsd` have no per-1k twin, because they are charged per billable
-item inside one call. Amounts that state what a specific call costs stay per request
-and are never scaled to 1,000: a price quote's `maxCostUsd` and `minCostUsd`, the
-`costUsd` `run_api` returns, and the `balanceUsd` from `get_balance`.
+This API's `pricing.from.model` is `flat`, so `maxUsd` is what one request is billed. A
+linear offer instead carries `unit` (for example `"result"`), `baseUsd`, `perUnitUsd`,
+`maxUsd`, and `maxPer1kUsd`; the charge is the base plus the per-unit amount, capped at
+`maxUsd`. `failover` is authoritative; do not infer it from lanes. Show people
+`maxPer1kUsd` as `$0.90/1k req` and read it rather than multiplying `maxUsd`; see
+[every static price in two denominations](/#every-static-price-in-two-denominations).
 
 ```json
 // get_api {"sku_id": "reddit.search"} → structuredContent (schemas abridged)
@@ -513,7 +447,7 @@ Tool failures come back as MCP tool errors with a short machine-readable prefix:
 | `unauthorized` | Missing or invalid AnyAPI key | No |
 | `sku_not_found` | The requested SKU does not exist | No |
 | `invalid_input` | Payload did not match the API's input schema | No |
-| `insufficient_balance` | Wallet balance too low — top up to run | No |
+| `insufficient_balance` | Wallet balance too low; top up to run | No |
 | `key_cap_exceeded` | The API key reached its configured spend cap | No |
 | `grant_cap_exceeded` | The authorization reached the spending limit its owner approved | No |
 | `trial_cap_reached` | The autonomous trial reached its cap | No |
@@ -533,18 +467,14 @@ Tool failures come back as MCP tool errors with a short machine-readable prefix:
 | `no_providers` | The API has no enabled providers | No |
 | `scrape_failed` | The run ended without a confirmed outcome | Unknown - check `get_balance`; repeating the same call within a few minutes cannot double charge |
 
-A completed lookup that returns a normalized empty result such as `found: false` is not a
-tool error. It is a successful answer: the lookup ran and the account, post, video, or
-page does not exist, was removed or suspended, or the search matched nothing, and
-`output.reason` says which (`not_found`, or `suspended` for a suspended account). It is
-charged only when a source charged AnyAPI for the lookup. When more than one source was
-asked, each one that charged is billed at its own price, up to the API's published maximum;
-a miss no source billed is free. Read `costUsd` for what the call actually cost, which is
-`0` when nothing was charged for it.
+A normalized empty result such as `found: false` is a successful answer, not a tool error:
+the thing does not exist, was removed or suspended, or the search matched nothing.
+`output.reason` says which (`not_found`, or `suspended` for a suspended account). A miss no
+source billed is free. When AnyAPI asks more than one source, each source that charged is
+billed at its own price, capped at the API's published maximum. `costUsd` is the actual
+charge, `0` when nothing was charged.
 
 <Tip>
-  Pair the MCP server with the official [agent skill](/agent-skills) — the skill teaches
-  your agent the discover → inspect → run workflow and cost discipline; MCP provides the
-  live tools. Need help? Reach out at
-  [support@getanyapi.com](mailto:support@getanyapi.com).
+  The [agent skill](/agent-skills) teaches your agent the workflow and cost discipline; MCP
+  provides the live tools. Help: [support@getanyapi.com](mailto:support@getanyapi.com).
 </Tip>

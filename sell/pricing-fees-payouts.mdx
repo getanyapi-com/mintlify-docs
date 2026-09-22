@@ -1,17 +1,16 @@
 ---
 title: "Pricing, fees & payouts"
-description: "How operator pricing works on AnyAPI: you set the customer price in USD, the platform takes a commission per sale, and earnings pay out to your bank through Stripe — free, from $50."
+description: "How operator pricing works on AnyAPI: you set the customer price in USD, the platform takes a commission per sale, and earnings pay out to your bank through Stripe for free, from $50."
 ---
 
-Everything on the seller side is denominated in USD. You set a price, customers pay it,
-and every earnings row itemizes your share and the platform fee.
+Everything on the seller side is in USD. Every earnings row itemizes your share and the
+platform fee.
 
 ## You set the price
 
 When you register an endpoint you set the **customer list price in USD per 1,000
 requests** (minimum $0.01/1k). Routing is cheapest-first among healthy endpoints on the
-same API, so your price is your lever for traffic: price lower to win more requests,
-higher to earn more per request.
+same API: price lower to win more requests, higher to earn more per request.
 
 ### Changing your price
 
@@ -19,14 +18,13 @@ From the endpoint's page in the [dashboard](https://getanyapi.com/dashboard/sell
 (or `POST /v1/operator/endpoints/{id}/price`):
 
 - **Decreases apply immediately.**
-- **Increases apply after a 24-hour delay**, so customers are never surprised
-  mid-integration.
+- **Increases apply after a 24-hour delay.**
 - At most **2 price changes per endpoint per rolling 24 hours**.
 
 ## The commission split
 
-AnyAPI takes a per-sale commission from your profile's commission rate (`commissionBps`,
-default 1000 basis points = 10%). Don't assume the default — read your rate from your
+AnyAPI takes a per-sale commission at your profile's rate (`commissionBps`, default 1000
+basis points = 10%). Read your actual rate from your
 [operator profile](https://getanyapi.com/dashboard/sell) or `GET /v1/operator/profile`.
 
 Worked example at a $5.00/1k list price and the default 10% commission:
@@ -39,7 +37,7 @@ Worked example at a $5.00/1k list price and the default 10% commission:
 
 ## When earnings become withdrawable
 
-- **Earnings accrue on confirmed sales** — every request your endpoint wins and serves
+- **Earnings accrue on confirmed sales:** every request your endpoint wins and serves
   successfully, including free-tier-funded and agent-paid traffic.
 - Accrued earnings show as **Pending** in
   [Earnings](https://getanyapi.com/dashboard/sell/earnings).
@@ -48,9 +46,9 @@ Worked example at a $5.00/1k list price and the default 10% commission:
 
 ## Payouts
 
-Payouts run through Stripe. Connect a payout account once from
-[Earnings → Set up payouts](https://getanyapi.com/dashboard/sell/earnings) — identity
-verification, bank details, and tax forms are all handled on Stripe's hosted flow.
+Connect a payout account once from
+[Earnings > Set up payouts](https://getanyapi.com/dashboard/sell/earnings). Stripe's hosted
+flow handles identity verification, bank details, and tax forms.
 
 | Rule | Value |
 | --- | --- |
@@ -66,8 +64,7 @@ your available balance.
 
 ## Quality affects earnings
 
-Only healthy endpoints receive traffic. If your error rate spikes or quality drops, the
-endpoint is paused automatically (shown as *Paused (quality)* in the dashboard) and stops
-earning until automatic re-tests restore it. Failed requests never earn: a non-2xx,
-invalid output, or timeout fails over to another provider at no cost to the customer and
-no earning to you.
+If your error rate spikes or quality drops, the endpoint is paused automatically (*Paused
+(quality)* in the dashboard) and stops earning until automatic re-tests restore it. A
+non-2xx, invalid output, or timeout earns nothing: the request fails over to another
+provider and the customer is not charged for your attempt.

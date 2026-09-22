@@ -1,86 +1,78 @@
 ---
 title: "Become an operator"
-description: "Sell through AnyAPI: host an endpoint for a catalog API, pass the quality gates, and earn USD on every request you win. This page walks the whole journey from signup to first payout."
+description: "Sell through AnyAPI: host an endpoint for a catalog API, pass the quality gates, and earn USD on every request you win."
 ---
 
-AnyAPI is a marketplace on both sides. Buyers call hundreds of APIs through one key and one
-wallet. **Operators** are the supply side: you run your own scraper or data service behind
-the catalog, and when your endpoint wins a request, you earn the customer price minus the
-platform fee. No subscriptions, no invoicing — you're paid in USD.
+**Operators** run their own scraper or data service behind an API in the AnyAPI catalog.
+When your endpoint wins a request, you earn the customer price minus the platform fee, paid
+in USD.
 
 <Info>
-  Running an AI agent instead of reading docs? The machine-readable version of everything on
-  this page lives at
+  AI agents can run an operator account end to end from
   [`getanyapi.com/operator-onboarding/SKILL.md`](https://getanyapi.com/operator-onboarding/SKILL.md).
-  Point your agent at it and it can run your operator account end to end.
 </Info>
 
 ## How selling works
 
-You don't list a new API — you plug into an existing one. Every API in the
-[catalog](https://getanyapi.com/catalog) has a fixed request and response format (its
-*schema*), and the ones you can register yourself are listed in
+You plug into an existing catalog API rather than list a new one. Each API has a fixed
+request and response format (its *schema*). The ones you can register yourself are listed in
 [APIs open to sellers](/sell/apis/index); to sell any other one, email
-[support@getanyapi.com](mailto:support@getanyapi.com). You host an HTTPS endpoint that
-speaks the API's format, set your own price, and
-AnyAPI routes customer traffic to the cheapest endpoint that maintains quality. Your price
-is your lever for winning traffic.
+[support@getanyapi.com](mailto:support@getanyapi.com).
 
-Customers always see AnyAPI as the provider. Your operator id (`op_...`) exists for
-routing, earnings, and payouts — it's never shown to buyers.
+You host an HTTPS endpoint that speaks the API's format and set your own price. AnyAPI
+routes customer traffic to the cheapest endpoint that maintains quality.
+
+Customers always see AnyAPI as the provider. Your operator id (`op_...`) is used for
+routing, earnings, and payouts, and is never shown to buyers.
 
 ## The journey
 
 <Steps>
   <Step title="Create your operator account">
     In the dashboard, open [Sell APIs](https://getanyapi.com/dashboard/sell) and pick a
-    display name. Your account starts as **pending**: a human at AnyAPI approves each new
-    operator once before their endpoints can serve paid traffic. You can register endpoints
-    and run checks while you wait.
+    display name. Your account starts as **pending** until a person at AnyAPI approves it;
+    only then can your endpoints serve paid traffic. You can register endpoints and run
+    checks while you wait.
   </Step>
   <Step title="Build your endpoint">
-    Pick one of the [APIs open to sellers](/sell/apis/index), read its request/response
-    format, and deploy an
-    HTTPS endpoint that implements it. The full technical spec — signed requests, the
-    response envelope, timeouts — is on the
-    [endpoint contract](/sell/operator-endpoint-contract) page. The register dialog in the
-    dashboard also shows the exact schema for the API you pick.
+    Pick one of the [APIs open to sellers](/sell/apis/index) and deploy an HTTPS endpoint
+    that implements its format. The [endpoint contract](/sell/operator-endpoint-contract)
+    covers signed requests, the response envelope, and timeouts. The register dialog in
+    the dashboard shows the exact schema for the API you pick.
   </Step>
   <Step title="Register it">
-    In [Sell APIs → Endpoints](https://getanyapi.com/dashboard/sell/endpoints), register
-    the endpoint: the API it serves, your base URL (HTTPS, port 443, public host), an
-    optional path (default `/run`), and your price in USD per 1,000 requests. You get back
-    a **signing secret, shown exactly once** — store it; your endpoint uses it to verify
-    that requests really come from AnyAPI.
+    In [Sell APIs > Endpoints](https://getanyapi.com/dashboard/sell/endpoints), enter the
+    API it serves, your base URL (HTTPS, port 443, public host), an optional path (default
+    `/run`), and your price in USD per 1,000 requests. You get a **signing secret, shown
+    exactly once**. Store it; your endpoint uses it to verify that requests come from
+    AnyAPI.
   </Step>
   <Step title="Pass the compatibility checks">
-    From the endpoint's page, run the checks (the dashboard calls this step
-    *conformance* in the API). AnyAPI fires the API's example requests at your endpoint,
-    signed, and verifies five things: HTTP 2xx, a response that validates against the
-    API's schema, `found: true`, an answer within 15 seconds, and a body under 8 MB. Fail
-    → you get a per-check report, fix, and rerun as often as you like. Pass → the live
-    trial starts automatically.
+    Run the checks from the endpoint's page (the API calls this step *conformance*).
+    AnyAPI sends the API's example requests to your endpoint, signed, and verifies HTTP
+    2xx, a response that validates against the schema, `found: true`, an answer within 15
+    seconds, and a body under 8 MB. On failure you get a per-check report and can rerun
+    as often as you like. On success the live trial starts automatically.
   </Step>
   <Step title="Pass the live trial (free)">
-    Real customer traffic is mirrored to your endpoint — capped at 500 mirrored calls —
-    and your answers are compared with the current provider's. Customers never see your
-    output during the trial and nothing is billed. Every comparison is judged
-    automatically. Promotion is automatic when you hit **at least 95% pass rate over at
-    least 200 comparisons spanning at least 7 days, with zero flags for made-up data or
-    tampered URLs**.
+    Up to 500 real customer calls are mirrored to your endpoint, and your answers are
+    compared automatically with the current provider's. Customers never see your output
+    during the trial and nothing is billed. You are promoted automatically at **at least
+    95% pass rate over at least 200 comparisons spanning at least 7 days, with zero flags
+    for made-up data or tampered URLs**.
   </Step>
   <Step title="Go live and earn">
-    Your endpoint starts serving real traffic in a monitored phase, then fully live as
-    quality holds. You earn from the first request you win. If quality drops, the endpoint
-    is paused automatically and re-tested until it recovers — you can also pause it
-    yourself any time with the kill switch on its page.
+    Your endpoint serves real traffic in a monitored phase, then fully live while quality
+    holds. You earn from the first request you win. If quality drops, the endpoint is
+    paused automatically and re-tested until it recovers. You can also pause it yourself
+    with the kill switch on its page.
   </Step>
   <Step title="Set up payouts">
     Connect a payout account from
-    [Sell APIs → Earnings](https://getanyapi.com/dashboard/sell/earnings) (hosted by
-    Stripe: identity, bank, and tax happen there). Withdrawals are free with a $50
-    minimum; the first payout unlocks 30 days after your operator account is approved.
-    Full money rules: [Pricing, fees & payouts](/sell/pricing-fees-payouts).
+    [Sell APIs > Earnings](https://getanyapi.com/dashboard/sell/earnings); Stripe handles
+    identity, bank, and tax. Withdrawals are free with a $50 minimum, and the first payout
+    unlocks 30 days after your operator account is approved. See
+    [Pricing, fees & payouts](/sell/pricing-fees-payouts).
   </Step>
 </Steps>
 
@@ -98,8 +90,8 @@ routing, earnings, and payouts — it's never shown to buyers.
 
 ## Where to go next
 
-- [The endpoint contract](/sell/operator-endpoint-contract) — the exact request you'll
-  receive and the response you must return, with signature-verification code to copy.
-- [Pricing, fees & payouts](/sell/pricing-fees-payouts) — how the split works and how the
-  money reaches your bank.
+- [The endpoint contract](/sell/operator-endpoint-contract): the request you receive, the
+  response you return, and signature-verification code.
+- [Pricing, fees & payouts](/sell/pricing-fees-payouts): the fee split and how money
+  reaches your bank.
 - Questions? [support@getanyapi.com](mailto:support@getanyapi.com).

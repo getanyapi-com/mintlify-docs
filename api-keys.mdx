@@ -3,12 +3,9 @@ title: "API keys & spend controls"
 description: "Create keys with spend limits, reset windows, and expirations; track per-key usage; recharge your wallet automatically."
 ---
 
-Every request authenticates with an API key, and every key spends your one wallet. This
-page covers the controls that keep that safe: per-key spend limits, expirations, the
-disable switch, per-key usage analytics, and automatic wallet top-ups.
-
-Manage everything at [dashboard → API keys](https://getanyapi.com/dashboard/keys), or use
-the endpoints below with any key or session.
+Every request authenticates with an API key, and every key spends your one wallet.
+Manage keys at [dashboard > API keys](https://getanyapi.com/dashboard/keys), or call the
+endpoints below with any key or session.
 
 ## Create a key
 
@@ -35,7 +32,7 @@ All fields except `name` are optional:
 | `expiresIn` | `1h`, `1d`, `7d`, `30d`, `90d`, `180d`, `1y`, or `never` (default). Fixed at creation. |
 
 A request that would take the key past its limit is rejected with **402** and the message
-`this API key has reached its spend limit` — nothing is charged. The wallet balance still
+`this API key has reached its spend limit`, and nothing is charged. The wallet balance
 applies independently.
 
 ## Update, disable, delete
@@ -59,15 +56,15 @@ curl -s -X POST ... -d '{ "disabled": true }'
   same request, and `"limitUsd": null` clears both.
 - A **disabled** key fails every request with **401** (`this API key is disabled`) until
   you re-enable it with `{ "disabled": false }`.
-- An **expired** key fails with **401** (`this API key has expired`); expiry cannot be
-  changed after creation — mint a new key instead.
-- `DELETE /v1/api-keys/{id}` revokes a key permanently. This cannot be undone.
+- An **expired** key fails with **401** (`this API key has expired`). Expiry cannot be
+  changed after creation; mint a new key instead.
+- `DELETE /v1/api-keys/{id}` revokes a key permanently.
 
 ## Per-key usage
 
 `GET /v1/api-keys/{id}/usage?days=7|30|90` returns one key's spend: totals, a per-API
-breakdown, a daily series, and calendar totals for today, this week, and this month —
-all in USD.
+breakdown, a daily series, and calendar totals for today, this week, and this month, all
+in USD.
 
 ```json
 {
@@ -87,15 +84,13 @@ The key list (`GET /v1/api-keys`) also carries each key's 30-day `usage30d`
 
 ## Manual top-ups
 
-Add between \$10 and \$10,000 from **Credits → Buy credits** in the dashboard. Every dollar
-you pay adds one dollar of wallet spending power. AnyAPI does not add a top-up fee.
+Add between \$10 and \$10,000 from **Credits > Buy credits** in the dashboard. Every dollar
+you pay adds one dollar to your wallet, with no top-up fee.
 
-Choosing an amount sends you to Stripe's secure hosted checkout page, which can show payment
-methods you saved previously. You can also choose to save a reusable method during payment, and
-Stripe returns you to the dashboard when you are done. AnyAPI waits for the verified payment event
-before updating your wallet, so a browser redirect or URL parameter alone never grants funds. Some
-payment methods settle later; the dashboard keeps checking your balance and shows a delayed state
-until the top-up lands.
+You pay on Stripe's hosted checkout page, where you can use a saved payment method or save a
+new reusable one. Your wallet updates only after AnyAPI receives the verified payment event.
+Some payment methods settle later; the dashboard shows a delayed state until the top-up
+lands.
 
 Successful full and partial refunds reduce the wallet by the refunded amount. A dispute reduces
 the wallet when it opens, even when that makes the balance negative. Winning the dispute restores
@@ -103,8 +98,7 @@ the disputed amount; losing it does not apply another debit.
 
 ## Auto top-up
 
-Keep your wallet from running dry: when your balance falls below a threshold, AnyAPI
-charges your saved card for a fixed amount, automatically.
+When your balance falls below a threshold, AnyAPI charges your saved card a fixed amount.
 
 ```bash
 # Read the current settings

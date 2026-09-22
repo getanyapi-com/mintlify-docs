@@ -3,91 +3,70 @@ title: "Introduction"
 description: "Any API, one wallet, USD, no subscriptions."
 ---
 
-AnyAPI is a unified marketplace for scraping and data APIs. Reach hundreds of
-APIs through **one interface and one key**, pay per request in **real US dollars**,
-and let AnyAPI normalize the response schema and fail over automatically when a
-provider errors.
-
-No per-provider signups, no monthly plans, no juggling credentials. Top up a
-single wallet and start calling.
+AnyAPI is a marketplace for scraping and data APIs. You call hundreds of APIs with
+**one key**, pay per request in **US dollars** from one wallet, and get a normalized
+response. When a source errors, AnyAPI fails over to the next one automatically.
 
 ## Build from the API contract
 
-To pick a SKU by eye first, browse [the catalog](https://getanyapi.com/catalog). Each
-platform has a page listing its endpoints, normalized schemas, and USD prices.
+To pick a SKU by eye, browse [the catalog](https://getanyapi.com/catalog). Each
+platform page lists its endpoints, normalized schemas, and USD prices.
 
-Before you write a request, select the SKU and fetch its contract:
+Before you write a request, fetch the selected SKU's contract:
 
 ```text
 GET https://api.getanyapi.com/v1/apis/{sku}
 ```
 
-With MCP, call `get_api` for the selected SKU instead. Use only the fields declared in
-`inputSchema`. Input fields are SKU-specific, so do not add familiar names such as `limit`,
-`cursor`, `page`, or `sort` unless that schema declares them. If the API returns
-`invalid_input`, compare the request with the schema. Do not retry with guessed field names.
+With MCP, call `get_api` instead. Use only the fields declared in `inputSchema`.
+Input fields are SKU-specific, so do not add names such as `limit`, `cursor`, `page`, or
+`sort` unless that schema declares them. If the API returns `invalid_input`, compare the
+request with the schema. Do not retry with guessed field names.
 
-If you are using a coding agent, give it the maintained AnyAPI integration instructions:
+If you use a coding agent, give it the maintained AnyAPI instructions:
 
 ```text
 Set up https://getanyapi.com/SKILL.md
 ```
 
-## Why AnyAPI
-
-<CardGroup cols={2}>
-  <Card title="One key, every API" icon="key">
-    A single AnyAPI key unlocks the whole catalog. Add an API to your app without
-    creating yet another account.
-  </Card>
-  <Card title="Pay per request, in USD" icon="dollar-sign">
-    No subscriptions. You're billed the winning provider's price in real dollars,
-    and only when a call succeeds.
-  </Card>
-  <Card title="Normalized responses" icon="shapes">
-    Every API returns the same shape across providers, so your code doesn't change
-    when the upstream does.
-  </Card>
-  <Card title="Automatic failover" icon="shield-check">
-    If a provider fails, AnyAPI retries the next one under the same request.
-    Failed calls are never charged.
-  </Card>
-</CardGroup>
-
 ## How it works
 
-Every API is a single `POST` to `/v1/run/{sku}`: send the normalized input, get a
-normalized result.
+Every API is a single `POST` to `/v1/run/{sku}`.
 
 <Steps>
   <Step title="Send a request">
     Call `/v1/run/{sku}` with the SKU's normalized input and your API key.
   </Step>
   <Step title="AnyAPI routes it">
-    We validate your input, then run it against the best provider — failing over
-    to the next on error, all under one price reservation.
+    AnyAPI validates your input and runs it against the best source. On error it fails
+    over to the next source, all under one price reservation.
   </Step>
   <Step title="Get a normalized result">
-    You receive `{ output, provider, costUsd, items }`. You're charged `costUsd`
-    only on success.
+    You receive `{ output, provider, costUsd, items }`. `costUsd` is what this call
+    cost you.
   </Step>
 </Steps>
 
 ## Pricing
 
-Pricing is **pass-through** in USD, surfaced as `costUsd` on every response. There
-are no subscriptions and no charge for failed calls — if every provider errors,
-you pay nothing.
+Prices are in USD, and every response reports its charge as `costUsd`. There are no
+subscriptions.
 
-Most APIs are **priced per result**: a per-item rate for each result returned (a
-few also add a small base fee), so a call that returns 5 results costs less than
-one that returns 50. Some input schemas declare a result cap such as `limit`. Use
-that field only when the selected SKU's `inputSchema` declares it. The response
-reports `items`, the count you were charged for. Catalog and `get_api` results carry
-nested `pricing`: `pricing.from` is the cheapest complete flat or linear offer,
-while `pricing.failoverMaxUsd` is the greatest fallback ceiling. Linear offers name
-their billable `unit` and include `baseUsd`, `perUnitUsd`, and `maxUsd`, so you can
-budget before making a call. Simple lookups are flat per request.
+- A failed call is free. If every source errors, you pay nothing.
+- A miss that the source did not bill is free.
+- When AnyAPI asks more than one source for one request, each source that charged is
+  billed at its own price. The total is capped at the API's published maximum.
+
+Most APIs are **priced per result**: a per-item rate for each result returned, plus a
+small base fee on a few. A call that returns 5 results costs less than one that returns 50.
+Some input schemas declare a result cap such as `limit`; use it only when the selected
+SKU's `inputSchema` declares it. The response reports `items`, the count you were charged
+for. Simple lookups are flat per request.
+
+Catalog and `get_api` results carry nested `pricing`. `pricing.from` is the cheapest
+complete flat or linear offer, and `pricing.failoverMaxUsd` is the greatest fallback
+ceiling. Linear offers name their billable `unit` and include `baseUsd`, `perUnitUsd`, and
+`maxUsd`, so you can budget before a call.
 
 ### Every static price in two denominations
 
@@ -102,37 +81,31 @@ Every static discovery offer publishes its maximum twice:
 
 Lane-level `pricing` objects carry `maxPer1kUsd` too.
 
-**Per 1,000 requests is the denomination AnyAPI quotes customers in.** Most of the
-catalog costs a fraction of a cent per call, and per-request figures at that scale
-cannot be compared by eye. When you show a catalog price to a person, read
-`maxPer1kUsd` and label it `/1k req` - for example `$96.60/1k req` rather than
-`$0.0966 per request`.
+**AnyAPI quotes customers per 1,000 requests**, because most of the catalog costs a
+fraction of a cent per call. When you show a catalog price to a person, read
+`maxPer1kUsd` and label it `/1k req`: `$96.60/1k req`, not `$0.0966 per request`.
 
-Read the published per-1k field instead of multiplying `maxUsd` yourself. AnyAPI
-derives it with exact fixed-point arithmetic, while a floating-point multiplication
-drifts: in most languages `0.0966 * 1000` is `96.60000000000001`, and live catalog
-prices land on that case.
+Read the published per-1k field instead of multiplying `maxUsd` yourself. Floating-point
+multiplication drifts: in most languages `0.0966 * 1000` is `96.60000000000001`, and live
+catalog prices hit that case.
 
-`baseUsd` and `perUnitUsd` have **no** per-1k twin. They are charged per billable
-item inside a single call, so a per-1,000-request version of them would describe
-nothing you can be billed.
+`baseUsd` and `perUnitUsd` have **no** per-1k twin, because they are charged per billable
+item inside one call.
 
-Amounts that state what one specific call costs stay per request and are never
-scaled to 1,000: a price quote's `maxCostUsd` and `minCostUsd`, the `costUsd` on a
-completed run, and your wallet balance. Report those exactly as returned.
+Amounts for one specific call stay per request and are never scaled to 1,000: a price
+quote's `maxCostUsd` and `minCostUsd`, the `costUsd` on a completed run, and your wallet
+balance. Report those exactly as returned.
 
 ## For AI agents
 
-If you are an AI agent (or are setting one up), AnyAPI's whole catalog is available
-through one [MCP server](/mcp-server) — no per-API integration needed:
+The whole catalog is available through one [MCP server](/mcp-server):
 
 - **Endpoint:** `https://api.getanyapi.com/mcp` (Streamable HTTP)
-- **Auth:** `Authorization: Bearer <ANYAPI_KEY>` — required for `run_api` and
-  `get_balance`; `list_apis`, `search_apis`, and `get_api` (discovery) work without a key.
-- **Tools:** `search_apis` → `get_api` → `run_api`. Find an API by keyword (or browse
-  with `list_apis`), read its input JSON Schema, then execute it. Successful runs bill the
-  wallet in USD (`costUsd`); failed runs are never charged. `get_balance` returns the
-  wallet's remaining USD.
+- **Auth:** `Authorization: Bearer <ANYAPI_KEY>`, required for `run_api` and
+  `get_balance`. Discovery (`list_apis`, `search_apis`, `get_api`) works without a key.
+- **Tools:** `search_apis` (or `list_apis` to browse), then `get_api` to read the input
+  JSON Schema, then `run_api` to execute. Runs bill the wallet in USD (`costUsd`) under the
+  [pricing rules](#pricing). `get_balance` returns the wallet's remaining USD.
 
 ```json
 {
@@ -145,30 +118,28 @@ through one [MCP server](/mcp-server) — no per-API integration needed:
 }
 ```
 
-See the [MCP server page](/mcp-server) for per-client setup (Claude Code, Claude Desktop,
-Cursor, Codex) and the full tool reference. There is also an official
-[agent skill](/agent-skills) (`npx skills add getanyapi-com/skills`) that teaches your
-agent this whole workflow, including pricing and error semantics. Agents can also use the plain REST
-surface — `GET /v1/apis?category=...` to browse, `GET /catalog/search?q=...` to
-search, and `POST /v1/run/{sku}` to execute — documented in the
-[API Reference](/api-reference/tiktok/tiktok-profile) and
-machine-readable at the public
+The [MCP server page](/mcp-server) covers per-client setup (Claude Code, Claude Desktop,
+Cursor, Codex) and the full tool reference. The official [agent skill](/agent-skills)
+(`npx skills add getanyapi-com/skills`) teaches your agent this workflow, including
+pricing and error semantics. Agents can also use REST: `GET /v1/apis?category=...` to
+browse, `GET /catalog/search?q=...` to search, and `POST /v1/run/{sku}` to execute. See
+the [API Reference](/api-reference/tiktok/tiktok-profile) and the public
 [`/openapi.json`](https://api.getanyapi.com/openapi.json).
 
 ## Get started
 
 <CardGroup cols={2}>
   <Card title="Quickstart" icon="rocket" href="/quickstart">
-    Make your first call in under five minutes.
+    Make your first call.
   </Card>
   <Card title="Connect over MCP" icon="robot" href="/mcp-server">
-    Give your AI agents the whole catalog through one MCP endpoint.
+    Connect your AI agent to the catalog.
   </Card>
   <Card title="n8n community node" icon="diagram-project" href="/n8n">
-    Run any AnyAPI endpoint inside an n8n workflow on one credential.
+    Run any AnyAPI endpoint inside an n8n workflow.
   </Card>
   <Card title="API Reference" icon="code" href="/api-reference/tiktok/tiktok-profile">
-    Browse every API with typed request and response schemas.
+    Typed request and response schemas for every API.
   </Card>
   <Card title="Dashboard" icon="gauge" href="https://getanyapi.com/dashboard">
     Create keys, top up your wallet, and track usage.

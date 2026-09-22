@@ -3,9 +3,7 @@ title: "SDKs"
 description: "Official typed TypeScript and Python SDKs for AnyAPI - one key, USD pricing, and a typed method for every API in the catalog."
 ---
 
-AnyAPI ships two official, typed SDKs so you can call any API in the catalog from
-your own code without hand-writing HTTP requests. Each SDK combines generated, typed
-SKU methods with a handwritten discovery client.
+AnyAPI has two official typed SDKs.
 
 | | |
 |---|---|
@@ -14,10 +12,7 @@ SKU methods with a handwritten discovery client.
 | **Source** | [`getanyapi-com/sdks`](https://github.com/getanyapi-com/sdks) |
 
 Every API is a typed method under its platform namespace (`client.google.search(...)`,
-`client.amazon.reviews(...)`), and there is a generic escape hatch to call any API by slug.
-AnyAPI generates those execution methods from the gateway's OpenAPI document. The
-`catalog`, `search`, and `describe` methods are separate tolerant readers of the live
-discovery API; SDK generation does not update them.
+`client.amazon.reviews(...)`), and `run` calls any API by slug.
 
 ## Install
 
@@ -33,11 +28,8 @@ pip install getanyapi
 
 ## Authenticate
 
-Construct a client with your AnyAPI key. When you omit it, both SDKs read
-`ANYAPI_API_KEY` from the environment, so you never have to hardcode a secret.
-
-Need a key? Grab one from the [dashboard](https://getanyapi.com/dashboard) or mint one
-from the terminal - see the [Quickstart](/quickstart).
+When you omit the key, both SDKs read `ANYAPI_API_KEY` from the environment. Get a key
+from the [dashboard](https://getanyapi.com/dashboard) or the [Quickstart](/quickstart).
 
 <CodeGroup>
 ```ts TypeScript
@@ -56,9 +48,8 @@ client = AnyAPI()  # reads ANYAPI_API_KEY from the environment
 
 ## Your first call
 
-Call any API as a typed method under its platform namespace. `res.output` is the
-normalized result, and the cost of the call in real US dollars is on `res.costUsd`
-(TypeScript) / `res.cost_usd` (Python).
+`res.output` is the normalized result. The call's cost in USD is `res.costUsd`
+(TypeScript) or `res.cost_usd` (Python).
 
 <CodeGroup>
 ```ts TypeScript
@@ -86,8 +77,7 @@ print("charged", res.cost_usd, "USD")
 
 ## Call any API by slug
 
-Every typed method has a generic counterpart. Pass the API's slug and input to
-`run` to call any API in the catalog with full typing.
+Pass an API's slug and input to `run`:
 
 <CodeGroup>
 ```ts TypeScript
@@ -101,7 +91,7 @@ rev = client.run("amazon.reviews", {"product": "B07FZ8S74R", "limit": 3})
 
 ## Discover APIs
 
-Browse by category, run a ranked search, then describe one result to retrieve its schemas:
+Browse by category, run a ranked search, then describe one result to get its schemas:
 
 <CodeGroup>
 ```ts TypeScript
@@ -125,30 +115,15 @@ print(api.pricing.from_offer, api.pricing.failover_max_usd, api.failover)
 ```
 </CodeGroup>
 
-The gateway owns input validation, provider normalization, route and lane order,
-failover, pricing relationships, health semantics, and billing. The handwritten SDK
-clients authenticate and transport the request, validate the known fields they expose,
-and ignore safe new discovery fields. They preserve input and output schemas as opaque
-JSON.
-
-Treat `pricing.from`, `pricing.failoverMaxUsd`, `failover`, lane order, and health as
-gateway-published facts. `failover` reports whether AnyAPI currently has an alternate
-route. Do not derive it from the lane count or recompute pricing from individual lanes.
-
-Discovery publishes each static maximum in two denominations: `maxUsd` is what one
-request can be billed and `maxPer1kUsd` is that same maximum per 1,000 requests, with
-`failoverMaxPer1kUsd` as the twin of `failoverMaxUsd`. **Per 1,000 requests is the
-denomination AnyAPI quotes customers in**, because most of the catalog costs a fraction
-of a cent per call and per-request figures cannot be compared by eye. Display the
-published per-1k field rather than multiplying `maxUsd`, which drifts in floating point
-(`0.0966 * 1000` is `96.60000000000001` in most languages). `baseUsd` and `perUnitUsd`
-have no per-1k twin, because they are charged per billable item inside one call, and
-`costUsd` and the wallet balance stay per request.
+The SDKs return `pricing.from`, `pricing.failoverMaxUsd`, and `failover` as the gateway
+publishes them. `failover` reports whether AnyAPI currently has an alternate route. Do not
+derive it from the lane count or recompute pricing from individual lanes. See
+[Pricing](/#pricing) for what each price field means and why to display `maxPer1kUsd`
+rather than multiplying `maxUsd`.
 
 ## Async (Python)
 
-The TypeScript SDK is promise-based, so every method is already `await`-able. In Python,
-use `AsyncAnyAPI` for an async client backed by the same typed surface.
+TypeScript methods already return promises. In Python, use `AsyncAnyAPI`:
 
 ```python
 from getanyapi import AsyncAnyAPI
@@ -159,15 +134,12 @@ async with AsyncAnyAPI() as client:
 
 ## Not found vs error
 
-A successful call always resolves. For most APIs the payload is wrapped in a `found`
-flag: `output.found` is `false` when the upstream had no matching entity, which is a
-successful answer, not an error. Use `unwrap` to get the data or raise
-`ResultNotFoundError` when the result is empty.
+For most APIs the payload is wrapped in a `found` flag. `output.found: false` means the
+source had no matching entity; it is a successful answer, not an error. `unwrap` returns
+the data or raises `ResultNotFoundError` when the result is empty.
 
-Every outcome maps to exactly one shape, and every `found: false` answer says why in
-`output.reason`. Each API's output schema lists the exact words that API can answer with,
-so the schema is that API's contract for a miss, it is typed in both SDKs, and it is never
-the source's own wording:
+Every outcome maps to one shape, and every `found: false` answer says why in
+`output.reason`, using a word from that API's output schema:
 
 | You asked for | You get |
 | --- | --- |
@@ -180,17 +152,16 @@ the source's own wording:
 | A site this API cannot serve | `422` with an `alternatives` list naming the APIs that can |
 | Every source failing on a well-formed request | `502` `UpstreamError`, never charged |
 
-A `found: false` answer is billed only when a source charged AnyAPI for the lookup. On an
-API with more than one source, every source AnyAPI asked that charged for the call is
-billed at its own price, and the total never exceeds the API's published maximum. A miss
-the sources refused without billing is free, and `costUsd` / `cost_usd` on the result is
-always what the call actually cost you.
+A failed call is free. A `found: false` answer is billed only when a source charged AnyAPI
+for the lookup. When AnyAPI asks more than one source, each source that charged is billed
+at its own price, and the total never exceeds the API's published maximum. `costUsd` /
+`cost_usd` is always what the call cost you.
 
 `reason` is present only on a miss. In TypeScript it is the `NotFoundReason` union on the
 `found: false` branch of `Output<T>`; in Python it is `OutputNotFound.reason`. Every API can
-answer `not_found`; an API lists `suspended` only when one of its sources can tell a suspended
-account apart. An API can gain a word later, so read the list from its `outputSchema` in
-`/v1/apis/{slug}` or the OpenAPI document rather than hardcoding it.
+answer `not_found`; an API lists `suspended` only when one of its sources can tell a
+suspended account apart. An API can gain a word later, so read the list from its
+`outputSchema` in `/v1/apis/{slug}` or the OpenAPI document rather than hardcoding it.
 
 <CodeGroup>
 ```ts TypeScript
@@ -219,14 +190,13 @@ except ResultNotFoundError:
 
 `ResultNotFoundError` subclasses `NotFoundError`, so catching `NotFoundError` catches
 both an HTTP 404 and an empty result; catch `ResultNotFoundError` to handle only empty
-results. A few APIs (such as `reddit.search`) return their data object directly as
-`output` with no `found` wrapper, and `unwrap` returns it as-is without throwing.
+results. A few APIs (such as `reddit.search`) have no `found` wrapper, and `unwrap`
+returns their `output` as-is.
 
 ## Pagination
 
-Paginated APIs expose an iterator that yields items across pages and follows the cursor
-for you. Call `.pages()` on it to walk whole result pages instead, and read each page's
-`costUsd` / `cost_usd`.
+Paginated APIs expose an iterator that follows the cursor and yields items. Call
+`.pages()` to walk whole pages and read each page's `costUsd` / `cost_usd`.
 
 <CodeGroup>
 ```ts TypeScript
@@ -254,8 +224,8 @@ for page in client.reddit.iter_search(query="coffee").pages():
 
 ## Trim the response
 
-Shape the response to save context and bandwidth. `fields`, `maxItems` /
-`max_items`, and `summary` trim what comes back, but they do NOT change the price.
+`fields`, `maxItems` / `max_items`, and `summary` trim what comes back. They do not
+change the price.
 
 <CodeGroup>
 ```ts TypeScript
@@ -277,19 +247,19 @@ res = client.google.search(
 ```
 </CodeGroup>
 
-Per-call transport overrides live alongside these: `timeoutMs` and `maxRetries` (plus an
+Per-call transport overrides go in the same options: `timeoutMs` and `maxRetries` (plus an
 `AbortSignal` via `signal`) in TypeScript, and `timeout` / `max_retries` inside `options`
 in Python.
 
 ## Long-running APIs
 
-The SDKs transparently follow a `202 Accepted` response by polling the durable Request. The overall
-default remains 300 seconds. If that deadline expires while work is still active, the SDK throws
-`RequestPendingError` with the resumable Request ID instead of losing the operation.
+The SDKs follow a `202 Accepted` response by polling the durable Request, for up to 300
+seconds by default. If that deadline passes while work is still active, the SDK throws
+`RequestPendingError` with the resumable Request ID.
 
-Use `start` when you want the handle immediately. If the same idempotency key already completed,
-`start` returns that terminal run result as `200` instead. Use `requests.get` or `requests.wait` to
-resume an accepted Request:
+Use `start` to get the handle immediately. If the same idempotency key already completed,
+`start` returns that result as `200`. Use `requests.get` or `requests.wait` to resume an
+accepted Request:
 
 <CodeGroup>
 ```ts TypeScript
@@ -317,10 +287,9 @@ network failures retry, with jittered exponential backoff that honors `Retry-Aft
 timeouts are never retried. The default `maxRetries` / `max_retries` is 2 (up to 3
 attempts), and you can set it on the client or per request.
 
-Direct REST error bodies retain the existing `error` message and also include a stable
-machine-readable `code` when one is available. Use `code` to distinguish cases such as
-`invalid_input`, `provider_rate_limited`, and `unclassified_upstream_response` without
-parsing the message text. Existing clients that only read `error` remain compatible.
+REST error bodies carry an `error` message and, when available, a stable `code` such as
+`invalid_input`, `provider_rate_limited`, or `unclassified_upstream_response`. Branch on
+`code`, not the message text.
 
 | Class | HTTP | Meaning |
 | --- | --- | --- |
@@ -340,9 +309,8 @@ Configure the client with `new AnyAPI({ timeoutMs, maxRetries })` in TypeScript 
 
 ## Agent signup
 
-Bootstrap a capped starter key with no account, for autonomous agents. A human funds it
-later by claiming it at the returned URL. See
-[Let your agent onboard itself](/agent-self-signup) for the full flow.
+Mint a capped free trial key with no account. When it runs out, a human connects a wallet
+to keep it going; see [Let your agent onboard itself](/agent-self-signup).
 
 <CodeGroup>
 ```ts TypeScript
@@ -362,7 +330,4 @@ client = AnyAPI(api_key=result.secret)
 
 ## Learn more
 
-- TypeScript package: [`@getanyapi/sdk` on npm](https://www.npmjs.com/package/@getanyapi/sdk)
-- Python package: [`getanyapi` on PyPI](https://pypi.org/project/getanyapi/)
-- Source and issues: [`getanyapi-com/sdks`](https://github.com/getanyapi-com/sdks)
 - Browse every API in the [API Reference](/api-reference/tiktok/tiktok-profile).

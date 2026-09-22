@@ -3,24 +3,21 @@ title: "Let your agent onboard itself"
 description: "Point an AI agent at AnyAPI and it provisions its own free trial key, reads the catalog, and starts calling APIs. You just prompt it - no signup, no email, no copied credentials."
 ---
 
-Most tools make *you* sign up, create a key, and paste it into your agent. AnyAPI flips
-that around: **the agent onboards itself.** It installs the AnyAPI skills, mints its own
-**free trial key**, discovers the catalog, and makes the first call - all from a single
-prompt. No account, no email, no credentials to hand over. When the trial budget runs out,
-one human approval keeps it going.
+From one prompt, the agent installs the AnyAPI skills, mints its own **free trial key**,
+and makes its first call. You create no account and hand over no credentials. When the
+trial budget runs out, one human approval keeps it going.
 
 <Info>
-  **Which page do you want?** This page is for an **autonomous agent that calls AnyAPI at
-  runtime** - it provisions its own trial key. If instead a coding agent is **integrating
-  AnyAPI into an app you'll ship**, the app is the caller: create a normal
+  This page is for an **autonomous agent that calls AnyAPI at runtime**. If a coding agent
+  is **integrating AnyAPI into an app you'll ship**, create a
   [dashboard key](https://getanyapi.com/dashboard/keys) on your funded account and see
-  [Agent skills](/agent-skills). Trial keys carry a small budget and expire in 7 days, so
-  they belong to autonomous agents, not shipped code.
+  [Agent skills](/agent-skills). Trial keys have a small budget and expire in 7 days, so
+  they do not belong in shipped code.
 </Info>
 
 ## The one thing you do
 
-Prompt your agent. That's the whole setup step:
+Prompt your agent:
 
 ```text
 You have access to AnyAPI, a pay-per-call marketplace for scraping and data APIs.
@@ -28,33 +25,28 @@ Read https://getanyapi.com/agent-onboarding/SKILL.md, onboard yourself, and make
 real API call. Report what you did.
 ```
 
-No email, no key to paste. The agent takes it from there: it mints a free trial key, runs
-a call, and tells you in one sentence what it did.
-
 <Note>
-  Already have a funded account and want the agent to spend from it directly? Hand it an
-  [API key](https://getanyapi.com/dashboard/keys) instead and skip the trial - see
-  [Agent skills](/agent-skills). The trial is for the zero-setup, agent-first path.
+  To have the agent spend from your funded account instead, hand it an
+  [API key](https://getanyapi.com/dashboard/keys) and skip the trial.
 </Note>
 
 ## What the agent does on its own
 
 <Steps>
   <Step title="Installs the CLI (if it has a shell)">
-    An agent that can run shell commands installs the AnyAPI CLI first. One command
-    installs the skills, mints the free trial key, and writes local credentials:
+    An agent with a shell runs one command that installs the skills, mints the trial key,
+    and writes local credentials:
 
     ```bash
     npx -y anyapi-cli@latest init
     ```
 
-    `anyapi init` installs the AnyAPI agent skills, offers MCP registration, and runs the
-    trial signup if no key is available - saving it to `~/.anyapi/config.json`. After init,
-    the agent calls the installed `anyapi` binary directly.
+    `anyapi init` also offers MCP registration and saves the key to
+    `~/.anyapi/config.json`. After init, the agent calls the `anyapi` binary directly.
   </Step>
   <Step title="Mints its own free trial key">
-    With no shell (a hosted chat or no-code runtime), the agent posts to the public signup
-    endpoint directly - no human, no account, no email:
+    Without a shell (a hosted chat or no-code runtime), the agent posts to the public signup
+    endpoint:
 
     ```bash
     curl -X POST https://api.getanyapi.com/agent/signup \
@@ -62,8 +54,8 @@ a call, and tells you in one sentence what it did.
       -d '{ "label": "my-agent" }'
     ```
 
-    The body is optional; `label` just tags the key. The response returns the key once,
-    plus everything needed to upgrade later:
+    The body is optional; `label` tags the key. The response returns the key once, plus
+    the upgrade details:
 
     ```json
     {
@@ -83,30 +75,25 @@ a call, and tells you in one sentence what it did.
     The agent stores `secret` as `ANYAPI_API_KEY` and relays `notice` to you verbatim.
   </Step>
   <Step title="Starts working immediately">
-    The trial key works right away. The agent lists APIs, reads schemas, checks its USD
-    balance, and runs a real call over [MCP](/mcp-server), the CLI, or REST - all priced in
-    USD, pay per request.
+    The agent lists APIs, reads schemas, checks its USD balance, and runs calls over
+    [MCP](/mcp-server), the CLI, or REST.
   </Step>
 </Steps>
 
 ## What it costs you to start
 
-Nothing, and nothing is owed. A trial key carries a budget of about **$0.05 of requests**
-(the `capUsd` in the response), **creates no account**, and **self-expires in 7 days** if
-it is never upgraded. If the agent proves useless, you do nothing: the key just expires and
-nothing lingers.
+Nothing. A trial key carries about **$0.05 of requests** (`capUsd`), **creates no
+account**, and **self-expires in 7 days** if never upgraded.
 
 <Warning>
   When the trial budget is spent, calls return **HTTP 402** with error code
-  `trial_cap_reached` and an `upgrade` object in the body. That's the signal it's time to
-  approve continued spend (below). The unspent trial also stops working after 7 days.
+  `trial_cap_reached` and an `upgrade` object in the body. Approve continued spend below.
 </Warning>
 
 ## Upgrade past the trial
 
-Continuing past the trial takes exactly one human approval, through OAuth 2.1. The agent
-never stops to ask you for a key - you approve a spend limit, and it keeps working on the
-same session.
+Continuing takes one human approval through OAuth 2.1. You approve a spend limit, and the
+agent keeps working on the same session without a new key.
 
 <Tabs>
   <Tab title="With the CLI (recommended)">
@@ -117,44 +104,26 @@ same session.
     ```
 
     This requires `anyapi-cli >= 0.3.0`. It starts an OAuth flow with a localhost callback
-    and prints a **single consent URL**. Hand that one URL to the human. They open it,
-    reach the consent screen at
-    [getanyapi.com/dashboard/authorize](https://getanyapi.com/dashboard/authorize), sign in
-    or sign up, see a **receipt of what the agent accomplished on the trial**, set a spend
-    limit, and approve. The agent then holds an OAuth access token and keeps working - there
-    is no key to swap by hand.
-
-    <Note>
-      If the installed CLI predates `anyapi connect`, use the dashboard-key path below
-      instead.
-    </Note>
+    and prints **one consent URL** for the human. At
+    [getanyapi.com/dashboard/authorize](https://getanyapi.com/dashboard/authorize) they sign
+    in or sign up, see a **receipt of what the agent did on the trial**, set a spend limit,
+    and approve. The agent then holds an OAuth access token.
   </Tab>
   <Tab title="Raw REST or MCP (no shell)">
-    An agent that cannot run a shell surfaces the upgrade to you directly. The `402
-    trial_cap_reached` response body carries the `upgrade` coordinates
-    (`authorizationServer` and `scope`); the agent relays the link to you so you can sign in
-    and approve continued spend at
+    The `402 trial_cap_reached` body carries the `upgrade` coordinates
+    (`authorizationServer` and `scope`). The agent relays the link so you can approve
+    continued spend at
     [getanyapi.com/dashboard/authorize](https://getanyapi.com/dashboard/authorize).
   </Tab>
   <Tab title="Dashboard key (secondary)">
-    A human already signed in at [getanyapi.com](https://getanyapi.com) can create a full,
-    **non-expiring** key directly at
-    [getanyapi.com/dashboard/keys](https://getanyapi.com/dashboard/keys) and hand it to the
-    agent via the `ANYAPI_API_KEY` environment variable. New accounts start with about
-    **100 free requests**. This is the path to use on a CLI too old for `anyapi connect`.
+    Create a **non-expiring** key at
+    [getanyapi.com/dashboard/keys](https://getanyapi.com/dashboard/keys) and give it to the
+    agent as `ANYAPI_API_KEY`. New accounts start with about **100 free requests**. Use this
+    path on a CLI too old for `anyapi connect`.
   </Tab>
 </Tabs>
 
-## Why this is safe
-
-- The trial budget bounds what an unapproved agent can spend - about $0.05, no more.
-- No account is created and nothing is owed. An unspent trial key expires on its own in 7
-  days.
-- You decide if and when to continue. The OAuth approval is where you set the spend limit,
-  after you've seen a receipt of what the agent actually did.
-
 <Tip>
-  Give your agent the live tools too: connect the [MCP server](/mcp-server) so it can
-  discover and run APIs without writing HTTP by hand, or point it at the
-  [CLI](/cli) to keep tool schemas out of its context window.
+  Connect the [MCP server](/mcp-server) for live tools, or use the [CLI](/cli) to keep tool
+  schemas out of the agent's context window.
 </Tip>
