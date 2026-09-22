@@ -78078,7 +78078,7 @@
         },
         "/v1/run/google.search": {
             "post": {
-                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Pass the returned nextCursor back as cursor to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
+                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Send page 2, 3, ... to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
                 "operationId": "google_search",
                 "parameters": [
                     {
@@ -78167,7 +78167,8 @@
                                         "type": "boolean"
                                     },
                                     "cursor": {
-                                        "description": "Continuation token from a previous response's nextCursor. Pass it back to fetch the next page of results.",
+                                        "deprecated": true,
+                                        "description": "Deprecated: send page instead. A continuation token from an earlier response's nextCursor is still accepted and still continues on the source that issued it; page is ignored when cursor is sent alongside it.",
                                         "minLength": 1,
                                         "type": "string"
                                     },
@@ -78192,7 +78193,7 @@
                                     },
                                     "limit": {
                                         "default": 10,
-                                        "description": "Maximum number of organic results to return in this response. Google stopped honoring bulk result counts in September 2025, so one page is about 10 results and a limit above 10 is accepted but will not return more than that. To go deeper, either page through with cursor (about 10 results per call, each billed as a request) or use google.search_100, which returns up to 100 ranked results in a single call for one flat charge and is cheaper past roughly 20 results. Price is flat per request.",
+                                        "description": "Maximum number of organic results to return in this response. Google stopped honoring bulk result counts in September 2025, so one page is about 10 results and a limit above 10 is accepted but will not return more than that. To go deeper, send page (about 10 results per page, each billed as a request) or use google.search_100, which returns up to 100 ranked results in a single call for one flat charge and is cheaper past roughly 20 results. Price is flat per request.",
                                         "maximum": 100,
                                         "minimum": 1,
                                         "type": "integer"
@@ -78200,6 +78201,12 @@
                                     "location": {
                                         "description": "Fine-grained location to localize results to, more specific than the country-level gl. Must exactly match an Active Canonical Name from Google's geo-target list, which uses no space after each comma: 'New York,New York,United States', 'Austin,Texas,United States', 'London,England,United Kingdom'. A value that does not match is rejected rather than quietly searched from somewhere else.",
                                         "type": "string"
+                                    },
+                                    "page": {
+                                        "default": 1,
+                                        "description": "Which page of about 10 organic results to return, starting at 1. Send page 2, 3, ... to walk deeper; each page is billed as one request and any source can serve any page. Replaces cursor.",
+                                        "minimum": 1,
+                                        "type": "integer"
                                     },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
@@ -104100,7 +104107,7 @@
         },
         "/v1/run/instagram.user_posts": {
             "post": {
-                "description": "List an Instagram account's recent posts (likes, comments, captions) by handle with cursor pagination.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 6 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram User Posts pricing and uptime](https://getanyapi.com/api/instagram/user-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "List an Instagram account's recent posts (likes, comments, captions) by handle with cursor pagination.\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram User Posts pricing and uptime](https://getanyapi.com/api/instagram/user-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_user_posts",
                 "parameters": [
                     {
@@ -104640,7 +104647,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000800",
+                        "amount": "0.000950",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -104714,7 +104721,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000800",
+                                "amount": "0.000950",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
