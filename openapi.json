@@ -39833,7 +39833,7 @@
         },
         "/v1/run/email.find": {
             "post": {
-                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$30.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
+                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$15.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
                 "operationId": "email_find",
                 "parameters": [
                     {
@@ -40302,7 +40302,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.030800",
+                        "amount": "0.015400",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -40344,7 +40344,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.030800",
+                                "amount": "0.015400",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -40376,7 +40376,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.030800",
+                                "amount": "0.015400",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -73976,7 +73976,7 @@
         },
         "/v1/run/google.ai_overview": {
             "post": {
-                "description": "Ask Google Search a prompt and receive the AI Overview it generated for that scrape, with every source Google listed. Google regenerates the overview per search, so the same prompt can return different wording and a different source list.\n\n**Price:** \\$4.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Google AI Overview pricing and uptime](https://getanyapi.com/api/google/ai-overview) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
+                "description": "Ask Google Search a prompt and receive the AI Overview it generated for that scrape, with every source Google listed. Google regenerates the overview per search, so the same prompt can return different wording and a different source list.\n\n**Price:** \\$1.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google AI Overview pricing and uptime](https://getanyapi.com/api/google/ai-overview) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
                 "operationId": "google_ai_overview",
                 "parameters": [
                     {
@@ -74453,7 +74453,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.004800",
+                        "amount": "0.001800",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -74495,7 +74495,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.004800",
+                                "amount": "0.001800",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -74527,7 +74527,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.004800",
+                                "amount": "0.001800",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -78082,7 +78082,7 @@
         },
         "/v1/run/google.search": {
             "post": {
-                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Send page 2, 3, ... to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
+                "description": "Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Send page 2, 3, ... to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Search pricing and uptime](https://getanyapi.com/api/google/search) - live USD price, lane routing, and measured 30-day uptime. [Every Google endpoint](https://getanyapi.com/api/google).",
                 "operationId": "google_search",
                 "parameters": [
                     {
@@ -78610,7 +78610,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000400",
+                        "amount": "0.000500",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -78684,7 +78684,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000400",
+                                "amount": "0.000500",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -190783,7 +190783,7 @@
         },
         "/v1/run/tiktok.ad_library_search": {
             "post": {
-                "description": "Search TikTok's public Ads Library by keyword or advertiser (advertiser, title, audience band, run dates, library link, and video).\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Ad Library Search pricing and uptime](https://getanyapi.com/api/tiktok/ad-library-search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Search TikTok's public Ads Library by keyword or advertiser (advertiser, title, audience band, run dates, library link, and video).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Ad Library Search pricing and uptime](https://getanyapi.com/api/tiktok/ad-library-search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_ad_library_search",
                 "parameters": [
                     {
@@ -191321,7 +191321,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000500",
+                        "amount": "0.001200",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -191363,7 +191363,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001000",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -191395,7 +191395,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000500",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -222336,7 +222336,7 @@
         },
         "/v1/run/twitter.following": {
             "post": {
-                "description": "List the accounts a public X (Twitter) account follows by username with cursor pagination. Limit is a per-page maximum; follow the response's nextCursor for more.\n\n**Price:** \\$3.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [X / Twitter Following pricing and uptime](https://getanyapi.com/api/x-twitter/following) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
+                "description": "List the accounts a public X (Twitter) account follows by username with cursor pagination. Limit is a per-page maximum; follow the response's nextCursor for more.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter Following pricing and uptime](https://getanyapi.com/api/x-twitter/following) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
                 "operationId": "twitter_following",
                 "parameters": [
                     {
@@ -222858,7 +222858,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.003600",
+                        "amount": "0.000500",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -222900,7 +222900,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.003600",
+                                "amount": "0.001000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -222932,7 +222932,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.003600",
+                                "amount": "0.000500",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
