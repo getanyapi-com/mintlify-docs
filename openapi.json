@@ -38500,7 +38500,7 @@
         },
         "/v1/run/ebay.search": {
             "post": {
-                "description": "Search eBay active listings by keyword with optional price-range, item-condition, listing-type, and sort filters and get title, price, condition, shipping, and seller in one normalized response.\n\n**Price:** billed per result - \\$1.10 per 1,000 requests base + \\$2.58 per 1,000 results, capped at \\$65.50 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [eBay Search pricing and uptime](https://getanyapi.com/api/ebay/search) - live USD price, lane routing, and measured 30-day uptime. [Every Ebay endpoint](https://getanyapi.com/api/ebay).",
+                "description": "Search eBay active listings by keyword with optional price-range, item-condition, listing-type, and sort filters and get title, price, condition, shipping, and seller in one normalized response.\n\n**Price:** \\$2.25 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [eBay Search pricing and uptime](https://getanyapi.com/api/ebay/search) - live USD price, lane routing, and measured 30-day uptime. [Every Ebay endpoint](https://getanyapi.com/api/ebay).",
                 "operationId": "ebay_search",
                 "parameters": [
                     {
@@ -38638,6 +38638,25 @@
                                     "query": {
                                         "description": "Search keywords, e.g. \"nintendo switch\" or \"vintage levis 501\".",
                                         "type": "string"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `sellerName`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a listing that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "bidCount",
+                                                "condition",
+                                                "currency",
+                                                "listingType",
+                                                "price",
+                                                "sellerFeedbackCount",
+                                                "sellerFeedbackPercent",
+                                                "sellerName",
+                                                "shippingCost"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "sort": {
                                         "description": "Result sort order; omit for eBay's Best Match (e.g. price_low sorts by lowest price plus shipping first).",
@@ -39043,10 +39062,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.002250",
                         "currency": "USD",
-                        "max": "0.065500",
-                        "min": "0.001100",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -39086,11 +39104,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.002250",
                                 "currency": "USD",
-                                "max": "0.065500",
-                                "min": "0.001100",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -39119,11 +39136,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.002250",
                                 "currency": "USD",
-                                "max": "0.065500",
-                                "min": "0.001100",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -128575,7 +128591,7 @@
         },
         "/v1/run/maps.contacts": {
             "post": {
-                "description": "Search Google Maps for businesses and enrich each result with contact details (emails, phones, and social profiles from their websites), up to 20 records per request.\n\n**Price:** billed per result - \\$0.06 per 1,000 requests base + \\$4.95 per 1,000 results, capped at \\$99.10 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Google Maps Contacts pricing and uptime](https://getanyapi.com/api/maps/contacts) - live USD price, lane routing, and measured 30-day uptime. [Every Maps endpoint](https://getanyapi.com/api/maps).",
+                "description": "Search Google Maps for businesses and enrich each result with contact details (emails, phones, and social profiles from their websites), up to 20 records per request.\n\n**Price:** \\$4.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Maps Contacts pricing and uptime](https://getanyapi.com/api/maps/contacts) - live USD price, lane routing, and measured 30-day uptime. [Every Maps endpoint](https://getanyapi.com/api/maps).",
                 "operationId": "maps_contacts",
                 "parameters": [
                     {
@@ -128683,7 +128699,7 @@
                                         "type": "string"
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (1-20, default 20). You are billed per result returned, so a lower limit costs less.",
+                                        "description": "Maximum number of results to return (1-20, default 20).",
                                         "maximum": 20,
                                         "minimum": 1,
                                         "type": "integer"
@@ -128712,6 +128728,44 @@
                                     "query": {
                                         "description": "What you would type in the Google Maps search bar (e.g. dentist).",
                                         "type": "string"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `city` or `reviewCount`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a business that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "address",
+                                                "categories",
+                                                "category",
+                                                "cid",
+                                                "city",
+                                                "countryCode",
+                                                "domain",
+                                                "emails",
+                                                "facebooks",
+                                                "image",
+                                                "instagrams",
+                                                "language",
+                                                "latitude",
+                                                "linkedIns",
+                                                "longitude",
+                                                "neighborhood",
+                                                "phone",
+                                                "phones",
+                                                "postalCode",
+                                                "rank",
+                                                "rating",
+                                                "reviewCount",
+                                                "state",
+                                                "street",
+                                                "tiktoks",
+                                                "twitters",
+                                                "website",
+                                                "youtubes"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -129218,10 +129272,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.004500",
                         "currency": "USD",
-                        "max": "0.099100",
-                        "min": "0.000060",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -129261,11 +129314,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.004500",
                                 "currency": "USD",
-                                "max": "0.099100",
-                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -129294,11 +129346,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.004500",
                                 "currency": "USD",
-                                "max": "0.099100",
-                                "min": "0.000060",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
