@@ -1,6 +1,6 @@
 ---
 title: "Pricing, fees & payouts"
-description: "How operator pricing works on AnyAPI: you set the customer price in USD, the platform takes a commission per sale, and earnings pay out to your bank through Stripe for free, from $50."
+description: "How operator pricing works on AnyAPI: you set the customer price in USD, the platform takes a commission per sale, and earnings pay out to your PayPal account, from $20."
 ---
 
 Everything on the seller side is in USD. Every earnings row itemizes your share and the
@@ -46,21 +46,39 @@ Worked example at a $5.00/1k list price and the default 20% commission:
 
 ## Payouts
 
-Connect a payout account once from
-[Earnings > Set up payouts](https://getanyapi.com/dashboard/sell/earnings). Stripe's hosted
-flow handles identity verification, bank details, and tax forms.
+AnyAPI pays sellers through PayPal only. Connect a verified PayPal account in your own name
+from [Sell APIs > Earnings](https://getanyapi.com/dashboard/sell/earnings), and verify your
+identity, before you can withdraw. See [Become an operator](/sell/become-an-operator).
 
 | Rule | Value |
 | --- | --- |
-| Withdrawal fee | Free |
-| Minimum withdrawal | $50 |
-| First payout | Unlocks 30 days after operator approval |
-| Method | Bank transfer via Stripe |
+| Method | PayPal, paid in USD |
+| Minimum withdrawal | $20 |
+| First payout | Unlocks 30 days after you become a seller |
+| Review | AnyAPI reviews every payout before it's sent |
+| Fee | PayPal's fee, taken out of the payout |
 
 Request a withdrawal from the dashboard or `POST /v1/operator/payouts` with
-`{"amountUsd": 50}`. It shows as **Pending** in your payout history until it settles, then
-**Paid**. A failed transfer shows **Failed** with the reason, and the amount returns to
-your available balance.
+`{"amountUsd": 20}`. Your available balance drops by the full amount, and you receive that
+amount minus PayPal's fee. The withdraw dialog shows the fee and what you'll receive before
+you confirm. If you don't withdraw, AnyAPI starts a payout of your available balance
+automatically once it reaches $20.
+
+PayPal's fee for sending a payout, per
+[PayPal's fee page](https://www.paypal.com/us/business/paypal-business-fees):
+
+| Where your PayPal account is | Fee |
+| --- | --- |
+| United States | $0.25 per payout |
+| Anywhere else | 2% of the amount sent, at most $20 |
+| Unknown (PayPal didn't share your country) | The higher of the two |
+
+Payouts are sent in USD. PayPal may charge you to convert them to your currency.
+
+Every payout, including an automatic one, shows as **Waiting for review** in your payout
+history until AnyAPI approves it, then **Sending**, then **Paid**. A declined payout shows
+**Declined** with the reason, and a failed one shows **Failed**. In both cases the amount
+returns to your available balance.
 
 ## Quality affects earnings
 
