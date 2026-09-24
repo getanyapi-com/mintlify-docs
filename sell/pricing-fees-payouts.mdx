@@ -62,7 +62,9 @@ Request a withdrawal from the dashboard or `POST /v1/operator/payouts` with
 `{"amountUsd": 20}`. Your available balance drops by the full amount, and you receive that
 amount minus PayPal's fee. The withdraw dialog shows the fee and what you'll receive before
 you confirm. If you don't withdraw, AnyAPI starts a payout of your available balance
-automatically once it reaches $20.
+automatically once it reaches $20, at most once a month. A month in which you already have a
+payout, including a withdrawal you requested or a declined payout, gets no automatic one.
+Automatic payouts wait for review like any other.
 
 PayPal's fee for sending a payout, per
 [PayPal's fee page](https://www.paypal.com/us/business/paypal-business-fees):
