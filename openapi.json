@@ -207610,7 +207610,7 @@
         },
         "/v1/run/tiktok.comment_replies": {
             "post": {
-                "description": "List the replies to a TikTok comment with cursor pagination (text, author, likes).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Comment Replies pricing and uptime](https://getanyapi.com/api/tiktok/comment-replies) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "List the replies to a TikTok comment with cursor pagination (text, author, likes).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Comment Replies pricing and uptime](https://getanyapi.com/api/tiktok/comment-replies) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_comment_replies",
                 "parameters": [
                     {
@@ -208201,7 +208201,7 @@
         },
         "/v1/run/tiktok.followers": {
             "post": {
-                "description": "List the followers of a TikTok account by username, returning each follower's profile basics.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Followers pricing and uptime](https://getanyapi.com/api/tiktok/followers) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "List the followers of a TikTok account by username, returning each follower's profile basics.\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Followers pricing and uptime](https://getanyapi.com/api/tiktok/followers) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_followers",
                 "parameters": [
                     {
@@ -208300,6 +208300,24 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a follower that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "items": {
+                                            "enum": [
+                                                "avatarUrl",
+                                                "bio",
+                                                "createdUtc",
+                                                "followerCount",
+                                                "followers",
+                                                "followingCount",
+                                                "nextCursor",
+                                                "total"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -208694,7 +208712,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
+                        "amount": "0.000950",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -208736,7 +208754,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.001000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -208768,7 +208786,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.000950",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -208797,7 +208815,7 @@
         },
         "/v1/run/tiktok.following": {
             "post": {
-                "description": "List the accounts a TikTok user follows (handle, display name, follower count, bio) by username.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Following pricing and uptime](https://getanyapi.com/api/tiktok/following) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "List the accounts a TikTok user follows (handle, display name, follower count, bio) by username.\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Following pricing and uptime](https://getanyapi.com/api/tiktok/following) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_following",
                 "parameters": [
                     {
@@ -209321,7 +209339,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
+                        "amount": "0.000950",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -209363,7 +209381,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.001000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -209395,7 +209413,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.000950",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -216168,7 +216186,7 @@
         },
         "/v1/run/tiktok.search_keyword": {
             "post": {
-                "description": "Search TikTok by keyword and get matching videos (caption, views, likes, comments, shares) as normalized JSON.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Keyword Search pricing and uptime](https://getanyapi.com/api/tiktok/search-keyword) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Search TikTok by keyword and get matching videos (caption, views, likes, comments, shares) as normalized JSON.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 6 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Keyword Search pricing and uptime](https://getanyapi.com/api/tiktok/search-keyword) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_search_keyword",
                 "parameters": [
                     {
@@ -216284,8 +216302,27 @@
                                     },
                                     "requireCursor": {
                                         "deprecated": true,
-                                        "description": "Deprecated. Every source for this search returns a nextCursor, so this changes nothing about the price or which source serves you; it stays accepted so callers that already send it keep working.",
+                                        "description": "Deprecated: name `nextCursor` in `requireFields` instead, which is the field this flag is translated into. It stays accepted so callers that already send it keep working. Sending it routes you to a source that returns a pagination cursor, which can raise your price when the cheapest source cannot page.",
                                         "type": "boolean"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `region`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "author",
+                                                "comments",
+                                                "createdUtc",
+                                                "likes",
+                                                "nextCursor",
+                                                "region",
+                                                "saves",
+                                                "shares",
+                                                "views"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "sortBy": {
                                         "default": "relevance",
@@ -217452,7 +217489,7 @@
         },
         "/v1/run/tiktok.search_suggestions": {
             "post": {
-                "description": "Get the search terms TikTok suggests for a keyword, each with its language and relative weight - the queries real TikTok users type around your topic.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Search Suggestions pricing and uptime](https://getanyapi.com/api/tiktok/search-suggestions) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Get the search terms TikTok suggests for a keyword, each with its language and relative weight - the queries real TikTok users type around your topic.\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Search Suggestions pricing and uptime](https://getanyapi.com/api/tiktok/search-suggestions) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_search_suggestions",
                 "parameters": [
                     {
@@ -217897,7 +217934,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
+                        "amount": "0.000950",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -217939,7 +217976,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.001000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -217971,7 +218008,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.000950",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -218000,7 +218037,7 @@
         },
         "/v1/run/tiktok.search_top": {
             "post": {
-                "description": "Search TikTok's top results for a keyword (caption, views, likes, comments, shares) with cursor pagination.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Top Search pricing and uptime](https://getanyapi.com/api/tiktok/search-top) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Search TikTok's top results for a keyword (caption, views, likes, comments, shares) with cursor pagination.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Top Search pricing and uptime](https://getanyapi.com/api/tiktok/search-top) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_search_top",
                 "parameters": [
                     {
@@ -218115,6 +218152,29 @@
                                     "region": {
                                         "description": "2-letter country code for the proxy location (e.g. US, GB, FR).",
                                         "type": "string"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `videoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "authorImage",
+                                                "authorName",
+                                                "authorUserId",
+                                                "comments",
+                                                "contentType",
+                                                "durationSeconds",
+                                                "image",
+                                                "likes",
+                                                "nextCursor",
+                                                "saves",
+                                                "shares",
+                                                "videoUrl",
+                                                "views"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "sortBy": {
                                         "description": "Sort order: relevance, most-liked, date-posted.",
@@ -218657,7 +218717,7 @@
         },
         "/v1/run/tiktok.search_users": {
             "post": {
-                "description": "Search TikTok accounts by keyword (handle, nickname, follower count) with cursor pagination.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok User Search pricing and uptime](https://getanyapi.com/api/tiktok/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Search TikTok accounts by keyword (handle, nickname, follower count) with cursor pagination.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 6 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok User Search pricing and uptime](https://getanyapi.com/api/tiktok/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_search_users",
                 "parameters": [
                     {
@@ -218756,6 +218816,23 @@
                                     "query": {
                                         "description": "The keyword to search TikTok accounts for.",
                                         "type": "string"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `verified`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "avatarUrl",
+                                                "followers",
+                                                "following",
+                                                "likes",
+                                                "nextCursor",
+                                                "verified",
+                                                "videos"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -219246,7 +219323,7 @@
         },
         "/v1/run/tiktok.song": {
             "post": {
-                "description": "Fetch details for a TikTok song or sound (title, author, duration, cover art, and how many videos use it).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Song pricing and uptime](https://getanyapi.com/api/tiktok/song) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Fetch details for a TikTok song or sound (title, author, duration, cover art, and how many videos use it).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Song pricing and uptime](https://getanyapi.com/api/tiktok/song) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_song",
                 "parameters": [
                     {
@@ -219817,7 +219894,7 @@
         },
         "/v1/run/tiktok.song_videos": {
             "post": {
-                "description": "List TikTok videos that use a given song or sound (with descriptions, authors, and engagement stats).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Song Videos pricing and uptime](https://getanyapi.com/api/tiktok/song-videos) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "List TikTok videos that use a given song or sound (with descriptions, authors, and engagement stats).\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Song Videos pricing and uptime](https://getanyapi.com/api/tiktok/song-videos) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_song_videos",
                 "parameters": [
                     {
@@ -219916,6 +219993,31 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `videoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "authorImage",
+                                                "authorUserId",
+                                                "collectCount",
+                                                "commentCount",
+                                                "createTime",
+                                                "description",
+                                                "durationSeconds",
+                                                "hasMore",
+                                                "image",
+                                                "likeCount",
+                                                "nextCursor",
+                                                "playCount",
+                                                "shareCount",
+                                                "url",
+                                                "videoUrl"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -222448,7 +222550,7 @@
         },
         "/v1/run/tiktok.video": {
             "post": {
-                "description": "Fetch a single TikTok video by URL with its caption and engagement counts (views, likes, comments, shares, saves).\n\n**Price:** \\$0.45 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Video pricing and uptime](https://getanyapi.com/api/tiktok/video) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "Fetch a single TikTok video by URL with its caption and engagement counts (views, likes, comments, shares, saves).\n\n**Price:** \\$0.45 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Video pricing and uptime](https://getanyapi.com/api/tiktok/video) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_video",
                 "parameters": [
                     {
@@ -223057,7 +223159,7 @@
         },
         "/v1/run/tiktok.video_comments": {
             "post": {
-                "description": "List the comments on a TikTok video by URL with cursor pagination (text, author, likes, reply count).\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Video Comments pricing and uptime](https://getanyapi.com/api/tiktok/video-comments) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "List the comments on a TikTok video by URL with cursor pagination (text, author, likes, reply count).\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 6 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Video Comments pricing and uptime](https://getanyapi.com/api/tiktok/video-comments) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_video_comments",
                 "parameters": [
                     {
@@ -226735,7 +226837,7 @@
         },
         "/v1/run/tiktok_shop.product": {
             "post": {
-                "description": "Fetch TikTok Shop product details (title, price, sales, seller, and ratings) from a product URL.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Shop Product pricing and uptime](https://getanyapi.com/api/tiktok-shop/product) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok Shop endpoint](https://getanyapi.com/api/tiktok-shop).",
+                "description": "Fetch TikTok Shop product details (title, price, sales, seller, and ratings) from a product URL.\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Shop Product pricing and uptime](https://getanyapi.com/api/tiktok-shop/product) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok Shop endpoint](https://getanyapi.com/api/tiktok-shop).",
                 "operationId": "tiktok_shop_product",
                 "parameters": [
                     {
@@ -227209,7 +227311,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
+                        "amount": "0.000950",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -227251,7 +227353,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.001000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -227283,7 +227385,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.000950",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -227312,7 +227414,7 @@
         },
         "/v1/run/tiktok_shop.product_reviews": {
             "post": {
-                "description": "Fetch customer reviews for a TikTok Shop product by URL (rating, text, reviewer, country, and verified-purchase flag).\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Shop Product Reviews pricing and uptime](https://getanyapi.com/api/tiktok-shop/product-reviews) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok Shop endpoint](https://getanyapi.com/api/tiktok-shop).",
+                "description": "Fetch customer reviews for a TikTok Shop product by URL (rating, text, reviewer, country, and verified-purchase flag).\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Shop Product Reviews pricing and uptime](https://getanyapi.com/api/tiktok-shop/product-reviews) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok Shop endpoint](https://getanyapi.com/api/tiktok-shop).",
                 "operationId": "tiktok_shop_product_reviews",
                 "parameters": [
                     {
@@ -227824,7 +227926,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
+                        "amount": "0.000950",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -227866,7 +227968,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.001000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -227898,7 +228000,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.000950",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -227927,7 +228029,7 @@
         },
         "/v1/run/tiktok_shop.search": {
             "post": {
-                "description": "Search TikTok Shop products by keyword across 15 countries: price, sales, rating, and seller info per product, in one normalized response.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Shop Search pricing and uptime](https://getanyapi.com/api/tiktok-shop/search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok Shop endpoint](https://getanyapi.com/api/tiktok-shop).",
+                "description": "Search TikTok Shop products by keyword across 15 countries: price, sales, rating, and seller info per product, in one normalized response.\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Shop Search pricing and uptime](https://getanyapi.com/api/tiktok-shop/search) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok Shop endpoint](https://getanyapi.com/api/tiktok-shop).",
                 "operationId": "tiktok_shop_search",
                 "parameters": [
                     {
@@ -228051,6 +228153,26 @@
                                     "query": {
                                         "description": "Search keyword for TikTok Shop products (e.g. wireless earbuds).",
                                         "type": "string"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `currency`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a product that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "currency",
+                                                "discountPct",
+                                                "image",
+                                                "originalPrice",
+                                                "price",
+                                                "rating",
+                                                "reviewCount",
+                                                "sellerId",
+                                                "shopName",
+                                                "soldCount"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -228445,7 +228567,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
+                        "amount": "0.000950",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -228487,7 +228609,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.001000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -228519,7 +228641,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.000950",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -228548,7 +228670,7 @@
         },
         "/v1/run/tiktok_shop.search_suggestions": {
             "post": {
-                "description": "Get TikTok Shop search autocomplete terms for a keyword: the long-tail queries shoppers actually type, for keyword and demand research.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [TikTok Shop Search Suggestions pricing and uptime](https://getanyapi.com/api/tiktok-shop/search-suggestions) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok Shop endpoint](https://getanyapi.com/api/tiktok-shop).",
+                "description": "Get TikTok Shop search autocomplete terms for a keyword: the long-tail queries shoppers actually type, for keyword and demand research.\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Shop Search Suggestions pricing and uptime](https://getanyapi.com/api/tiktok-shop/search-suggestions) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok Shop endpoint](https://getanyapi.com/api/tiktok-shop).",
                 "operationId": "tiktok_shop_search_suggestions",
                 "parameters": [
                     {
@@ -228987,7 +229109,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.001200",
+                        "amount": "0.000950",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -229029,7 +229151,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.001000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -229061,7 +229183,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001200",
+                                "amount": "0.000950",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
