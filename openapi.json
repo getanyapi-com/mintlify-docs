@@ -116307,7 +116307,7 @@
         },
         "/v1/run/linkedin.company_employees": {
             "post": {
-                "description": "List the employees of a LinkedIn company by name or company URL, with optional job-title filtering.\n\n**Price:** billed per result - \\$3.20 per 1,000 requests base + \\$4.80 per 1,000 results, capped at \\$51.20 per 1,000 requests.\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Company Employees pricing and uptime](https://getanyapi.com/api/linkedin/company-employees) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "List the employees of a LinkedIn company by name or company URL, with optional job-title filtering.\n\n**Price:** billed per result - \\$11.00 per 1,000 results, capped at \\$110.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Company Employees pricing and uptime](https://getanyapi.com/api/linkedin/company-employees) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_company_employees",
                 "parameters": [
                     {
@@ -116856,8 +116856,8 @@
                 "x-payment-info": {
                     "price": {
                         "currency": "USD",
-                        "max": "0.051200",
-                        "min": "0.003200",
+                        "max": "0.110000",
+                        "min": "0.000000",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -116899,8 +116899,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.051200",
-                                "min": "0.003200",
+                                "max": "0.110000",
+                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -116932,8 +116932,8 @@
                             },
                             "pricing": {
                                 "currency": "USD",
-                                "max": "0.051200",
-                                "min": "0.003200",
+                                "max": "0.110000",
+                                "min": "0.000000",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -163104,7 +163104,7 @@
         },
         "/v1/run/reddit.post_comments": {
             "post": {
-                "description": "List the top-level comments on a Reddit post by URL (author, body, score, timestamp).\n\n**Price:** \\$0.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Post Comments pricing and uptime](https://getanyapi.com/api/reddit/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "List the comments on a Reddit post by URL (author, body, score, timestamp, parent comment). Replies carry the parentId of the comment they answer.\n\n**Price:** \\$0.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Post Comments pricing and uptime](https://getanyapi.com/api/reddit/post-comments) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_post_comments",
                 "parameters": [
                     {
@@ -163285,6 +163285,10 @@
                                                                                         "description": "Reddit comment ID (base-36, without the t1_ prefix). Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "parentId": {
+                                                                                        "description": "ID of the comment this one replies to (base-36, without the t1_ prefix). Empty for a top-level comment that replies to the post itself.",
+                                                                                        "type": "string"
                                                                                     },
                                                                                     "score": {
                                                                                         "description": "Net score (upvotes minus downvotes) on the comment at fetch time.",
