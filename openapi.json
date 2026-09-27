@@ -9427,7 +9427,7 @@
                                                                                         "type": "boolean"
                                                                                     },
                                                                                     "listPrice": {
-                                                                                        "description": "Pre-discount list price when on sale, 0 when not discounted, or null when the serving source does not publish it.",
+                                                                                        "description": "Pre-discount list price when on sale, or null when the product is not discounted or the serving source does not publish it.",
                                                                                         "type": [
                                                                                             "number",
                                                                                             "null"
@@ -9445,16 +9445,25 @@
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "price": {
-                                                                                        "description": "Current price as a numeric amount; 0 when no offer is available.",
-                                                                                        "type": "number"
+                                                                                        "description": "Current price as a numeric amount, or null when the result shows no current price (no offer, or only a secondary offer).",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "rating": {
-                                                                                        "description": "Average star rating, 0-5; 0 when unrated.",
-                                                                                        "type": "number"
+                                                                                        "description": "Average star rating, 0-5, or null when the product is unrated.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "reviewsCount": {
-                                                                                        "description": "Number of customer reviews; 0 when none.",
-                                                                                        "type": "integer"
+                                                                                        "description": "Number of customer reviews, or null when the product has none.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "title": {
                                                                                         "description": "Product title. Populated whenever the provider has data for the entity.",
@@ -40434,23 +40443,36 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "listingType": {
-                                                                                        "description": "Auction, FixedPrice, etc.",
-                                                                                        "type": "string"
+                                                                                        "description": "Auction, FixedPrice, etc. Null when the serving source does not publish the listing format.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "price": {
                                                                                         "description": "Listing price.",
                                                                                         "type": "number"
                                                                                     },
                                                                                     "sellerFeedbackCount": {
-                                                                                        "description": "Seller's lifetime feedback count.",
-                                                                                        "type": "number"
+                                                                                        "description": "Seller's lifetime feedback count, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "sellerFeedbackPercent": {
-                                                                                        "description": "Seller positive-feedback percentage.",
-                                                                                        "type": "number"
+                                                                                        "description": "Seller positive-feedback percentage, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "sellerName": {
-                                                                                        "type": "string"
+                                                                                        "description": "Seller username, or null when the serving source does not publish the seller.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "shippingCost": {
                                                                                         "description": "Shipping cost or free-delivery label.",
@@ -96803,7 +96825,7 @@
         },
         "/v1/run/instagram.post": {
             "post": {
-                "description": "Fetch a single Instagram post or reel by URL (media URLs, like count, owner, type) as normalized JSON. Turn on hostVideo to also get the post's video on a hosted MP4 link that plays without an Instagram session, charged as an extra on top of the price. If you want the spoken words as well, instagram.reel_transcript transcribes the same reel.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post pricing and uptime](https://getanyapi.com/api/instagram/post) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Fetch a single Instagram post or reel by URL (media URLs, like count, owner, type) as normalized JSON. Turn on hostVideo to also get the post's video on a hosted MP4 link that plays without an Instagram session, charged as an extra on top of the price. If you want the spoken words as well, instagram.reel_transcript transcribes the same reel.\n\n**Price:** \\$0.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Post pricing and uptime](https://getanyapi.com/api/instagram/post) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_post",
                 "parameters": [
                     {
@@ -158540,6 +158562,18 @@
                                         "description": "Keyword, topic, brand, or theme to search Pinterest for (e.g. mid-century living room).",
                                         "type": "string"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `description` or `videoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be null on a pin that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "description",
+                                                "videoUrl"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -158610,16 +158644,43 @@
                                                                             "description": "Matching Pinterest records: pin or board title, description, image/video URL, creator, and link. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
+                                                                                    "author": {
+                                                                                        "description": "Username (handle) of the account that saved the pin.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "authorName": {
+                                                                                        "description": "Display name of the account that saved the pin.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "description": {
+                                                                                        "description": "The pin's full description text, or null when the source does not provide it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "id": {
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "image": {
+                                                                                        "description": "URL of the pin's full-size image; for a video pin, its cover image.",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "title": {
+                                                                                        "description": "Pin title, or the pin's description when the pin has no title.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "url": {
                                                                                         "description": "Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "videoUrl": {
+                                                                                        "description": "Streaming (HLS) URL of the pin's video, or null when the pin is not a video or the source does not provide it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -209492,6 +209553,20 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `playCount`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. A source that returns only a rounded or shortened value for a field does not count as returning it.",
+                                        "items": {
+                                            "enum": [
+                                                "commentCount",
+                                                "likeCount",
+                                                "playCount",
+                                                "shareCount"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -209576,7 +209651,7 @@
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "commentCount": {
-                                                                                        "description": "Number of comments on the video.",
+                                                                                        "description": "Number of comments on the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count.",
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "createdUtc": {
@@ -209597,15 +209672,15 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "likeCount": {
-                                                                                        "description": "Number of likes on the video.",
+                                                                                        "description": "Number of likes on the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count.",
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "playCount": {
-                                                                                        "description": "Number of views/plays of the video.",
+                                                                                        "description": "Number of views/plays of the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count.",
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "shareCount": {
-                                                                                        "description": "Number of shares of the video.",
+                                                                                        "description": "Number of shares of the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count.",
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "text": {
@@ -228142,7 +228217,7 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "originalPrice": {
-                                                                                        "description": "Pre-discount list price (0 when not on sale).",
+                                                                                        "description": "Pre-discount list price. Omitted when the product is not on sale.",
                                                                                         "type": "number"
                                                                                     },
                                                                                     "price": {
@@ -228155,7 +228230,7 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "rating": {
-                                                                                        "description": "Average review score.",
+                                                                                        "description": "Average review score. Omitted when the product has no rating yet.",
                                                                                         "type": "number"
                                                                                     },
                                                                                     "reviewCount": {
@@ -231791,21 +231866,6 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
-                                    "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `avatarUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a review that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
-                                        "items": {
-                                            "enum": [
-                                                "author",
-                                                "authorCountry",
-                                                "avatarUrl",
-                                                "language",
-                                                "reviewerReviewsCount"
-                                            ],
-                                            "type": "string"
-                                        },
-                                        "type": "array",
-                                        "uniqueItems": true
-                                    },
                                     "sortBy": {
                                         "default": "auto",
                                         "description": "Review ordering: auto, relevancy, or recent (e.g. recent).",
@@ -231898,8 +231958,11 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "avatarUrl": {
-                                                                                        "description": "URL of the reviewer's avatar image.",
-                                                                                        "type": "string"
+                                                                                        "description": "URL of the reviewer's avatar image, or null when the reviewer has no photo.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "createdUtc": {
                                                                                         "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
@@ -231909,6 +231972,14 @@
                                                                                     "language": {
                                                                                         "description": "Language code of the review text, e.g. en.",
                                                                                         "type": "string"
+                                                                                    },
+                                                                                    "ownerResponseText": {
+                                                                                        "description": "The company's public reply to the review. Absent when the company has not replied.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "ownerResponseUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the company replied; absent when it has not.",
+                                                                                        "type": "number"
                                                                                     },
                                                                                     "rating": {
                                                                                         "description": "Star rating (1-5).",
@@ -261431,10 +261502,12 @@
                                         "type": "integer"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `authorAvatarUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `authorAvatarUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. A source that returns only a rounded or shortened value for a field does not count as returning it.",
                                         "items": {
                                             "enum": [
-                                                "authorAvatarUrl"
+                                                "authorAvatarUrl",
+                                                "comments",
+                                                "description"
                                             ],
                                             "type": "string"
                                         },
@@ -261519,7 +261592,7 @@
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "comments": {
-                                                                            "description": "Number of comments.",
+                                                                            "description": "Number of comments. Some sources round large counts (2.4M instead of 2,457,538); name `comments` in requireFields to be served only by a source that returns the exact count.",
                                                                             "type": "integer"
                                                                         },
                                                                         "createdUtc": {
@@ -261528,7 +261601,7 @@
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "description": {
-                                                                            "description": "Full video description text.",
+                                                                            "description": "Video description text. Some sources return it as YouTube displays it, with long links shortened (https://colab.research.google.com/dri...) and YouTube or social links replaced by their titles; name `description` in requireFields to be served only by a source that returns every link intact.",
                                                                             "type": "string"
                                                                         },
                                                                         "durationMs": {
@@ -269081,8 +269154,18 @@
                                                                                         "type": "number"
                                                                                     },
                                                                                     "lotSize": {
-                                                                                        "description": "Lot size in square feet.",
-                                                                                        "type": "number"
+                                                                                        "description": "Lot size as Zillow states it, in the unit named by lotSizeUnit (square feet or acres), or null when the listing has no lot size.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "lotSizeUnit": {
+                                                                                        "description": "Unit of lotSize: sqft or acres. Null when the listing has no lot size or the serving source does not name the unit.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "price": {
                                                                                         "description": "List price in the listing currency.",
@@ -269093,8 +269176,11 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "rentZestimate": {
-                                                                                        "description": "Zillow estimated monthly rent.",
-                                                                                        "type": "number"
+                                                                                        "description": "Zillow estimated monthly rent, or null when Zillow shows no rent Zestimate for the listing.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "state": {
                                                                                         "description": "Two-letter state code.",
@@ -269110,8 +269196,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "taxAssessedValue": {
-                                                                                        "description": "Assessed value the county tax authority carries for the property.",
-                                                                                        "type": "number"
+                                                                                        "description": "Assessed value the county tax authority carries for the property, or null when none is published.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "url": {
                                                                                         "description": "Absolute Zillow listing URL. Populated whenever the provider has data for the entity.",
@@ -269126,8 +269215,11 @@
                                                                                         ]
                                                                                     },
                                                                                     "zestimate": {
-                                                                                        "description": "Zillow estimated market value.",
-                                                                                        "type": "number"
+                                                                                        "description": "Zillow estimated market value, or null when Zillow shows no Zestimate for the listing.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "zipcode": {
                                                                                         "type": "string"
