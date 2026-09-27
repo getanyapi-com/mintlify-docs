@@ -35,6 +35,21 @@ jobs:
         run: |
           python3 -c "import json,sys; d=json.load(open('openapi.json')); n=len(d.get('paths',{})); print('paths:',n); sys.exit(1) if n < 100 else None"
 
+      # Run check.yml's Mintlify gate (same Node, CLI install, and invocation)
+      # on the regenerated tree before anything is committed. Mintlify deploys
+      # on push, so a spec it rejects would freeze the docs; a failure here
+      # stops the job before the push. The path count above stays because
+      # `mint validate` accepts a truncated spec.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: install Mintlify CLI
+        run: npm install -g mint
+
+      - name: mint validate (strict build)
+        run: mint validate --telemetry false < /dev/null
+
       - name: commit if changed
         run: |
           if git diff --quiet openapi.json; then
