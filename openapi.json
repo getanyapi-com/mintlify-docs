@@ -115858,7 +115858,10 @@
                                                                     "properties": {
                                                                         "companyType": {
                                                                             "description": "Company type, e.g. Privately Held, Public Company.",
-                                                                            "type": "string"
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "description": {
                                                                             "description": "Company about/description text. Populated whenever the provider has data for the entity.",
@@ -115915,7 +115918,10 @@
                                                                                     "type": "integer"
                                                                                 }
                                                                             },
-                                                                            "type": "object"
+                                                                            "type": [
+                                                                                "object",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "id": {
                                                                             "description": "LinkedIn's numeric company id, as a string.",
@@ -115968,12 +115974,18 @@
                                                                         },
                                                                         "pageVerified": {
                                                                             "description": "Whether LinkedIn has verified the company page.",
-                                                                            "type": "boolean"
+                                                                            "type": [
+                                                                                "boolean",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "similarOrganizations": {
                                                                             "description": "Similar organizations surfaced by LinkedIn.",
                                                                             "items": {},
-                                                                            "type": "array"
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "specialities": {
                                                                             "description": "Company-declared specialities.",
@@ -122962,7 +122974,7 @@
         },
         "/v1/run/linkedin.post_reactions": {
             "post": {
-                "description": "List who reacted to a LinkedIn post - reactor name, profile URL, job title, and reaction type. Lead-gen grade.\n\n**Price:** \\$5.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Post Reactions pricing and uptime](https://getanyapi.com/api/linkedin/post-reactions) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "List who reacted to a LinkedIn post - reactor name, profile URL, job title, and reaction type. Lead-gen grade.\n\n**Price:** \\$2.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Post Reactions pricing and uptime](https://getanyapi.com/api/linkedin/post-reactions) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_post_reactions",
                 "parameters": [
                     {
@@ -123061,6 +123073,20 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `postId`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "actor",
+                                                "items",
+                                                "postId",
+                                                "reactionType"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -123165,9 +123191,11 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "postId": {
-                                                                                        "description": "LinkedIn URN of the post that was reacted to. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
+                                                                                        "description": "LinkedIn URN of the post that was reacted to.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "reactionType": {
                                                                                         "description": "Reaction kind (e.g. LIKE, PRAISE, EMPATHY, INTEREST, APPRECIATION, ENTERTAINMENT).",
@@ -123451,7 +123479,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.005000",
+                        "amount": "0.002900",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -123493,7 +123521,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.005000",
+                                "amount": "0.002900",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -123525,7 +123553,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.005000",
+                                "amount": "0.002900",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -124089,7 +124117,7 @@
         },
         "/v1/run/linkedin.profile": {
             "post": {
-                "description": "Fetch a rich LinkedIn member profile by URL: name, headline, avatar, location, connections and followers, current position, and full work experience with job titles, descriptions, dates, employment/workplace type, and per-role skills, plus education, skills, certifications, honors and awards, languages, projects, publications, and verified/premium/open-to-work flags.\n\n**Price:** \\$4.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile pricing and uptime](https://getanyapi.com/api/linkedin/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Fetch a rich LinkedIn member profile by URL: name, headline, avatar, location, connections and followers, current position, and full work experience with job titles, descriptions, dates, employment/workplace type, and per-role skills, plus education, skills, certifications, honors and awards, languages, projects, publications, and verified/premium/open-to-work flags.\n\n**Price:** \\$2.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile pricing and uptime](https://getanyapi.com/api/linkedin/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_profile",
                 "parameters": [
                     {
@@ -124180,6 +124208,67 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `city` or `workplaceType`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "about",
+                                                "certifications",
+                                                "city",
+                                                "companyId",
+                                                "companyLinkedinUrl",
+                                                "companyName",
+                                                "connectionsCount",
+                                                "country",
+                                                "countryCode",
+                                                "coverImage",
+                                                "creator",
+                                                "currentPosition",
+                                                "degree",
+                                                "description",
+                                                "duration",
+                                                "education",
+                                                "employmentType",
+                                                "endDate",
+                                                "endorsements",
+                                                "fieldOfStudy",
+                                                "firstName",
+                                                "followerCount",
+                                                "hiring",
+                                                "honorsAndAwards",
+                                                "id",
+                                                "influencer",
+                                                "issuedAt",
+                                                "issuedBy",
+                                                "languages",
+                                                "lastName",
+                                                "location",
+                                                "name",
+                                                "openToWork",
+                                                "photo",
+                                                "positions",
+                                                "premium",
+                                                "projects",
+                                                "publicIdentifier",
+                                                "publications",
+                                                "publishedText",
+                                                "school",
+                                                "schoolId",
+                                                "schoolUrl",
+                                                "skills",
+                                                "startDate",
+                                                "state",
+                                                "title",
+                                                "topSkills",
+                                                "url",
+                                                "verified",
+                                                "workplaceType"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -124344,7 +124433,10 @@
                                                                                     },
                                                                                     "schoolId": {
                                                                                         "description": "LinkedIn's numeric school id, as a string.",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "schoolUrl": {
                                                                                         "description": "School LinkedIn URL.",
@@ -124406,7 +124498,10 @@
                                                                                     "skills": {
                                                                                         "description": "Skills associated with this role.",
                                                                                         "items": {},
-                                                                                        "type": "array"
+                                                                                        "type": [
+                                                                                            "array",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "startDate": {
                                                                                         "description": "Start date text, e.g. 'Feb 2014'.",
@@ -124414,7 +124509,10 @@
                                                                                     },
                                                                                     "workplaceType": {
                                                                                         "description": "Workplace type, e.g. 'Remote' or 'On-site'.",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -124448,7 +124546,10 @@
                                                                                 "properties": {
                                                                                     "description": {
                                                                                         "description": "Award description.",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "issuedAt": {
                                                                                         "description": "Issue date text.",
@@ -124515,7 +124616,10 @@
                                                                                 "properties": {
                                                                                     "description": {
                                                                                         "description": "Publication description.",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "publishedText": {
                                                                                         "description": "Publisher and/or date text as shown on LinkedIn.",
@@ -124531,8 +124635,32 @@
                                                                             "type": "array"
                                                                         },
                                                                         "skills": {
-                                                                            "description": "The member's skills, as free-form strings when present.",
-                                                                            "items": {},
+                                                                            "description": "The member's skills: an object per skill, or a bare skill name when LinkedIn shows no endorsed-skills section.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "endorsements": {
+                                                                                        "description": "Endorsement count as LinkedIn shows it, e.g. '23 endorsements'. Null from a source that does not read endorsements; name it in requireFields to be served by one that does.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Skill name.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "positions": {
+                                                                                        "description": "Where the skill was used or who endorsed it, as LinkedIn shows it, e.g. 'Endorsed by 3 colleagues at Rippling'. Null from a source that does not read them; name it in requireFields to be served by one that does.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": [
+                                                                                            "array",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    }
+                                                                                }
+                                                                            },
                                                                             "type": "array"
                                                                         },
                                                                         "state": {
@@ -124542,7 +124670,10 @@
                                                                         "topSkills": {
                                                                             "description": "The member's top skills, as free-form strings when present.",
                                                                             "items": {},
-                                                                            "type": "array"
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "url": {
                                                                             "description": "Canonical LinkedIn profile URL.",
@@ -124825,7 +124956,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.004000",
+                        "amount": "0.002900",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -124867,7 +124998,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.004000",
+                                "amount": "0.002900",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -124899,7 +125030,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.004000",
+                                "amount": "0.002900",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
