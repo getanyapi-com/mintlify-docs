@@ -15,6 +15,7 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `videoId` or `authorId`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 | `url` | string | yes | Full Facebook post URL. |
 
 <Accordion title="Full input JSON Schema">
@@ -36,6 +37,29 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
     "url": {
       "type": "string",
       "description": "Full Facebook post URL."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "authorId",
+          "authorImage",
+          "authorName",
+          "authorVerified",
+          "comments",
+          "createdUtc",
+          "durationSeconds",
+          "image",
+          "likes",
+          "shares",
+          "url",
+          "videoId",
+          "views"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `videoId` or `authorId`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -55,13 +79,14 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
 | `data.comments` | integer | yes |  |
 | `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.durationSeconds` | number | no | Length of the post's video in seconds, 0 when the post carries no video. |
-| `data.id` | string | yes |  |
+| `data.id` | string | yes | Facebook post id. For a reel or video post this is NOT the id in the /reel/ URL; that one is videoId. |
 | `data.image` | string | no | Preview image or video thumbnail URL for the post. |
 | `data.likes` | integer | yes |  |
 | `data.shares` | integer | yes |  |
 | `data.text` | string | yes |  |
 | `data.url` | string | no | Canonical Facebook URL of the post. |
-| `data.views` | integer | yes |  |
+| `data.videoId` | string or null | no | Facebook video id of the post's reel or video, the id that appears in its /reel/&lt;id&gt; URL. Null when the post carries no video or this lane cannot read it. |
+| `data.views` | integer or null | yes | Number of views on the post's video. Null when the source cannot report an exact count, for example when it gives only a rounded figure such as 14K. |
 | `found` | boolean | yes |  |
 
 Extra fields are kept, missing declared fields fail.
@@ -101,7 +126,15 @@ Extra fields are kept, missing declared fields fail.
           "properties": {
             "id": {
               "x-anyapi-must-populate": true,
-              "type": "string"
+              "type": "string",
+              "description": "Facebook post id. For a reel or video post this is NOT the id in the /reel/ URL; that one is videoId."
+            },
+            "videoId": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Facebook video id of the post's reel or video, the id that appears in its /reel/<id> URL. Null when the post carries no video or this lane cannot read it."
             },
             "text": {
               "x-anyapi-must-populate": true,
@@ -117,7 +150,11 @@ Extra fields are kept, missing declared fields fail.
               "type": "integer"
             },
             "views": {
-              "type": "integer"
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Number of views on the post's video. Null when the source cannot report an exact count, for example when it gives only a rounded figure such as 14K."
             },
             "url": {
               "type": "string",

@@ -16,7 +16,7 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Continuation token from a previous response for pagination. |
-| `order` | string | no | Comment order (e.g. top, newest). |
+| `order` | string | no | Comment order (e.g. top, newest). One of: `top`, `newest`. |
 | `url` | string | yes | Full YouTube video URL. Shorts (youtube.com/shorts/...) and youtu.be URLs also work. |
 
 <Accordion title="Full input JSON Schema">
@@ -41,6 +41,10 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
     },
     "order": {
       "type": "string",
+      "enum": [
+        "top",
+        "newest"
+      ],
       "description": "Comment order (e.g. top, newest)."
     },
     "cursor": {

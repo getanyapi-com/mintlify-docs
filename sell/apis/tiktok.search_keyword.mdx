@@ -18,8 +18,9 @@ AnyAPI publishes this API from **$0.70 per 1,000 requests**. That is the price a
 | `cursor` | string | no | Pagination cursor from a previous response. |
 | `datePosted` | integer or string | no | Time frame filter, in days back from now. Use a canonical JSON integer that is nonnegative: 0 for any time, 1 for the past 24 hours, 7 for the past week, 30 for the past month, 90 for the past three months, or 180 for the past six months. Any other number is not guaranteed to filter anything. Legacy numeric strings remain accepted. Default `0`. |
 | `query` | string | yes | The keyword to search TikTok for. |
-| `requireCursor` | boolean | no | Deprecated. Every source for this search returns a nextCursor, so this changes nothing about the price or which source serves you; it stays accepted so callers that already send it keep working. |
-| `sortBy` | integer or string | no | Sort order. Use the canonical JSON integer 0 for relevance, 1 for most liked, or 2 for newest first; legacy numeric strings remain accepted. One of: `0`, `1`, `2`, `0`, `1`, `2`. Default `0`. |
+| `requireCursor` | boolean | no | Deprecated: name `nextCursor` in `requireFields` instead, which is the field this flag is translated into. It stays accepted so callers that already send it keep working. Sending it routes you to a source that returns a pagination cursor, which can raise your price when the cheapest source cannot page. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `region`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `sortBy` | string | no | Sort order: relevance, most-liked, date-posted. One of: `relevance`, `most-liked`, `date-posted`. Default `"relevance"`. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -30,11 +31,20 @@ AnyAPI publishes this API from **$0.70 per 1,000 requests**. That is the price a
   "example": {
     "query": "cooking",
     "datePosted": 0,
-    "sortBy": 0
+    "sortBy": "relevance"
   },
   "title": "TikTok keyword search input",
   "type": "object",
   "additionalProperties": false,
+  "x-anyapi-compat-values": {
+    "sortBy": {
+      "0": "relevance",
+      "1": "most-liked",
+      "2": "date-posted",
+      "popular": "most-liked",
+      "like": "most-liked"
+    }
+  },
   "required": [
     "query"
   ],
@@ -54,20 +64,14 @@ AnyAPI publishes this API from **$0.70 per 1,000 requests**. That is the price a
       "description": "Time frame filter, in days back from now. Use a canonical JSON integer that is nonnegative: 0 for any time, 1 for the past 24 hours, 7 for the past week, 30 for the past month, 90 for the past three months, or 180 for the past six months. Any other number is not guaranteed to filter anything. Legacy numeric strings remain accepted."
     },
     "sortBy": {
-      "type": [
-        "integer",
-        "string"
-      ],
+      "type": "string",
       "enum": [
-        0,
-        1,
-        2,
-        "0",
-        "1",
-        "2"
+        "relevance",
+        "most-liked",
+        "date-posted"
       ],
-      "default": 0,
-      "description": "Sort order. Use the canonical JSON integer 0 for relevance, 1 for most liked, or 2 for newest first; legacy numeric strings remain accepted."
+      "default": "relevance",
+      "description": "Sort order: relevance, most-liked, date-posted."
     },
     "cursor": {
       "type": "string",
@@ -76,7 +80,26 @@ AnyAPI publishes this API from **$0.70 per 1,000 requests**. That is the price a
     "requireCursor": {
       "type": "boolean",
       "deprecated": true,
-      "description": "Deprecated. Every source for this search returns a nextCursor, so this changes nothing about the price or which source serves you; it stays accepted so callers that already send it keep working."
+      "description": "Deprecated: name `nextCursor` in `requireFields` instead, which is the field this flag is translated into. It stays accepted so callers that already send it keep working. Sending it routes you to a source that returns a pagination cursor, which can raise your price when the cheapest source cannot page."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "author",
+          "comments",
+          "createdUtc",
+          "likes",
+          "nextCursor",
+          "region",
+          "saves",
+          "shares",
+          "views"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `region`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -232,7 +255,7 @@ This output schema declares no `reason` field, so `found: false` is the whole no
 {
   "query": "cooking",
   "datePosted": 0,
-  "sortBy": 0
+  "sortBy": "relevance"
 }
 ```
 

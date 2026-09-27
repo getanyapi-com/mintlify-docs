@@ -9,13 +9,14 @@ This page is the seller-facing summary of one catalog API, `instagram.profile`. 
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `handle` | string | yes | Instagram username without the leading @. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `contactMethod`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -39,6 +40,25 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
     "handle": {
       "type": "string",
       "description": "Instagram username without the leading @."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "contactMethod",
+          "followers",
+          "following",
+          "isBusiness",
+          "posts",
+          "private",
+          "title",
+          "url",
+          "verified"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `contactMethod`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -64,7 +84,7 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
 | `data.following` | integer | yes | Number of accounts this account follows. |
 | `data.handle` | string | yes | Instagram username without the leading @. |
 | `data.isBusiness` | boolean | no | Whether Instagram flags the account as a business account. |
-| `data.posts` | integer | yes | Number of posts on the account. |
+| `data.posts` | integer | yes | Always 0: none of the sources behind this API returns the account's total post count. |
 | `data.private` | boolean | yes | Whether the account is private. |
 | `data.userId` | string | no | Instagram's numeric account id, as a string. |
 | `data.verified` | boolean | yes | Whether the account carries Instagram's verified badge. |
@@ -133,7 +153,7 @@ Extra fields are kept, missing declared fields fail.
             },
             "posts": {
               "type": "integer",
-              "description": "Number of posts on the account."
+              "description": "Always 0: none of the sources behind this API returns the account's total post count."
             },
             "bio": {
               "x-anyapi-must-populate": true,

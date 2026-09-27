@@ -9,15 +9,16 @@ This page is the seller-facing summary of one catalog API, `tiktok_shop.search`.
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.95 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `country` | string | no | Country code of the TikTok Shop market to search (e.g. US). One of: `US`, `VN`, `TH`, `PH`, `MY`, `ID`, `GB`, `SG`, `ES`, `MX`, `DE`, `IT`, `FR`, `BR`, `JP`. Default `"US"`. |
-| `limit` | integer | no | Accepted but ignored. The search returns every product TikTok Shop gives for the query, typically about 30 and occasionally more than 50, for the same price per call. |
+| `limit` | integer | no | Maximum products to return, honoured on US searches up to 30. Other countries and larger values return every product TikTok Shop gives for the query, typically about 30 and occasionally more than 50. The price per call is the same either way. |
 | `query` | string | yes | Search keyword for TikTok Shop products (e.g. wireless earbuds). |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `currency`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a product that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -39,7 +40,7 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
     "limit": {
       "type": "integer",
       "minimum": 1,
-      "description": "Accepted but ignored. The search returns every product TikTok Shop gives for the query, typically about 30 and occasionally more than 50, for the same price per call."
+      "description": "Maximum products to return, honoured on US searches up to 30. Other countries and larger values return every product TikTok Shop gives for the query, typically about 30 and occasionally more than 50. The price per call is the same either way."
     },
     "query": {
       "type": "string",
@@ -66,6 +67,26 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
       ],
       "default": "US",
       "description": "Country code of the TikTok Shop market to search (e.g. US)."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "currency",
+          "discountPct",
+          "image",
+          "originalPrice",
+          "price",
+          "rating",
+          "reviewCount",
+          "sellerId",
+          "shopName",
+          "soldCount"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `currency`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a product that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }

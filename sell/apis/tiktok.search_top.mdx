@@ -9,17 +9,18 @@ This page is the seller-facing summary of one catalog API, `tiktok.search_top`. 
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.90 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Pagination cursor from a previous response. |
-| `publishTime` | string | no | Time-frame filter: yesterday, this-week, this-month, last-3-months, last-6-months, all-time. |
+| `publishTime` | string | no | Time-frame filter: yesterday, this-week, this-month, last-3-months, last-6-months, all-time. One of: `yesterday`, `this-week`, `this-month`, `last-3-months`, `last-6-months`, `all-time`. |
 | `query` | string | yes | Keyword to search for (e.g. "funny"). |
 | `region` | string | no | 2-letter country code for the proxy location (e.g. US, GB, FR). |
-| `sortBy` | string | no | Sort order: relevance, most-liked, date-posted. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `videoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `sortBy` | string | no | Sort order: relevance, most-liked, date-posted. One of: `relevance`, `most-liked`, `date-posted`. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -33,6 +34,15 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
   "title": "TikTok Top Search input",
   "type": "object",
   "additionalProperties": false,
+  "x-anyapi-compat-values": {
+    "sortBy": {
+      "latest": "date-posted"
+    },
+    "publishTime": {
+      "last-week": "this-week",
+      "last-month": "this-month"
+    }
+  },
   "required": [
     "query"
   ],
@@ -43,10 +53,23 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
     },
     "publishTime": {
       "type": "string",
+      "enum": [
+        "yesterday",
+        "this-week",
+        "this-month",
+        "last-3-months",
+        "last-6-months",
+        "all-time"
+      ],
       "description": "Time-frame filter: yesterday, this-week, this-month, last-3-months, last-6-months, all-time."
     },
     "sortBy": {
       "type": "string",
+      "enum": [
+        "relevance",
+        "most-liked",
+        "date-posted"
+      ],
       "description": "Sort order: relevance, most-liked, date-posted."
     },
     "region": {
@@ -56,6 +79,29 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
     "cursor": {
       "type": "string",
       "description": "Pagination cursor from a previous response."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "authorImage",
+          "authorName",
+          "authorUserId",
+          "comments",
+          "contentType",
+          "durationSeconds",
+          "image",
+          "likes",
+          "nextCursor",
+          "saves",
+          "shares",
+          "videoUrl",
+          "views"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `videoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }

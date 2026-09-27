@@ -3,7 +3,7 @@ title: "Reddit Post Comments"
 description: "Sell reddit.post_comments on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
 ---
 
-List the top-level comments on a Reddit post by URL (author, body, score, timestamp).
+List the comments on a Reddit post by URL (author, body, score, timestamp, parent comment). Replies carry the parentId of the comment they answer.
 
 This page is the seller-facing summary of one catalog API, `reddit.post_comments`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
 
@@ -62,6 +62,7 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
 | `data.comments[].body` | string | yes | Comment text, as Markdown. |
 | `data.comments[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.comments[].id` | string | yes | Reddit comment ID (base-36, without the t1_ prefix). |
+| `data.comments[].parentId` | string | no | ID of the comment this one replies to (base-36, without the t1_ prefix). Empty for a top-level comment that replies to the post itself. |
 | `data.comments[].score` | integer | no | Net score (upvotes minus downvotes) on the comment at fetch time. |
 | `data.comments[].url` | string | yes | Permalink to the comment on reddit.com. |
 | `data.media` | array | no | Photo, video, and GIF attachments on the post. Empty when the post has none. |
@@ -162,6 +163,10 @@ Extra fields are kept, missing declared fields fail.
                     "x-anyapi-must-populate": true,
                     "type": "string",
                     "description": "Reddit comment ID (base-36, without the t1_ prefix)."
+                  },
+                  "parentId": {
+                    "type": "string",
+                    "description": "ID of the comment this one replies to (base-36, without the t1_ prefix). Empty for a top-level comment that replies to the post itself."
                   },
                   "author": {
                     "x-anyapi-must-populate": true,

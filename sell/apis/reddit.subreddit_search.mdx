@@ -18,9 +18,9 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
 | `cursor` | string | no | Optional pagination token from a previous response. |
 | `query` | string | no | Optional search query to match posts (e.g. 'push ups'). |
 | `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived` or `selftext`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
-| `sort` | string | no | Optional sort order: relevance, hot, top, new, comments. |
+| `sort` | string | no | Optional sort order: relevance, hot, top, new, comments. One of: `relevance`, `hot`, `top`, `new`, `comments`. |
 | `subreddit` | string | yes | Subreddit name without the r/ prefix (e.g. 'Fitness'). |
-| `timeframe` | string | no | Optional time filter: all, year, month, week, day, hour. |
+| `timeframe` | string | no | Optional time filter: all, year, month, week, day, hour. One of: `all`, `year`, `month`, `week`, `day`, `hour`. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -54,10 +54,25 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
     },
     "sort": {
       "type": "string",
+      "enum": [
+        "relevance",
+        "hot",
+        "top",
+        "new",
+        "comments"
+      ],
       "description": "Optional sort order: relevance, hot, top, new, comments."
     },
     "timeframe": {
       "type": "string",
+      "enum": [
+        "all",
+        "year",
+        "month",
+        "week",
+        "day",
+        "hour"
+      ],
       "description": "Optional time filter: all, year, month, week, day, hour."
     },
     "cursor": {
