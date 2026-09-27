@@ -75655,7 +75655,7 @@
         },
         "/v1/run/glassdoor.jobs": {
             "post": {
-                "description": "Search Glassdoor job listings by keyword and location, or scrape any Glassdoor company or job search page URL - up to 20 normalized job records per request.\n\n**Price:** billed per result - \\$5.50 per 1,000 requests base + \\$5.23 per 1,000 results, capped at \\$110.00 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Glassdoor Jobs pricing and uptime](https://getanyapi.com/api/glassdoor/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Glassdoor endpoint](https://getanyapi.com/api/glassdoor).",
+                "description": "Search Glassdoor job listings by keyword and location, or scrape any Glassdoor company or job search page URL - up to 20 normalized job records per request.\n\n**Price:** \\$9.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Glassdoor Jobs pricing and uptime](https://getanyapi.com/api/glassdoor/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Glassdoor endpoint](https://getanyapi.com/api/glassdoor).",
                 "operationId": "glassdoor_jobs",
                 "parameters": [
                     {
@@ -75721,9 +75721,7 @@
                         "application/json": {
                             "example": {
                                 "limit": 3,
-                                "location": "United States",
-                                "postedLimit": "month",
-                                "query": "software engineer"
+                                "url": "https://www.glassdoor.com/Jobs/Google-Jobs-E9079.htm"
                             },
                             "schema": {
                                 "additionalProperties": false,
@@ -75741,9 +75739,7 @@
                                 ],
                                 "example": {
                                     "limit": 3,
-                                    "location": "United States",
-                                    "postedLimit": "month",
-                                    "query": "software engineer"
+                                    "url": "https://www.glassdoor.com/Jobs/Google-Jobs-E9079.htm"
                                 },
                                 "properties": {
                                     "allowFallbacks": {
@@ -75765,7 +75761,7 @@
                                         "uniqueItems": true
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (1-20, default 20). You are billed per result returned, so a lower limit costs less.",
+                                        "description": "Maximum number of results to return (1-20, default 20).",
                                         "maximum": 20,
                                         "minimum": 1,
                                         "type": "integer"
@@ -75791,6 +75787,24 @@
                                     "query": {
                                         "description": "Job title or keywords to search (keyword mode). Provide this or a url.",
                                         "type": "string"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `companyIndustry` or `logoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a job listing that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "companyIndustry",
+                                                "companyRevenue",
+                                                "companySize",
+                                                "companyType",
+                                                "expired",
+                                                "logoUrl",
+                                                "normalizedTitle",
+                                                "sector"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "sortBy": {
                                         "description": "Sort order: most recent (date) or best match (relevance). Keyword mode only.",
@@ -75890,19 +75904,31 @@
                                                                                     },
                                                                                     "companyIndustry": {
                                                                                         "description": "Primary industry of the hiring employer.",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "companyRevenue": {
                                                                                         "description": "Employer revenue band as Glassdoor words it.",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "companySize": {
                                                                                         "description": "Employer headcount band as Glassdoor words it (e.g. \"1001 to 5000 Employees\").",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "companyType": {
                                                                                         "description": "Employer ownership type (e.g. \"Company - Private\").",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "description": {
                                                                                         "description": "Full job description (may contain HTML).",
@@ -75914,7 +75940,10 @@
                                                                                     },
                                                                                     "expired": {
                                                                                         "description": "Whether Glassdoor reports the listing as expired.",
-                                                                                        "type": "boolean"
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "id": {
                                                                                         "description": "Glassdoor job listing id. Populated whenever the provider has data for the entity.",
@@ -75931,11 +75960,17 @@
                                                                                     },
                                                                                     "logoUrl": {
                                                                                         "description": "Employer square logo image URL.",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "normalizedTitle": {
                                                                                         "description": "Glassdoor's normalized occupation title for the listing.",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "rating": {
                                                                                         "description": "Employer Glassdoor star rating (0 when not rated).",
@@ -75969,7 +76004,10 @@
                                                                                     },
                                                                                     "sector": {
                                                                                         "description": "Sector of the hiring employer.",
-                                                                                        "type": "string"
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "title": {
                                                                                         "description": "Job title. Populated whenever the provider has data for the entity.",
@@ -76262,10 +76300,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.009000",
                         "currency": "USD",
-                        "max": "0.110000",
-                        "min": "0.005500",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -76305,11 +76342,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.009000",
                                 "currency": "USD",
-                                "max": "0.110000",
-                                "min": "0.005500",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -76338,11 +76374,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.009000",
                                 "currency": "USD",
-                                "max": "0.110000",
-                                "min": "0.005500",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -244294,7 +244329,7 @@
         },
         "/v1/run/upwork.jobs": {
             "post": {
-                "description": "Search Upwork job postings by keyword, with up to 25 fresh listings per request.\n\n**Price:** billed per result - \\$1.10 per 1,000 requests base + \\$1.10 per 1,000 results, capped at \\$28.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Upwork Jobs pricing and uptime](https://getanyapi.com/api/upwork/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Upwork endpoint](https://getanyapi.com/api/upwork).",
+                "description": "Search Upwork job postings by keyword, with up to 25 fresh listings per request.\n\n**Price:** \\$10.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Upwork Jobs pricing and uptime](https://getanyapi.com/api/upwork/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Upwork endpoint](https://getanyapi.com/api/upwork).",
                 "operationId": "upwork_jobs",
                 "parameters": [
                     {
@@ -244403,7 +244438,7 @@
                                         "type": "string"
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (10-25, default 25). You are billed per result returned, so a lower limit costs less.",
+                                        "description": "Maximum number of results to return (10-25, default 25).",
                                         "maximum": 25,
                                         "minimum": 10,
                                         "type": "integer"
@@ -244424,6 +244459,18 @@
                                     "query": {
                                         "description": "Keywords to search Upwork jobs for (e.g. react developer).",
                                         "type": "string"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `premium` or `reposted`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a job that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "premium",
+                                                "reposted"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "sort": {
                                         "default": "newest",
@@ -244561,7 +244608,10 @@
                                                                                     },
                                                                                     "premium": {
                                                                                         "description": "Whether Upwork flags the posting as premium.",
-                                                                                        "type": "boolean"
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "proposals": {
                                                                                         "description": "Number of proposals submitted.",
@@ -244569,7 +244619,10 @@
                                                                                     },
                                                                                     "reposted": {
                                                                                         "description": "Whether the posting is a repost of an earlier job.",
-                                                                                        "type": "boolean"
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "tags": {
                                                                                         "description": "Skill tags.",
@@ -244872,10 +244925,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.010000",
                         "currency": "USD",
-                        "max": "0.028600",
-                        "min": "0.001100",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -244915,11 +244967,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.010000",
                                 "currency": "USD",
-                                "max": "0.028600",
-                                "min": "0.001100",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -244948,11 +244999,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.010000",
                                 "currency": "USD",
-                                "max": "0.028600",
-                                "min": "0.001100",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
