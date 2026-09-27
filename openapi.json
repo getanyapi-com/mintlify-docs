@@ -195291,7 +195291,7 @@
         },
         "/v1/run/snapchat.profile": {
             "post": {
-                "description": "Fetch a Snapchat user's public profile by username: display name, bio, subscriber count, and recent public content.\n\n**Price:** billed per result - \\$1.10 per 1,000 requests base + \\$2.20 per 1,000 results, capped at \\$3.30 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Snapchat Profile pricing and uptime](https://getanyapi.com/api/snapchat/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Snapchat endpoint](https://getanyapi.com/api/snapchat).",
+                "description": "Fetch a Snapchat user's public profile by username: display name, bio, subscriber count, and recent public content.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Snapchat Profile pricing and uptime](https://getanyapi.com/api/snapchat/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Snapchat endpoint](https://getanyapi.com/api/snapchat).",
                 "operationId": "snapchat_profile",
                 "parameters": [
                     {
@@ -195783,10 +195783,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.001200",
                         "currency": "USD",
-                        "max": "0.003300",
-                        "min": "0.001100",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -195826,11 +195825,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001200",
                                 "currency": "USD",
-                                "max": "0.003300",
-                                "min": "0.001100",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -195859,11 +195857,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001200",
                                 "currency": "USD",
-                                "max": "0.003300",
-                                "min": "0.001100",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -232675,7 +232672,7 @@
         },
         "/v1/run/truthsocial.post": {
             "post": {
-                "description": "Get a single Truth Social post by its URL - text, author, engagement (likes, comments, shares), and timestamp as clean JSON.\n\n**Price:** \\$3.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Truth Social Post pricing and uptime](https://getanyapi.com/api/truthsocial/post) - live USD price, lane routing, and measured 30-day uptime. [Every Truthsocial endpoint](https://getanyapi.com/api/truthsocial).",
+                "description": "Get a single Truth Social post by its URL - text, author, engagement (likes, comments, shares), and timestamp as clean JSON.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Truth Social Post pricing and uptime](https://getanyapi.com/api/truthsocial/post) - live USD price, lane routing, and measured 30-day uptime. [Every Truthsocial endpoint](https://getanyapi.com/api/truthsocial).",
                 "operationId": "truthsocial_post",
                 "parameters": [
                     {
@@ -233159,7 +233156,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.003600",
+                        "amount": "0.001200",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -233201,7 +233198,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.003600",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -233233,7 +233230,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.003600",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -233262,7 +233259,7 @@
         },
         "/v1/run/truthsocial.profile": {
             "post": {
-                "description": "Get a Truth Social account's public profile by handle - display name, bio, follower/following counts, and post count as clean JSON.\n\n**Price:** \\$3.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Truth Social Profile pricing and uptime](https://getanyapi.com/api/truthsocial/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Truthsocial endpoint](https://getanyapi.com/api/truthsocial).",
+                "description": "Get a Truth Social account's public profile by handle - display name, bio, follower/following counts, and post count as clean JSON.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Truth Social Profile pricing and uptime](https://getanyapi.com/api/truthsocial/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Truthsocial endpoint](https://getanyapi.com/api/truthsocial).",
                 "operationId": "truthsocial_profile",
                 "parameters": [
                     {
@@ -233745,7 +233742,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.003600",
+                        "amount": "0.001200",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -233787,7 +233784,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.003600",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -233819,7 +233816,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.003600",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -233848,7 +233845,7 @@
         },
         "/v1/run/truthsocial.user_posts": {
             "post": {
-                "description": "List a Truth Social account's recent posts by handle - text, engagement (likes, comments, shares), and timestamps as clean JSON.\n\n**Price:** \\$3.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Truth Social User Posts pricing and uptime](https://getanyapi.com/api/truthsocial/user-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Truthsocial endpoint](https://getanyapi.com/api/truthsocial).",
+                "description": "List a Truth Social account's recent posts by handle - text, engagement (likes, comments, shares), and timestamps as clean JSON.\n\n**Price:** \\$1.20 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Truth Social User Posts pricing and uptime](https://getanyapi.com/api/truthsocial/user-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Truthsocial endpoint](https://getanyapi.com/api/truthsocial).",
                 "operationId": "truthsocial_user_posts",
                 "parameters": [
                     {
@@ -234351,7 +234348,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.003600",
+                        "amount": "0.001200",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -234393,7 +234390,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.003600",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -234425,7 +234422,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.003600",
+                                "amount": "0.001200",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
