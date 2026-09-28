@@ -128131,7 +128131,7 @@
         },
         "/v1/run/linkedin.profile_thin": {
             "post": {
-                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_profile_thin",
                 "parameters": [
                     {
@@ -161576,8 +161576,11 @@
                                                                                         "type": "number"
                                                                                     },
                                                                                     "taxAssessedValue": {
-                                                                                        "description": "Most recent assessed value from the county tax authority, in US dollars.",
-                                                                                        "type": "number"
+                                                                                        "description": "Most recent assessed value from the county tax authority, in US dollars, or null when none is published (common on new construction).",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "title": {
                                                                                         "description": "Human-readable street address line used as the listing title.",
@@ -170397,8 +170400,11 @@
                                                                                         "type": "number"
                                                                                     },
                                                                                     "lotSize": {
-                                                                                        "description": "Lot size in square feet.",
-                                                                                        "type": "number"
+                                                                                        "description": "Lot size in square feet, or null when the listing has no lot size (common on condos).",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "mlsId": {
                                                                                         "description": "MLS number for the listing.",
@@ -222647,6 +222653,20 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `views`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. A source that returns only a rounded or shortened value for a field does not count as returning it.",
+                                        "items": {
+                                            "enum": [
+                                                "comments",
+                                                "likes",
+                                                "shares",
+                                                "views"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -222727,6 +222747,7 @@
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "comments": {
+                                                                            "description": "Number of comments. Some sources round large counts (48.5K instead of 48,536); name `comments` in requireFields to be served only by a source that returns the exact count.",
                                                                             "type": "integer"
                                                                         },
                                                                         "createdUtc": {
@@ -222747,6 +222768,7 @@
                                                                             "type": "string"
                                                                         },
                                                                         "likes": {
+                                                                            "description": "Number of likes. Some sources round large counts (2.9M instead of 2,884,604); name `likes` in requireFields to be served only by a source that returns the exact count.",
                                                                             "type": "integer"
                                                                         },
                                                                         "region": {
@@ -222756,6 +222778,7 @@
                                                                             "type": "integer"
                                                                         },
                                                                         "shares": {
+                                                                            "description": "Number of shares. Some sources round large counts (35.9K instead of 35,923); name `shares` in requireFields to be served only by a source that returns the exact count.",
                                                                             "type": "integer"
                                                                         },
                                                                         "url": {
@@ -222767,6 +222790,7 @@
                                                                             "type": "string"
                                                                         },
                                                                         "views": {
+                                                                            "description": "Number of plays. Some sources round large counts (32.7M instead of 32,736,400); name `views` in requireFields to be served only by a source that returns the exact count.",
                                                                             "type": "integer"
                                                                         }
                                                                     },
@@ -229376,7 +229400,11 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "originalPrice": {
-                                                                                        "type": "number"
+                                                                                        "description": "Pre-discount list price, or null when the product is not on sale.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "price": {
                                                                                         "type": "number"
@@ -229387,7 +229415,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "rating": {
-                                                                                        "type": "number"
+                                                                                        "description": "Average review score out of 5, or null when the product has no rating yet.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "reviewCount": {
                                                                                         "type": "integer"
@@ -229993,7 +230025,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "originalPrice": {
-                                                                                        "type": "string"
+                                                                                        "description": "Pre-discount list price, or null when the product is not on sale.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "price": {
                                                                                         "type": "string"
@@ -230004,7 +230040,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "rating": {
-                                                                                        "type": "number"
+                                                                                        "description": "Average review score out of 5, or null when the product has no rating yet.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "reviewCount": {
                                                                                         "type": "integer"
@@ -256693,6 +256733,17 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `views`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. A source that returns only a rounded or shortened value for a field does not count as returning it.",
+                                        "items": {
+                                            "enum": [
+                                                "views"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "sort": {
                                         "description": "Sort order.",
                                         "enum": [
@@ -256799,6 +256850,7 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "views": {
+                                                                                        "description": "Number of views. Some sources round large counts (6.4M instead of 6,474,059); name `views` in requireFields to be served only by a source that returns the exact count.",
                                                                                         "type": "integer"
                                                                                     }
                                                                                 },
@@ -260406,7 +260458,7 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "views": {
-                                                                                        "description": "View count, or 0 when the source did not publish one. Read viewsAvailable before trusting a 0.",
+                                                                                        "description": "View count, or 0 when the source did not publish one. Read viewsAvailable before trusting a 0. Rounded as YouTube shows it on Shorts (8.9M, 875K), so counts of 1,000 or more are approximate.",
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "viewsAvailable": {
@@ -260965,7 +261017,7 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "comments": {
-                                                                                        "description": "Number of comments on the short.",
+                                                                                        "description": "Number of comments on the short. Rounded as YouTube shows it on Shorts (1.2K, 15K), so counts of 1,000 or more are approximate.",
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "createdUtc": {
@@ -268389,8 +268441,11 @@
                                                                                         "type": "number"
                                                                                     },
                                                                                     "rentZestimate": {
-                                                                                        "description": "Zillow estimated monthly rent.",
-                                                                                        "type": "number"
+                                                                                        "description": "Zillow estimated monthly rent, or null when Zillow shows no rent Zestimate for the property.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "sqft": {
                                                                                         "description": "Interior living area in square feet.",
@@ -268410,8 +268465,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "zestimate": {
-                                                                                        "description": "Zillow estimated market value.",
-                                                                                        "type": "number"
+                                                                                        "description": "Zillow estimated market value, or null when Zillow shows no Zestimate for the property.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "zpid": {
                                                                                         "description": "Zillow property id (zpid), the stable identifier for the property. Populated whenever the provider has data for the entity.",
