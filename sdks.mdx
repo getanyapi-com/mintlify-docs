@@ -150,9 +150,9 @@ Every outcome maps to one shape, and every `found: false` answer says why in
 | An API slug that does not exist | `404` `NotFoundError` |
 | Input the API cannot accept, such as a malformed URL or a field combination no source serves | `400` `BadRequestError`, never charged |
 | A site this API cannot serve | `422` with an `alternatives` list naming the APIs that can |
-| Every source failing on a well-formed request | `502` `UpstreamError`, never charged |
+| Every source failing on a well-formed request | `502` `UpstreamError` |
 
-A failed call is free. A `found: false` answer is billed only when a source charged AnyAPI
+Some failed wallet-funded requests incur processing charges that we pass through at cost, with no markup; the error response shows the amount charged. A `found: false` answer is billed only when a source charged AnyAPI
 for the lookup. When AnyAPI asks more than one source, each source that charged is billed
 at its own price, and the total never exceeds the API's published maximum. `costUsd` /
 `cost_usd` is always what the call cost you.
