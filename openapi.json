@@ -9863,7 +9863,7 @@
         },
         "/v1/run/apollo.organization": {
             "post": {
-                "description": "Get a complete organization profile by ID including company, industry, employee, revenue, funding, location, and technology data.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization pricing and uptime](https://getanyapi.com/api/apollo/organization) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
+                "description": "Get a complete organization profile by ID including company, industry, employee, monthly headcount flow, revenue, funding rounds, ownership, location, and technology data.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization pricing and uptime](https://getanyapi.com/api/apollo/organization) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
                 "operationId": "apollo_organization",
                 "parameters": [
                     {
@@ -9928,12 +9928,12 @@
                     "content": {
                         "application/json": {
                             "example": {
-                                "organizationId": "5e66b6381e05b4008c8331b8"
+                                "organizationId": "5fc8de5191bd9400bfc52051"
                             },
                             "schema": {
                                 "additionalProperties": false,
                                 "example": {
-                                    "organizationId": "5e66b6381e05b4008c8331b8"
+                                    "organizationId": "5fc8de5191bd9400bfc52051"
                                 },
                                 "properties": {
                                     "allowFallbacks": {
@@ -10018,6 +10018,11 @@
                                                                             "description": "Alexa global traffic rank of the organization website.",
                                                                             "type": "integer"
                                                                         },
+                                                                        "angellistUrl": {
+                                                                            "description": "Canonical AngelList profile URL.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
+                                                                        },
                                                                         "annualRevenue": {
                                                                             "description": "Estimated annual revenue in USD.",
                                                                             "minimum": 0,
@@ -10035,6 +10040,11 @@
                                                                             "description": "Headquarters country.",
                                                                             "type": "string"
                                                                         },
+                                                                        "crunchbaseUrl": {
+                                                                            "description": "Canonical Crunchbase profile URL.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
+                                                                        },
                                                                         "description": {
                                                                             "description": "Organization summary.",
                                                                             "type": "string"
@@ -10048,6 +10058,47 @@
                                                                             "minimum": 0,
                                                                             "type": "integer"
                                                                         },
+                                                                        "employeeMetrics": {
+                                                                            "description": "Monthly headcount flow per department.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "departments": {
+                                                                                        "description": "Headcount flow per department in the month.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "churned": {
+                                                                                                    "description": "People who left the department in the month.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "department": {
+                                                                                                    "description": "Apollo department name. Absent on the row Apollo does not attribute to a department.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "new": {
+                                                                                                    "description": "People who joined the department in the month.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "integer"
+                                                                                                },
+                                                                                                "retained": {
+                                                                                                    "description": "People who stayed in the department through the month.",
+                                                                                                    "minimum": 0,
+                                                                                                    "type": "integer"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "startUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
                                                                         "facebookUrl": {
                                                                             "description": "Canonical Facebook page URL.",
                                                                             "format": "uri",
@@ -10056,6 +10107,48 @@
                                                                         "foundedYear": {
                                                                             "description": "Year the organization was founded.",
                                                                             "type": "integer"
+                                                                        },
+                                                                        "fundingEvents": {
+                                                                            "description": "Funding rounds Apollo records for the organization.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "amountDisplay": {
+                                                                                        "description": "Amount raised in this round as Apollo displays it, such as 100M.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "currency": {
+                                                                                        "description": "Currency symbol of the amount, such as $.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "detectedUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Funding round identifier.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "investors": {
+                                                                                        "description": "Investors in this round as one comma-separated string, exactly as Apollo returns it. A single investor name can itself contain a comma.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "newsUrl": {
+                                                                                        "description": "Article reporting the round.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "raisedUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "type": {
+                                                                                        "description": "Funding round type, such as Series D.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
                                                                         },
                                                                         "id": {
                                                                             "description": "Stable organization identifier.",
@@ -10077,12 +10170,34 @@
                                                                             "description": "Primary industry.",
                                                                             "type": "string"
                                                                         },
+                                                                        "industryTagId": {
+                                                                            "description": "Apollo industry tag identifier of the primary industry, accepted by apollo.organizations_search industryIds.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "industryTagIds": {
+                                                                            "additionalProperties": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "description": "Apollo industry tag identifier for each industry, keyed by industry name. The identifiers are accepted by apollo.organizations_search industryIds.",
+                                                                            "type": "object"
+                                                                        },
                                                                         "keywords": {
                                                                             "description": "Keywords associated with the organization.",
                                                                             "items": {
                                                                                 "type": "string"
                                                                             },
                                                                             "type": "array"
+                                                                        },
+                                                                        "languages": {
+                                                                            "description": "Languages the organization operates in.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "latestFundingDetectedUtc": {
+                                                                            "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                            "type": "number"
                                                                         },
                                                                         "latestFundingStage": {
                                                                             "description": "Latest disclosed funding stage.",
@@ -10112,6 +10227,26 @@
                                                                             "description": "Organization name.",
                                                                             "type": "string"
                                                                         },
+                                                                        "orgChartRootPersonIds": {
+                                                                            "description": "Apollo person identifiers at the top of the organization's org chart, accepted by apollo.person_enrich personId.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "parentOrganizationId": {
+                                                                            "description": "Identifier of the organization that owns this one.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "parentOrganizationName": {
+                                                                            "description": "Name of the organization that owns this one.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "parentOrganizationWebsiteUrl": {
+                                                                            "description": "Website URL of the organization that owns this one.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
+                                                                        },
                                                                         "phone": {
                                                                             "description": "Organization phone number in international format.",
                                                                             "type": "string"
@@ -10120,9 +10255,33 @@
                                                                             "description": "Headquarters postal code.",
                                                                             "type": "string"
                                                                         },
+                                                                        "publiclyTradedExchange": {
+                                                                            "description": "Exchange the company lists on, such as nyse.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "publiclyTradedSymbol": {
+                                                                            "description": "Stock ticker, for listed companies.",
+                                                                            "type": "string"
+                                                                        },
                                                                         "rawAddress": {
                                                                             "description": "Headquarters address as one display string.",
                                                                             "type": "string"
+                                                                        },
+                                                                        "retailLocationCount": {
+                                                                            "description": "Number of retail locations Apollo records for the organization.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "sanitizedPhone": {
+                                                                            "description": "Organization phone number in international E.164 form, such as +14152985539.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "secondaryIndustries": {
+                                                                            "description": "Industries associated with the organization besides the primary industry.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": "array"
                                                                         },
                                                                         "sicCodes": {
                                                                             "description": "SIC industry codes.",
@@ -10138,6 +10297,70 @@
                                                                         "streetAddress": {
                                                                             "description": "Street address.",
                                                                             "type": "string"
+                                                                        },
+                                                                        "suborganizationCount": {
+                                                                            "description": "Number of related organizations Apollo lists under this one.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "suborganizations": {
+                                                                            "description": "Related organizations Apollo lists under this one, usually subsidiaries or acquisitions.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "country": {
+                                                                                        "description": "Headquarters country.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "employeeCount": {
+                                                                                        "description": "Estimated employee count.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Organization identifier.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "industries": {
+                                                                                        "description": "Industries associated with the organization.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Organization name.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "websiteUrl": {
+                                                                                        "description": "Canonical organization website URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "technologies": {
+                                                                            "description": "Technologies detected at the organization, with their category.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "category": {
+                                                                                        "description": "Technology category.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Technology identifier, accepted by the technologySlug filters of apollo.organizations_search and apollo.people_search.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Technology name.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
                                                                         },
                                                                         "technologyNames": {
                                                                             "description": "Technologies detected at the organization.",
@@ -10539,7 +10762,7 @@
         },
         "/v1/run/apollo.organization_enrich": {
             "post": {
-                "description": "Enrich an organization by domain with company profile, industry, employee, revenue, funding, location, and technology data.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization Enrichment pricing and uptime](https://getanyapi.com/api/apollo/organization-enrich) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
+                "description": "Enrich an organization by domain, optionally with its LinkedIn URL, website, or name, with company profile, industry, headcount growth, department headcount, revenue, funding rounds, location, and technology data.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization Enrichment pricing and uptime](https://getanyapi.com/api/apollo/organization-enrich) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
                 "operationId": "apollo_organization_enrich",
                 "parameters": [
                     {
@@ -10631,6 +10854,16 @@
                                         "type": "array",
                                         "uniqueItems": true
                                     },
+                                    "linkedinUrl": {
+                                        "description": "LinkedIn company page URL, which Apollo also matches on.",
+                                        "format": "uri",
+                                        "type": "string"
+                                    },
+                                    "name": {
+                                        "description": "Organization name, which improves match accuracy.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
@@ -10644,6 +10877,11 @@
                                         },
                                         "type": "array",
                                         "uniqueItems": true
+                                    },
+                                    "website": {
+                                        "description": "Full website URL, which Apollo also matches on.",
+                                        "minLength": 1,
+                                        "type": "string"
                                     }
                                 },
                                 "required": [
@@ -10694,6 +10932,11 @@
                                                                             "description": "Alexa global traffic rank of the organization website.",
                                                                             "type": "integer"
                                                                         },
+                                                                        "angellistUrl": {
+                                                                            "description": "Canonical AngelList profile URL.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
+                                                                        },
                                                                         "annualRevenue": {
                                                                             "description": "Estimated annual revenue in USD.",
                                                                             "minimum": 0,
@@ -10711,6 +10954,11 @@
                                                                             "description": "Headquarters country.",
                                                                             "type": "string"
                                                                         },
+                                                                        "crunchbaseUrl": {
+                                                                            "description": "Canonical Crunchbase profile URL.",
+                                                                            "format": "uri",
+                                                                            "type": "string"
+                                                                        },
                                                                         "description": {
                                                                             "description": "Organization summary.",
                                                                             "type": "string"
@@ -10724,6 +10972,24 @@
                                                                             "minimum": 0,
                                                                             "type": "integer"
                                                                         },
+                                                                        "employeeGrowth": {
+                                                                            "description": "Headcount change over trailing windows, in percent.",
+                                                                            "properties": {
+                                                                                "percent12m": {
+                                                                                    "description": "Percent change over the last twelve months.",
+                                                                                    "type": "number"
+                                                                                },
+                                                                                "percent24m": {
+                                                                                    "description": "Percent change over the last twenty-four months.",
+                                                                                    "type": "number"
+                                                                                },
+                                                                                "percent6m": {
+                                                                                    "description": "Percent change over the last six months.",
+                                                                                    "type": "number"
+                                                                                }
+                                                                            },
+                                                                            "type": "object"
+                                                                        },
                                                                         "facebookUrl": {
                                                                             "description": "Canonical Facebook page URL.",
                                                                             "format": "uri",
@@ -10732,6 +10998,55 @@
                                                                         "foundedYear": {
                                                                             "description": "Year the organization was founded.",
                                                                             "type": "integer"
+                                                                        },
+                                                                        "fundingEvents": {
+                                                                            "description": "Funding rounds Apollo records for the organization.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "amountDisplay": {
+                                                                                        "description": "Amount raised in this round as Apollo displays it, such as 100M.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "currency": {
+                                                                                        "description": "Currency symbol of the amount, such as $.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "detectedUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Funding round identifier.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "investors": {
+                                                                                        "description": "Investors in this round as one comma-separated string, exactly as Apollo returns it. A single investor name can itself contain a comma.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "newsUrl": {
+                                                                                        "description": "Article reporting the round.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "raisedUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
+                                                                                    "type": {
+                                                                                        "description": "Funding round type, such as Series D.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "headcountByRole": {
+                                                                            "additionalProperties": {
+                                                                                "type": "number"
+                                                                            },
+                                                                            "description": "Employee count per department, keyed by Apollo department name.",
+                                                                            "type": "object"
                                                                         },
                                                                         "id": {
                                                                             "description": "Stable organization identifier.",
@@ -10753,12 +11068,34 @@
                                                                             "description": "Primary industry.",
                                                                             "type": "string"
                                                                         },
+                                                                        "industryTagId": {
+                                                                            "description": "Apollo industry tag identifier of the primary industry, accepted by apollo.organizations_search industryIds.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "industryTagIds": {
+                                                                            "additionalProperties": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "description": "Apollo industry tag identifier for each industry, keyed by industry name. The identifiers are accepted by apollo.organizations_search industryIds.",
+                                                                            "type": "object"
+                                                                        },
                                                                         "keywords": {
                                                                             "description": "Keywords associated with the organization.",
                                                                             "items": {
                                                                                 "type": "string"
                                                                             },
                                                                             "type": "array"
+                                                                        },
+                                                                        "languages": {
+                                                                            "description": "Languages the organization operates in.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "latestFundingDetectedUtc": {
+                                                                            "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                            "type": "number"
                                                                         },
                                                                         "latestFundingStage": {
                                                                             "description": "Latest disclosed funding stage.",
@@ -10788,6 +11125,17 @@
                                                                             "description": "Organization name.",
                                                                             "type": "string"
                                                                         },
+                                                                        "orgChartRootPersonIds": {
+                                                                            "description": "Apollo person identifiers at the top of the organization's org chart, accepted by apollo.person_enrich personId.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "parentOrganizationId": {
+                                                                            "description": "Identifier of the organization that owns this one.",
+                                                                            "type": "string"
+                                                                        },
                                                                         "phone": {
                                                                             "description": "Organization phone number in international format.",
                                                                             "type": "string"
@@ -10796,9 +11144,33 @@
                                                                             "description": "Headquarters postal code.",
                                                                             "type": "string"
                                                                         },
+                                                                        "publiclyTradedExchange": {
+                                                                            "description": "Exchange the company lists on, such as nyse.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "publiclyTradedSymbol": {
+                                                                            "description": "Stock ticker, for listed companies.",
+                                                                            "type": "string"
+                                                                        },
                                                                         "rawAddress": {
                                                                             "description": "Headquarters address as one display string.",
                                                                             "type": "string"
+                                                                        },
+                                                                        "retailLocationCount": {
+                                                                            "description": "Number of retail locations Apollo records for the organization.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "sanitizedPhone": {
+                                                                            "description": "Organization phone number in international E.164 form, such as +14152985539.",
+                                                                            "type": "string"
+                                                                        },
+                                                                        "secondaryIndustries": {
+                                                                            "description": "Industries associated with the organization besides the primary industry.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": "array"
                                                                         },
                                                                         "sicCodes": {
                                                                             "description": "SIC industry codes.",
@@ -10814,6 +11186,70 @@
                                                                         "streetAddress": {
                                                                             "description": "Street address.",
                                                                             "type": "string"
+                                                                        },
+                                                                        "suborganizationCount": {
+                                                                            "description": "Number of related organizations Apollo lists under this one.",
+                                                                            "minimum": 0,
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "suborganizations": {
+                                                                            "description": "Related organizations Apollo lists under this one, usually subsidiaries or acquisitions.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "country": {
+                                                                                        "description": "Headquarters country.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "employeeCount": {
+                                                                                        "description": "Estimated employee count.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Organization identifier.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "industries": {
+                                                                                        "description": "Industries associated with the organization.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Organization name.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "websiteUrl": {
+                                                                                        "description": "Canonical organization website URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
+                                                                        },
+                                                                        "technologies": {
+                                                                            "description": "Technologies detected at the organization, with their category.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "category": {
+                                                                                        "description": "Technology category.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Technology identifier, accepted by the technologySlug filters of apollo.organizations_search and apollo.people_search.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "description": "Technology name.",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array"
                                                                         },
                                                                         "technologyNames": {
                                                                             "description": "Technologies detected at the organization.",
@@ -11215,7 +11651,7 @@
         },
         "/v1/run/apollo.organization_jobs": {
             "post": {
-                "description": "Get current job postings for an organization by ID with title, location, source URL, and timestamps.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization Jobs pricing and uptime](https://getanyapi.com/api/apollo/organization-jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
+                "description": "Get current job postings for an organization by ID with title, location, source URL, and timestamps, one page at a time.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization Jobs pricing and uptime](https://getanyapi.com/api/apollo/organization-jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
                 "operationId": "apollo_organization_jobs",
                 "parameters": [
                     {
@@ -11302,10 +11738,21 @@
                                         "type": "array",
                                         "uniqueItems": true
                                     },
+                                    "limit": {
+                                        "description": "Maximum job postings returned on this page.",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
                                     "organizationId": {
                                         "description": "Organization identifier returned by an Apollo organization endpoint.",
                                         "minLength": 1,
                                         "type": "string"
+                                    },
+                                    "page": {
+                                        "default": 1,
+                                        "description": "One-based result page.",
+                                        "minimum": 1,
+                                        "type": "integer"
                                     },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
@@ -11811,7 +12258,7 @@
         },
         "/v1/run/apollo.organization_news": {
             "post": {
-                "description": "Search news related to one or more organizations with article details, categories, and pagination totals.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization News pricing and uptime](https://getanyapi.com/api/apollo/organization-news) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
+                "description": "Search news related to one or more organizations, optionally by category and publish date range, with article details, categories, and pagination totals.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization News pricing and uptime](https://getanyapi.com/api/apollo/organization-news) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
                 "operationId": "apollo_organization_news",
                 "parameters": [
                     {
@@ -11897,6 +12344,14 @@
                                         "description": "Optional, default true. When false, only the sources listed in `source` may serve; the request is refused with no charge if none of them can. When true, the listed sources are tried first and any other source may serve after them, at the normal price.",
                                         "type": "boolean"
                                     },
+                                    "categories": {
+                                        "description": "News categories or sub-categories to match, such as hires, investment or contract.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
                                     "ignoreSources": {
                                         "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
                                         "items": {
@@ -11938,6 +12393,16 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "publishedAtGte": {
+                                        "description": "Only articles published on or after this date. Format: YYYY-MM-DD.",
+                                        "format": "date",
+                                        "type": "string"
+                                    },
+                                    "publishedAtLte": {
+                                        "description": "Only articles published on or before this date. Format: YYYY-MM-DD.",
+                                        "format": "date",
+                                        "type": "string"
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -12627,6 +13092,11 @@
                                                                                         "description": "Alexa global traffic rank of the organization website.",
                                                                                         "type": "integer"
                                                                                     },
+                                                                                    "angellistUrl": {
+                                                                                        "description": "Canonical AngelList profile URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "annualRevenue": {
                                                                                         "description": "Estimated annual revenue in USD.",
                                                                                         "minimum": 0,
@@ -12644,6 +13114,11 @@
                                                                                         "description": "Headquarters country.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "crunchbaseUrl": {
+                                                                                        "description": "Canonical Crunchbase profile URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "description": {
                                                                                         "description": "Organization summary.",
                                                                                         "type": "string"
@@ -12657,6 +13132,24 @@
                                                                                         "minimum": 0,
                                                                                         "type": "integer"
                                                                                     },
+                                                                                    "employeeGrowth": {
+                                                                                        "description": "Headcount change over trailing windows, in percent.",
+                                                                                        "properties": {
+                                                                                            "percent12m": {
+                                                                                                "description": "Percent change over the last twelve months.",
+                                                                                                "type": "number"
+                                                                                            },
+                                                                                            "percent24m": {
+                                                                                                "description": "Percent change over the last twenty-four months.",
+                                                                                                "type": "number"
+                                                                                            },
+                                                                                            "percent6m": {
+                                                                                                "description": "Percent change over the last six months.",
+                                                                                                "type": "number"
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object"
+                                                                                    },
                                                                                     "facebookUrl": {
                                                                                         "description": "Canonical Facebook page URL.",
                                                                                         "format": "uri",
@@ -12665,6 +13158,55 @@
                                                                                     "foundedYear": {
                                                                                         "description": "Year the organization was founded.",
                                                                                         "type": "integer"
+                                                                                    },
+                                                                                    "fundingEvents": {
+                                                                                        "description": "Funding rounds Apollo records for the organization.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "amountDisplay": {
+                                                                                                    "description": "Amount raised in this round as Apollo displays it, such as 100M.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "currency": {
+                                                                                                    "description": "Currency symbol of the amount, such as $.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "detectedUtc": {
+                                                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                                    "type": "number"
+                                                                                                },
+                                                                                                "id": {
+                                                                                                    "description": "Funding round identifier.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "investors": {
+                                                                                                    "description": "Investors in this round as one comma-separated string, exactly as Apollo returns it. A single investor name can itself contain a comma.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "newsUrl": {
+                                                                                                    "description": "Article reporting the round.",
+                                                                                                    "format": "uri",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "raisedUtc": {
+                                                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                                    "type": "number"
+                                                                                                },
+                                                                                                "type": {
+                                                                                                    "description": "Funding round type, such as Series D.",
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "headcountByRole": {
+                                                                                        "additionalProperties": {
+                                                                                            "type": "number"
+                                                                                        },
+                                                                                        "description": "Employee count per department, keyed by Apollo department name.",
+                                                                                        "type": "object"
                                                                                     },
                                                                                     "id": {
                                                                                         "description": "Stable organization identifier.",
@@ -12686,12 +13228,34 @@
                                                                                         "description": "Primary industry.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "industryTagId": {
+                                                                                        "description": "Apollo industry tag identifier of the primary industry, accepted by apollo.organizations_search industryIds.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "industryTagIds": {
+                                                                                        "additionalProperties": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "description": "Apollo industry tag identifier for each industry, keyed by industry name. The identifiers are accepted by apollo.organizations_search industryIds.",
+                                                                                        "type": "object"
+                                                                                    },
                                                                                     "keywords": {
                                                                                         "description": "Keywords associated with the organization.",
                                                                                         "items": {
                                                                                             "type": "string"
                                                                                         },
                                                                                         "type": "array"
+                                                                                    },
+                                                                                    "languages": {
+                                                                                        "description": "Languages the organization operates in.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "latestFundingDetectedUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
                                                                                     },
                                                                                     "latestFundingStage": {
                                                                                         "description": "Latest disclosed funding stage.",
@@ -12721,6 +13285,26 @@
                                                                                         "description": "Organization name.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "ownershipChainIds": {
+                                                                                        "description": "Identifiers of the organizations in this organization's ownership chain.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "parentOrganizationId": {
+                                                                                        "description": "Identifier of the organization that owns this one.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "parentOrganizationName": {
+                                                                                        "description": "Name of the organization that owns this one.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "parentOrganizationWebsiteUrl": {
+                                                                                        "description": "Website URL of the organization that owns this one.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "phone": {
                                                                                         "description": "Organization phone number in international format.",
                                                                                         "type": "string"
@@ -12729,9 +13313,33 @@
                                                                                         "description": "Headquarters postal code.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "publiclyTradedExchange": {
+                                                                                        "description": "Exchange the company lists on, such as nyse.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "publiclyTradedSymbol": {
+                                                                                        "description": "Stock ticker, for listed companies.",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "rawAddress": {
                                                                                         "description": "Headquarters address as one display string.",
                                                                                         "type": "string"
+                                                                                    },
+                                                                                    "retailLocationCount": {
+                                                                                        "description": "Number of retail locations Apollo records for the organization.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "sanitizedPhone": {
+                                                                                        "description": "Organization phone number in international E.164 form, such as +14152985539.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "secondaryIndustries": {
+                                                                                        "description": "Industries associated with the organization besides the primary industry.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
                                                                                     },
                                                                                     "sicCodes": {
                                                                                         "description": "SIC industry codes.",
@@ -12748,6 +13356,30 @@
                                                                                         "description": "Street address.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "suborganizationCount": {
+                                                                                        "description": "Number of related organizations Apollo lists under this one.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "subsidiaryCountries": {
+                                                                                        "description": "Countries Apollo rolls up across the organization's corporate family.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "subsidiaryEmployeeCount": {
+                                                                                        "description": "Estimated employee count Apollo rolls up across the organization's corporate family.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "subsidiaryIndustries": {
+                                                                                        "description": "Industries Apollo rolls up across the organization's corporate family.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
                                                                                     "totalFunding": {
                                                                                         "description": "Total disclosed funding in USD.",
                                                                                         "minimum": 0,
@@ -12759,6 +13391,19 @@
                                                                                     },
                                                                                     "twitterUrl": {
                                                                                         "description": "Canonical X or Twitter profile URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "ultimateParentOrganizationId": {
+                                                                                        "description": "Identifier of the top organization in this organization's ownership chain.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "ultimateParentOrganizationName": {
+                                                                                        "description": "Name of the top organization in this organization's ownership chain.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "ultimateParentOrganizationWebsiteUrl": {
+                                                                                        "description": "Website URL of the top organization in this organization's ownership chain.",
                                                                                         "format": "uri",
                                                                                         "type": "string"
                                                                                     },
@@ -13160,7 +13805,7 @@
         },
         "/v1/run/apollo.organizations_search": {
             "post": {
-                "description": "Search organizations by location, employee range, industry, and keywords with normalized company records and pagination totals.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization Search pricing and uptime](https://getanyapi.com/api/apollo/organizations-search) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
+                "description": "Search organizations by location, employee range, industry, keywords, domain, name, revenue, funding, technology, hiring activity, headcount growth, or lookalike seeds, with normalized company records and pagination totals.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Organization Search pricing and uptime](https://getanyapi.com/api/apollo/organizations-search) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
                 "operationId": "apollo_organizations_search",
                 "parameters": [
                     {
@@ -13242,6 +13887,15 @@
                                         "description": "Optional, default true. When false, only the sources listed in `source` may serve; the request is refused with no charge if none of them can. When true, the listed sources are tried first and any other source may serve after them, at the normal price.",
                                         "type": "boolean"
                                     },
+                                    "domains": {
+                                        "description": "Organization domains to match, without www, at most 1000.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "maxItems": 1000,
+                                        "type": "array"
+                                    },
                                     "employeeRanges": {
                                         "description": "Employee-count ranges in Apollo notation, such as 51,200.",
                                         "items": {
@@ -13249,6 +13903,31 @@
                                             "type": "string"
                                         },
                                         "type": "array"
+                                    },
+                                    "excludeDomains": {
+                                        "description": "Exclude organizations matching any of these domains. Every domain Apollo holds for that organization is excluded.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "excludeLocations": {
+                                        "description": "Headquarters locations to exclude, such as ireland.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "headcountGrowthMonths": {
+                                        "description": "Trailing window in months for the headcount growth filter. Takes effect only together with minHeadcountGrowthPercent or maxHeadcountGrowthPercent.",
+                                        "enum": [
+                                            6,
+                                            12,
+                                            24
+                                        ],
+                                        "type": "integer"
                                     },
                                     "ignoreSources": {
                                         "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
@@ -13267,9 +13946,53 @@
                                         },
                                         "type": "array"
                                     },
+                                    "jobPostedAtGte": {
+                                        "description": "Only organizations with a job posted on or after this date. Format: YYYY-MM-DD.",
+                                        "format": "date",
+                                        "type": "string"
+                                    },
+                                    "jobPostedAtLte": {
+                                        "description": "Only organizations with a job posted on or before this date. Format: YYYY-MM-DD.",
+                                        "format": "date",
+                                        "type": "string"
+                                    },
+                                    "jobPostingLocations": {
+                                        "description": "Locations of the organization's active job postings, such as japan.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "jobPostingTitles": {
+                                        "description": "Job titles listed in the organization's active job postings, such as sales manager.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "keywordTags": {
+                                        "description": "Keywords associated with the organization, such as mining or consulting.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
                                     "keywords": {
                                         "description": "Keywords to match across organization records.",
                                         "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "lastFundingRoundDateGte": {
+                                        "description": "Only organizations whose most recent funding round is on or after this date. Format: YYYY-MM-DD.",
+                                        "format": "date",
+                                        "type": "string"
+                                    },
+                                    "lastFundingRoundDateLte": {
+                                        "description": "Only organizations whose most recent funding round is on or before this date. Format: YYYY-MM-DD.",
+                                        "format": "date",
                                         "type": "string"
                                     },
                                     "limit": {
@@ -13281,6 +14004,68 @@
                                     },
                                     "locations": {
                                         "description": "Headquarters locations to match.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "lookalikeOrganizationIds": {
+                                        "description": "Apollo organization identifiers to use as lookalike seeds, at most five. Results are narrowed to organizations similar to the seeds, and the seeds themselves are excluded. A seed Apollo holds no lookalike data for returns no results.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "maxItems": 5,
+                                        "type": "array"
+                                    },
+                                    "maxFundingUsd": {
+                                        "description": "Maximum total funding across all rounds, in whole USD.",
+                                        "type": "integer"
+                                    },
+                                    "maxHeadcountGrowthPercent": {
+                                        "description": "Maximum organization headcount growth over headcountGrowthMonths, as a whole percentage such as 100 for 100%.",
+                                        "type": "integer"
+                                    },
+                                    "maxJobs": {
+                                        "description": "Maximum number of active job postings at the organization.",
+                                        "type": "integer"
+                                    },
+                                    "maxLatestFundingUsd": {
+                                        "description": "Maximum amount raised in the most recent funding round, in whole USD.",
+                                        "type": "integer"
+                                    },
+                                    "maxRevenueUsd": {
+                                        "description": "Maximum organization annual revenue, in whole USD with no symbols.",
+                                        "type": "integer"
+                                    },
+                                    "minFundingUsd": {
+                                        "description": "Minimum total funding across all rounds, in whole USD.",
+                                        "type": "integer"
+                                    },
+                                    "minHeadcountGrowthPercent": {
+                                        "description": "Minimum organization headcount growth over headcountGrowthMonths, as a whole percentage such as 10 for 10%. Negative values are accepted.",
+                                        "type": "integer"
+                                    },
+                                    "minJobs": {
+                                        "description": "Minimum number of active job postings at the organization.",
+                                        "type": "integer"
+                                    },
+                                    "minLatestFundingUsd": {
+                                        "description": "Minimum amount raised in the most recent funding round, in whole USD.",
+                                        "type": "integer"
+                                    },
+                                    "minRevenueUsd": {
+                                        "description": "Minimum organization annual revenue, in whole USD with no symbols.",
+                                        "type": "integer"
+                                    },
+                                    "name": {
+                                        "description": "Organization name to match; partial matches count.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "organizationIds": {
+                                        "description": "Apollo organization identifiers to match.",
                                         "items": {
                                             "minLength": 1,
                                             "type": "string"
@@ -13307,6 +14092,14 @@
                                         },
                                         "type": "array",
                                         "uniqueItems": true
+                                    },
+                                    "technologySlugOr": {
+                                        "description": "Only organizations that use ANY of these technologies. Apollo technology identifiers, such as salesforce or google_analytics (spaces and periods become underscores). The technologies output of the Apollo organization SKUs returns them as id.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
                                     }
                                 },
                                 "title": "Apollo Organization Search input",
@@ -13364,6 +14157,11 @@
                                                                                         "description": "Alexa global traffic rank of the organization website.",
                                                                                         "type": "integer"
                                                                                     },
+                                                                                    "angellistUrl": {
+                                                                                        "description": "Canonical AngelList profile URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "annualRevenue": {
                                                                                         "description": "Estimated annual revenue in USD.",
                                                                                         "minimum": 0,
@@ -13373,9 +14171,32 @@
                                                                                         "description": "Human-readable estimated annual revenue.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "crunchbaseUrl": {
+                                                                                        "description": "Canonical Crunchbase profile URL.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "domain": {
                                                                                         "description": "Primary organization domain.",
                                                                                         "type": "string"
+                                                                                    },
+                                                                                    "employeeGrowth": {
+                                                                                        "description": "Headcount change over trailing windows, in percent.",
+                                                                                        "properties": {
+                                                                                            "percent12m": {
+                                                                                                "description": "Percent change over the last twelve months.",
+                                                                                                "type": "number"
+                                                                                            },
+                                                                                            "percent24m": {
+                                                                                                "description": "Percent change over the last twenty-four months.",
+                                                                                                "type": "number"
+                                                                                            },
+                                                                                            "percent6m": {
+                                                                                                "description": "Percent change over the last six months.",
+                                                                                                "type": "number"
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object"
                                                                                     },
                                                                                     "facebookUrl": {
                                                                                         "description": "Canonical Facebook page URL.",
@@ -13394,6 +14215,13 @@
                                                                                         "description": "Organization logo URL.",
                                                                                         "format": "uri",
                                                                                         "type": "string"
+                                                                                    },
+                                                                                    "languages": {
+                                                                                        "description": "Languages the organization operates in.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
                                                                                     },
                                                                                     "linkedinId": {
                                                                                         "description": "Organization LinkedIn numeric id.",
@@ -13415,8 +14243,45 @@
                                                                                         "description": "Organization name.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "ownershipChainIds": {
+                                                                                        "description": "Identifiers of the organizations in this organization's ownership chain.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "parentOrganizationId": {
+                                                                                        "description": "Identifier of the organization that owns this one.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "parentOrganizationName": {
+                                                                                        "description": "Name of the organization that owns this one.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "parentOrganizationWebsiteUrl": {
+                                                                                        "description": "Website URL of the organization that owns this one.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "phone": {
                                                                                         "description": "Organization phone number in international format.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "publiclyTradedExchange": {
+                                                                                        "description": "Exchange the company lists on, such as nyse.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "publiclyTradedSymbol": {
+                                                                                        "description": "Stock ticker, for listed companies.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "retailLocationCount": {
+                                                                                        "description": "Number of retail locations Apollo records for the organization.",
+                                                                                        "minimum": 0,
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "sanitizedPhone": {
+                                                                                        "description": "Organization phone number in international E.164 form, such as +14152985539.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "sicCodes": {
@@ -13837,7 +14702,7 @@
         },
         "/v1/run/apollo.people_search": {
             "post": {
-                "description": "Search people by title, seniority, person or organization location, employee range, and keywords with normalized profile summaries.\n\n**Price:** \\$10.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo People Search pricing and uptime](https://getanyapi.com/api/apollo/people-search) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
+                "description": "Search people by title, seniority, name, location, employer domain or id, email status, and employer revenue, technology, hiring, and headcount growth, with normalized profile summaries.\n\n**Price:** \\$10.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo People Search pricing and uptime](https://getanyapi.com/api/apollo/people-search) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
                 "operationId": "apollo_people_search",
                 "parameters": [
                     {
@@ -13923,6 +14788,19 @@
                                         "description": "Optional, default true. When false, only the sources listed in `source` may serve; the request is refused with no charge if none of them can. When true, the listed sources are tried first and any other source may serve after them, at the normal price.",
                                         "type": "boolean"
                                     },
+                                    "emailStatuses": {
+                                        "description": "Email statuses to match.",
+                                        "items": {
+                                            "enum": [
+                                                "verified",
+                                                "unverified",
+                                                "likely to engage",
+                                                "unavailable"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
                                     "employeeRanges": {
                                         "description": "Organization employee-count ranges in Apollo notation, such as 51,200.",
                                         "items": {
@@ -13930,6 +14808,23 @@
                                             "type": "string"
                                         },
                                         "type": "array"
+                                    },
+                                    "excludeOrganizationDomains": {
+                                        "description": "Exclude people whose current employer matches any of these domains. Every domain Apollo holds for that employer is excluded.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "headcountGrowthMonths": {
+                                        "description": "Trailing window in months for the headcount growth filter. Takes effect only together with minHeadcountGrowthPercent or maxHeadcountGrowthPercent.",
+                                        "enum": [
+                                            6,
+                                            12,
+                                            24
+                                        ],
+                                        "type": "integer"
                                     },
                                     "ignoreSources": {
                                         "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
@@ -13939,6 +14834,36 @@
                                         },
                                         "type": "array",
                                         "uniqueItems": true
+                                    },
+                                    "includeSimilarTitles": {
+                                        "description": "Whether titles similar to the ones in titles also match. Set false for strict title matches only.",
+                                        "type": "boolean"
+                                    },
+                                    "jobPostedAtGte": {
+                                        "description": "Only organizations with a job posted on or after this date. Format: YYYY-MM-DD.",
+                                        "format": "date",
+                                        "type": "string"
+                                    },
+                                    "jobPostedAtLte": {
+                                        "description": "Only organizations with a job posted on or before this date. Format: YYYY-MM-DD.",
+                                        "format": "date",
+                                        "type": "string"
+                                    },
+                                    "jobPostingLocations": {
+                                        "description": "Locations of the organization's active job postings, such as japan.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "jobPostingTitles": {
+                                        "description": "Job titles listed in the organization's active job postings, such as sales manager.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
                                     },
                                     "keywords": {
                                         "description": "Keywords to match across people records.",
@@ -13951,6 +14876,56 @@
                                         "maximum": 100,
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "lookalikeOrganizationIds": {
+                                        "description": "Apollo organization identifiers to use as lookalike seeds, at most five. Results are narrowed to organizations similar to the seeds, and the seeds themselves are excluded. A seed Apollo holds no lookalike data for returns no results.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "maxItems": 5,
+                                        "type": "array"
+                                    },
+                                    "maxHeadcountGrowthPercent": {
+                                        "description": "Maximum organization headcount growth over headcountGrowthMonths, as a whole percentage such as 100 for 100%.",
+                                        "type": "integer"
+                                    },
+                                    "maxJobs": {
+                                        "description": "Maximum number of active job postings at the organization.",
+                                        "type": "integer"
+                                    },
+                                    "maxRevenueUsd": {
+                                        "description": "Maximum organization annual revenue, in whole USD with no symbols.",
+                                        "type": "integer"
+                                    },
+                                    "minHeadcountGrowthPercent": {
+                                        "description": "Minimum organization headcount growth over headcountGrowthMonths, as a whole percentage such as 10 for 10%. Negative values are accepted.",
+                                        "type": "integer"
+                                    },
+                                    "minJobs": {
+                                        "description": "Minimum number of active job postings at the organization.",
+                                        "type": "integer"
+                                    },
+                                    "minRevenueUsd": {
+                                        "description": "Minimum organization annual revenue, in whole USD with no symbols.",
+                                        "type": "integer"
+                                    },
+                                    "organizationDomains": {
+                                        "description": "Domains of the person's current or previous employer, without www, at most 1000.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "maxItems": 1000,
+                                        "type": "array"
+                                    },
+                                    "organizationIds": {
+                                        "description": "Apollo identifiers of the person's current employer.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
                                     },
                                     "organizationLocations": {
                                         "description": "Organization headquarters locations to match.",
@@ -13975,6 +14950,11 @@
                                         },
                                         "type": "array"
                                     },
+                                    "personName": {
+                                        "description": "Person name to match; results include people whose name contains every word.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
@@ -13993,7 +14973,8 @@
                                                 "director",
                                                 "manager",
                                                 "senior",
-                                                "entry"
+                                                "entry",
+                                                "intern"
                                             ],
                                             "type": "string"
                                         },
@@ -14007,6 +14988,30 @@
                                         },
                                         "type": "array",
                                         "uniqueItems": true
+                                    },
+                                    "technologySlugAnd": {
+                                        "description": "Only people whose current employer uses ALL of these technologies. Apollo technology identifiers, such as salesforce or google_analytics (spaces and periods become underscores). The technologies output of the Apollo organization SKUs returns them as id.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "technologySlugNot": {
+                                        "description": "Exclude people whose current employer uses any of these technologies. Apollo technology identifiers, such as salesforce or google_analytics (spaces and periods become underscores). The technologies output of the Apollo organization SKUs returns them as id.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "technologySlugOr": {
+                                        "description": "Only people whose current employer uses ANY of these technologies. Apollo technology identifiers, such as salesforce or google_analytics (spaces and periods become underscores). The technologies output of the Apollo organization SKUs returns them as id.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array"
                                     },
                                     "titles": {
                                         "description": "Job titles to match.",
@@ -14533,7 +15538,7 @@
         },
         "/v1/run/apollo.person_enrich": {
             "post": {
-                "description": "Enrich a person by email, LinkedIn URL, or name and organization with contact, role, location, and company data.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Person Enrichment pricing and uptime](https://getanyapi.com/api/apollo/person-enrich) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
+                "description": "Enrich a person by email, email hash, LinkedIn URL, Apollo person id, or name and organization with contact, role, location, and company data.\n\n**Price:** \\$12.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Apollo Person Enrichment pricing and uptime](https://getanyapi.com/api/apollo/person-enrich) - live USD price, lane routing, and measured 30-day uptime. [Every Apollo endpoint](https://getanyapi.com/api/apollo).",
                 "operationId": "apollo_person_enrich",
                 "parameters": [
                     {
@@ -14628,6 +15633,28 @@
                                             "lastName",
                                             "domain"
                                         ]
+                                    },
+                                    {
+                                        "required": [
+                                            "emailHash"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "personId"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "fullName",
+                                            "organizationName"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "fullName",
+                                            "domain"
+                                        ]
                                     }
                                 ],
                                 "example": {
@@ -14651,8 +15678,18 @@
                                         "format": "email",
                                         "type": "string"
                                     },
+                                    "emailHash": {
+                                        "description": "MD5 or SHA-256 hash of the person's email, used to identify the person.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
                                     "firstName": {
                                         "description": "Person first name, used with lastName and an organization identifier.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "fullName": {
+                                        "description": "Person full name, used with an organization identifier instead of firstName and lastName.",
                                         "minLength": 1,
                                         "type": "string"
                                     },
@@ -14680,10 +15717,20 @@
                                         "minLength": 1,
                                         "type": "string"
                                     },
+                                    "personId": {
+                                        "description": "Apollo person identifier, such as an id returned by apollo.people_search.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "revealPersonalEmails": {
+                                        "default": true,
+                                        "description": "Whether to include personal emails. Apollo withholds them for people in GDPR regions.",
+                                        "type": "boolean"
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -14743,6 +15790,10 @@
                                                                         "catchAll": {
                                                                             "description": "Domain accepts all addresses.",
                                                                             "type": "boolean"
+                                                                        },
+                                                                        "catchAllVerdict": {
+                                                                            "description": "Apollo's verdict on the catch-all email domain, such as allow.",
+                                                                            "type": "string"
                                                                         },
                                                                         "city": {
                                                                             "description": "City.",
@@ -14866,6 +15917,11 @@
                                                                                     "description": "Alexa global traffic rank of the organization website.",
                                                                                     "type": "integer"
                                                                                 },
+                                                                                "angellistUrl": {
+                                                                                    "description": "Canonical AngelList profile URL.",
+                                                                                    "format": "uri",
+                                                                                    "type": "string"
+                                                                                },
                                                                                 "annualRevenue": {
                                                                                     "description": "Estimated annual revenue in USD.",
                                                                                     "minimum": 0,
@@ -14883,6 +15939,11 @@
                                                                                     "description": "Headquarters country.",
                                                                                     "type": "string"
                                                                                 },
+                                                                                "crunchbaseUrl": {
+                                                                                    "description": "Canonical Crunchbase profile URL.",
+                                                                                    "format": "uri",
+                                                                                    "type": "string"
+                                                                                },
                                                                                 "description": {
                                                                                     "description": "Organization summary.",
                                                                                     "type": "string"
@@ -14896,6 +15957,24 @@
                                                                                     "minimum": 0,
                                                                                     "type": "integer"
                                                                                 },
+                                                                                "employeeGrowth": {
+                                                                                    "description": "Headcount change over trailing windows, in percent.",
+                                                                                    "properties": {
+                                                                                        "percent12m": {
+                                                                                            "description": "Percent change over the last twelve months.",
+                                                                                            "type": "number"
+                                                                                        },
+                                                                                        "percent24m": {
+                                                                                            "description": "Percent change over the last twenty-four months.",
+                                                                                            "type": "number"
+                                                                                        },
+                                                                                        "percent6m": {
+                                                                                            "description": "Percent change over the last six months.",
+                                                                                            "type": "number"
+                                                                                        }
+                                                                                    },
+                                                                                    "type": "object"
+                                                                                },
                                                                                 "facebookUrl": {
                                                                                     "description": "Canonical Facebook page URL.",
                                                                                     "format": "uri",
@@ -14904,6 +15983,48 @@
                                                                                 "foundedYear": {
                                                                                     "description": "Year the organization was founded.",
                                                                                     "type": "integer"
+                                                                                },
+                                                                                "fundingEvents": {
+                                                                                    "description": "Funding rounds Apollo records for the organization.",
+                                                                                    "items": {
+                                                                                        "properties": {
+                                                                                            "amountDisplay": {
+                                                                                                "description": "Amount raised in this round as Apollo displays it, such as 100M.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "currency": {
+                                                                                                "description": "Currency symbol of the amount, such as $.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "detectedUtc": {
+                                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                                "type": "number"
+                                                                                            },
+                                                                                            "id": {
+                                                                                                "description": "Funding round identifier.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "investors": {
+                                                                                                "description": "Investors in this round as one comma-separated string, exactly as Apollo returns it. A single investor name can itself contain a comma.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "newsUrl": {
+                                                                                                "description": "Article reporting the round.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "raisedUtc": {
+                                                                                                "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                                "type": "number"
+                                                                                            },
+                                                                                            "type": {
+                                                                                                "description": "Funding round type, such as Series D.",
+                                                                                                "type": "string"
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object"
+                                                                                    },
+                                                                                    "type": "array"
                                                                                 },
                                                                                 "id": {
                                                                                     "description": "Stable organization identifier.",
@@ -14925,12 +16046,34 @@
                                                                                     "description": "Primary industry.",
                                                                                     "type": "string"
                                                                                 },
+                                                                                "industryTagId": {
+                                                                                    "description": "Apollo industry tag identifier of the primary industry, accepted by apollo.organizations_search industryIds.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "industryTagIds": {
+                                                                                    "additionalProperties": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "description": "Apollo industry tag identifier for each industry, keyed by industry name. The identifiers are accepted by apollo.organizations_search industryIds.",
+                                                                                    "type": "object"
+                                                                                },
                                                                                 "keywords": {
                                                                                     "description": "Keywords associated with the organization.",
                                                                                     "items": {
                                                                                         "type": "string"
                                                                                     },
                                                                                     "type": "array"
+                                                                                },
+                                                                                "languages": {
+                                                                                    "description": "Languages the organization operates in.",
+                                                                                    "items": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "type": "array"
+                                                                                },
+                                                                                "latestFundingDetectedUtc": {
+                                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                    "type": "number"
                                                                                 },
                                                                                 "latestFundingStage": {
                                                                                     "description": "Latest disclosed funding stage.",
@@ -14960,6 +16103,17 @@
                                                                                     "description": "Organization name.",
                                                                                     "type": "string"
                                                                                 },
+                                                                                "orgChartRootPersonIds": {
+                                                                                    "description": "Apollo person identifiers at the top of the organization's org chart, accepted by apollo.person_enrich personId.",
+                                                                                    "items": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "type": "array"
+                                                                                },
+                                                                                "parentOrganizationId": {
+                                                                                    "description": "Identifier of the organization that owns this one.",
+                                                                                    "type": "string"
+                                                                                },
                                                                                 "phone": {
                                                                                     "description": "Organization phone number in international format.",
                                                                                     "type": "string"
@@ -14968,9 +16122,33 @@
                                                                                     "description": "Headquarters postal code.",
                                                                                     "type": "string"
                                                                                 },
+                                                                                "publiclyTradedExchange": {
+                                                                                    "description": "Exchange the company lists on, such as nyse.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "publiclyTradedSymbol": {
+                                                                                    "description": "Stock ticker, for listed companies.",
+                                                                                    "type": "string"
+                                                                                },
                                                                                 "rawAddress": {
                                                                                     "description": "Headquarters address as one display string.",
                                                                                     "type": "string"
+                                                                                },
+                                                                                "retailLocationCount": {
+                                                                                    "description": "Number of retail locations Apollo records for the organization.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "sanitizedPhone": {
+                                                                                    "description": "Organization phone number in international E.164 form, such as +14152985539.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "secondaryIndustries": {
+                                                                                    "description": "Industries associated with the organization besides the primary industry.",
+                                                                                    "items": {
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "type": "array"
                                                                                 },
                                                                                 "sicCodes": {
                                                                                     "description": "SIC industry codes.",
@@ -14986,6 +16164,70 @@
                                                                                 "streetAddress": {
                                                                                     "description": "Street address.",
                                                                                     "type": "string"
+                                                                                },
+                                                                                "suborganizationCount": {
+                                                                                    "description": "Number of related organizations Apollo lists under this one.",
+                                                                                    "minimum": 0,
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "suborganizations": {
+                                                                                    "description": "Related organizations Apollo lists under this one, usually subsidiaries or acquisitions.",
+                                                                                    "items": {
+                                                                                        "properties": {
+                                                                                            "country": {
+                                                                                                "description": "Headquarters country.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "employeeCount": {
+                                                                                                "description": "Estimated employee count.",
+                                                                                                "minimum": 0,
+                                                                                                "type": "integer"
+                                                                                            },
+                                                                                            "id": {
+                                                                                                "description": "Organization identifier.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "industries": {
+                                                                                                "description": "Industries associated with the organization.",
+                                                                                                "items": {
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "type": "array"
+                                                                                            },
+                                                                                            "name": {
+                                                                                                "description": "Organization name.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "websiteUrl": {
+                                                                                                "description": "Canonical organization website URL.",
+                                                                                                "format": "uri",
+                                                                                                "type": "string"
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object"
+                                                                                    },
+                                                                                    "type": "array"
+                                                                                },
+                                                                                "technologies": {
+                                                                                    "description": "Technologies detected at the organization, with their category.",
+                                                                                    "items": {
+                                                                                        "properties": {
+                                                                                            "category": {
+                                                                                                "description": "Technology category.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "id": {
+                                                                                                "description": "Technology identifier, accepted by the technologySlug filters of apollo.organizations_search and apollo.people_search.",
+                                                                                                "type": "string"
+                                                                                            },
+                                                                                            "name": {
+                                                                                                "description": "Technology name.",
+                                                                                                "type": "string"
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object"
+                                                                                    },
+                                                                                    "type": "array"
                                                                                 },
                                                                                 "technologyNames": {
                                                                                     "description": "Technologies detected at the organization.",
@@ -15019,6 +16261,10 @@
                                                                                 "name"
                                                                             ],
                                                                             "type": "object"
+                                                                        },
+                                                                        "organizationId": {
+                                                                            "description": "Identifier of the person's current organization.",
+                                                                            "type": "string"
                                                                         },
                                                                         "personalEmails": {
                                                                             "description": "Available personal email addresses, included automatically.",
@@ -128244,7 +129490,7 @@
         },
         "/v1/run/linkedin.profile_thin": {
             "post": {
-                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_profile_thin",
                 "parameters": [
                     {
