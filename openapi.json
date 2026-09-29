@@ -43485,7 +43485,7 @@
         },
         "/v1/run/email.find": {
             "post": {
-                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$15.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
+                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$30.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
                 "operationId": "email_find",
                 "parameters": [
                     {
@@ -43954,7 +43954,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.015400",
+                        "amount": "0.030800",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -43996,7 +43996,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.015400",
+                                "amount": "0.030800",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -44028,7 +44028,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.015400",
+                                "amount": "0.030800",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -241358,7 +241358,7 @@
         },
         "/v1/run/twitter.search_users": {
             "post": {
-                "description": "Search X (Twitter) accounts by keyword - the People tab of X search. Matches handles, display names, and profile bios, and returns normalized profile records with follower, following, and post counts plus cursor pagination. Use twitter.search for posts.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Search pricing and uptime](https://getanyapi.com/api/x-twitter/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
+                "description": "Search X (Twitter) accounts by keyword - the People tab of X search. Matches handles, display names, and profile bios, and returns normalized profile records with follower, following, and post counts plus cursor pagination. Use twitter.search for posts.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Search pricing and uptime](https://getanyapi.com/api/x-twitter/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
                 "operationId": "twitter_search_users",
                 "parameters": [
                     {
@@ -241460,6 +241460,19 @@
                                         "minLength": 1,
                                         "type": "string"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `location`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "items": {
+                                            "enum": [
+                                                "canDm",
+                                                "listedCount",
+                                                "location"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -241537,8 +241550,11 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "canDm": {
-                                                                                        "description": "Whether the account accepts direct messages.",
-                                                                                        "type": "boolean"
+                                                                                        "description": "Whether the account accepts direct messages; null when the serving source does not return it. Name it in requireFields to be served by a source that does.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "coverUrl": {
                                                                                         "description": "Profile banner image URL of the account.",
@@ -241562,12 +241578,18 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "listedCount": {
-                                                                                        "description": "Number of public lists the account appears on.",
-                                                                                        "type": "integer"
+                                                                                        "description": "Number of public lists the account appears on; null when the serving source does not return it. Name it in requireFields to be served by a source that does.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "location": {
-                                                                                        "description": "The account's self-reported location (may be empty).",
-                                                                                        "type": "string"
+                                                                                        "description": "The account's self-reported location (may be empty); null when the serving source does not return locations. Name it in requireFields to be served by a source that does.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "name": {
                                                                                         "description": "The account's display name. Populated whenever the provider has data for the entity.",
