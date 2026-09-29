@@ -82506,7 +82506,7 @@
                                         "type": "integer"
                                     },
                                     "location": {
-                                        "description": "Fine-grained location to localize results to, more specific than the country-level gl. Must exactly match an Active Canonical Name from Google's geo-target list, which uses no space after each comma: 'New York,New York,United States', 'Austin,Texas,United States', 'London,England,United Kingdom'. A value that does not match is rejected rather than quietly searched from somewhere else.",
+                                        "description": "Fine-grained location to localize results to, more specific than the country-level gl. Send it as an Active Canonical Name from Google's geo-target list: place, then each parent region, then country, with no space after each comma, e.g. 'New York,New York,United States', 'Austin,Texas,United States', 'London,England,United Kingdom'. Common variations are translated to that name when they point to exactly one place: spaces after commas, missing accents, a US state abbreviation ('Orlando, FL, United States'), or a skipped region ('Sydney, Australia'). A value that names no place, or more than one, is rejected rather than quietly searched from somewhere else.",
                                         "type": "string"
                                     },
                                     "page": {
@@ -82558,6 +82558,9 @@
                                 "x-aliases": {
                                     "num": "limit",
                                     "q": "query"
+                                },
+                                "x-anyapi-input-normalizers": {
+                                    "location": "google_geo_target"
                                 }
                             }
                         }
