@@ -16787,6 +16787,10 @@
                                         "description": "Two-letter App Store storefront country code to read reviews from.",
                                         "type": "string"
                                     },
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of reviews.",
+                                        "type": "string"
+                                    },
                                     "ignoreSources": {
                                         "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
                                         "items": {
@@ -16808,11 +16812,12 @@
                                         "type": "integer"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `helpfulVotes` or `version`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a review that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `helpfulVotes` or `version`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a review that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
                                         "items": {
                                             "enum": [
                                                 "appId",
                                                 "helpfulVotes",
+                                                "nextCursor",
                                                 "url",
                                                 "version"
                                             ],
@@ -16936,6 +16941,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of reviews, or null when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -130086,7 +130098,7 @@
         },
         "/v1/run/linkedin.profile_thin": {
             "post": {
-                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_profile_thin",
                 "parameters": [
                     {
@@ -213214,6 +213226,10 @@
                                         "description": "Optional, default true. When false, only the sources listed in `source` may serve; the request is refused with no charge if none of them can. When true, the listed sources are tried first and any other source may serve after them, at the normal price.",
                                         "type": "boolean"
                                     },
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of videos.",
+                                        "type": "string"
+                                    },
                                     "hashtag": {
                                         "description": "TikTok hashtag to fetch videos for, without the # prefix (e.g. booktok).",
                                         "type": "string"
@@ -213239,11 +213255,12 @@
                                         "type": "integer"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `playCount`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. A source that returns only a rounded or shortened value for a field does not count as returning it.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `playCount`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. A source that returns only a rounded or shortened value for a field does not count as returning it. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
                                         "items": {
                                             "enum": [
                                                 "commentCount",
                                                 "likeCount",
+                                                "nextCursor",
                                                 "playCount",
                                                 "shareCount"
                                             ],
@@ -213391,6 +213408,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of videos, or null when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -241805,6 +241829,10 @@
                                         "description": "Optional, default true. When false, only the sources listed in `source` may serve; the request is refused with no charge if none of them can. When true, the listed sources are tried first and any other source may serve after them, at the normal price.",
                                         "type": "boolean"
                                     },
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of replies.",
+                                        "type": "string"
+                                    },
                                     "ignoreSources": {
                                         "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
                                         "items": {
@@ -241824,6 +241852,17 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "items": {
+                                            "enum": [
+                                                "nextCursor"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -241987,6 +242026,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of replies, or null when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
