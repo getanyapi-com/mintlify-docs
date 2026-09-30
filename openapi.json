@@ -102021,6 +102021,15 @@
                                                                                         "description": "The reel's short code, the part of its instagram.com URL after /reel/. Empty when the request supplied a CDN media URL.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "source": {
+                                                                                        "description": "Why the transcript reads the way it does. \"audio_asr\" means the words come from speech recognition over the reel's audio; a reel with only music in it transcribes to an empty text this way, and its audio time is charged. \"no_audio\" means there was nothing to listen to: the video has no audio track, or the post is a photo with no video. The transcript is empty because that is the answer, and only the request price is charged, with no audio time. \"transcript_unavailable\" means recognition did not complete for this reel, so the transcript is empty for that reason rather than because the reel has no speech in it; the rest of the record is still what we resolved, and no audio time is charged.",
+                                                                                        "enum": [
+                                                                                            "audio_asr",
+                                                                                            "no_audio",
+                                                                                            "transcript_unavailable"
+                                                                                        ],
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "text": {
                                                                                         "description": "The full speech transcript. Empty when the reel has no detectable spoken audio, or when the post is a photo with no video to transcribe. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -111491,7 +111500,7 @@
         },
         "/v1/run/instagram.user_reels": {
             "post": {
-                "description": "List an Instagram account's reels by handle with cursor pagination (caption, plays, likes, comments).\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 6 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram User Reels pricing and uptime](https://getanyapi.com/api/instagram/user-reels) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "List an Instagram account's reels by handle with cursor pagination (caption, plays, likes, comments).\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram User Reels pricing and uptime](https://getanyapi.com/api/instagram/user-reels) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_user_reels",
                 "parameters": [
                     {
@@ -112049,7 +112058,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000800",
+                        "amount": "0.000950",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -112123,7 +112132,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000800",
+                                "amount": "0.000950",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -228873,9 +228882,10 @@
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "source": {
-                                                                            "description": "How the text was produced. \"audio_asr\" means the words come from speech recognition over the video's audio, never from a caption track TikTok published - for TikTok's own captions, use tiktok.video_transcript. \"transcript_unavailable\" means recognition did not complete for this video, so the transcript is empty for that reason rather than because the video has no speech in it; the rest of the record is still what we resolved, and no audio time is charged. Populated whenever the provider has data for the entity.",
+                                                                            "description": "How the text was produced. \"audio_asr\" means the words come from speech recognition over the video's audio, never from a caption track TikTok published - for TikTok's own captions, use tiktok.video_transcript. \"transcript_unavailable\" means recognition did not complete for this video, so the transcript is empty for that reason rather than because the video has no speech in it; the rest of the record is still what we resolved, and no audio time is charged. \"no_audio\" means there was nothing to listen to: the video has no audio track, or the post has no video. The transcript is empty because that is the answer, the rest of the record is still what we resolved, and only the request price is charged, with no audio time. Populated whenever the provider has data for the entity.",
                                                                             "enum": [
                                                                                 "audio_asr",
+                                                                                "no_audio",
                                                                                 "transcript_unavailable"
                                                                             ],
                                                                             "type": "string",
