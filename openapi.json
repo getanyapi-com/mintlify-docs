@@ -111500,7 +111500,7 @@
         },
         "/v1/run/instagram.user_reels": {
             "post": {
-                "description": "List an Instagram account's reels by handle with cursor pagination (caption, plays, likes, comments).\n\n**Price:** \\$0.95 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram User Reels pricing and uptime](https://getanyapi.com/api/instagram/user-reels) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "List an Instagram account's reels by handle with cursor pagination (caption, plays, likes, comments).\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 6 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram User Reels pricing and uptime](https://getanyapi.com/api/instagram/user-reels) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_user_reels",
                 "parameters": [
                     {
@@ -112058,7 +112058,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000950",
+                        "amount": "0.000800",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -112132,7 +112132,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000950",
+                                "amount": "0.000800",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -131399,7 +131399,7 @@
         },
         "/v1/run/linkedin.search_leads": {
             "post": {
-                "description": "Fast LinkedIn leads list: one call returns a page of up to 25 people matching a keyword and optional filters (location, job title, company, school, seniority, function, company size, and more), each with name, current positions, location, summary, and photo. Each lead's url opens the profile and can be passed to linkedin.profile for the full record. For full profiles in one call use linkedin.search_profiles.\n\n**Price:** \\$70.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Fast Leads List pricing and uptime](https://getanyapi.com/api/linkedin/search-leads) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "LinkedIn lead search with Sales Navigator's search and filters: one call returns a page of up to 25 people matching a keyword and Sales Navigator lead filters (location, job title, current and past company, school, seniority, function, company size, and more), or the results of a Sales Navigator lead-search URL you built yourself. Each lead comes with name, current positions, location, summary, and photo, and its url opens the profile and can be passed to linkedin.profile for the full record. For full profiles in one call use linkedin.search_profiles.\n\n**Price:** \\$70.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Sales Navigator Lead Search pricing and uptime](https://getanyapi.com/api/linkedin/search-leads) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_search_leads",
                 "parameters": [
                     {
@@ -131471,6 +131471,18 @@
                             },
                             "schema": {
                                 "additionalProperties": false,
+                                "anyOf": [
+                                    {
+                                        "required": [
+                                            "query"
+                                        ]
+                                    },
+                                    {
+                                        "required": [
+                                            "salesNavUrl"
+                                        ]
+                                    }
+                                ],
                                 "example": {
                                     "currentCompanies": [
                                         "Google"
@@ -131712,7 +131724,7 @@
                                     },
                                     "page": {
                                         "default": 1,
-                                        "description": "Which page of up to 25 leads to return, starting at 1 (1-100, default 1). Each page is billed as one request.",
+                                        "description": "Which page of up to 25 leads to return, starting at 1 (1-100, default 1). Also pages through a salesNavUrl search. Each page is billed as one request.",
                                         "maximum": 100,
                                         "minimum": 1,
                                         "type": "integer"
@@ -131772,7 +131784,7 @@
                                         "type": "array"
                                     },
                                     "query": {
-                                        "description": "Search query for LinkedIn profiles: a role, name, or keywords (e.g. 'Marketing Manager').",
+                                        "description": "Search keywords for LinkedIn leads: a role, name, or keywords (e.g. 'Marketing Manager'). Provide this or salesNavUrl.",
                                         "type": "string"
                                     },
                                     "recentlyChangedJobs": {
@@ -131782,6 +131794,11 @@
                                     "recentlyPostedOnLinkedIn": {
                                         "description": "When true, only return people who recently posted on LinkedIn (an activity signal).",
                                         "type": "boolean"
+                                    },
+                                    "salesNavUrl": {
+                                        "description": "Alternatively, a LinkedIn Sales Navigator lead-search URL you built in Sales Navigator (e.g. https://www.linkedin.com/sales/search/people?query=(keywords%3Aengineer)). When set it overrides query and every other filter on this request; only page still applies.",
+                                        "pattern": "^https://(?:www\\.)?linkedin\\.com/sales/",
+                                        "type": "string"
                                     },
                                     "schools": {
                                         "description": "Filter to people who attended any of these schools, by name. Commas are not allowed in a value. Up to 50 values.",
@@ -131849,10 +131866,7 @@
                                         "type": "array"
                                     }
                                 },
-                                "required": [
-                                    "query"
-                                ],
-                                "title": "LinkedIn fast leads list input",
+                                "title": "LinkedIn Sales Navigator lead search input",
                                 "type": "object"
                             }
                         }
@@ -132025,7 +132039,7 @@
                                                         "found",
                                                         "data"
                                                     ],
-                                                    "title": "LinkedIn fast leads list output",
+                                                    "title": "LinkedIn Sales Navigator lead search output",
                                                     "type": "object"
                                                 },
                                                 {
@@ -132262,7 +132276,7 @@
                     },
                     {}
                 ],
-                "summary": "LinkedIn Fast Leads List",
+                "summary": "LinkedIn Sales Navigator Lead Search",
                 "tags": [
                     "linkedin"
                 ],
