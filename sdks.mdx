@@ -145,6 +145,7 @@ Every outcome maps to one shape, and every `found: false` answer says why in
 | --- | --- |
 | An account, post, video, or channel that does not exist, or a search with no matches | `200` with `output.found: false`, `data: null`, and `reason: "not_found"` |
 | An account the platform has suspended | `200` with `output.found: false` and `reason: "suspended"` |
+| A transcript of a video longer than the source can transcribe | `200` with `output.found: false` and `reason: "too_long"`, never charged; asking again returns the same answer |
 | An account deleted or removed by its owner or the platform | `200` with `output.found: false` and `reason: "not_found"`; the source cannot tell a removed account from one that never existed |
 | A target the first source returns nothing for, on an API that has more than one source | Some APIs ask the next source before answering `found: false`; a source that states the target does not exist is taken at its word |
 | An API slug that does not exist | `404` `NotFoundError` |
@@ -160,7 +161,8 @@ at its own price, and the total never exceeds the API's published maximum. `cost
 `reason` is present only on a miss. In TypeScript it is the `NotFoundReason` union on the
 `found: false` branch of `Output<T>`; in Python it is `OutputNotFound.reason`. Every API can
 answer `not_found`; an API lists `suspended` only when one of its sources can tell a
-suspended account apart. An API can gain a word later, so read the list from its
+suspended account apart, and `too_long` only on a transcript API whose source refuses a video
+over its length limit. An API can gain a word later, so read the list from its
 `outputSchema` in `/v1/apis/{slug}` or the OpenAPI document rather than hardcoding it.
 
 <CodeGroup>
