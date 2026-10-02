@@ -780,6 +780,10 @@
             },
             "DiscoverySourceHealth": {
                 "properties": {
+                    "blockedPct": {
+                        "description": "Share of this source's attempts the target site refused, as a percentage. Left out of uptimePct. Sent only for web.scrape, where later sources see only the pages earlier ones failed on.",
+                        "type": "number"
+                    },
                     "latencyP50Ms": {
                         "description": "Median successful service time for this source, in milliseconds.",
                         "type": "integer"
@@ -245696,7 +245700,7 @@
         },
         "/v1/run/twitter.search_users": {
             "post": {
-                "description": "Search X (Twitter) accounts by keyword - the People tab of X search. Matches handles, display names, and profile bios, and returns normalized profile records with follower, following, and post counts plus cursor pagination. Use twitter.search for posts.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Search pricing and uptime](https://getanyapi.com/api/x-twitter/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
+                "description": "Search X (Twitter) accounts by keyword - the People tab of X search. Matches handles, display names, and profile bios, and returns normalized profile records with follower, following, and post counts plus cursor pagination. Use twitter.search for posts.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Search pricing and uptime](https://getanyapi.com/api/x-twitter/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
                 "operationId": "twitter_search_users",
                 "parameters": [
                     {
@@ -246244,7 +246248,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000750",
+                        "amount": "0.000700",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -246318,7 +246322,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000750",
+                                "amount": "0.000700",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
