@@ -215,6 +215,22 @@ REST results remain replayable for 24 hours. If the continued run produces a rep
 it charges normally exactly once even if the original client disconnected. Calls without an
 `Idempotency-Key` stay tied to the caller and are canceled on disconnect.
 
+## Read a past response
+
+AnyAPI keeps the response to every paid request so you can read it again without paying twice:
+for 3 days by default, or 7 days or not at all, which you choose on the dashboard's Usage page.
+Read it with the request ID from the `X-Anyapi-Request-Id` response header or the dashboard:
+
+```bash
+curl -s https://api.getanyapi.com/v1/requests/REQUEST_ID -H "X-API-Key: YOUR_ANYAPI_KEY"
+```
+
+The response carries `result` while the response is kept, and `resultExpired: true` after.
+Lowering the setting hides older responses at once. Stored responses are encrypted, and anything
+over 5 MiB is not kept. Reading them is limited to 30 reads a minute for each $1 your account has
+spent; past the limit you get `429` with `Retry-After`, and an account that has spent nothing
+cannot read stored responses yet.
+
 ## Check your balance
 
 ```bash
