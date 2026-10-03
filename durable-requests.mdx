@@ -69,8 +69,10 @@ times out, resume with `GET /v1/requests/{requestId}`. Do not send another paid 
 AnyAPI returns the same active Request for concurrent calls that use the same key, SKU, and input.
 It replays a completed success. Reusing a key with different input returns `409`.
 
-Successful output remains retrievable for 24 hours. After that, the Request metadata remains
-available with `resultExpired: true`.
+Successful output remains retrievable for 24 hours, whatever your response retention setting.
+After that, the output stays readable for the rest of your retention window (see
+[Read a past response](/quickstart#read-a-past-response)), and once it ends the Request metadata
+remains available with `resultExpired: true`.
 
 <Note>
   Durable execution currently requires an authenticated wallet API key. It is not available through
