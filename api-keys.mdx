@@ -60,6 +60,23 @@ curl -s -X POST ... -d '{ "disabled": true }'
   changed after creation; mint a new key instead.
 - `DELETE /v1/api-keys/{id}` revokes a key permanently.
 
+## When your balance runs out
+
+When your balance can't pay for a request, it fails with **402** `insufficient_balance` and
+nothing is charged. AnyAPI emails you when your balance runs low and again when it runs out.
+
+If a key keeps calling 48 hours or more after your balance ran out, AnyAPI pauses that key.
+A paused key fails with **402** `insufficient_balance` and the message
+`this API key is paused because your balance ran out; it resumes when you add funds`, and
+shows **Paused** in [dashboard > API keys](https://getanyapi.com/dashboard/keys). A
+connected app (such as an MCP client you authorized) pauses the same way, with the message
+`this connection is paused because your balance ran out; it resumes when you add funds`.
+AnyAPI emails you when it pauses a key or app.
+
+Only the key or app that kept calling is paused; your other keys and your account are
+unaffected. Once you add funds and your balance can pay for requests again, the key or app
+resumes on its own. You don't need to change anything.
+
 ## Per-key usage
 
 `GET /v1/api-keys/{id}/usage?days=7|30|90` returns one key's spend: totals, a per-API
