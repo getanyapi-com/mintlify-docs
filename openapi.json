@@ -2050,7 +2050,7 @@
         },
         "/v1/requests/{id}": {
             "get": {
-                "description": "Inspect a customer-owned Request. Poll queued or running requests after retryAfterSeconds. Successful output is retained for 24 hours; metadata remains after the result expires.",
+                "description": "Inspect a customer-owned Request. Poll queued or running requests after retryAfterSeconds; a durable result stays collectable for 24 hours. A paid request's output can be read back for the account's response retention window, 3 days unless 7 days or none is chosen in the dashboard; lowering the setting hides older output at once. Reading kept output is limited per account to 30 reads a minute for each dollar of lifetime settled spend, so an account that has spent nothing cannot read it. Metadata remains after the result expires (resultExpired).",
                 "operationId": "getRequest",
                 "parameters": [
                     {
@@ -2093,6 +2093,16 @@
                             }
                         },
                         "description": "Unknown request id, or a request owned by another customer."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The account's limit on reading kept output is reached; retry after Retry-After seconds."
                     }
                 },
                 "summary": "Get a request"
