@@ -129659,6 +129659,10 @@
                                         ],
                                         "type": "string"
                                     },
+                                    "cursor": {
+                                        "description": "Pagination cursor from a previous response's nextCursor.",
+                                        "type": "string"
+                                    },
                                     "ignoreSources": {
                                         "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
                                         "items": {
@@ -129680,7 +129684,7 @@
                                     },
                                     "limit": {
                                         "default": 10,
-                                        "description": "Maximum number of posts to return (1-100, default 10).",
+                                        "description": "Most posts to return (1-100, default 10). Ignored on sources that page: each call returns one full page of 50 posts; follow nextCursor for more. Sources that cannot page return up to `limit` posts in one call with no nextCursor.",
                                         "maximum": 100,
                                         "minimum": 1,
                                         "type": "integer"
@@ -129708,6 +129712,17 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "items": {
+                                            "enum": [
+                                                "nextCursor"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -130248,6 +130263,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of posts, or null when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -130702,6 +130724,10 @@
                                         "description": "Optional, default true. When false, only the sources listed in `source` may serve; the request is refused with no charge if none of them can. When true, the listed sources are tried first and any other source may serve after them, at the normal price.",
                                         "type": "boolean"
                                     },
+                                    "cursor": {
+                                        "description": "Pagination cursor from a previous response's nextCursor.",
+                                        "type": "string"
+                                    },
                                     "ignoreSources": {
                                         "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
                                         "items": {
@@ -130713,7 +130739,7 @@
                                     },
                                     "limit": {
                                         "default": 10,
-                                        "description": "Maximum number of posts to return (10-100, default 10).",
+                                        "description": "Most posts to return (10-100, default 10). Ignored on sources that page: each call returns one full page of 50 posts; follow nextCursor for more. Sources that cannot page return up to `limit` posts in one call with no nextCursor.",
                                         "maximum": 100,
                                         "minimum": 10,
                                         "type": "integer"
@@ -130722,6 +130748,17 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "items": {
+                                            "enum": [
+                                                "nextCursor"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -130966,6 +131003,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of posts, or null when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -132050,7 +132094,7 @@
         },
         "/v1/run/linkedin.profile_thin": {
             "post": {
-                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_profile_thin",
                 "parameters": [
                     {
@@ -245710,7 +245754,7 @@
         },
         "/v1/run/twitter.search_users": {
             "post": {
-                "description": "Search X (Twitter) accounts by keyword - the People tab of X search. Matches handles, display names, and profile bios, and returns normalized profile records with follower, following, and post counts plus cursor pagination. Use twitter.search for posts.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Search pricing and uptime](https://getanyapi.com/api/x-twitter/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
+                "description": "Search X (Twitter) accounts by keyword - the People tab of X search. Matches handles, display names, and profile bios, and returns normalized profile records with follower, following, and post counts plus cursor pagination. Use twitter.search for posts.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Search pricing and uptime](https://getanyapi.com/api/x-twitter/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
                 "operationId": "twitter_search_users",
                 "parameters": [
                     {
@@ -246258,7 +246302,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000700",
+                        "amount": "0.000750",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -246332,7 +246376,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000700",
+                                "amount": "0.000750",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -268635,7 +268679,7 @@
         },
         "/v1/run/youtube.video": {
             "post": {
-                "description": "Fetch a YouTube video or Short's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch a YouTube video or Short's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video",
                 "parameters": [
                     {
