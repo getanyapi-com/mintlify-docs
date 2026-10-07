@@ -124125,7 +124125,7 @@
         },
         "/v1/run/linkedin.jobs": {
             "post": {
-                "description": "Search LinkedIn job listings by title and location - full records with description, salary, applicant count, seniority, company details, and benefits. Up to 25 jobs per request.\n\n**Price:** billed per result - \\$1.10 per 1,000 requests base + \\$1.10 per 1,000 results, capped at \\$28.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Jobs pricing and uptime](https://getanyapi.com/api/linkedin/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Search LinkedIn job listings by title and location - full records with description, salary, applicant count, seniority, company details, and benefits. Up to 25 jobs per request.\n\n**Price:** billed per result - \\$28.60 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$28.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [LinkedIn Jobs pricing and uptime](https://getanyapi.com/api/linkedin/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_jobs",
                 "parameters": [
                     {
@@ -124213,6 +124213,10 @@
                                         "description": "Filter to a specific company by name (e.g. Google).",
                                         "type": "string"
                                     },
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of job listings.",
+                                        "type": "string"
+                                    },
                                     "easyApply": {
                                         "description": "When true, only return jobs offering LinkedIn Easy Apply.",
                                         "type": "boolean"
@@ -124250,7 +124254,7 @@
                                         "uniqueItems": true
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (1-25, default 25). You are billed per result returned, so a lower limit costs less.",
+                                        "description": "Accepted for compatibility and ignored: each call returns one full page of up to 25 jobs at one flat price per call; follow nextCursor for more.",
                                         "maximum": 25,
                                         "minimum": 1,
                                         "type": "integer"
@@ -124550,6 +124554,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of job listings, or null when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -124823,7 +124834,7 @@
                     "price": {
                         "currency": "USD",
                         "max": "0.028600",
-                        "min": "0.001100",
+                        "min": "0.028600",
                         "mode": "dynamic"
                     },
                     "protocols": [
@@ -124866,7 +124877,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.028600",
-                                "min": "0.001100",
+                                "min": "0.028600",
                                 "minimumUsd": "0.001000",
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -124899,7 +124910,7 @@
                             "pricing": {
                                 "currency": "USD",
                                 "max": "0.028600",
-                                "min": "0.001100",
+                                "min": "0.028600",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
                                 "quoteBasis": "floor"
@@ -125015,6 +125026,10 @@
                                         "description": "Filter to a specific company by its LinkedIn numeric company id.",
                                         "type": "string"
                                     },
+                                    "cursor": {
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of job listings.",
+                                        "type": "string"
+                                    },
                                     "employmentType": {
                                         "description": "Filter by employment type.",
                                         "enum": [
@@ -125052,7 +125067,7 @@
                                         "uniqueItems": true
                                     },
                                     "limit": {
-                                        "description": "Maximum number of results to return (1-25, default 25).",
+                                        "description": "Accepted for compatibility and ignored: each call returns one full source page (10 or 25 jobs depending on source); follow nextCursor for more.",
                                         "maximum": 25,
                                         "minimum": 1,
                                         "type": "integer"
@@ -125205,6 +125220,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "nextCursor": {
+                                                                            "description": "Opaque cursor for the next page of job listings, or null when there are no more. Pass it back as cursor to continue.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
