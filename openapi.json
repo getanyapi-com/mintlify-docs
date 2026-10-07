@@ -254171,7 +254171,7 @@
         },
         "/v1/run/web.screenshot": {
             "post": {
-                "description": "Capture a real-browser screenshot of any web page URL.\n\n**Price:** billed per result - \\$1.74 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$1.74 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Website Screenshot pricing and uptime](https://getanyapi.com/api/web/screenshot) - live USD price, lane routing, and measured 30-day uptime. [Every Web endpoint](https://getanyapi.com/api/web).",
+                "description": "Capture a real-browser screenshot of any web page URL.\n\n**Price:** \\$1.30 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Website Screenshot pricing and uptime](https://getanyapi.com/api/web/screenshot) - live USD price, lane routing, and measured 30-day uptime. [Every Web endpoint](https://getanyapi.com/api/web).",
                 "operationId": "web_screenshot",
                 "parameters": [
                     {
@@ -254623,10 +254623,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.001300",
                         "currency": "USD",
-                        "max": "0.001740",
-                        "min": "0.001740",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -254666,11 +254665,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001300",
                                 "currency": "USD",
-                                "max": "0.001740",
-                                "min": "0.001740",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -254699,11 +254697,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001300",
                                 "currency": "USD",
-                                "max": "0.001740",
-                                "min": "0.001740",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
