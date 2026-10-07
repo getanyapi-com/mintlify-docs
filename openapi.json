@@ -102491,7 +102491,7 @@
         },
         "/v1/run/instagram.profile": {
             "post": {
-                "description": "Fetch an Instagram account's public profile (followers, posts, bio, verification) by handle.\n\n**Price:** \\$1.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Profile pricing and uptime](https://getanyapi.com/api/instagram/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "Fetch an Instagram account's public profile (followers, posts, bio, verification) by handle.\n\n**Price:** \\$1.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram Profile pricing and uptime](https://getanyapi.com/api/instagram/profile) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_profile",
                 "parameters": [
                     {
@@ -245776,7 +245776,7 @@
         },
         "/v1/run/twitter.search_users": {
             "post": {
-                "description": "Search X (Twitter) accounts by keyword - the People tab of X search. Matches handles, display names, and profile bios, and returns normalized profile records with follower, following, and post counts plus cursor pagination. Use twitter.search for posts.\n\n**Price:** \\$0.75 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Search pricing and uptime](https://getanyapi.com/api/x-twitter/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
+                "description": "Search X (Twitter) accounts by keyword - the People tab of X search. Matches handles, display names, and profile bios, and returns normalized profile records with follower, following, and post counts plus cursor pagination. Use twitter.search for posts.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [X / Twitter User Search pricing and uptime](https://getanyapi.com/api/x-twitter/search-users) - live USD price, lane routing, and measured 30-day uptime. [Every X (Twitter) endpoint](https://getanyapi.com/api/x-twitter).",
                 "operationId": "twitter_search_users",
                 "parameters": [
                     {
@@ -246324,7 +246324,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000750",
+                        "amount": "0.000700",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -246398,7 +246398,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000750",
+                                "amount": "0.000700",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -251087,7 +251087,7 @@
         },
         "/v1/run/upwork.jobs": {
             "post": {
-                "description": "Search Upwork job postings by keyword, with up to 25 fresh listings per request.\n\n**Price:** \\$7.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Upwork Jobs pricing and uptime](https://getanyapi.com/api/upwork/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Upwork endpoint](https://getanyapi.com/api/upwork).",
+                "description": "Search Upwork job postings by keyword, with up to 25 fresh listings per request.\n\n**Price:** billed per result - \\$1.10 per 1,000 requests base + \\$1.10 per 1,000 results, capped at \\$28.60 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Upwork Jobs pricing and uptime](https://getanyapi.com/api/upwork/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Upwork endpoint](https://getanyapi.com/api/upwork).",
                 "operationId": "upwork_jobs",
                 "parameters": [
                     {
@@ -251683,9 +251683,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.007000",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.028600",
+                        "min": "0.001100",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -251725,10 +251726,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.007000",
                                 "currency": "USD",
+                                "max": "0.028600",
+                                "min": "0.001100",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -251757,10 +251759,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.007000",
                                 "currency": "USD",
+                                "max": "0.028600",
+                                "min": "0.001100",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -270069,7 +270072,7 @@
         },
         "/v1/run/youtube.video": {
             "post": {
-                "description": "Fetch a YouTube video or Short's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch a YouTube video or Short's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video",
                 "parameters": [
                     {
