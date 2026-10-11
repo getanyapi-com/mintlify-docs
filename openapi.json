@@ -65427,7 +65427,10 @@
                                         "uniqueItems": true
                                     },
                                     "url": {
-                                        "description": "The Facebook page URL.",
+                                        "description": "The Facebook page URL whose events to list, e.g. https://www.facebook.com/brickyardoldtown. A single event link (https://www.facebook.com/events/<id>) is refused as invalid input, with no charge; facebook.event_details reads one event.",
+                                        "not": {
+                                            "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*(?:facebook|fb)\\.com/events/"
+                                        },
                                         "type": "string"
                                     }
                                 },
@@ -66050,7 +66053,10 @@
                                         "uniqueItems": true
                                     },
                                     "url": {
-                                        "description": "Full Facebook page/profile URL.",
+                                        "description": "Full Facebook page or profile URL, e.g. https://www.facebook.com/nike. A single event link (https://www.facebook.com/events/<id>) is refused as invalid input, with no charge; facebook.event_details reads one event.",
+                                        "not": {
+                                            "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*(?:facebook|fb)\\.com/events/"
+                                        },
                                         "type": "string"
                                     }
                                 },
@@ -168366,8 +168372,9 @@
                                         "uniqueItems": true
                                     },
                                     "url": {
-                                        "description": "Full Reddit post URL in the /r/<subreddit>/comments/<id>/<slug>/ form, e.g. \"https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/\". The short \"reddit.com/comments/<id>\" form is not accepted.",
+                                        "description": "Reddit post URL on reddit.com, e.g. \"https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/\". The /r/<subreddit>/comments/<id>/, /user/<name>/comments/<id>/, /comments/<id>/ and /gallery/<id> forms are accepted. A link to any other site is refused as invalid input, with no charge.",
                                         "minLength": 1,
+                                        "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*(?:reddit\\.com|redd\\.it)(?:[/?#]|$)",
                                         "type": "string"
                                     }
                                 },
@@ -229034,7 +229041,11 @@
                                         "uniqueItems": true
                                     },
                                     "url": {
-                                        "description": "Full TikTok video URL.",
+                                        "description": "TikTok post URL on tiktok.com: a video or photo post (https://www.tiktok.com/@<user>/video/<id> or /photo/<id>) or a vm.tiktok.com or vt.tiktok.com short link. A profile link (https://www.tiktok.com/@<user>), a video file link (tiktokcdn.com) or a link to any other site is refused as invalid input, with no charge.",
+                                        "not": {
+                                            "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*tiktok\\.com/@[^/?#]*/?(?:[?#]|$)"
+                                        },
+                                        "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*tiktok\\.com(?:[/?#]|$)",
                                         "type": "string"
                                     }
                                 },
