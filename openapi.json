@@ -195515,7 +195515,7 @@
         },
         "/v1/run/seo.ranked_keywords": {
             "post": {
-                "description": "Get AnyAPI SEO ranked keywords for a domain with rankings, traffic estimates, volume, CPC, difficulty, and intent as normalized JSON.\n\n**Price:** billed per result - \\$14.96 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$174.96 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Ranked Keywords pricing and uptime](https://getanyapi.com/api/seo/ranked-keywords) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Get AnyAPI SEO ranked keywords for a domain with rankings, traffic estimates, volume, CPC, difficulty, and intent as normalized JSON. One call returns up to 1,000 keywords; use offset to page further.\n\n**Price:** billed per result - \\$14.96 per 1,000 requests base + \\$0.16 per 1,000 results, capped at \\$174.96 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Ranked Keywords pricing and uptime](https://getanyapi.com/api/seo/ranked-keywords) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_ranked_keywords",
                 "parameters": [
                     {
@@ -195615,7 +195615,7 @@
                                     },
                                     "limit": {
                                         "default": 10,
-                                        "description": "Maximum number of ranked keywords to return. You are billed per returned result, so a lower limit costs less.",
+                                        "description": "Maximum number of ranked keywords to return. 1,000 is the per-call maximum; use offset to fetch more. You are billed per returned result, so a lower limit costs less.",
                                         "maximum": 1000,
                                         "minimum": 1,
                                         "type": "integer"
@@ -195623,6 +195623,12 @@
                                     "location": {
                                         "default": 2840,
                                         "description": "Location code for SEO ranking metrics. The default is the United States.",
+                                        "type": "integer"
+                                    },
+                                    "offset": {
+                                        "default": 0,
+                                        "description": "Number of ranked keywords to skip in the chosen sort order. To fetch the next page, set offset to the previous offset plus limit, and keep the same orderBy, location, and language across pages. You are billed only for the keywords returned.",
+                                        "minimum": 0,
                                         "type": "integer"
                                     },
                                     "orderBy": {
