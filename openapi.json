@@ -65928,7 +65928,7 @@
         },
         "/v1/run/facebook.profile_posts": {
             "post": {
-                "description": "List a Facebook page's recent posts by URL or page id with cursor pagination (text, author, publication time, permalink).\n\n**Price:** \\$1.10 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Facebook Profile Posts pricing and uptime](https://getanyapi.com/api/facebook/profile-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
+                "description": "List a Facebook page's recent posts by URL or page id with cursor pagination (text, author, publication time, permalink).\n\n**Price:** \\$1.10 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Facebook Profile Posts pricing and uptime](https://getanyapi.com/api/facebook/profile-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Facebook endpoint](https://getanyapi.com/api/facebook).",
                 "operationId": "facebook_profile_posts",
                 "parameters": [
                     {
@@ -132117,7 +132117,7 @@
         },
         "/v1/run/linkedin.profile_thin": {
             "post": {
-                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_profile_thin",
                 "parameters": [
                     {
@@ -194846,7 +194846,7 @@
         },
         "/v1/run/seo.local_pack": {
             "post": {
-                "description": "Search AnyAPI SEO local pack results with rankings, ratings, addresses, and contact basics as normalized JSON.\n\n**Price:** billed per result - \\$2.40 per 1,000 requests base + \\$0.00 per 1,000 results, capped at \\$2.40 per 1,000 requests.\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [SEO Local Pack pricing and uptime](https://getanyapi.com/api/seo/local-pack) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
+                "description": "Get the Google local pack for a keyword in a city: the short list of businesses Google shows in the map box on its normal search results page, in pack order, with rating, review count, address, category, opening hours, phone, website, booking link, and Google listing ids. Sponsored listings are left out. For the full Google Maps results list, use maps.search.\n\n**Price:** \\$1.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Local Pack pricing and uptime](https://getanyapi.com/api/seo/local-pack) - live USD price, lane routing, and measured 30-day uptime. [Every Seo endpoint](https://getanyapi.com/api/seo).",
                 "operationId": "seo_local_pack",
                 "parameters": [
                     {
@@ -194913,7 +194913,6 @@
                             "example": {
                                 "keyword": "coffee shop",
                                 "language": "en",
-                                "limit": 5,
                                 "location": "New York,New York,United States"
                             },
                             "schema": {
@@ -194921,21 +194920,8 @@
                                 "example": {
                                     "keyword": "coffee shop",
                                     "language": "en",
-                                    "limit": 5,
                                     "location": "New York,New York,United States"
                                 },
-                                "oneOf": [
-                                    {
-                                        "required": [
-                                            "location"
-                                        ]
-                                    },
-                                    {
-                                        "required": [
-                                            "locationCoordinate"
-                                        ]
-                                    }
-                                ],
                                 "properties": {
                                     "allowFallbacks": {
                                         "default": true,
@@ -194952,38 +194938,53 @@
                                         "uniqueItems": true
                                     },
                                     "keyword": {
-                                        "description": "SEO local pack search keyword.",
+                                        "description": "Search keyword, for example coffee shop or plumber.",
                                         "maxLength": 200,
                                         "minLength": 2,
                                         "type": "string"
                                     },
                                     "language": {
                                         "default": "en",
-                                        "description": "Language code for SEO local pack results.",
+                                        "description": "Language code for the search results.",
                                         "type": "string"
                                     },
                                     "limit": {
-                                        "default": 20,
-                                        "description": "Maximum number of local pack places to return. Billing is flat per request.",
+                                        "description": "Maximum number of local pack businesses to return. Google usually shows three. Billing is flat per request.",
                                         "maximum": 100,
                                         "minimum": 1,
                                         "type": "integer"
                                     },
                                     "location": {
-                                        "description": "Local pack search location name, formatted like City,Region,Country; for example, New York,New York,United States. Supply either location or locationCoordinate, not both.",
+                                        "description": "Location to search from, formatted like City,Region,Country; for example, New York,New York,United States.",
                                         "maxLength": 180,
                                         "minLength": 3,
-                                        "type": "string"
-                                    },
-                                    "locationCoordinate": {
-                                        "description": "Precise geo target as latitude,longitude or latitude,longitude,radius (radius in meters); for example, 40.7580,-73.9855 or 40.7580,-73.9855,1000. Supply either location or locationCoordinate, not both.",
-                                        "pattern": "^-?[0-9]+(\\.[0-9]+)?,-?[0-9]+(\\.[0-9]+)?(,[0-9]+)?$",
                                         "type": "string"
                                     },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `address` or `cid`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a business that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "address",
+                                                "bookingUrl",
+                                                "category",
+                                                "cid",
+                                                "description",
+                                                "directionsUrl",
+                                                "hours",
+                                                "image",
+                                                "knowledgeGraphId",
+                                                "priceLevel",
+                                                "rankGroup"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -194996,9 +194997,10 @@
                                     }
                                 },
                                 "required": [
-                                    "keyword"
+                                    "keyword",
+                                    "location"
                                 ],
-                                "title": "SEO Local Pack input",
+                                "title": "Google Local Pack input",
                                 "type": "object"
                             }
                         }
@@ -195041,97 +195043,93 @@
                                                                     "additionalProperties": false,
                                                                     "properties": {
                                                                         "places": {
-                                                                            "description": "SEO local pack place records. Populated whenever the provider has data for the entity.",
+                                                                            "description": "Businesses in the Google local pack, in the order Google shows them. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "address": {
-                                                                                        "description": "Full formatted street address. Populated whenever the provider has data for the entity.",
-                                                                                        "type": "string",
-                                                                                        "x-anyapi-must-populate": true
+                                                                                        "description": "The address line Google shows for the business in the pack. For a business that serves an area rather than a storefront, Google shows years in business and the city here instead.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "bookingUrl": {
+                                                                                        "description": "Booking link Google shows for the business, when it has one. The query string carries the booking session, so it is kept.",
+                                                                                        "type": "string"
                                                                                     },
                                                                                     "category": {
-                                                                                        "description": "Primary place category.",
+                                                                                        "description": "Business category Google shows, such as Coffee shop or Plumber.",
                                                                                         "type": "string"
                                                                                     },
-                                                                                    "city": {
-                                                                                        "description": "City the place is in.",
+                                                                                    "cid": {
+                                                                                        "description": "Google customer id (CID) of the business listing.",
                                                                                         "type": "string"
                                                                                     },
-                                                                                    "claimed": {
-                                                                                        "description": "True when the place listing is claimed.",
-                                                                                        "type": "boolean"
+                                                                                    "description": {
+                                                                                        "description": "The text Google prints under the business name in the pack. Usually it is every line: the street address or years in business, opening hours, and a review quote. On some responses it is only the review quote, with the address and hours in their own fields.",
+                                                                                        "type": "string"
                                                                                     },
-                                                                                    "countryCode": {
-                                                                                        "description": "Two-letter country code.",
+                                                                                    "directionsUrl": {
+                                                                                        "description": "Google Maps directions link to the business, with tracking query parameters removed.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "domain": {
-                                                                                        "description": "Registrable domain of the place website.",
+                                                                                        "description": "Host name of the business website, such as www.example.com.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "hours": {
+                                                                                        "description": "Opening hours text Google shows, such as Open 24 hours or Closed - Opens 7 AM.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "image": {
-                                                                                        "description": "Primary photo URL for the place. The query string carries the image identity, so it is kept.",
+                                                                                        "description": "Thumbnail photo URL Google shows for the business.",
                                                                                         "type": "string"
                                                                                     },
-                                                                                    "latitude": {
-                                                                                        "description": "Latitude of the place in decimal degrees.",
-                                                                                        "type": "number"
-                                                                                    },
-                                                                                    "longitude": {
-                                                                                        "description": "Longitude of the place in decimal degrees.",
-                                                                                        "type": "number"
+                                                                                    "knowledgeGraphId": {
+                                                                                        "description": "Google Knowledge Graph id of the business, such as /g/11vb1r7rlr.",
+                                                                                        "type": "string"
                                                                                     },
                                                                                     "name": {
-                                                                                        "description": "Place name. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Business name. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "phone": {
-                                                                                        "description": "Business phone number, when listed.",
+                                                                                        "description": "Business phone number, when Google shows one, as Google prints it: national format such as (512) 890-2933 or international format such as +1 512-890-2933.",
                                                                                         "type": "string"
                                                                                     },
-                                                                                    "placeId": {
-                                                                                        "description": "Place identifier.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "postalCode": {
-                                                                                        "description": "Postal code of the place.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "priceLevel": {
-                                                                                        "description": "Price level indicator Google shows for the place.",
-                                                                                        "type": "string"
-                                                                                    },
-                                                                                    "rankAbsolute": {
-                                                                                        "description": "Absolute ranking position in the local pack results. Populated whenever the provider has data for the entity.",
+                                                                                    "position": {
+                                                                                        "description": "One-based position of the business in the local pack, counting only unpaid listings. Populated whenever the provider has data for the entity.",
                                                                                         "type": "integer",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "priceLevel": {
+                                                                                        "description": "Price range Google shows for the business, such as $10-20.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "rankAbsolute": {
+                                                                                        "description": "Position of the business among every element of the Google results page, counting from the top.",
+                                                                                        "type": "integer"
+                                                                                    },
                                                                                     "rankGroup": {
-                                                                                        "description": "Grouped ranking position within the local pack.",
+                                                                                        "description": "Position Google gives the business inside the local pack, counting sponsored listings, so it can be higher than position when an ad sits above it.",
                                                                                         "type": "integer"
                                                                                     },
                                                                                     "rating": {
-                                                                                        "description": "Average star rating out of 5. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "Average Google star rating out of 5. Populated whenever the provider has data for the entity.",
                                                                                         "type": "number",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
-                                                                                    "region": {
-                                                                                        "description": "State or region the place is in.",
-                                                                                        "type": "string"
-                                                                                    },
                                                                                     "reviewsCount": {
-                                                                                        "description": "Total number of reviews.",
-                                                                                        "type": "integer"
+                                                                                        "description": "Number of Google reviews behind the rating. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "url": {
-                                                                                        "description": "Canonical place URL.",
+                                                                                        "description": "Business website URL, when listed, with tracking query parameters removed.",
                                                                                         "type": "string"
                                                                                     }
                                                                                 },
                                                                                 "required": [
-                                                                                    "name",
-                                                                                    "rankAbsolute"
+                                                                                    "position",
+                                                                                    "name"
                                                                                 ],
                                                                                 "type": "object"
                                                                             },
@@ -195161,7 +195159,7 @@
                                                         "found",
                                                         "data"
                                                     ],
-                                                    "title": "SEO Local Pack output",
+                                                    "title": "Google Local Pack output",
                                                     "type": "object"
                                                 },
                                                 {
@@ -195398,7 +195396,7 @@
                     },
                     {}
                 ],
-                "summary": "SEO Local Pack",
+                "summary": "Google Local Pack",
                 "tags": [
                     "seo"
                 ],
@@ -195407,10 +195405,9 @@
                 },
                 "x-payment-info": {
                     "price": {
+                        "amount": "0.001500",
                         "currency": "USD",
-                        "max": "0.002400",
-                        "min": "0.002400",
-                        "mode": "dynamic"
+                        "mode": "fixed"
                     },
                     "protocols": [
                         {
@@ -195450,11 +195447,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001500",
                                 "currency": "USD",
-                                "max": "0.002400",
-                                "min": "0.002400",
                                 "minimumUsd": "0.001000",
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -195483,11 +195479,10 @@
                                 ]
                             },
                             "pricing": {
+                                "amount": "0.001500",
                                 "currency": "USD",
-                                "max": "0.002400",
-                                "min": "0.002400",
                                 "minimumUsd": null,
-                                "mode": "dynamic",
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
