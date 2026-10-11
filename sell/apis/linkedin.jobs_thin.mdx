@@ -16,10 +16,11 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `companyId` | string | no | Filter to a specific company by its LinkedIn numeric company id. |
+| `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of job listings. |
 | `employmentType` | string | no | Filter by employment type. One of: `full-time`, `part-time`, `contract`, `internship`, `temporary`. |
 | `experienceLevel` | string | no | Filter by required seniority/experience level. One of: `internship`, `entry`, `associate`, `mid-senior`, `director`, `executive`. |
 | `geoId` | string | no | LinkedIn geo id to target a precise location (e.g. 103644278 for the United States); more exact than the free-text location. |
-| `limit` | integer | no | Maximum number of results to return (1-25, default 25). |
+| `limit` | integer | no | Accepted for compatibility and ignored: each call returns one full source page (10 or 25 jobs depending on source); follow nextCursor for more. |
 | `location` | string | no | City, region, or country to search within. |
 | `postedLimit` | string | no | Only jobs posted within this window (past 24 hours, week, or month). One of: `24h`, `week`, `month`. |
 | `query` | string | yes | Job title or keywords to search. |
@@ -49,7 +50,11 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
       "type": "integer",
       "minimum": 1,
       "maximum": 25,
-      "description": "Maximum number of results to return (1-25, default 25)."
+      "description": "Accepted for compatibility and ignored: each call returns one full source page (10 or 25 jobs depending on source); follow nextCursor for more."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of job listings."
     },
     "query": {
       "type": "string",
@@ -114,9 +119,6 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
       "items": {
         "type": "string",
         "enum": [
-          "companyUrl",
-          "createdUtc",
-          "id",
           "logoUrl"
         ]
       },
@@ -142,6 +144,7 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
 | `data.items[].logoUrl` | string | no | Hiring company logo image URL. |
 | `data.items[].title` | string | yes | Job title. |
 | `data.items[].url` | string | yes | Canonical LinkedIn job listing URL. |
+| `data.nextCursor` | string or null | no | Opaque cursor for the next page of job listings, or null when there are no more. Pass it back as cursor to continue. |
 | `found` | boolean | yes | True when at least one job listing was returned. |
 
 Extra fields are kept, missing declared fields fail.
@@ -177,6 +180,13 @@ Extra fields are kept, missing declared fields fail.
             "items"
           ],
           "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of job listings, or null when there are no more. Pass it back as cursor to continue."
+            },
             "items": {
               "x-anyapi-must-populate": true,
               "type": "array",

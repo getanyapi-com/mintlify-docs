@@ -9,13 +9,15 @@ This page is the seller-facing summary of one catalog API, `twitter.replies`. Th
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.45 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
+| `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of replies. |
 | `limit` | integer | no | Maximum number of results to return (1-40, default 40). Per-result lanes cost less at lower limits; a backup that bills its native page may cost up to the advertised request price. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 | `url` | string | yes | Full URL of the X (Twitter) post to fetch replies for (e.g. https://x.com/nasa/status/1846987139428634858). |
 
 <Accordion title="Full input JSON Schema">
@@ -43,6 +45,21 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
     "url": {
       "type": "string",
       "description": "Full URL of the X (Twitter) post to fetch replies for (e.g. https://x.com/nasa/status/1846987139428634858)."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of replies."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "nextCursor"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
     }
   }
 }
@@ -73,7 +90,8 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
 | `data.items[].repostCount` | integer | no | Number of reposts/retweets of this reply. |
 | `data.items[].text` | string | yes | The reply's text. Empty for media-only replies with no text. |
 | `data.items[].url` | string | yes | Canonical x.com URL of the reply, with tracking query params stripped. |
-| `data.items[].viewCount` | integer | no | Number of views of this reply. |
+| `data.items[].viewCount` | integer or null | no | Number of views of this reply. Null when the source does not report it, as for posts older than X view counts. |
+| `data.nextCursor` | string or null | no | Opaque cursor for the next page of replies, or null when there are no more. Pass it back as cursor to continue. |
 | `found` | boolean | yes | Whether the provider returned a reply result. An empty items array is valid and may mean the post has no replies or the target could not be resolved. |
 
 Extra fields are kept, missing declared fields fail.
@@ -160,8 +178,11 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Number of quote tweets of this reply."
                   },
                   "viewCount": {
-                    "type": "integer",
-                    "description": "Number of views of this reply."
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of views of this reply. Null when the source does not report it, as for posts older than X view counts."
                   },
                   "createdUtc": {
                     "type": "number",
@@ -208,6 +229,13 @@ Extra fields are kept, missing declared fields fail.
             "conversationId": {
               "type": "string",
               "description": "Id of the conversation the reply belongs to, as a string."
+            },
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of replies, or null when there are no more. Pass it back as cursor to continue."
             }
           }
         }

@@ -58,7 +58,7 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
 | `data.comments[].avatarUrl` | string | no | URL of the commenting account's profile avatar image. |
 | `data.comments[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.comments[].id` | string | yes |  |
-| `data.comments[].likes` | integer | yes |  |
+| `data.comments[].likes` | integer or null | yes | Number of likes on the comment. Null when the source does not report it. |
 | `data.comments[].text` | string | yes |  |
 | `data.comments[].verified` | boolean | yes |  |
 | `data.nextCursor` | string or null | yes | Opaque cursor for the next page of comments, or null when this lane has no more. Pass it back as cursor to continue. |
@@ -133,7 +133,11 @@ Extra fields are kept, missing declared fields fail.
                     "type": "boolean"
                   },
                   "likes": {
-                    "type": "integer"
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of likes on the comment. Null when the source does not report it."
                   },
                   "createdUtc": {
                     "x-anyapi-must-populate": true,

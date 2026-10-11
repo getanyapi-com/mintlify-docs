@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `linkedin.search_post
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$5.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$4.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -24,6 +24,7 @@ AnyAPI publishes this API from **$5.00 per 1,000 requests**. That is the price a
 | `limit` | integer | no | Maximum number of posts to return (1-100, default 10). The upper bound is one LinkedIn search page. Default `10`. |
 | `mentioningMemberUrls` | array | no | Only return posts mentioning these LinkedIn member profile URLs. |
 | `query` | string | yes | LinkedIn post search query, including quoted terms or Boolean operators accepted by LinkedIn search. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `attachmentType` or `pollOptions`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 | `sort` | string | no | Order results by search relevance or publication date. One of: `relevance`, `date`. Default `"relevance"`. |
 
 <Accordion title="Full input JSON Schema">
@@ -133,6 +134,26 @@ AnyAPI publishes this API from **$5.00 per 1,000 requests**. That is the price a
       "type": "string",
       "minLength": 1,
       "description": "Only return posts whose author profile headline or job title contains at least one of these keywords."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "attachmentDescription",
+          "attachmentImage",
+          "attachmentSubtitle",
+          "attachmentTitle",
+          "attachmentType",
+          "attachmentUrl",
+          "pollClosed",
+          "pollOptions",
+          "pollQuestion",
+          "pollTotalVotes"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `attachmentType` or `pollOptions`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }

@@ -48,14 +48,7 @@ AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a
         "type": "string",
         "enum": [
           "contactMethod",
-          "followers",
-          "following",
-          "isBusiness",
-          "posts",
-          "private",
-          "title",
-          "url",
-          "verified"
+          "posts"
         ]
       },
       "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `contactMethod`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
@@ -84,7 +77,7 @@ AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a
 | `data.following` | integer | yes | Number of accounts this account follows. |
 | `data.handle` | string | yes | Instagram username without the leading @. |
 | `data.isBusiness` | boolean | no | Whether Instagram flags the account as a business account. |
-| `data.posts` | integer | yes | Always 0: none of the sources behind this API returns the account's total post count. |
+| `data.posts` | integer or null | yes | Total number of posts on the account. Null when the serving source does not report it. |
 | `data.private` | boolean | yes | Whether the account is private. |
 | `data.userId` | string | no | Instagram's numeric account id, as a string. |
 | `data.verified` | boolean | yes | Whether the account carries Instagram's verified badge. |
@@ -99,6 +92,7 @@ Extra fields are kept, missing declared fields fail.
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://getanyapi.com/schemas/instagram.profile.output.json",
   "title": "Instagram profile output",
+  "x-anyapi-result-list": false,
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -152,8 +146,11 @@ Extra fields are kept, missing declared fields fail.
               "description": "Number of accounts this account follows."
             },
             "posts": {
-              "type": "integer",
-              "description": "Always 0: none of the sources behind this API returns the account's total post count."
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Total number of posts on the account. Null when the serving source does not report it."
             },
             "bio": {
               "x-anyapi-must-populate": true,

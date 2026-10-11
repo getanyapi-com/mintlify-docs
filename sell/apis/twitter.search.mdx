@@ -9,17 +9,17 @@ This page is the seller-facing summary of one catalog API, `twitter.search`. The
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.65 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of search results. |
-| `limit` | integer | no | Per-page maximum number of results to return (1-50, default 20). A provider may return a smaller native page; follow nextCursor for more. Default `20`. |
-| `query` | string | yes | Search query using X (Twitter) advanced-search syntax. IMPORTANT: bare terms are ANDed - a tweet must contain EVERY word, so a list of loosely related keywords matches nothing; use one short phrase or OR between alternatives (e.g. 'anyapi OR getanyapi'). You can embed X advanced-search operators directly in the query to filter results: from:username and to:username (author or recipient), since:YYYY-MM-DD and until:YYYY-MM-DD (date range), min_faves:N, min_retweets:N, min_replies:N (engagement floors), "exact phrase", -term to exclude, filter:media and filter:links and -filter:replies (content filters), lang:en, near:city, and geocode:lat,long,radius. Examples: 'from:OpenAI', 'AI agents min_faves:500 -filter:replies', 'nvidia since:2026-01-01 until:2026-03-01'. A query with no matches returns an empty items array; prefer the fewest words that identify the topic. |
-| `queryType` | string | no | Result ranking: 'Latest', 'Top', 'Photos', or 'Videos' (e.g. Latest). One of: `Latest`, `Top`, `Photos`, `Videos`. Default `"Latest"`. |
-| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `media`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
+| `limit` | integer | no | Page size to ask for (1-50, default 20). Some sources honor it; others always return their whole native page of about 20. A page is never trimmed after the call, so follow nextCursor to continue exactly where this response ended. Default `20`. |
+| `query` | string | yes | Search query using X (Twitter) advanced-search syntax. IMPORTANT: bare terms are ANDed - a tweet must contain EVERY word, so a list of loosely related keywords matches nothing; use one short phrase or OR between alternatives (e.g. 'anyapi OR getanyapi'). When an operator follows an OR list, put the list in parentheses, e.g. '(anyapi OR getanyapi) -filter:replies': without them X applies the operator to the last alternative only, so such a query still runs as X reads it and the response's hint carries the corrected query. You can embed X advanced-search operators directly in the query to filter results: from:username and to:username (author or recipient), since:YYYY-MM-DD and until:YYYY-MM-DD (date range), min_faves:N, min_retweets:N, min_replies:N (engagement floors), "exact phrase", -term to exclude, filter:media and filter:links and -filter:replies (content filters), lang:en, near:city, and geocode:lat,long,radius. Examples: 'from:OpenAI', 'AI agents min_faves:500 -filter:replies', 'nvidia since:2026-01-01 until:2026-03-01'. A query with no matches returns an empty items array; prefer the fewest words that identify the topic. |
+| `queryType` | string | no | Which posts to return: 'Latest' (newest first, the default), 'Top' (most popular), 'Photos' (newest posts with images), or 'Videos' (newest posts with video). Photos and Videos search your query as written with filter:images or filter:videos added after it, so they cost the same as a Latest search. One of: `Latest`, `Top`, `Photos`, `Videos`. Default `"Latest"`. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 | `requireSinglePage` | boolean | no | Set true to get up to limit results in one response instead of provider-native pages, served by a bulk provider when needed. |
 
 <Accordion title="Full input JSON Schema">
@@ -37,7 +37,17 @@ AnyAPI publishes this API from **$0.65 per 1,000 requests**. That is the price a
   "x-anyapi-compat-inputs": {
     "lang": {
       "fold_into": "query",
-      "template": " lang:{value}"
+      "template": " lang:{value}",
+      "wrap": true
+    },
+    "queryType": {
+      "fold_into": "query",
+      "template": " filter:{value}",
+      "wrap": true,
+      "values": {
+        "Photos": "images",
+        "Videos": "videos"
+      }
     }
   },
   "required": [
@@ -50,36 +60,21 @@ AnyAPI publishes this API from **$0.65 per 1,000 requests**. That is the price a
       "items": {
         "type": "string",
         "enum": [
-          "authorFollowers",
-          "authorId",
-          "authorImage",
-          "authorVerified",
-          "bookmarkCount",
-          "conversationId",
-          "inReplyToId",
-          "isReply",
-          "lang",
-          "likeCount",
-          "media",
-          "nextCursor",
-          "quoteCount",
-          "replyCount",
-          "retweetCount",
-          "viewCount"
+          "nextCursor"
         ]
       },
-      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `media`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
     },
     "limit": {
       "type": "integer",
       "minimum": 1,
       "maximum": 50,
       "default": 20,
-      "description": "Per-page maximum number of results to return (1-50, default 20). A provider may return a smaller native page; follow nextCursor for more."
+      "description": "Page size to ask for (1-50, default 20). Some sources honor it; others always return their whole native page of about 20. A page is never trimmed after the call, so follow nextCursor to continue exactly where this response ended."
     },
     "query": {
       "type": "string",
-      "description": "Search query using X (Twitter) advanced-search syntax. IMPORTANT: bare terms are ANDed - a tweet must contain EVERY word, so a list of loosely related keywords matches nothing; use one short phrase or OR between alternatives (e.g. 'anyapi OR getanyapi'). You can embed X advanced-search operators directly in the query to filter results: from:username and to:username (author or recipient), since:YYYY-MM-DD and until:YYYY-MM-DD (date range), min_faves:N, min_retweets:N, min_replies:N (engagement floors), \"exact phrase\", -term to exclude, filter:media and filter:links and -filter:replies (content filters), lang:en, near:city, and geocode:lat,long,radius. Examples: 'from:OpenAI', 'AI agents min_faves:500 -filter:replies', 'nvidia since:2026-01-01 until:2026-03-01'. A query with no matches returns an empty items array; prefer the fewest words that identify the topic."
+      "description": "Search query using X (Twitter) advanced-search syntax. IMPORTANT: bare terms are ANDed - a tweet must contain EVERY word, so a list of loosely related keywords matches nothing; use one short phrase or OR between alternatives (e.g. 'anyapi OR getanyapi'). When an operator follows an OR list, put the list in parentheses, e.g. '(anyapi OR getanyapi) -filter:replies': without them X applies the operator to the last alternative only, so such a query still runs as X reads it and the response's hint carries the corrected query. You can embed X advanced-search operators directly in the query to filter results: from:username and to:username (author or recipient), since:YYYY-MM-DD and until:YYYY-MM-DD (date range), min_faves:N, min_retweets:N, min_replies:N (engagement floors), \"exact phrase\", -term to exclude, filter:media and filter:links and -filter:replies (content filters), lang:en, near:city, and geocode:lat,long,radius. Examples: 'from:OpenAI', 'AI agents min_faves:500 -filter:replies', 'nvidia since:2026-01-01 until:2026-03-01'. A query with no matches returns an empty items array; prefer the fewest words that identify the topic."
     },
     "queryType": {
       "type": "string",
@@ -89,7 +84,7 @@ AnyAPI publishes this API from **$0.65 per 1,000 requests**. That is the price a
         "Photos",
         "Videos"
       ],
-      "description": "Result ranking: 'Latest', 'Top', 'Photos', or 'Videos' (e.g. Latest).",
+      "description": "Which posts to return: 'Latest' (newest first, the default), 'Top' (most popular), 'Photos' (newest posts with images), or 'Videos' (newest posts with video). Photos and Videos search your query as written with filter:images or filter:videos added after it, so they cost the same as a Latest search.",
       "default": "Latest"
     },
     "cursor": {
@@ -137,7 +132,7 @@ AnyAPI publishes this API from **$0.65 per 1,000 requests**. That is the price a
 | `data.items[].retweetCount` | integer | no |  |
 | `data.items[].text` | string | yes |  |
 | `data.items[].url` | string | yes |  |
-| `data.items[].viewCount` | integer | no |  |
+| `data.items[].viewCount` | integer or null | no | Number of views. Null when the source does not report it, as for posts older than X view counts. |
 | `data.nextCursor` | string or null | no | Opaque cursor for the next page of search results, or null when there are no more. Pass it back as cursor to continue. |
 | `found` | boolean | yes |  |
 
@@ -220,7 +215,11 @@ Extra fields are kept, missing declared fields fail.
                     "type": "integer"
                   },
                   "viewCount": {
-                    "type": "integer"
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of views. Null when the source does not report it, as for posts older than X view counts."
                   },
                   "bookmarkCount": {
                     "type": "integer"

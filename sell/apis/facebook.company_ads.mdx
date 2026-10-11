@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `facebook.company_ads
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$1.10 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -22,7 +22,7 @@ This API takes no input fields.
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://getanyapi.com/schemas/facebook.company_ads.input.json",
   "example": {
-    "companyName": "nike",
+    "pageId": "15087023444",
     "sortBy": "recent"
   },
   "title": "Facebook company ads input",
@@ -90,10 +90,12 @@ This API takes no input fields.
     },
     "startDate": {
       "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
       "description": "Filter to ads with impressions on or after this date, in YYYY-MM-DD format."
     },
     "endDate": {
       "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
       "description": "Filter to ads with impressions on or before this date, in YYYY-MM-DD format."
     },
     "cursor": {
@@ -113,7 +115,7 @@ This API takes no input fields.
 | `data` | null or object | yes |  |
 | `data.ads` | array | yes |  |
 | `data.ads[].active` | boolean | yes |  |
-| `data.ads[].adCount` | integer | yes | Number of ads in this campaign (collation count). |
+| `data.ads[].adCount` | integer or null | yes | Number of ads in this campaign (collation count). Null when the source does not report it. |
 | `data.ads[].caption` | string | no | Caption line of the ad creative, usually the advertiser's display domain. |
 | `data.ads[].categories` | array | no | Ad Library categories the ad is filed under. |
 | `data.ads[].ctaText` | string | no | Call-to-action button label on the ad. |
@@ -248,8 +250,11 @@ Extra fields are kept, missing declared fields fail.
                     }
                   },
                   "adCount": {
-                    "type": "integer",
-                    "description": "Number of ads in this campaign (collation count)."
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of ads in this campaign (collation count). Null when the source does not report it."
                   },
                   "pageProfilePicture": {
                     "type": "string",
@@ -393,7 +398,7 @@ This output schema declares no `reason` field, so `found: false` is the whole no
 
 ```json
 {
-  "companyName": "nike",
+  "pageId": "15087023444",
   "sortBy": "recent"
 }
 ```

@@ -75,15 +75,7 @@ AnyAPI publishes this API from **$0.95 per 1,000 requests**. That is the price a
         "type": "string",
         "enum": [
           "currency",
-          "discountPct",
-          "image",
-          "originalPrice",
-          "price",
-          "rating",
-          "reviewCount",
-          "sellerId",
-          "shopName",
-          "soldCount"
+          "reviewCount"
         ]
       },
       "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `currency`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a product that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
@@ -103,10 +95,10 @@ AnyAPI publishes this API from **$0.95 per 1,000 requests**. That is the price a
 | `data.items[].currency` | string | no | ISO currency name, e.g. USD. |
 | `data.items[].discountPct` | number | no | Discount off the original price as a percentage, e.g. 10 for 10% off. Omitted when the product is not discounted. |
 | `data.items[].image` | string | no | Product image URL. |
-| `data.items[].originalPrice` | number | no | Pre-discount list price (0 when not on sale). |
+| `data.items[].originalPrice` | number | no | Pre-discount list price. Omitted when the product is not on sale. |
 | `data.items[].price` | number | no | Current sale price. |
 | `data.items[].productId` | string | yes | TikTok Shop product id. |
-| `data.items[].rating` | number | no | Average review score. |
+| `data.items[].rating` | number | no | Average review score. Omitted when the product has no rating yet. |
 | `data.items[].reviewCount` | integer | no | Number of reviews. Omitted when the lane that served this request does not report it. |
 | `data.items[].sellerId` | string | no | TikTok Shop seller id, for joining to the seller's other products. |
 | `data.items[].shopName` | string | no | Seller shop name. |
@@ -173,7 +165,7 @@ Extra fields are kept, missing declared fields fail.
                   },
                   "originalPrice": {
                     "type": "number",
-                    "description": "Pre-discount list price (0 when not on sale)."
+                    "description": "Pre-discount list price. Omitted when the product is not on sale."
                   },
                   "currency": {
                     "type": "string",
@@ -181,7 +173,7 @@ Extra fields are kept, missing declared fields fail.
                   },
                   "rating": {
                     "type": "number",
-                    "description": "Average review score."
+                    "description": "Average review score. Omitted when the product has no rating yet."
                   },
                   "soldCount": {
                     "type": "integer",

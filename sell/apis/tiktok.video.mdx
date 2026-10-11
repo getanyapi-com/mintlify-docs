@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `tiktok.video`. The t
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.45 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.40 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -38,6 +38,20 @@ This API takes no input fields.
     "id": {
       "type": "string",
       "description": "TikTok video ID, the numeric run at the end of a video URL. Use it when a listing SKU handed you an id and no URL."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "comments",
+          "likes",
+          "shares",
+          "views"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `views`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. A source that returns only a rounded or shortened value for a field does not count as returning it."
     }
   },
   "anyOf": [
@@ -67,18 +81,18 @@ This API takes no input fields.
 | `data.authorName` | string | no | Author's display name. |
 | `data.authorUserId` | string | no | Author's numeric TikTok user id. |
 | `data.caption` | string | yes |  |
-| `data.comments` | integer | yes |  |
+| `data.comments` | integer | yes | Number of comments. Some sources round large counts (48.5K instead of 48,536); name `comments` in requireFields to be served only by a source that returns the exact count. |
 | `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.durationSeconds` | number | no | Video duration in seconds. |
 | `data.id` | string | yes |  |
 | `data.image` | string | no | URL of the video's cover/thumbnail image. A signed, short-lived TikTok CDN URL (typically expires within about a day; query params are load-bearing and kept intact), often served as HEIC rather than JPEG, so fetch it promptly and transcode if you need broad browser support. Absent when the upstream provides no cover. |
-| `data.likes` | integer | yes |  |
+| `data.likes` | integer | yes | Number of likes. Some sources round large counts (2.9M instead of 2,884,604); name `likes` in requireFields to be served only by a source that returns the exact count. |
 | `data.region` | string | yes |  |
 | `data.saves` | integer | yes |  |
-| `data.shares` | integer | yes |  |
+| `data.shares` | integer | yes | Number of shares. Some sources round large counts (35.9K instead of 35,923); name `shares` in requireFields to be served only by a source that returns the exact count. |
 | `data.url` | string | no | Canonical TikTok URL of the video. |
 | `data.videoUrl` | string | no | Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
-| `data.views` | integer | yes |  |
+| `data.views` | integer | yes | Number of plays. Some sources round large counts (32.7M instead of 32,736,400); name `views` in requireFields to be served only by a source that returns the exact count. |
 | `found` | boolean | yes |  |
 
 Extra fields are kept, missing declared fields fail.
@@ -134,16 +148,20 @@ Extra fields are kept, missing declared fields fail.
               "type": "string"
             },
             "views": {
-              "type": "integer"
+              "type": "integer",
+              "description": "Number of plays. Some sources round large counts (32.7M instead of 32,736,400); name `views` in requireFields to be served only by a source that returns the exact count."
             },
             "likes": {
-              "type": "integer"
+              "type": "integer",
+              "description": "Number of likes. Some sources round large counts (2.9M instead of 2,884,604); name `likes` in requireFields to be served only by a source that returns the exact count."
             },
             "comments": {
-              "type": "integer"
+              "type": "integer",
+              "description": "Number of comments. Some sources round large counts (48.5K instead of 48,536); name `comments` in requireFields to be served only by a source that returns the exact count."
             },
             "shares": {
-              "type": "integer"
+              "type": "integer",
+              "description": "Number of shares. Some sources round large counts (35.9K instead of 35,923); name `shares` in requireFields to be served only by a source that returns the exact count."
             },
             "saves": {
               "type": "integer"

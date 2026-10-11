@@ -9,12 +9,13 @@ This page is the seller-facing summary of one catalog API, `linkedin.profile`. T
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$4.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$2.90 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `topSkills` or `workplaceType`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 | `url` | string | yes | Full LinkedIn profile URL. |
 
 <Accordion title="Full input JSON Schema">
@@ -36,6 +37,21 @@ AnyAPI publishes this API from **$4.00 per 1,000 requests**. That is the price a
     "url": {
       "type": "string",
       "description": "Full LinkedIn profile URL."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "endorsements",
+          "positions",
+          "schoolId",
+          "topSkills",
+          "workplaceType"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `topSkills` or `workplaceType`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -71,7 +87,7 @@ AnyAPI publishes this API from **$4.00 per 1,000 requests**. That is the price a
 | `data.education[].endDate` | string | no | End date text. |
 | `data.education[].fieldOfStudy` | string | no | Field of study. |
 | `data.education[].school` | string | yes | School name. |
-| `data.education[].schoolId` | string | no | LinkedIn's numeric school id, as a string. |
+| `data.education[].schoolId` | string or null | no | LinkedIn's numeric school id, as a string. |
 | `data.education[].schoolUrl` | string | no | School LinkedIn URL. |
 | `data.education[].startDate` | string | no | Start date text. |
 | `data.experience` | array | no | Full work experience with titles, descriptions, dates, and per-role skills. |
@@ -84,15 +100,15 @@ AnyAPI publishes this API from **$4.00 per 1,000 requests**. That is the price a
 | `data.experience[].endDate` | string | no | End date text, e.g. 'Present'. |
 | `data.experience[].location` | string | no | Role location. |
 | `data.experience[].position` | string | yes | Job title. |
-| `data.experience[].skills` | array | no | Skills associated with this role. |
+| `data.experience[].skills` | array or null | no | Skills associated with this role. |
 | `data.experience[].startDate` | string | no | Start date text, e.g. 'Feb 2014'. |
-| `data.experience[].workplaceType` | string | no | Workplace type, e.g. 'Remote' or 'On-site'. |
+| `data.experience[].workplaceType` | string or null | no | Workplace type, e.g. 'Remote' or 'On-site'. |
 | `data.firstName` | string | yes | First name of the profile owner. |
 | `data.followerCount` | integer | no | Number of followers. |
 | `data.headline` | string | yes | Professional headline shown under the name. |
 | `data.hiring` | boolean | no | Whether the member shows the Hiring badge. |
 | `data.honorsAndAwards` | array | no | Honors and awards. |
-| `data.honorsAndAwards[].description` | string | no | Award description. |
+| `data.honorsAndAwards[].description` | string or null | no | Award description. |
 | `data.honorsAndAwards[].issuedAt` | string | no | Issue date text. |
 | `data.honorsAndAwards[].issuedBy` | string | no | Issuing organization. |
 | `data.honorsAndAwards[].title` | string | no | Award title. |
@@ -107,12 +123,15 @@ AnyAPI publishes this API from **$4.00 per 1,000 requests**. That is the price a
 | `data.projects` | array | no | Projects, as returned by LinkedIn when present. |
 | `data.publicIdentifier` | string | no | LinkedIn public identifier (the /in/ handle). |
 | `data.publications` | array | no | Publications. |
-| `data.publications[].description` | string | no | Publication description. |
+| `data.publications[].description` | string or null | no | Publication description. |
 | `data.publications[].publishedText` | string | no | Publisher and/or date text as shown on LinkedIn. |
 | `data.publications[].title` | string | no | Publication title. |
-| `data.skills` | array | no | The member's skills, as free-form strings when present. |
+| `data.skills` | array | no | The member's skills: an object per skill, or a bare skill name when LinkedIn shows no endorsed-skills section. |
+| `data.skills[].endorsements` | string or null | no | Endorsement count as LinkedIn shows it, e.g. '23 endorsements'. Null from a source that does not read endorsements; name it in requireFields to be served by one that does. |
+| `data.skills[].name` | string | no | Skill name. |
+| `data.skills[].positions` | array or null | no | Where the skill was used or who endorsed it, as LinkedIn shows it, e.g. 'Endorsed by 3 colleagues at Rippling'. Null from a source that does not read them; name it in requireFields to be served by one that does. |
 | `data.state` | string | no | State or region of the profile owner. |
-| `data.topSkills` | array | no | The member's top skills, as free-form strings when present. |
+| `data.topSkills` | array or null | no | The member's top skills, as free-form strings when present. |
 | `data.url` | string | yes | Canonical LinkedIn profile URL. |
 | `data.verified` | boolean | no | Whether the profile is identity-verified. |
 | `found` | boolean | yes | Whether the profile was found. |
@@ -126,6 +145,7 @@ Extra fields are kept, missing declared fields fail.
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://getanyapi.com/schemas/linkedin.profile.output.json",
   "title": "LinkedIn profile output",
+  "x-anyapi-result-list": false,
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -242,7 +262,10 @@ Extra fields are kept, missing declared fields fail.
               "description": "Whether the member is open to work."
             },
             "topSkills": {
-              "type": "array",
+              "type": [
+                "array",
+                "null"
+              ],
               "description": "The member's top skills, as free-form strings when present.",
               "items": {}
             },
@@ -307,7 +330,10 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Employment type, e.g. 'Full-time'."
                   },
                   "workplaceType": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "description": "Workplace type, e.g. 'Remote' or 'On-site'."
                   },
                   "companyName": {
@@ -327,7 +353,10 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Role location."
                   },
                   "skills": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "description": "Skills associated with this role.",
                     "items": {}
                   },
@@ -360,7 +389,10 @@ Extra fields are kept, missing declared fields fail.
                     "description": "School LinkedIn URL."
                   },
                   "schoolId": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "description": "LinkedIn's numeric school id, as a string."
                   },
                   "degree": {
@@ -384,8 +416,32 @@ Extra fields are kept, missing declared fields fail.
             },
             "skills": {
               "type": "array",
-              "description": "The member's skills, as free-form strings when present.",
-              "items": {}
+              "description": "The member's skills: an object per skill, or a bare skill name when LinkedIn shows no endorsed-skills section.",
+              "items": {
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Skill name."
+                  },
+                  "endorsements": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Endorsement count as LinkedIn shows it, e.g. '23 endorsements'. Null from a source that does not read endorsements; name it in requireFields to be served by one that does."
+                  },
+                  "positions": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "Where the skill was used or who endorsed it, as LinkedIn shows it, e.g. 'Endorsed by 3 colleagues at Rippling'. Null from a source that does not read them; name it in requireFields to be served by one that does.",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
             },
             "certifications": {
               "type": "array",
@@ -427,7 +483,10 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Issue date text."
                   },
                   "description": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "description": "Award description."
                   }
                 }
@@ -458,7 +517,10 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Publisher and/or date text as shown on LinkedIn."
                   },
                   "description": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "description": "Publication description."
                   }
                 }

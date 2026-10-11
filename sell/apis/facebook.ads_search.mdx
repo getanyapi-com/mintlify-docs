@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `facebook.ads_search`
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$1.10 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -21,7 +21,7 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
 | `endDate` | string | no | Filter to ads with impressions on or before this date, in YYYY-MM-DD format. |
 | `mediaType` | string | no | Creative media type filter. One of: `ALL`, `IMAGE`, `VIDEO`, `MEME`, `IMAGE_AND_MEME`, `NONE`. |
 | `query` | string | yes | Keyword to search the Meta Ad Library for (e.g. "protein powder"). |
-| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `totalResults` or `pageLikes`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on an ad that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `totalResults`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on an ad that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 | `searchType` | string | no | Match mode for the query: loose keyword match (keyword_unordered, the default) or exact phrase (keyword_exact_phrase). One of: `keyword_unordered`, `keyword_exact_phrase`. |
 | `sortBy` | string | no | Sort order: impressions (highest first, the default) or recent (most recent). One of: `impressions`, `recent`. |
 | `startDate` | string | no | Filter to ads with impressions on or after this date, in YYYY-MM-DD format. |
@@ -105,6 +105,7 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
     },
     "endDate": {
       "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
       "description": "Filter to ads with impressions on or before this date, in YYYY-MM-DD format."
     },
     "cursor": {
@@ -117,25 +118,10 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
       "items": {
         "type": "string",
         "enum": [
-          "active",
-          "adCount",
-          "ads",
-          "caption",
-          "categories",
-          "endDate",
-          "isReshared",
-          "linkDescription",
-          "media",
-          "nextCursor",
-          "pageCategories",
-          "pageDeleted",
-          "pageLikes",
-          "pageProfilePicture",
-          "pageUrl",
           "totalResults"
         ]
       },
-      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `totalResults` or `pageLikes`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on an ad that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `totalResults`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on an ad that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -150,7 +136,7 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
 | `data` | null or object | yes |  |
 | `data.ads` | array | yes |  |
 | `data.ads[].active` | boolean | yes |  |
-| `data.ads[].adCount` | integer | yes | Number of ads in this campaign (collation count). |
+| `data.ads[].adCount` | integer or null | yes | Number of ads in this campaign (collation count). Null when the source does not report it. |
 | `data.ads[].caption` | string | no | Caption line of the ad creative, usually the advertiser's display domain. |
 | `data.ads[].categories` | array | no | Ad Library categories the ad is filed under. |
 | `data.ads[].ctaText` | string | yes |  |
@@ -316,8 +302,11 @@ Extra fields are kept, missing declared fields fail.
                     }
                   },
                   "adCount": {
-                    "type": "integer",
-                    "description": "Number of ads in this campaign (collation count)."
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of ads in this campaign (collation count). Null when the source does not report it."
                   },
                   "pageProfilePicture": {
                     "type": "string",

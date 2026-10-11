@@ -17,7 +17,7 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
 | --- | --- | --- | --- |
 | `after` | string | no | Legacy pagination alias. Prefer `cursor`; omit both fields for the first page. |
 | `cursor` | string | no | Opaque pagination cursor from a previous response's `nextCursor`; omit for the first page. |
-| `limit` | integer | no | Requested number of posts. Note: the upstream returns one page (about 25 posts) per call; values larger than a page are not delivered in a single response. To fetch more, pass `nextCursor` back as `cursor`. Default `25`. |
+| `limit` | integer | no | Page size to ask for (up to 100). Some sources honor it; others always return their whole page of about 25 posts. A page is never trimmed after the call, so pass nextCursor back as cursor to continue exactly where this response ended. Default `25`. |
 | `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived` or `selftext`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 | `sort` | string | no | Listing sort order. One of: `hot`, `new`, `top`. Default `"hot"`. |
 | `subreddit` | string | yes | Subreddit name without the leading r/ (e.g. "golang"). |
@@ -49,7 +49,7 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
       "minimum": 1,
       "maximum": 100,
       "default": 25,
-      "description": "Requested number of posts. Note: the upstream returns one page (about 25 posts) per call; values larger than a page are not delivered in a single response. To fetch more, pass `nextCursor` back as `cursor`."
+      "description": "Page size to ask for (up to 100). Some sources honor it; others always return their whole page of about 25 posts. A page is never trimmed after the call, so pass nextCursor back as cursor to continue exactly where this response ended."
     },
     "sort": {
       "type": "string",
@@ -88,15 +88,9 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
       "items": {
         "type": "string",
         "enum": [
-          "authorId",
           "isArchived",
           "isLocked",
-          "nextCursor",
-          "nsfw",
-          "numComments",
-          "score",
-          "selftext",
-          "upvoteRatio"
+          "selftext"
         ]
       },
       "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived` or `selftext`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."

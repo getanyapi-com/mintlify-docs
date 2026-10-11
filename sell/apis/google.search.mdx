@@ -19,8 +19,8 @@ AnyAPI publishes this API from **$0.40 per 1,000 requests**. That is the price a
 | `cursor` | string | no | Deprecated: send page instead. A continuation token from an earlier response's nextCursor is still accepted and still continues on the source that issued it; page is ignored when cursor is sent alongside it. |
 | `gl` | string | no | Two-letter country code for result localization (e.g. us, gb, de). Default `"us"`. |
 | `hl` | string | no | Two-letter interface and results language code (e.g. en, es, de). Default `"en"`. |
-| `limit` | integer | no | Maximum number of organic results to return in this response. Google stopped honoring bulk result counts in September 2025, so one page is about 10 results and a limit above 10 is accepted but will not return more than that. To go deeper, send page (about 10 results per page, each billed as a request) or use google.search_100, which returns up to 100 ranked results in a single call for one flat charge and is cheaper past roughly 20 results. Price is flat per request. Default `10`. |
-| `location` | string | no | Fine-grained location to localize results to, more specific than the country-level gl. Must exactly match an Active Canonical Name from Google's geo-target list, which uses no space after each comma: 'New York,New York,United States', 'Austin,Texas,United States', 'London,England,United Kingdom'. A value that does not match is rejected rather than quietly searched from somewhere else. |
+| `limit` | integer | no | Page size to ask for. Google returns about 10 organic results per page and stopped honoring larger counts in September 2025, so a limit above 10 still returns about 10. Some sources return their whole page of about 10 whatever limit says: a page is never trimmed after the call, so nextCursor always continues exactly where this response ended. To go deeper, send page (about 10 results per page, each billed as a request) or use google.search_100, which returns up to 100 ranked results in a single call for one flat charge and is cheaper past roughly 20 results. Price is flat per request. Default `10`. |
+| `location` | string | no | Fine-grained location to localize results to, more specific than the country-level gl. Send it as an Active Canonical Name from Google's geo-target list: place, then each parent region, then country, with no space after each comma, e.g. 'New York,New York,United States', 'Austin,Texas,United States', 'London,England,United Kingdom'. Common variations are translated to that name when they point to exactly one place: spaces after commas, missing accents, a US state abbreviation ('Orlando, FL, United States'), or a skipped region ('Sydney, Australia'). A value that names no place, or more than one, is rejected rather than quietly searched from somewhere else. |
 | `page` | integer | no | Which page of about 10 organic results to return, starting at 1. Send page 2, 3, ... to walk deeper; each page is billed as one request and any source can serve any page. Replaces cursor. Default `1`. |
 | `query` | string | yes | The Google search query. |
 | `requireCursor` | boolean | no | Deprecated. Every source for this search returns a nextCursor, so this changes nothing about the price or which source serves you; it stays accepted so callers that already send it keep working. |
@@ -41,6 +41,9 @@ AnyAPI publishes this API from **$0.40 per 1,000 requests**. That is the price a
   "title": "Google search input",
   "type": "object",
   "additionalProperties": false,
+  "x-anyapi-input-normalizers": {
+    "location": "google_geo_target"
+  },
   "x-aliases": {
     "q": "query",
     "num": "limit"
@@ -58,7 +61,7 @@ AnyAPI publishes this API from **$0.40 per 1,000 requests**. That is the price a
       "minimum": 1,
       "maximum": 100,
       "default": 10,
-      "description": "Maximum number of organic results to return in this response. Google stopped honoring bulk result counts in September 2025, so one page is about 10 results and a limit above 10 is accepted but will not return more than that. To go deeper, send page (about 10 results per page, each billed as a request) or use google.search_100, which returns up to 100 ranked results in a single call for one flat charge and is cheaper past roughly 20 results. Price is flat per request."
+      "description": "Page size to ask for. Google returns about 10 organic results per page and stopped honoring larger counts in September 2025, so a limit above 10 still returns about 10. Some sources return their whole page of about 10 whatever limit says: a page is never trimmed after the call, so nextCursor always continues exactly where this response ended. To go deeper, send page (about 10 results per page, each billed as a request) or use google.search_100, which returns up to 100 ranked results in a single call for one flat charge and is cheaper past roughly 20 results. Price is flat per request."
     },
     "page": {
       "type": "integer",
@@ -89,7 +92,7 @@ AnyAPI publishes this API from **$0.40 per 1,000 requests**. That is the price a
     },
     "location": {
       "type": "string",
-      "description": "Fine-grained location to localize results to, more specific than the country-level gl. Must exactly match an Active Canonical Name from Google's geo-target list, which uses no space after each comma: 'New York,New York,United States', 'Austin,Texas,United States', 'London,England,United Kingdom'. A value that does not match is rejected rather than quietly searched from somewhere else."
+      "description": "Fine-grained location to localize results to, more specific than the country-level gl. Send it as an Active Canonical Name from Google's geo-target list: place, then each parent region, then country, with no space after each comma, e.g. 'New York,New York,United States', 'Austin,Texas,United States', 'London,England,United Kingdom'. Common variations are translated to that name when they point to exactly one place: spaces after commas, missing accents, a US state abbreviation ('Orlando, FL, United States'), or a skipped region ('Sydney, Australia'). A value that names no place, or more than one, is rejected rather than quietly searched from somewhere else."
     },
     "timeframe": {
       "type": "string",

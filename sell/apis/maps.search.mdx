@@ -97,24 +97,16 @@ AnyAPI publishes this API from **$1.75 per 1,000 requests**. That is the price a
       "items": {
         "type": "string",
         "enum": [
-          "address",
-          "categories",
-          "category",
           "cid",
           "city",
           "countryCode",
-          "image",
-          "latitude",
-          "longitude",
+          "hours",
           "permanentlyClosed",
           "phone",
           "postalCode",
           "priceLevel",
-          "rating",
-          "reviewCount",
           "state",
-          "street",
-          "website"
+          "street"
         ]
       },
       "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `cid` or `street`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a place that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
@@ -137,6 +129,7 @@ AnyAPI publishes this API from **$1.75 per 1,000 requests**. That is the price a
 | `data.items[].cid` | string | no | Google customer/place id (cid). |
 | `data.items[].city` | string | no | City the place is in. |
 | `data.items[].countryCode` | string | no | Two-letter country code. |
+| `data.items[].hours` | array | no | Opening hours by day: each element is an object with the day name and its hours. |
 | `data.items[].image` | string | no | Primary place photo URL. |
 | `data.items[].latitude` | number | no | Latitude of the place in decimal degrees. |
 | `data.items[].longitude` | number | no | Longitude of the place in decimal degrees. |
@@ -288,6 +281,13 @@ Extra fields are kept, missing declared fields fail.
                   "image": {
                     "type": "string",
                     "description": "Primary place photo URL."
+                  },
+                  "hours": {
+                    "type": "array",
+                    "description": "Opening hours by day: each element is an object with the day name and its hours.",
+                    "items": {
+                      "type": "object"
+                    }
                   }
                 }
               }
