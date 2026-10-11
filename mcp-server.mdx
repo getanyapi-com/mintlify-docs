@@ -274,7 +274,7 @@ validation, routing, failover, pricing, and billing are identical.
     reflects the full result.
 
     **Returns** the normalized `output`, `provider` (always **AnyAPI**), `costUsd`, `items`
-    (the number of results charged for), and `replayed`. Most APIs are priced per result
+    (the number of results returned), and `replayed`. Most APIs are priced per result
     (`baseUsd + perUnitUsd × items`), so a result cap in the input schema, when it declares
     one, also caps cost. Simple lookups are flat per request. Invalid input and insufficient
     funds are **not** charged. Some failed wallet-funded requests incur processing charges that we pass through at cost, with no markup; the error message shows the amount charged.
@@ -480,7 +480,7 @@ the thing does not exist, was removed or suspended, or the search matched nothin
 `output.reason` says which (`not_found`; `suspended` for a suspended account; `too_long` for a
 video longer than a transcript API's source can transcribe). A miss no
 source billed is free. When AnyAPI asks more than one source, each source that charged is
-billed at its own price, capped at the API's published maximum. `costUsd` is the actual
+billed at its price for that request, capped at the API's published maximum. `costUsd` is the actual
 charge, `0` when nothing was charged.
 
 <Tip>

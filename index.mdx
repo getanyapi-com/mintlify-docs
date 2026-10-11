@@ -55,13 +55,18 @@ subscriptions.
 - Some failed wallet-funded requests incur processing charges that we pass through at cost, with no markup; the error response shows the amount charged.
 - A miss that the source did not bill is free.
 - When AnyAPI asks more than one source for one request, each source that charged is
-  billed at its own price. The total is capped at the API's published maximum.
+  billed at its price for that request. The total is capped at the API's published maximum.
 
 Most APIs are **priced per result**: a per-item rate for each result returned, plus a
 small base fee on a few. A call that returns 5 results costs less than one that returns 50.
 Some input schemas declare a result cap such as `limit`; use it only when the selected
-SKU's `inputSchema` declares it. The response reports `items`, the count you were charged
-for. Simple lookups are flat per request.
+SKU's `inputSchema` declares it. The response reports `items`, the number of results
+returned. Simple lookups are flat per request.
+
+On a few APIs that mix per-result and per-request sources, a source can serve your request at
+the price another source quoted for it. That price is fixed when you call: returning fewer
+results, or none on a billed miss, does not lower it. A source serving at its own per-result
+price still charges only for the results it returns.
 
 Catalog and `get_api` results carry nested `pricing`. `pricing.from` is the cheapest
 complete flat or linear offer, and `pricing.failoverMaxUsd` is the greatest fallback
