@@ -68442,10 +68442,11 @@
                                         "uniqueItems": true
                                     },
                                     "url": {
-                                        "description": "The Facebook page URL whose events to list, e.g. https://www.facebook.com/brickyardoldtown. A single event link (https://www.facebook.com/events/<id>) is refused as invalid input, with no charge; facebook.event_details reads one event.",
+                                        "description": "The Facebook page link whose events to list, e.g. https://www.facebook.com/brickyardoldtown. Accepted: facebook.com/<name>, /p/<name>-<id>, /pages/<name>/<id>, /pg/<name>, /people/<name>/<id> and profile.php?id=<id>, on facebook.com or fb.com with or without www, m, mbasic, web, business or a language subdomain. Anything after the page, such as a tab, is fine: only the page is read. Any other Facebook link, such as a single event, group, share link, reel, video, hashtag, search or login page, is refused as invalid input, with no charge; facebook.event_details reads one event.",
                                         "not": {
-                                            "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*(?:facebook|fb)\\.com/events/"
+                                            "pattern": "^(?:[A-Za-z]+://)?[^/?#]*/+(?:(?:events|groups|reels?|videos|watch|stories|hashtag|search|sharer|photo|plugins|legal|login|help|privacy|media|share)(?:[/?#]|$)|(?:[^/?#]{0,6}|[^/?#]{8,}|[^p/?#][^/?#]{6}|p[^r/?#][^/?#]{5}|pr[^o/?#][^/?#]{4}|pro[^f/?#][^/?#]{3}|prof[^i/?#][^/?#]{2}|profi[^l/?#][^/?#]|profil[^e/?#])\\.php(?:[/?#]|$))"
                                         },
+                                        "pattern": "^(?:[Hh][Tt][Tt][Pp][Ss]?://)?(?:(?:[Ww][Ww][Ww]|[Mm]|[Mm][Bb][Aa][Ss][Ii][Cc]|[Ww][Ee][Bb]|[Bb][Uu][Ss][Ii][Nn][Ee][Ss][Ss]|[A-Za-z]{2}-[A-Za-z]{2})\\.)?(?:[Ff][Aa][Cc][Ee][Bb][Oo][Oo][Kk]|[Ff][Bb])\\.[Cc][Oo][Mm]/+[^/?#]",
                                         "type": "string"
                                     }
                                 },
@@ -69068,10 +69069,11 @@
                                         "uniqueItems": true
                                     },
                                     "url": {
-                                        "description": "Full Facebook page or profile URL, e.g. https://www.facebook.com/nike. A single event link (https://www.facebook.com/events/<id>) is refused as invalid input, with no charge; facebook.event_details reads one event.",
+                                        "description": "Facebook page or profile link, e.g. https://www.facebook.com/nike. Accepted: facebook.com/<name>, /p/<name>-<id>, /pages/<name>/<id>, /pg/<name>, /people/<name>/<id>, profile.php?id=<id>, and share links to a page (/share/<id> or /share/p/<id>), on facebook.com or fb.com with or without www, m, mbasic, web, business or a language subdomain. Anything after the page, such as a tab, is fine. Any other Facebook link, such as a single event, group, reel, video, video or reel share link (/share/v/ or /share/r/), hashtag, search or login page, is refused as invalid input, with no charge; facebook.event_details reads one event and facebook.post reads one post.",
                                         "not": {
-                                            "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*(?:facebook|fb)\\.com/events/"
+                                            "pattern": "^(?:[A-Za-z]+://)?[^/?#]*/+(?:(?:events|groups|reels?|videos|watch|stories|hashtag|search|sharer|photo|plugins|legal|login|help|privacy)(?:[/?#]|$)|share/?(?:[?#]|$)|share/[A-Za-oq-z](?:[/?#]|$)|(?:[^/?#]{0,6}|[^/?#]{8,}|[^p/?#][^/?#]{6}|p[^r/?#][^/?#]{5}|pr[^o/?#][^/?#]{4}|pro[^f/?#][^/?#]{3}|prof[^i/?#][^/?#]{2}|profi[^l/?#][^/?#]|profil[^e/?#])\\.php(?:[/?#]|$))"
                                         },
+                                        "pattern": "^(?:[Hh][Tt][Tt][Pp][Ss]?://)?(?:(?:[Ww][Ww][Ww]|[Mm]|[Mm][Bb][Aa][Ss][Ii][Cc]|[Ww][Ee][Bb]|[Bb][Uu][Ss][Ii][Nn][Ee][Ss][Ss]|[A-Za-z]{2}-[A-Za-z]{2})\\.)?(?:[Ff][Aa][Cc][Ee][Bb][Oo][Oo][Kk]|[Ff][Bb])\\.[Cc][Oo][Mm]/+[^/?#]",
                                         "type": "string"
                                     }
                                 },
@@ -117085,7 +117087,7 @@
         },
         "/v1/run/instagram.user_reels": {
             "post": {
-                "description": "List an Instagram account's reels by handle with cursor pagination (caption, plays, likes, comments).\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram User Reels pricing and uptime](https://getanyapi.com/api/instagram/user-reels) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
+                "description": "List an Instagram account's reels by handle with cursor pagination (caption, plays, likes, comments).\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 6 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Instagram User Reels pricing and uptime](https://getanyapi.com/api/instagram/user-reels) - live USD price, lane routing, and measured 30-day uptime. [Every Instagram endpoint](https://getanyapi.com/api/instagram).",
                 "operationId": "instagram_user_reels",
                 "parameters": [
                     {
@@ -143686,7 +143688,7 @@
         },
         "/v1/run/maps.reviews": {
             "post": {
-                "description": "Fetch up to 100 Google Maps reviews for a place by place ID, sorted the way you need, in one normalized response.\n\n**Price:** \\$3.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Maps Reviews pricing and uptime](https://getanyapi.com/api/maps/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Maps endpoint](https://getanyapi.com/api/maps).",
+                "description": "Fetch up to 100 Google Maps reviews for a place by place ID, sorted the way you need, in one normalized response.\n\n**Price:** \\$3.50 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Google Maps Reviews pricing and uptime](https://getanyapi.com/api/maps/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Maps endpoint](https://getanyapi.com/api/maps).",
                 "operationId": "maps_reviews",
                 "parameters": [
                     {
