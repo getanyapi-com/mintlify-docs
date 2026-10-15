@@ -45,7 +45,10 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
         "type": "string",
         "enum": [
           "authorVerified",
+          "feedbackId",
+          "reactions",
           "videoId",
+          "videoUrl",
           "views"
         ]
       },
@@ -69,13 +72,23 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
 | `data.comments` | integer | yes |  |
 | `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.durationSeconds` | number | no | Length of the post's video in seconds, 0 when the post carries no video. |
+| `data.feedbackId` | string or null | no | Facebook feedback id of the post; pass it to facebook.post_comments as feedbackId to fetch its comments. Null when this source cannot read it. |
 | `data.id` | string | yes | Facebook post id. For a reel or video post this is NOT the id in the /reel/ URL; that one is videoId. |
 | `data.image` | string | no | Preview image or video thumbnail URL for the post. |
 | `data.likes` | integer | yes |  |
+| `data.reactions` | object or null | no | Reaction counts on the post, broken down by reaction type. Null when this source reports only the total. |
+| `data.reactions.angry` | integer | no | Angry reactions. |
+| `data.reactions.care` | integer | no | Care reactions. |
+| `data.reactions.haha` | integer | no | Haha reactions. |
+| `data.reactions.like` | integer | no | Like reactions. |
+| `data.reactions.love` | integer | no | Love reactions. |
+| `data.reactions.sad` | integer | no | Sad reactions. |
+| `data.reactions.wow` | integer | no | Wow reactions. |
 | `data.shares` | integer | yes |  |
 | `data.text` | string | yes |  |
 | `data.url` | string | no | Canonical Facebook URL of the post. |
 | `data.videoId` | string or null | no | Facebook video id of the post's reel or video, the id that appears in its /reel/&lt;id&gt; URL. Null when the post carries no video or this lane cannot read it. |
+| `data.videoUrl` | string or null | no | Playable video file URL of the post's reel or video. Null when the post carries no video or this source cannot read it. |
 | `data.views` | integer or null | yes | Number of views on the post's video. Null when the source cannot report an exact count, for example when it gives only a rounded figure such as 14K. |
 | `found` | boolean | yes |  |
 
@@ -177,6 +190,57 @@ Extra fields are kept, missing declared fields fail.
             "authorVerified": {
               "type": "boolean",
               "description": "Whether the posting page or profile carries a Facebook verification badge."
+            },
+            "reactions": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "Reaction counts on the post, broken down by reaction type. Null when this source reports only the total.",
+              "properties": {
+                "like": {
+                  "type": "integer",
+                  "description": "Like reactions."
+                },
+                "love": {
+                  "type": "integer",
+                  "description": "Love reactions."
+                },
+                "care": {
+                  "type": "integer",
+                  "description": "Care reactions."
+                },
+                "haha": {
+                  "type": "integer",
+                  "description": "Haha reactions."
+                },
+                "wow": {
+                  "type": "integer",
+                  "description": "Wow reactions."
+                },
+                "sad": {
+                  "type": "integer",
+                  "description": "Sad reactions."
+                },
+                "angry": {
+                  "type": "integer",
+                  "description": "Angry reactions."
+                }
+              }
+            },
+            "videoUrl": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Playable video file URL of the post's reel or video. Null when the post carries no video or this source cannot read it."
+            },
+            "feedbackId": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Facebook feedback id of the post; pass it to facebook.post_comments as feedbackId to fetch its comments. Null when this source cannot read it."
             }
           }
         }

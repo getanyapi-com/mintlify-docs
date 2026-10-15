@@ -118,6 +118,16 @@ This API takes no input fields.
 | `data.ads[].adCount` | integer or null | yes | Number of ads in this campaign (collation count). Null when the source does not report it. |
 | `data.ads[].caption` | string | no | Caption line of the ad creative, usually the advertiser's display domain. |
 | `data.ads[].categories` | array | no | Ad Library categories the ad is filed under. |
+| `data.ads[].creatives` | array | no | One entry per card of a carousel, dynamic-product, or dynamic-creative ad, in the order Meta returns them, each with its own text and destination. Single-creative ads return an empty array. The same card images and videos also appear in media. Meta CDN media URLs are signed and expire. |
+| `data.ads[].creatives[].body` | string | no | Card body text. |
+| `data.ads[].creatives[].caption` | string | no | Card display caption, usually the destination domain. |
+| `data.ads[].creatives[].ctaText` | string | no | Card call-to-action label (e.g. "Shop Now"). |
+| `data.ads[].creatives[].ctaType` | string | no | Card call-to-action type (e.g. "SHOP_NOW"). |
+| `data.ads[].creatives[].image` | string | no | Card image URL. For a video card this is the poster frame. |
+| `data.ads[].creatives[].linkDescription` | string | no | Card secondary description line. |
+| `data.ads[].creatives[].linkUrl` | string | no | Card destination URL. |
+| `data.ads[].creatives[].title` | string | no | Card headline. |
+| `data.ads[].creatives[].videoUrl` | string | no | Card video file URL (HD when supplied, otherwise SD). Present only on video cards. |
 | `data.ads[].ctaText` | string | no | Call-to-action button label on the ad. |
 | `data.ads[].ctaType` | string | no | Call-to-action button type on the ad, e.g. "SHOP_NOW". |
 | `data.ads[].currency` | string | yes |  |
@@ -292,6 +302,51 @@ Extra fields are kept, missing declared fields fail.
                         "height": {
                           "type": "integer",
                           "description": "Pixel height of the media item, when the lane reports it."
+                        }
+                      }
+                    }
+                  },
+                  "creatives": {
+                    "type": "array",
+                    "description": "One entry per card of a carousel, dynamic-product, or dynamic-creative ad, in the order Meta returns them, each with its own text and destination. Single-creative ads return an empty array. The same card images and videos also appear in media. Meta CDN media URLs are signed and expire.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "Card headline."
+                        },
+                        "body": {
+                          "type": "string",
+                          "description": "Card body text."
+                        },
+                        "caption": {
+                          "type": "string",
+                          "description": "Card display caption, usually the destination domain."
+                        },
+                        "linkUrl": {
+                          "type": "string",
+                          "description": "Card destination URL."
+                        },
+                        "linkDescription": {
+                          "type": "string",
+                          "description": "Card secondary description line."
+                        },
+                        "ctaText": {
+                          "type": "string",
+                          "description": "Card call-to-action label (e.g. \"Shop Now\")."
+                        },
+                        "ctaType": {
+                          "type": "string",
+                          "description": "Card call-to-action type (e.g. \"SHOP_NOW\")."
+                        },
+                        "image": {
+                          "type": "string",
+                          "description": "Card image URL. For a video card this is the poster frame."
+                        },
+                        "videoUrl": {
+                          "type": "string",
+                          "description": "Card video file URL (HD when supplied, otherwise SD). Present only on video cards."
                         }
                       }
                     }

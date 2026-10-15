@@ -70,8 +70,17 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
 | `data.posts[].authorName` | string | yes |  |
 | `data.posts[].commentCount` | integer | yes |  |
 | `data.posts[].id` | string | yes |  |
+| `data.posts[].image` | string | no | URL of the post's first image. Absent when the post has no image. |
 | `data.posts[].publishTime` | integer | yes |  |
 | `data.posts[].reactionCount` | integer | yes |  |
+| `data.posts[].reactions` | object | yes | Reaction counts on the post, broken down by reaction type. |
+| `data.posts[].reactions.angry` | integer | no | Angry reactions. |
+| `data.posts[].reactions.care` | integer | no | Care reactions. |
+| `data.posts[].reactions.haha` | integer | no | Haha reactions. |
+| `data.posts[].reactions.like` | integer | no | Like reactions. |
+| `data.posts[].reactions.love` | integer | no | Love reactions. |
+| `data.posts[].reactions.sad` | integer | no | Sad reactions. |
+| `data.posts[].reactions.wow` | integer | no | Wow reactions. |
 | `data.posts[].text` | string | yes |  |
 | `data.posts[].url` | string | yes |  |
 | `found` | boolean | yes |  |
@@ -128,7 +137,8 @@ Extra fields are kept, missing declared fields fail.
                   "reactionCount",
                   "commentCount",
                   "authorName",
-                  "authorId"
+                  "authorId",
+                  "reactions"
                 ],
                 "properties": {
                   "id": {
@@ -160,6 +170,44 @@ Extra fields are kept, missing declared fields fail.
                   "authorId": {
                     "x-anyapi-must-populate": true,
                     "type": "string"
+                  },
+                  "reactions": {
+                    "type": "object",
+                    "description": "Reaction counts on the post, broken down by reaction type.",
+                    "properties": {
+                      "like": {
+                        "type": "integer",
+                        "description": "Like reactions."
+                      },
+                      "love": {
+                        "type": "integer",
+                        "description": "Love reactions."
+                      },
+                      "care": {
+                        "type": "integer",
+                        "description": "Care reactions."
+                      },
+                      "haha": {
+                        "type": "integer",
+                        "description": "Haha reactions."
+                      },
+                      "wow": {
+                        "type": "integer",
+                        "description": "Wow reactions."
+                      },
+                      "sad": {
+                        "type": "integer",
+                        "description": "Sad reactions."
+                      },
+                      "angry": {
+                        "type": "integer",
+                        "description": "Angry reactions."
+                      }
+                    }
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "URL of the post's first image. Absent when the post has no image."
                   }
                 }
               }

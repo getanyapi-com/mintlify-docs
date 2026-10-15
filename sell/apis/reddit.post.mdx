@@ -15,7 +15,7 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
-| `url` | string | yes | Full Reddit post URL in the /r/&lt;subreddit&gt;/comments/&lt;id&gt;/&lt;slug&gt;/ form, e.g. "https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/". The short "reddit.com/comments/&lt;id&gt;" form is not accepted. |
+| `url` | string | yes | Reddit post URL on reddit.com, e.g. "https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/". The /r/&lt;subreddit&gt;/comments/&lt;id&gt;/, /user/&lt;name&gt;/comments/&lt;id&gt;/, /comments/&lt;id&gt;/ and /gallery/&lt;id&gt; forms are accepted. A link to any other site is refused as invalid input, with no charge. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -36,7 +36,8 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
     "url": {
       "type": "string",
       "minLength": 1,
-      "description": "Full Reddit post URL in the /r/<subreddit>/comments/<id>/<slug>/ form, e.g. \"https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/\". The short \"reddit.com/comments/<id>\" form is not accepted."
+      "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*(?:reddit\\.com|redd\\.it)(?:[/?#]|$)",
+      "description": "Reddit post URL on reddit.com, e.g. \"https://www.reddit.com/r/IAmA/comments/z1c9z/i_am_barack_obama_president_of_the_united_states/\". The /r/<subreddit>/comments/<id>/, /user/<name>/comments/<id>/, /comments/<id>/ and /gallery/<id> forms are accepted. A link to any other site is refused as invalid input, with no charge."
     }
   }
 }
