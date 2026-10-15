@@ -176163,7 +176163,7 @@
         },
         "/v1/run/reddit.search": {
             "post": {
-                "description": "Search Reddit posts across all subreddits by query.\n\n**Price:** \\$0.38 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Search pricing and uptime](https://getanyapi.com/api/reddit/search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "Search Reddit posts across all subreddits by query.\n\n**Price:** \\$0.35 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Search pricing and uptime](https://getanyapi.com/api/reddit/search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_search",
                 "parameters": [
                     {
@@ -176242,7 +176242,7 @@
                                         "type": "boolean"
                                     },
                                     "cursor": {
-                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of results.",
+                                        "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of results. Include `nextCursor` in requireFields on the first request to make sure a source that supports pagination serves it.",
                                         "type": "string"
                                     },
                                     "ignoreSources": {
@@ -176264,12 +176264,13 @@
                                         "type": "string"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived` or `media`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `media`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Name `nextCursor` only if you will fetch more than the first page: when you leave it out, a cheaper source that cannot paginate may serve the request, and its nextCursor is null, so there is no next page to ask for. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
                                         "items": {
                                             "enum": [
                                                 "isArchived",
                                                 "isLocked",
-                                                "media"
+                                                "media",
+                                                "nextCursor"
                                             ],
                                             "type": "string"
                                         },
@@ -176751,7 +176752,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000380",
+                        "amount": "0.000350",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -176825,7 +176826,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000380",
+                                "amount": "0.000350",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -178107,7 +178108,7 @@
         },
         "/v1/run/reddit.subreddit_search": {
             "post": {
-                "description": "Search posts within a single subreddit by query, sort, and timeframe.\n\n**Price:** \\$0.38 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Subreddit Search pricing and uptime](https://getanyapi.com/api/reddit/subreddit-search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "Search posts within a single subreddit by query, sort, and timeframe.\n\n**Price:** \\$0.35 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Subreddit Search pricing and uptime](https://getanyapi.com/api/reddit/subreddit-search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_subreddit_search",
                 "parameters": [
                     {
@@ -178188,7 +178189,7 @@
                                         "type": "boolean"
                                     },
                                     "cursor": {
-                                        "description": "Optional pagination token from a previous response.",
+                                        "description": "Optional pagination token from a previous response. Include `nextCursor` in requireFields on the first request to make sure a source that supports pagination serves it.",
                                         "type": "string"
                                     },
                                     "ignoreSources": {
@@ -178210,11 +178211,12 @@
                                         "type": "string"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived` or `selftext`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `selftext`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Name `nextCursor` only if you will fetch more than the first page: when you leave it out, a cheaper source that cannot paginate may serve the request, and its nextCursor is null, so there is no next page to ask for. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
                                         "items": {
                                             "enum": [
                                                 "isArchived",
                                                 "isLocked",
+                                                "nextCursor",
                                                 "selftext"
                                             ],
                                             "type": "string"
@@ -178669,7 +178671,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000380",
+                        "amount": "0.000350",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -178743,7 +178745,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000380",
+                                "amount": "0.000350",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -260640,7 +260642,7 @@
         },
         "/v1/run/web.scrape": {
             "post": {
-                "description": "Scrape any web page and get its content back as clean Markdown (or HTML, or raw HTML) plus title and metadata.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Web Scrape pricing and uptime](https://getanyapi.com/api/web/scrape) - live USD price, lane routing, and measured 30-day uptime. [Every Web endpoint](https://getanyapi.com/api/web).",
+                "description": "Scrape any web page and get its content back as clean Markdown (or HTML, or raw HTML) plus title and metadata.\n\n**Price:** \\$0.70 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Web Scrape pricing and uptime](https://getanyapi.com/api/web/scrape) - live USD price, lane routing, and measured 30-day uptime. [Every Web endpoint](https://getanyapi.com/api/web).",
                 "operationId": "web_scrape",
                 "parameters": [
                     {
