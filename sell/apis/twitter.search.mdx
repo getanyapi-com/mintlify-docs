@@ -106,10 +106,10 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
 | Field | Type | Always present | What it means |
 | --- | --- | --- | --- |
 | `data` | null or object | yes |  |
-| `data.authorFollowers` | integer | no | Follower count of the account that posted. |
-| `data.authorId` | string | no | Numeric X user id of the account that posted, as a string. |
-| `data.authorImage` | string | no | Avatar image URL of the account that posted. |
 | `data.items` | array | yes | Tweet records: text, author profile, timestamp, and engagement metrics (likes, retweets, replies, views). |
+| `data.items[].authorFollowers` | integer | no | Follower count of the account that posted. |
+| `data.items[].authorId` | string | no | Numeric X user id of the account that posted, as a string. |
+| `data.items[].authorImage` | string | no | Avatar image URL of the account that posted. |
 | `data.items[].authorName` | string | no |  |
 | `data.items[].authorUsername` | string | no |  |
 | `data.items[].authorVerified` | boolean | no |  |
@@ -202,6 +202,18 @@ Extra fields are kept, missing declared fields fail.
                   "authorVerified": {
                     "type": "boolean"
                   },
+                  "authorId": {
+                    "type": "string",
+                    "description": "Numeric X user id of the account that posted, as a string."
+                  },
+                  "authorImage": {
+                    "type": "string",
+                    "description": "Avatar image URL of the account that posted."
+                  },
+                  "authorFollowers": {
+                    "type": "integer",
+                    "description": "Follower count of the account that posted."
+                  },
                   "likeCount": {
                     "type": "integer"
                   },
@@ -289,18 +301,6 @@ Extra fields are kept, missing declared fields fail.
                 "null"
               ],
               "description": "Opaque cursor for the next page of search results, or null when there are no more. Pass it back as cursor to continue."
-            },
-            "authorId": {
-              "type": "string",
-              "description": "Numeric X user id of the account that posted, as a string."
-            },
-            "authorImage": {
-              "type": "string",
-              "description": "Avatar image URL of the account that posted."
-            },
-            "authorFollowers": {
-              "type": "integer",
-              "description": "Follower count of the account that posted."
             }
           }
         }

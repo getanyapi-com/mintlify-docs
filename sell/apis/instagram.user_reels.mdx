@@ -42,6 +42,29 @@ This API takes no input fields.
     "cursor": {
       "type": "string",
       "description": "Pagination cursor (max_id) from a previous response's nextCursor."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "coauthors",
+          "countsHidden",
+          "isPinned",
+          "locationId",
+          "locationLat",
+          "locationLng",
+          "locationName",
+          "paidPartnership",
+          "productType",
+          "reshares",
+          "soundAuthor",
+          "soundTitle",
+          "taggedUsers"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `soundTitle`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a reel that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   },
   "anyOf": [
@@ -70,19 +93,41 @@ This API takes no input fields.
 | `data.reels` | array | yes |  |
 | `data.reels[].avatarUrl` | string | no | Profile picture URL of the posting account. |
 | `data.reels[].caption` | string | yes |  |
+| `data.reels[].coauthors` | array or null | no | Accounts listed as coauthors of the post. Null when the serving source does not report it. |
+| `data.reels[].coauthors[].displayName` | string | no | Account display name. |
+| `data.reels[].coauthors[].userId` | string | no | Instagram's numeric account id, as a string. |
+| `data.reels[].coauthors[].username` | string | yes | Instagram username without the leading @. |
+| `data.reels[].coauthors[].verified` | boolean | no | Whether the account carries Instagram's verified badge. |
 | `data.reels[].comments` | integer | yes |  |
+| `data.reels[].countsHidden` | boolean or null | no | Whether the author has hidden the like and view counts. Null when the serving source does not report it. |
 | `data.reels[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.reels[].displayName` | string | no | Display name of the posting account. |
 | `data.reels[].durationSeconds` | number | yes | Reel duration in seconds. |
+| `data.reels[].hashtags` | array | no | Hashtags carried in the caption, each including its leading #. |
 | `data.reels[].id` | string | yes | Instagram media id. |
+| `data.reels[].isPinned` | boolean or null | no | Whether the post is pinned to the top of a profile grid. On a collaboration post this can be true because a coauthor pinned it to their own profile. Null when the serving source does not report it. |
 | `data.reels[].likes` | integer | yes |  |
+| `data.reels[].locationId` | string or null | no | Instagram location id the post is tagged at. Absent when the post has no location. Null when the serving source does not report it. |
+| `data.reels[].locationLat` | number or null | no | Latitude of the tagged location, in decimal degrees. Null when the serving source does not report it. |
+| `data.reels[].locationLng` | number or null | no | Longitude of the tagged location, in decimal degrees. Null when the serving source does not report it. |
+| `data.reels[].locationName` | string or null | no | Name of the location the post is tagged at. Null when the serving source does not report it. |
 | `data.reels[].media` | array | no | Photo, video, and GIF attachments on the post. Empty when the post has none. |
 | `data.reels[].media[].height` | integer | no | Pixel height of the media item, when the lane reports it. |
 | `data.reels[].media[].type` | string | yes | One of photo, video, or gif. |
 | `data.reels[].media[].url` | string | yes | Image URL. For a video or GIF this is the poster/thumbnail frame. |
 | `data.reels[].media[].videoUrl` | string | no | Playable video file URL. Present only for video and gif items. |
 | `data.reels[].media[].width` | integer | no | Pixel width of the media item, when the lane reports it. |
+| `data.reels[].mentions` | array | no | Accounts @mentioned in the caption, each including its leading @. |
+| `data.reels[].paidPartnership` | boolean or null | no | Whether the post is tagged as a paid partnership. Null when the serving source does not report it. |
+| `data.reels[].productType` | string or null | no | Instagram's own surface label for the post, such as feed, clips or carousel_container. Null when the serving source does not report it. |
+| `data.reels[].reshares` | integer or null | no | Number of times the post has been reshared, when Instagram reports it. Null when the serving source does not report it. |
 | `data.reels[].shortcode` | string | yes |  |
+| `data.reels[].soundAuthor` | string or null | no | Credited artist of a licensed track, or the username of the account whose original audio it is. Absent when the post has no sound. Null when the serving source does not report it. |
+| `data.reels[].soundTitle` | string or null | no | Name of the sound on a reel or a post with music. "Original audio" means the creator's own audio rather than a licensed track. Absent when the post has no sound. Null when the serving source does not report it. |
+| `data.reels[].taggedUsers` | array or null | no | Accounts tagged in the media. Null when the serving source does not report it. |
+| `data.reels[].taggedUsers[].displayName` | string | no | Account display name. |
+| `data.reels[].taggedUsers[].userId` | string | no | Instagram's numeric account id, as a string. |
+| `data.reels[].taggedUsers[].username` | string | yes | Instagram username without the leading @. |
 | `data.reels[].userId` | string | no | Instagram user id of the posting account. |
 | `data.reels[].username` | string | yes | Username of the account that posted the reel. A reels tab includes collaborator reels, so this is not always the requested handle. |
 | `data.reels[].verified` | boolean | yes | True when the posting account is verified. |
@@ -154,6 +199,157 @@ Extra fields are kept, missing declared fields fail.
                   "shortcode": {
                     "x-anyapi-must-populate": true,
                     "type": "string"
+                  },
+                  "hashtags": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "description": "Hashtags carried in the caption, each including its leading #.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "mentions": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "description": "Accounts @mentioned in the caption, each including its leading @.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "taggedUsers": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "Accounts tagged in the media. Null when the serving source does not report it.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "username"
+                      ],
+                      "properties": {
+                        "username": {
+                          "type": "string",
+                          "description": "Instagram username without the leading @."
+                        },
+                        "userId": {
+                          "type": "string",
+                          "description": "Instagram's numeric account id, as a string."
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "description": "Account display name."
+                        }
+                      }
+                    }
+                  },
+                  "coauthors": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "Accounts listed as coauthors of the post. Null when the serving source does not report it.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "username"
+                      ],
+                      "properties": {
+                        "username": {
+                          "type": "string",
+                          "description": "Instagram username without the leading @."
+                        },
+                        "userId": {
+                          "type": "string",
+                          "description": "Instagram's numeric account id, as a string."
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "description": "Account display name."
+                        },
+                        "verified": {
+                          "type": "boolean",
+                          "description": "Whether the account carries Instagram's verified badge."
+                        }
+                      }
+                    }
+                  },
+                  "isPinned": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the post is pinned to the top of a profile grid. On a collaboration post this can be true because a coauthor pinned it to their own profile. Null when the serving source does not report it."
+                  },
+                  "productType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Instagram's own surface label for the post, such as feed, clips or carousel_container. Null when the serving source does not report it."
+                  },
+                  "paidPartnership": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the post is tagged as a paid partnership. Null when the serving source does not report it."
+                  },
+                  "countsHidden": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the author has hidden the like and view counts. Null when the serving source does not report it."
+                  },
+                  "soundTitle": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Name of the sound on a reel or a post with music. \"Original audio\" means the creator's own audio rather than a licensed track. Absent when the post has no sound. Null when the serving source does not report it."
+                  },
+                  "soundAuthor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Credited artist of a licensed track, or the username of the account whose original audio it is. Absent when the post has no sound. Null when the serving source does not report it."
+                  },
+                  "reshares": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of times the post has been reshared, when Instagram reports it. Null when the serving source does not report it."
+                  },
+                  "locationId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Instagram location id the post is tagged at. Absent when the post has no location. Null when the serving source does not report it."
+                  },
+                  "locationName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Name of the location the post is tagged at. Null when the serving source does not report it."
+                  },
+                  "locationLat": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Latitude of the tagged location, in decimal degrees. Null when the serving source does not report it."
+                  },
+                  "locationLng": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Longitude of the tagged location, in decimal degrees. Null when the serving source does not report it."
                   },
                   "caption": {
                     "x-anyapi-must-populate": true,
@@ -248,7 +444,9 @@ Extra fields are kept, missing declared fields fail.
 ## Fields that must never come back empty
 
 - `caption`
+- `hashtags`
 - `id`
+- `mentions`
 - `reels`
 - `shortcode`
 - `username`

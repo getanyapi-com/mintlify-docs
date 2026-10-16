@@ -72,10 +72,10 @@ AnyAPI publishes this API from **$0.45 per 1,000 requests**. That is the price a
 | Field | Type | Always present | What it means |
 | --- | --- | --- | --- |
 | `data` | null or object | yes |  |
-| `data.conversationId` | string | no | Id of the conversation the reply belongs to, as a string. |
 | `data.items` | array | yes | Reply records for the requested post. |
 | `data.items[].authorHandle` | string | no | Screen name / handle of the reply's author, without the @ prefix. |
 | `data.items[].authorName` | string | no | Display name of the reply's author. Empty when the upstream omits it. |
+| `data.items[].conversationId` | string | no | Id of the conversation the reply belongs to, as a string. |
 | `data.items[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.items[].id` | string | yes | The reply's numeric tweet ID, as a string. |
 | `data.items[].likeCount` | integer | no | Number of likes on this reply. |
@@ -188,6 +188,10 @@ Extra fields are kept, missing declared fields fail.
                     "type": "number",
                     "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
                   },
+                  "conversationId": {
+                    "type": "string",
+                    "description": "Id of the conversation the reply belongs to, as a string."
+                  },
                   "media": {
                     "type": "array",
                     "description": "Photo, video, and GIF attachments on the post. Empty when the post has none.",
@@ -225,10 +229,6 @@ Extra fields are kept, missing declared fields fail.
                   }
                 }
               }
-            },
-            "conversationId": {
-              "type": "string",
-              "description": "Id of the conversation the reply belongs to, as a string."
             },
             "nextCursor": {
               "type": [

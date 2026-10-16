@@ -17,6 +17,7 @@ AnyAPI publishes this API from **$1.10 per 1,000 requests**. That is the price a
 | --- | --- | --- | --- |
 | `cursor` | string | no | Pagination cursor from a previous response's nextCursor. |
 | `query` | string | yes | Search keyword (e.g. "crossfit"). |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `locationName`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a reel that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -25,7 +26,7 @@ AnyAPI publishes this API from **$1.10 per 1,000 requests**. That is the price a
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://getanyapi.com/schemas/instagram.reels_search.input.json",
   "example": {
-    "query": "travel"
+    "query": "collab"
   },
   "title": "Instagram reels search input",
   "type": "object",
@@ -41,6 +42,21 @@ AnyAPI publishes this API from **$1.10 per 1,000 requests**. That is the price a
     "cursor": {
       "type": "string",
       "description": "Pagination cursor from a previous response's nextCursor."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "audioId",
+          "locationId",
+          "locationLat",
+          "locationLng",
+          "locationName"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `locationName`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a reel that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -55,18 +71,29 @@ AnyAPI publishes this API from **$1.10 per 1,000 requests**. That is the price a
 | `data` | null or object | yes | Wrapper holding the reels array, or null when nothing was found. |
 | `data.nextCursor` | string or null | yes | Opaque cursor for the next page of reels, or null when this lane has no more. Pass it back as cursor to continue. Instagram relevance-ranks reels search, so a later page can repeat reels from an earlier one. |
 | `data.reels` | array | yes | Reels matching the search. |
+| `data.reels[].audioId` | string or null | no | Instagram audio id of the post's sound, licensed track or original audio, the audioId instagram.audio_reels takes to list other reels using it. Absent when the post has no sound. Null when the serving source does not report it. |
 | `data.reels[].avatarUrl` | string | no | Profile picture URL of the author. |
 | `data.reels[].caption` | string | yes | Reel caption text. |
 | `data.reels[].comments` | integer | yes | Number of comments on the reel. |
+| `data.reels[].countsHidden` | boolean | no | Whether the author has hidden the like and view counts. |
 | `data.reels[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.reels[].displayName` | string | no | Display name of the author. |
 | `data.reels[].durationSeconds` | number | yes | Reel duration in seconds. |
 | `data.reels[].hasAudio` | boolean | no | True when the reel carries an audio track. |
+| `data.reels[].hashtags` | array | no | Hashtags carried in the caption, each including its leading #. |
 | `data.reels[].id` | string | no | Reel media identifier. |
 | `data.reels[].likes` | integer | yes | Number of likes on the reel. |
+| `data.reels[].locationId` | string or null | no | Instagram location id the post is tagged at. Absent when the post has no location. Null when the serving source does not report it. |
+| `data.reels[].locationLat` | number or null | no | Latitude of the tagged location, in decimal degrees. Null when the serving source does not report it. |
+| `data.reels[].locationLng` | number or null | no | Longitude of the tagged location, in decimal degrees. Null when the serving source does not report it. |
+| `data.reels[].locationName` | string or null | no | Name of the location the post is tagged at. Null when the serving source does not report it. |
+| `data.reels[].mentions` | array | no | Accounts @mentioned in the caption, each including its leading @. |
 | `data.reels[].paidPartnership` | boolean | yes | True when the reel is a paid partnership. |
 | `data.reels[].productType` | string | no | Instagram product type of the media, for example clips. |
+| `data.reels[].reshares` | integer | no | Number of times the post has been reshared, when Instagram reports it. |
 | `data.reels[].shortcode` | string | yes | Instagram media shortcode. |
+| `data.reels[].soundAuthor` | string | no | Credited artist of a licensed track, or the username of the account whose original audio it is. Absent when the post has no sound. |
+| `data.reels[].soundTitle` | string | no | Name of the sound on a reel or a post with music. "Original audio" means the creator's own audio rather than a licensed track. Absent when the post has no sound. |
 | `data.reels[].thumbnail` | string | yes | URL of the reel thumbnail image. |
 | `data.reels[].url` | string | yes | Canonical URL of the reel. |
 | `data.reels[].userId` | string | no | Instagram user id of the author. |
@@ -137,6 +164,76 @@ Extra fields are kept, missing declared fields fail.
                     "x-anyapi-must-populate": true,
                     "type": "string",
                     "description": "Canonical URL of the reel."
+                  },
+                  "hashtags": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "description": "Hashtags carried in the caption, each including its leading #.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "mentions": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "description": "Accounts @mentioned in the caption, each including its leading @.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "reshares": {
+                    "x-anyapi-must-populate": true,
+                    "type": "integer",
+                    "description": "Number of times the post has been reshared, when Instagram reports it."
+                  },
+                  "soundTitle": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Name of the sound on a reel or a post with music. \"Original audio\" means the creator's own audio rather than a licensed track. Absent when the post has no sound."
+                  },
+                  "soundAuthor": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Credited artist of a licensed track, or the username of the account whose original audio it is. Absent when the post has no sound."
+                  },
+                  "audioId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Instagram audio id of the post's sound, licensed track or original audio, the audioId instagram.audio_reels takes to list other reels using it. Absent when the post has no sound. Null when the serving source does not report it."
+                  },
+                  "countsHidden": {
+                    "type": "boolean",
+                    "description": "Whether the author has hidden the like and view counts."
+                  },
+                  "locationId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Instagram location id the post is tagged at. Absent when the post has no location. Null when the serving source does not report it."
+                  },
+                  "locationName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Name of the location the post is tagged at. Null when the serving source does not report it."
+                  },
+                  "locationLat": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Latitude of the tagged location, in decimal degrees. Null when the serving source does not report it."
+                  },
+                  "locationLng": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Longitude of the tagged location, in decimal degrees. Null when the serving source does not report it."
                   },
                   "caption": {
                     "x-anyapi-must-populate": true,
@@ -234,8 +331,13 @@ Extra fields are kept, missing declared fields fail.
 ## Fields that must never come back empty
 
 - `caption`
+- `hashtags`
+- `mentions`
 - `reels`
+- `reshares`
 - `shortcode`
+- `soundAuthor`
+- `soundTitle`
 - `thumbnail`
 - `url`
 - `username`
@@ -261,7 +363,7 @@ This output schema declares no `reason` field, so `found: false` is the whole no
 
 ```json
 {
-  "query": "travel"
+  "query": "collab"
 }
 ```
 

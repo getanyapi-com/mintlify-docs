@@ -16,6 +16,7 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Pagination cursor from a previous response's nextCursor. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `replies`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a comment that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 | `url` | string | yes | Full Instagram post or reel URL. |
 
 <Accordion title="Full input JSON Schema">
@@ -41,6 +42,18 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
     "cursor": {
       "type": "string",
       "description": "Pagination cursor from a previous response's nextCursor."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "replies",
+          "userId"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `replies`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a comment that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -59,7 +72,9 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
 | `data.comments[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.comments[].id` | string | yes |  |
 | `data.comments[].likes` | integer or null | yes | Number of likes on the comment. Null when the source does not report it. |
+| `data.comments[].replies` | integer or null | no | Number of replies to the comment, which tells you whether instagram.comment_replies has anything to fetch. Null when this source does not report it. |
 | `data.comments[].text` | string | yes |  |
+| `data.comments[].userId` | string or null | no | Instagram user id of the commenting account. Null when this source does not report it. |
 | `data.comments[].verified` | boolean | yes |  |
 | `data.nextCursor` | string or null | yes | Opaque cursor for the next page of comments, or null when this lane has no more. Pass it back as cursor to continue. |
 | `found` | boolean | yes |  |
@@ -147,6 +162,20 @@ Extra fields are kept, missing declared fields fail.
                   "avatarUrl": {
                     "type": "string",
                     "description": "URL of the commenting account's profile avatar image."
+                  },
+                  "replies": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of replies to the comment, which tells you whether instagram.comment_replies has anything to fetch. Null when this source does not report it."
+                  },
+                  "userId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Instagram user id of the commenting account. Null when this source does not report it."
                   }
                 }
               }

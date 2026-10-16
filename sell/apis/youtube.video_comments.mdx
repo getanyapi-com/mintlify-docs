@@ -71,6 +71,7 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
 | `data.comments[].likes` | integer | yes |  |
 | `data.comments[].publishedTime` | string | yes |  |
 | `data.comments[].replies` | integer | yes |  |
+| `data.comments[].repliesContinuationToken` | string | no | Token for this comment's replies. Pass it as continuationToken to youtube.comment_replies. Absent when the comment has no replies or the serving source does not return one. |
 | `data.comments[].text` | string | yes |  |
 | `data.nextCursor` | string or null | yes | Opaque cursor for the next page of comments, or null when this lane has no more. Pass it back as cursor to continue. |
 | `found` | boolean | yes |  |
@@ -161,6 +162,10 @@ Extra fields are kept, missing declared fields fail.
                   "authorAvatarUrl": {
                     "type": "string",
                     "description": "URL of the comment author's avatar image."
+                  },
+                  "repliesContinuationToken": {
+                    "type": "string",
+                    "description": "Token for this comment's replies. Pass it as continuationToken to youtube.comment_replies. Absent when the comment has no replies or the serving source does not return one."
                   }
                 }
               }

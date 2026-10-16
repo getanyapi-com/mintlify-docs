@@ -57,18 +57,18 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
       "items": {
         "type": "string",
         "enum": [
-          "avatarUrl",
-          "comments",
-          "createdUtc",
-          "displayName",
+          "altText",
+          "audioId",
+          "countsHidden",
+          "durationSeconds",
           "hasAudio",
           "locationId",
-          "locationName",
-          "paidPartnership",
+          "locationLat",
+          "locationLng",
           "plays",
-          "productType",
-          "userId",
-          "verified"
+          "reshares",
+          "soundAuthor",
+          "soundTitle"
         ]
       },
       "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `plays`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
@@ -84,24 +84,36 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
 | Field | Type | Always present | What it means |
 | --- | --- | --- | --- |
 | `data` | null or object | yes |  |
+| `data.altText` | string or null | no | Instagram's generated accessibility description of the media. Null when this source does not report it. |
+| `data.audioId` | string or null | no | Instagram audio id of the sound; pass it to instagram.audio_reels as audioId to list other reels using it. Null when the media has no sound or this source does not report it. |
 | `data.avatarUrl` | string | no | Profile picture URL of the posting account. |
 | `data.bytes` | integer | no | Size of the hosted MP4 in bytes. Present only when the request set `hostVideo` to true. |
+| `data.caption` | string | no | Caption text of the post, including its hashtags and @mentions. Empty when the post has no caption. |
 | `data.comments` | integer | no | Number of comments on the post. |
+| `data.countsHidden` | boolean or null | no | Whether the author has hidden the like and view counts. Null when this source does not report it. |
 | `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.displayName` | string | no | Display name of the posting account. |
 | `data.displayUrl` | string | yes |  |
+| `data.durationSeconds` | number or null | no | Video duration in seconds. Null on a photo, or when this source does not report it. |
 | `data.expiresUtc` | integer | no | When `hostedUrl` stops working, as a UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Present only when the request set `hostVideo` to true. |
 | `data.hasAudio` | boolean | no | True when the media carries an audio track. |
+| `data.hashtags` | array | no | Hashtags carried in the caption, each including its leading #. Empty when the caption uses none. |
 | `data.hostedUrl` | string | no | AnyAPI-hosted MP4 of this post's video, playable without an Instagram session. Present only when the request set `hostVideo` to true. |
 | `data.id` | string | yes |  |
 | `data.likes` | integer | yes |  |
 | `data.locationId` | string | no | Instagram id of the tagged place, when the post tags one. |
+| `data.locationLat` | number or null | no | Latitude of the tagged location, in decimal degrees. Null when the post tags no place or this source does not report it. |
+| `data.locationLng` | number or null | no | Longitude of the tagged location, in decimal degrees. Null when the post tags no place or this source does not report it. |
 | `data.locationName` | string | no | Name of the tagged place, when the post tags one. |
+| `data.mentions` | array | no | Accounts mentioned in the caption, each including its leading @, in caption order. Empty when the caption mentions none. |
 | `data.owner` | string | yes |  |
 | `data.paidPartnership` | boolean | no | True when the post is tagged as a paid partnership. |
 | `data.plays` | integer | no | Number of plays of the reel or video. Absent when Instagram does not expose a play count for this media, and on lanes that cannot serve it. |
 | `data.productType` | string | no | Instagram product type of the media, for example feed, clips or igtv. |
+| `data.reshares` | integer or null | no | Number of times the post has been reshared. Null when this source does not report it. |
 | `data.shortcode` | string | yes |  |
+| `data.soundAuthor` | string or null | no | Credited author of the sound. Null when the media has no sound or this source does not report it. |
+| `data.soundTitle` | string or null | no | Name of the sound. "Original audio" means the creator's own audio rather than a licensed track. Null when the media has no sound or this source does not report it. |
 | `data.type` | string | yes |  |
 | `data.userId` | string | no | Instagram user id of the posting account. |
 | `data.verified` | boolean | no | True when the posting account carries a verified badge. |
@@ -117,6 +129,7 @@ Extra fields are kept, missing declared fields fail.
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://getanyapi.com/schemas/instagram.post.output.json",
   "title": "Instagram post output",
+  "x-anyapi-result-list": false,
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -216,6 +229,89 @@ Extra fields are kept, missing declared fields fail.
               "type": "string",
               "description": "Name of the tagged place, when the post tags one."
             },
+            "caption": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Caption text of the post, including its hashtags and @mentions. Empty when the post has no caption."
+            },
+            "hashtags": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Hashtags carried in the caption, each including its leading #. Empty when the caption uses none."
+            },
+            "mentions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Accounts mentioned in the caption, each including its leading @, in caption order. Empty when the caption mentions none."
+            },
+            "locationLat": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Latitude of the tagged location, in decimal degrees. Null when the post tags no place or this source does not report it."
+            },
+            "locationLng": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Longitude of the tagged location, in decimal degrees. Null when the post tags no place or this source does not report it."
+            },
+            "durationSeconds": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Video duration in seconds. Null on a photo, or when this source does not report it."
+            },
+            "soundTitle": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Name of the sound. \"Original audio\" means the creator's own audio rather than a licensed track. Null when the media has no sound or this source does not report it."
+            },
+            "soundAuthor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Credited author of the sound. Null when the media has no sound or this source does not report it."
+            },
+            "audioId": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Instagram audio id of the sound; pass it to instagram.audio_reels as audioId to list other reels using it. Null when the media has no sound or this source does not report it."
+            },
+            "countsHidden": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "Whether the author has hidden the like and view counts. Null when this source does not report it."
+            },
+            "reshares": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Number of times the post has been reshared. Null when this source does not report it."
+            },
+            "altText": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Instagram's generated accessibility description of the media. Null when this source does not report it."
+            },
             "hostedUrl": {
               "type": "string",
               "format": "uri",
@@ -241,7 +337,9 @@ Extra fields are kept, missing declared fields fail.
 
 ## Fields that must never come back empty
 
+- `caption`
 - `displayUrl`
+- `hashtags`
 - `id`
 - `owner`
 
@@ -258,7 +356,7 @@ When the entity does not exist, answer 2xx with the not-found shape:
 }
 ```
 
-An empty result is not a not-found: when the entity exists but carries nothing, answer 2xx with `found: true` and the empty values.
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `hashtags` array.
 
 This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
 

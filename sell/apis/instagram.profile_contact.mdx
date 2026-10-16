@@ -16,6 +16,7 @@ AnyAPI publishes this API from **$1.75 per 1,000 requests**. That is the price a
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `handle` | string | yes | Instagram username without the leading @. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isBusiness`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -40,6 +41,20 @@ AnyAPI publishes this API from **$1.75 per 1,000 requests**. That is the price a
       "type": "string",
       "minLength": 1,
       "description": "Instagram username without the leading @."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "bioLinks",
+          "isBusiness",
+          "title",
+          "url"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isBusiness`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -53,10 +68,14 @@ AnyAPI publishes this API from **$1.75 per 1,000 requests**. That is the price a
 | --- | --- | --- | --- |
 | `data` | null or object | yes | The account and the contact details it publishes, or null when no such account exists. |
 | `data.bio` | string | no | Profile biography text. |
+| `data.bioLinks` | array or null | no | Every link the account publishes in its bio, in the order Instagram returns them. Null when this source does not report them. |
+| `data.bioLinks[].title` | string | no | Display label for the link, empty when the account set none. |
+| `data.bioLinks[].url` | string | yes | Destination URL, exactly as the account published it. |
 | `data.displayName` | string | no | Account display name. |
 | `data.emails` | array | yes | Every email address found for the account: the contact-button address plus any address written into the bio, deduplicated. Empty when the account publishes none. |
 | `data.externalUrl` | string | no | The website link on the profile. Absent when the account publishes no link. |
 | `data.handle` | string | yes | Instagram username without the leading @. |
+| `data.isBusiness` | boolean or null | no | Whether Instagram flags the account as a business account. Null when this source does not report it. |
 | `data.phones` | array | no | Every phone number found for the account, in E.164 form where the number could be normalized. Empty when the account publishes none. |
 | `data.private` | boolean | no | Whether the account is private. |
 | `data.publicEmail` | string | no | The address behind the profile's Email contact button, as the account owner entered it. Absent when the account publishes no contact email. |
@@ -146,6 +165,36 @@ Extra fields are kept, missing declared fields fail.
                 "type": "string"
               },
               "description": "Every phone number found for the account, in E.164 form where the number could be normalized. Empty when the account publishes none."
+            },
+            "isBusiness": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "Whether Instagram flags the account as a business account. Null when this source does not report it."
+            },
+            "bioLinks": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "description": "Every link the account publishes in its bio, in the order Instagram returns them. Null when this source does not report them.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Display label for the link, empty when the account set none."
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Destination URL, exactly as the account published it."
+                  }
+                }
+              }
             }
           }
         }
@@ -176,7 +225,7 @@ When the entity does not exist, answer 2xx with the not-found shape:
 }
 ```
 
-An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `emails` array.
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `bioLinks` array.
 
 This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
 

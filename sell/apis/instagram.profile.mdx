@@ -48,6 +48,7 @@ AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a
         "type": "string",
         "enum": [
           "contactMethod",
+          "highlightsCount",
           "posts"
         ]
       },
@@ -76,6 +77,7 @@ AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a
 | `data.followers` | integer | yes | Follower count. |
 | `data.following` | integer | yes | Number of accounts this account follows. |
 | `data.handle` | string | yes | Instagram username without the leading @. |
+| `data.highlightsCount` | integer or null | no | Number of story highlights pinned on the profile. Null when this source does not report it. |
 | `data.isBusiness` | boolean | no | Whether Instagram flags the account as a business account. |
 | `data.posts` | integer or null | yes | Total number of posts on the account. Null when the serving source does not report it. |
 | `data.private` | boolean | yes | Whether the account is private. |
@@ -151,6 +153,13 @@ Extra fields are kept, missing declared fields fail.
                 "null"
               ],
               "description": "Total number of posts on the account. Null when the serving source does not report it."
+            },
+            "highlightsCount": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Number of story highlights pinned on the profile. Null when this source does not report it."
             },
             "bio": {
               "x-anyapi-must-populate": true,
