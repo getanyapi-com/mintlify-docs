@@ -45,6 +45,8 @@ This API takes no input fields.
       "items": {
         "type": "string",
         "enum": [
+          "authorFollowers",
+          "authorVerified",
           "comments",
           "likes",
           "shares",
@@ -76,20 +78,26 @@ This API takes no input fields.
 | Field | Type | Always present | What it means |
 | --- | --- | --- | --- |
 | `data` | null or object | yes |  |
+| `data.authorFollowers` | integer or null | no | The author's follower count at the time of the request. Some sources round large counts; name `authorFollowers` in requireFields to be served only by a source that returns the exact count. Null when the serving source does not report it. |
 | `data.authorHandle` | string | no | Author's TikTok handle, without the leading @. |
 | `data.authorImage` | string | no | Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
 | `data.authorName` | string | no | Author's display name. |
 | `data.authorUserId` | string | no | Author's numeric TikTok user id. |
+| `data.authorVerified` | boolean or null | no | Whether the author's account carries a TikTok verification badge. Null when the serving source does not report it. |
 | `data.caption` | string | yes |  |
 | `data.comments` | integer | yes | Number of comments. Some sources round large counts (48.5K instead of 48,536); name `comments` in requireFields to be served only by a source that returns the exact count. |
 | `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.durationSeconds` | number | no | Video duration in seconds. |
+| `data.hashtags` | array | no | Hashtags carried in the caption, without the leading #. Empty when the post uses none; @-mentions are excluded. |
 | `data.id` | string | yes |  |
 | `data.image` | string | no | URL of the video's cover/thumbnail image. A signed, short-lived TikTok CDN URL (typically expires within about a day; query params are load-bearing and kept intact), often served as HEIC rather than JPEG, so fetch it promptly and transcode if you need broad browser support. Absent when the upstream provides no cover. |
 | `data.likes` | integer | yes | Number of likes. Some sources round large counts (2.9M instead of 2,884,604); name `likes` in requireFields to be served only by a source that returns the exact count. |
 | `data.region` | string | yes |  |
 | `data.saves` | integer | yes |  |
 | `data.shares` | integer | yes | Number of shares. Some sources round large counts (35.9K instead of 35,923); name `shares` in requireFields to be served only by a source that returns the exact count. |
+| `data.soundAuthor` | string | no | Credited author of the sound. |
+| `data.soundClipId` | string | no | Id of the sound the video uses. Pass it to tiktok.song or tiktok.song_videos as clipId. |
+| `data.soundTitle` | string | no | Name of the sound. "original sound" means the creator's own audio rather than a licensed track. |
 | `data.url` | string | no | Canonical TikTok URL of the video. |
 | `data.videoUrl` | string | no | Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
 | `data.views` | integer | yes | Number of plays. Some sources round large counts (32.7M instead of 32,736,400); name `views` in requireFields to be served only by a source that returns the exact count. |
@@ -101,6 +109,7 @@ Extra fields are kept, missing declared fields fail.
 
 ```json
 {
+  "x-anyapi-result-list": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://getanyapi.com/schemas/tiktok.video.output.json",
   "title": "TikTok video output",
@@ -197,6 +206,42 @@ Extra fields are kept, missing declared fields fail.
             "videoUrl": {
               "type": "string",
               "description": "Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+            },
+            "soundClipId": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Id of the sound the video uses. Pass it to tiktok.song or tiktok.song_videos as clipId."
+            },
+            "soundTitle": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Name of the sound. \"original sound\" means the creator's own audio rather than a licensed track."
+            },
+            "soundAuthor": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Credited author of the sound."
+            },
+            "hashtags": {
+              "type": "array",
+              "description": "Hashtags carried in the caption, without the leading #. Empty when the post uses none; @-mentions are excluded.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "authorFollowers": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "The author's follower count at the time of the request. Some sources round large counts; name `authorFollowers` in requireFields to be served only by a source that returns the exact count. Null when the serving source does not report it."
+            },
+            "authorVerified": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "Whether the author's account carries a TikTok verification badge. Null when the serving source does not report it."
             }
           }
         }
@@ -212,6 +257,9 @@ Extra fields are kept, missing declared fields fail.
 
 - `caption`
 - `id`
+- `soundAuthor`
+- `soundClipId`
+- `soundTitle`
 
 The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
 
@@ -226,7 +274,7 @@ When the entity does not exist, answer 2xx with the not-found shape:
 }
 ```
 
-An empty result is not a not-found: when the entity exists but carries nothing, answer 2xx with `found: true` and the empty values.
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `hashtags` array.
 
 This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
 

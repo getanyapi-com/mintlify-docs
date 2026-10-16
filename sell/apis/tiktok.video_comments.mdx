@@ -16,6 +16,7 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Pagination cursor from a previous response's nextCursor. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `authorUserId` or `language`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a comment that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 | `url` | string | yes | TikTok post URL on tiktok.com: a video or photo post (https://www.tiktok.com/@&lt;user&gt;/video/&lt;id&gt; or /photo/&lt;id&gt;) or a vm.tiktok.com or vt.tiktok.com short link. A profile link (https://www.tiktok.com/@&lt;user&gt;), a video file link (tiktokcdn.com) or a link to any other site is refused as invalid input, with no charge. |
 
 <Accordion title="Full input JSON Schema">
@@ -45,6 +46,18 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
     "cursor": {
       "type": "string",
       "description": "Pagination cursor from a previous response's nextCursor."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "authorUserId",
+          "language"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `authorUserId` or `language`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a comment that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
     }
   }
 }
@@ -61,8 +74,10 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
 | `data.comments[].author` | string | yes |  |
 | `data.comments[].authorImage` | string | no | Comment author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
 | `data.comments[].authorName` | string | no | Comment author's display name. |
+| `data.comments[].authorUserId` | string or null | no | Comment author's numeric TikTok user id. Null when the serving source does not report it. |
 | `data.comments[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.comments[].id` | string | yes |  |
+| `data.comments[].language` | string or null | no | Language TikTok detected for the comment text, as a code such as en. Null when the serving source does not report it. |
 | `data.comments[].likes` | integer | yes |  |
 | `data.comments[].replies` | integer | yes |  |
 | `data.comments[].text` | string | yes |  |
@@ -155,6 +170,20 @@ Extra fields are kept, missing declared fields fail.
                   "authorImage": {
                     "type": "string",
                     "description": "Comment author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  },
+                  "authorUserId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Comment author's numeric TikTok user id. Null when the serving source does not report it."
+                  },
+                  "language": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Language TikTok detected for the comment text, as a code such as en. Null when the serving source does not report it."
                   }
                 }
               }

@@ -88,7 +88,13 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
       "items": {
         "type": "string",
         "enum": [
-          "nextCursor"
+          "authorFollowers",
+          "authorVerified",
+          "locationName",
+          "nextCursor",
+          "paidPartnership",
+          "soundAuthor",
+          "soundTitle"
         ]
       },
       "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
@@ -107,14 +113,29 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
 | `data.nextCursor` | string or null | no | Opaque cursor for the next page of videos, or null when this lane has no more. Pass it back as cursor to continue. |
 | `data.videos` | array | yes |  |
 | `data.videos[].author` | string | no | Username (handle) of the account that posted, without the @ prefix. |
+| `data.videos[].authorFollowers` | integer or null | no | The author's follower count at the time of the request. Null when the serving source does not report it. |
+| `data.videos[].authorImage` | string | no | Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.videos[].authorName` | string | no | Author's display name. |
+| `data.videos[].authorUserId` | string | no | Author's numeric TikTok user id. |
+| `data.videos[].authorVerified` | boolean or null | no | Whether the author's account carries a TikTok verification badge. Null when the serving source does not report it. |
 | `data.videos[].caption` | string | yes |  |
 | `data.videos[].comments` | integer | yes |  |
 | `data.videos[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.videos[].durationSeconds` | number | no | Video duration in seconds. |
+| `data.videos[].hashtags` | array | no | Hashtags carried in the caption, without the leading #. Empty when the post uses none; @-mentions are excluded. |
 | `data.videos[].id` | string | yes |  |
+| `data.videos[].image` | string | no | URL of the video's cover/thumbnail image. A signed, short-lived TikTok CDN URL (typically expires within about a day; query params are load-bearing and kept intact), often served as HEIC rather than JPEG, so fetch it promptly and transcode if you need broad browser support. |
 | `data.videos[].likes` | integer | yes |  |
+| `data.videos[].locationName` | string or null | no | Name of the place the video is tagged at. Absent when the video has no location tag. Null when the serving source does not report it. |
+| `data.videos[].paidPartnership` | boolean or null | no | Whether the video is labeled as a paid partnership. Null when the serving source does not report it. |
 | `data.videos[].region` | string | yes |  |
 | `data.videos[].saves` | integer | no |  |
 | `data.videos[].shares` | integer | yes |  |
+| `data.videos[].soundAuthor` | string or null | no | Credited author of the sound. Null when the serving source does not report it. |
+| `data.videos[].soundClipId` | string | no | Id of the sound the video uses. Pass it to tiktok.song or tiktok.song_videos as clipId. |
+| `data.videos[].soundTitle` | string or null | no | Name of the sound. "original sound" means the creator's own audio rather than a licensed track. Null when the serving source does not report it. |
+| `data.videos[].url` | string | no | Canonical TikTok URL of the video. |
+| `data.videos[].videoUrl` | string | no | Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
 | `data.videos[].views` | integer | yes |  |
 | `found` | boolean | yes |  |
 
@@ -204,6 +225,94 @@ Extra fields are kept, missing declared fields fail.
                   },
                   "saves": {
                     "type": "integer"
+                  },
+                  "url": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Canonical TikTok URL of the video."
+                  },
+                  "image": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "URL of the video's cover/thumbnail image. A signed, short-lived TikTok CDN URL (typically expires within about a day; query params are load-bearing and kept intact), often served as HEIC rather than JPEG, so fetch it promptly and transcode if you need broad browser support."
+                  },
+                  "videoUrl": {
+                    "type": "string",
+                    "description": "Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  },
+                  "durationSeconds": {
+                    "type": "number",
+                    "description": "Video duration in seconds."
+                  },
+                  "authorName": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Author's display name."
+                  },
+                  "authorUserId": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Author's numeric TikTok user id."
+                  },
+                  "authorImage": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  },
+                  "authorFollowers": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "The author's follower count at the time of the request. Null when the serving source does not report it."
+                  },
+                  "authorVerified": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the author's account carries a TikTok verification badge. Null when the serving source does not report it."
+                  },
+                  "soundClipId": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Id of the sound the video uses. Pass it to tiktok.song or tiktok.song_videos as clipId."
+                  },
+                  "soundTitle": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Name of the sound. \"original sound\" means the creator's own audio rather than a licensed track. Null when the serving source does not report it."
+                  },
+                  "soundAuthor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Credited author of the sound. Null when the serving source does not report it."
+                  },
+                  "hashtags": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "description": "Hashtags carried in the caption, without the leading #. Empty when the post uses none; @-mentions are excluded.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "locationName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Name of the place the video is tagged at. Absent when the video has no location tag. Null when the serving source does not report it."
+                  },
+                  "paidPartnership": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the video is labeled as a paid partnership. Null when the serving source does not report it."
                   }
                 }
               }
@@ -220,8 +329,15 @@ Extra fields are kept, missing declared fields fail.
 
 ## Fields that must never come back empty
 
+- `authorImage`
+- `authorName`
+- `authorUserId`
 - `caption`
+- `hashtags`
 - `id`
+- `image`
+- `soundClipId`
+- `url`
 - `videos`
 
 The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
