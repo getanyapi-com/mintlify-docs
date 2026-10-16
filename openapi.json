@@ -21719,7 +21719,7 @@
                                                                                         ]
                                                                                     },
                                                                                     "websiteUrl": {
-                                                                                        "description": "Place website URL, tracking parameters stripped.",
+                                                                                        "description": "Place website URL with tracking parameters stripped; an id parameter is kept, since a page such as Facebook profile.php needs it.",
                                                                                         "format": "uri",
                                                                                         "type": [
                                                                                             "string",
@@ -21828,7 +21828,7 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "url": {
-                                                                                        "description": "Product page URL, tracking parameters stripped.",
+                                                                                        "description": "Product page URL with its query kept, since the query can name the product variant (e.g. color and size).",
                                                                                         "format": "uri",
                                                                                         "type": [
                                                                                             "string",
@@ -99915,7 +99915,7 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "image": {
-                                                                                        "description": "URL of the follower's profile picture, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                        "description": "URL of the follower's profile picture, kept whole because its query carries the CDN signature. Empty when the upstream omits it.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "name": {
@@ -99945,7 +99945,7 @@
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "nextCursor": {
-                                                                            "description": "Opaque cursor for the next page of followers, or null/empty when there are no more. Empty on every source behind this endpoint today, because each returns a single page of about 50 followers and no continuation. Pass it back as cursor whenever it is non-empty.",
+                                                                            "description": "Opaque cursor for the next page of followers, or null/empty when there are no more. Some sources return a single page of about 50 followers and no continuation, so it is empty there. Pass it back as cursor whenever it is non-empty.",
                                                                             "type": [
                                                                                 "string",
                                                                                 "null"
@@ -100505,7 +100505,7 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "image": {
-                                                                                        "description": "URL of the followed account's profile picture, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                        "description": "URL of the followed account's profile picture, kept whole because its query carries the CDN signature. Empty when the upstream omits it.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "name": {
@@ -100535,7 +100535,7 @@
                                                                             "x-anyapi-must-populate": true
                                                                         },
                                                                         "nextCursor": {
-                                                                            "description": "Opaque cursor for the next page of results, or null/empty when there are no more. Empty on every source behind this endpoint today, because each returns a single page of about 50 accounts and no continuation. Pass it back as cursor whenever it is non-empty.",
+                                                                            "description": "Opaque cursor for the next page of results, or null/empty when there are no more. Some sources return a single page of about 50 accounts and no continuation, so it is empty there. Pass it back as cursor whenever it is non-empty.",
                                                                             "type": [
                                                                                 "string",
                                                                                 "null"
@@ -104803,18 +104803,9 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `plays`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
                                         "items": {
                                             "enum": [
-                                                "avatarUrl",
-                                                "comments",
-                                                "createdUtc",
-                                                "displayName",
                                                 "hasAudio",
                                                 "locationId",
-                                                "locationName",
-                                                "paidPartnership",
-                                                "plays",
-                                                "productType",
-                                                "userId",
-                                                "verified"
+                                                "plays"
                                             ],
                                             "type": "string"
                                         },
@@ -109138,6 +109129,17 @@
                                         "description": "Keyword to search Instagram for; one or more words without special punctuation (e.g. coffee roastery).",
                                         "type": "string"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `postsCount`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "postsCount"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -109230,7 +109232,7 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "image": {
-                                                                                        "description": "URL of the account's profile picture, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                        "description": "URL of the account's profile picture, kept whole because its query carries the CDN signature. Empty when the upstream omits it.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "name": {
@@ -109238,8 +109240,11 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "postsCount": {
-                                                                                        "description": "The account's post count. May be 0 when the lane does not return it in search results.",
-                                                                                        "type": "integer"
+                                                                                        "description": "The account's post count. Null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "url": {
                                                                                         "description": "Canonical URL of the account's profile, with tracking query params stripped. Populated whenever the provider has data for the entity.",
@@ -112233,7 +112238,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "posts": {
-                                                                                        "type": "integer"
+                                                                                        "description": "Total number of posts on the account. Null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "private": {
                                                                                         "description": "Whether the account is private. Null when the serving source does not report it.",
@@ -112871,8 +112880,11 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "posts": {
-                                                                                        "description": "Number of posts on the profile.",
-                                                                                        "type": "integer"
+                                                                                        "description": "Number of posts on the profile. Null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "url": {
                                                                                         "description": "Canonical URL of the profile.",
@@ -116920,6 +116932,17 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `userId`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "userId"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -117062,8 +117085,11 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "userId": {
-                                                                                        "description": "Instagram user id of the posting account.",
-                                                                                        "type": "string"
+                                                                                        "description": "Instagram user id of the posting account. Null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "username": {
                                                                                         "description": "Username of the account that posted. A profile feed includes collaborator posts, so this is not always the requested handle. Populated whenever the provider has data for the entity.",
@@ -125236,7 +125262,7 @@
                                                                                         "description": "The post author (a company or a profile).",
                                                                                         "properties": {
                                                                                             "followers": {
-                                                                                                "description": "Author follower count as displayed text (e.g. '1,543,793 followers').",
+                                                                                                "description": "Author follower count as displayed text (e.g. '1,543,793 followers'). Absent when the author is a person, whose card shows a headline instead.",
                                                                                                 "type": "string"
                                                                                             },
                                                                                             "handle": {
@@ -139467,7 +139493,7 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "attachmentUrl": {
-                                                                                        "description": "Canonical destination URL of the attachment. When attachmentType is article, pass this URL to the linkedin.article endpoint to read the article's full body text.",
+                                                                                        "description": "Destination URL of the attachment with tracking parameters removed; a video keeps the signed query it needs to play, and a YouTube link keeps its video id. When attachmentType is article, pass this URL to the linkedin.article endpoint to read the article's full body text.",
                                                                                         "format": "uri",
                                                                                         "type": "string"
                                                                                     },
@@ -140576,7 +140602,7 @@
                                                                                         "type": "boolean"
                                                                                     },
                                                                                     "skills": {
-                                                                                        "description": "Listed skills, as free-form strings when present.",
+                                                                                        "description": "Listed skills, one object per skill with its name and, when the source has them, the endorsements label and related positions.",
                                                                                         "items": {},
                                                                                         "type": "array"
                                                                                     },
@@ -214064,12 +214090,18 @@
                                                                             ]
                                                                         },
                                                                         "replyCount": {
-                                                                            "description": "Number of replies to the post.",
-                                                                            "type": "integer"
+                                                                            "description": "Number of replies to the post. Null when the source does not report it.",
+                                                                            "type": [
+                                                                                "integer",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "repostCount": {
-                                                                            "description": "Number of reposts of the post.",
-                                                                            "type": "integer"
+                                                                            "description": "Number of reposts of the post. Null when the source does not report it.",
+                                                                            "type": [
+                                                                                "integer",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "text": {
                                                                             "description": "Post text content. Populated whenever the provider has data for the entity.",
@@ -221326,7 +221358,7 @@
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
                                                                                     "image": {
-                                                                                        "description": "URL of the video's cover/thumbnail image, with tracking query params stripped. Empty when the upstream omits it.",
+                                                                                        "description": "URL of the video's cover/thumbnail image. Signed and short-lived, so the query string is load-bearing and kept intact. Empty when the upstream omits it.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "likeCount": {
@@ -230498,11 +230530,10 @@
                                         "type": "string"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `verified`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
                                         "items": {
                                             "enum": [
-                                                "nextCursor",
-                                                "verified"
+                                                "nextCursor"
                                             ],
                                             "type": "string"
                                         },
@@ -246162,9 +246193,17 @@
                                                                                     "description": "Self-reported profile location.",
                                                                                     "type": "string"
                                                                                 },
+                                                                                "mediaCount": {
+                                                                                    "description": "Number of media items the author has published.",
+                                                                                    "type": "integer"
+                                                                                },
                                                                                 "name": {
                                                                                     "description": "Profile display name.",
                                                                                     "type": "string"
+                                                                                },
+                                                                                "posts": {
+                                                                                    "description": "Number of posts the author has published.",
+                                                                                    "type": "integer"
                                                                                 },
                                                                                 "url": {
                                                                                     "description": "Canonical public X profile URL. Populated whenever the provider has data for the entity.",
@@ -246297,14 +246336,6 @@
                                                                         "likes": {
                                                                             "description": "Wrapper post like count at retrieval time.",
                                                                             "minimum": 0,
-                                                                            "type": "integer"
-                                                                        },
-                                                                        "mediaCount": {
-                                                                            "description": "Number of media items the author has published.",
-                                                                            "type": "integer"
-                                                                        },
-                                                                        "posts": {
-                                                                            "description": "Number of posts the author has published.",
                                                                             "type": "integer"
                                                                         },
                                                                         "previewText": {
@@ -248060,14 +248091,6 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
-                                                                        "createdUtc": {
-                                                                            "description": "UTC epoch timestamp in seconds (Unix time) the account was created. Multiply by 1000 for a JS Date in milliseconds.",
-                                                                            "type": "number"
-                                                                        },
-                                                                        "id": {
-                                                                            "description": "Numeric X user id of the account, as a string.",
-                                                                            "type": "string"
-                                                                        },
                                                                         "items": {
                                                                             "description": "Follower records, normalized to a compact shape. Populated whenever the provider has data for the entity.",
                                                                             "items": {
@@ -248081,6 +248104,10 @@
                                                                                         "description": "The account's profile bio/description.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time) the account was created. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
                                                                                     "followers": {
                                                                                         "description": "How many followers this account has.",
                                                                                         "type": "integer"
@@ -248088,6 +248115,10 @@
                                                                                     "following": {
                                                                                         "description": "How many accounts this account follows.",
                                                                                         "type": "integer"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Numeric X user id of the account, as a string.",
+                                                                                        "type": "string"
                                                                                     },
                                                                                     "location": {
                                                                                         "description": "The account's self-reported location (may be empty).",
@@ -248678,14 +248709,6 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
-                                                                        "createdUtc": {
-                                                                            "description": "UTC epoch timestamp in seconds (Unix time) the account was created. Multiply by 1000 for a JS Date in milliseconds.",
-                                                                            "type": "number"
-                                                                        },
-                                                                        "id": {
-                                                                            "description": "Numeric X user id of the account, as a string.",
-                                                                            "type": "string"
-                                                                        },
                                                                         "items": {
                                                                             "description": "Followed-account records, normalized to a compact shape. Populated whenever the provider has data for the entity.",
                                                                             "items": {
@@ -248699,6 +248722,10 @@
                                                                                         "description": "The account's profile bio/description.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "createdUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time) the account was created. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                        "type": "number"
+                                                                                    },
                                                                                     "followers": {
                                                                                         "description": "How many followers this account has.",
                                                                                         "type": "integer"
@@ -248706,6 +248733,10 @@
                                                                                     "following": {
                                                                                         "description": "How many accounts this account follows.",
                                                                                         "type": "integer"
+                                                                                    },
+                                                                                    "id": {
+                                                                                        "description": "Numeric X user id of the account, as a string.",
+                                                                                        "type": "string"
                                                                                     },
                                                                                     "location": {
                                                                                         "description": "The account's self-reported location (may be empty).",
@@ -248715,6 +248746,10 @@
                                                                                         "description": "The account's display name. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "posts": {
+                                                                                        "description": "Number of posts the account has published.",
+                                                                                        "type": "integer"
                                                                                     },
                                                                                     "username": {
                                                                                         "description": "The account's @ handle, without the @ prefix. Populated whenever the provider has data for the entity.",
@@ -248741,10 +248776,6 @@
                                                                                 "string",
                                                                                 "null"
                                                                             ]
-                                                                        },
-                                                                        "posts": {
-                                                                            "description": "Number of posts the account has published.",
-                                                                            "type": "integer"
                                                                         }
                                                                     },
                                                                     "required": [
@@ -249891,10 +249922,6 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
-                                                                        "conversationId": {
-                                                                            "description": "Id of the conversation the reply belongs to, as a string.",
-                                                                            "type": "string"
-                                                                        },
                                                                         "items": {
                                                                             "description": "Reply records for the requested post. Populated whenever the provider has data for the entity.",
                                                                             "items": {
@@ -249905,6 +249932,10 @@
                                                                                     },
                                                                                     "authorName": {
                                                                                         "description": "Display name of the reply's author. Empty when the upstream omits it.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "conversationId": {
+                                                                                        "description": "Id of the conversation the reply belongs to, as a string.",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "createdUtc": {
@@ -250579,22 +250610,22 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
-                                                                        "authorFollowers": {
-                                                                            "description": "Follower count of the account that posted.",
-                                                                            "type": "integer"
-                                                                        },
-                                                                        "authorId": {
-                                                                            "description": "Numeric X user id of the account that posted, as a string.",
-                                                                            "type": "string"
-                                                                        },
-                                                                        "authorImage": {
-                                                                            "description": "Avatar image URL of the account that posted.",
-                                                                            "type": "string"
-                                                                        },
                                                                         "items": {
                                                                             "description": "Tweet records: text, author profile, timestamp, and engagement metrics (likes, retweets, replies, views). Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
+                                                                                    "authorFollowers": {
+                                                                                        "description": "Follower count of the account that posted.",
+                                                                                        "type": "integer"
+                                                                                    },
+                                                                                    "authorId": {
+                                                                                        "description": "Numeric X user id of the account that posted, as a string.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "authorImage": {
+                                                                                        "description": "Avatar image URL of the account that posted.",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "authorName": {
                                                                                         "description": "Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -252484,6 +252515,34 @@
                                                                     "properties": {
                                                                         "author": {
                                                                             "properties": {
+                                                                                "avatarUrl": {
+                                                                                    "description": "Avatar image URL of the author.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "bio": {
+                                                                                    "description": "Bio text on the author's profile.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "blueVerified": {
+                                                                                    "description": "Whether the author carries an X blue verification badge.",
+                                                                                    "type": "boolean"
+                                                                                },
+                                                                                "coverUrl": {
+                                                                                    "description": "Profile banner image URL of the author.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "createdUtc": {
+                                                                                    "description": "UTC epoch timestamp in seconds (Unix time) the author's account was created. Multiply by 1000 for a JS Date in milliseconds.",
+                                                                                    "type": "number"
+                                                                                },
+                                                                                "followers": {
+                                                                                    "description": "Follower count of the author.",
+                                                                                    "type": "integer"
+                                                                                },
+                                                                                "following": {
+                                                                                    "description": "Number of accounts the author follows.",
+                                                                                    "type": "integer"
+                                                                                },
                                                                                 "handle": {
                                                                                     "description": "Populated whenever the provider has data for the entity.",
                                                                                     "type": "string",
@@ -252494,10 +252553,22 @@
                                                                                     "type": "string",
                                                                                     "x-anyapi-must-populate": true
                                                                                 },
+                                                                                "location": {
+                                                                                    "description": "Location text on the author's profile.",
+                                                                                    "type": "string"
+                                                                                },
                                                                                 "name": {
                                                                                     "description": "Populated whenever the provider has data for the entity.",
                                                                                     "type": "string",
                                                                                     "x-anyapi-must-populate": true
+                                                                                },
+                                                                                "url": {
+                                                                                    "description": "Canonical X profile URL of the thread's author.",
+                                                                                    "type": "string"
+                                                                                },
+                                                                                "verified": {
+                                                                                    "description": "Whether the author carries a legacy X verification badge.",
+                                                                                    "type": "boolean"
                                                                                 }
                                                                             },
                                                                             "required": [
@@ -252507,18 +252578,6 @@
                                                                             ],
                                                                             "type": "object"
                                                                         },
-                                                                        "avatarUrl": {
-                                                                            "description": "Avatar image URL of the author.",
-                                                                            "type": "string"
-                                                                        },
-                                                                        "bio": {
-                                                                            "description": "Bio text on the author's profile.",
-                                                                            "type": "string"
-                                                                        },
-                                                                        "blueVerified": {
-                                                                            "description": "Whether the author carries an X blue verification badge.",
-                                                                            "type": "boolean"
-                                                                        },
                                                                         "complete": {
                                                                             "description": "Whether the provider reached the end of the self-thread without hitting its internal cap.",
                                                                             "type": "boolean"
@@ -252527,26 +252586,6 @@
                                                                             "description": "Conversation ID shared by the self-thread tweets. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
-                                                                        },
-                                                                        "coverUrl": {
-                                                                            "description": "Profile banner image URL of the author.",
-                                                                            "type": "string"
-                                                                        },
-                                                                        "createdUtc": {
-                                                                            "description": "UTC epoch timestamp in seconds (Unix time) the author's account was created. Multiply by 1000 for a JS Date in milliseconds.",
-                                                                            "type": "number"
-                                                                        },
-                                                                        "followers": {
-                                                                            "description": "Follower count of the author.",
-                                                                            "type": "integer"
-                                                                        },
-                                                                        "following": {
-                                                                            "description": "Number of accounts the author follows.",
-                                                                            "type": "integer"
-                                                                        },
-                                                                        "location": {
-                                                                            "description": "Location text on the author's profile.",
-                                                                            "type": "string"
                                                                         },
                                                                         "threadLength": {
                                                                             "description": "Number of tweets returned in the self-thread.",
@@ -252686,14 +252725,6 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
-                                                                        },
-                                                                        "url": {
-                                                                            "description": "Canonical X profile URL of the thread's author.",
-                                                                            "type": "string"
-                                                                        },
-                                                                        "verified": {
-                                                                            "description": "Whether the author carries a legacy X verification badge.",
-                                                                            "type": "boolean"
                                                                         }
                                                                     },
                                                                     "required": [
@@ -253275,6 +253306,10 @@
                                                                                         "minimum": 1,
                                                                                         "type": "integer",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "X search URL for the trend.",
+                                                                                        "type": "string"
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -253296,10 +253331,6 @@
                                                                             "description": "Resolved Yahoo WOEID used by X, exposed as a stable location identifier. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
                                                                             "x-anyapi-must-populate": true
-                                                                        },
-                                                                        "url": {
-                                                                            "description": "X search URL for the trend.",
-                                                                            "type": "string"
                                                                         }
                                                                     },
                                                                     "required": [
@@ -253770,13 +253801,10 @@
                                         "type": "integer"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `media` or `videoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a tweet that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `videoUrl` or `width`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a tweet that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
                                         "items": {
                                             "enum": [
                                                 "height",
-                                                "media",
-                                                "type",
-                                                "url",
                                                 "videoUrl",
                                                 "width"
                                             ],
@@ -254964,11 +254992,10 @@
                                         "type": "integer"
                                     },
                                     "requireFields": {
-                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isPinned` or `isReply`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a tweet that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isPinned`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a tweet that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted.",
                                         "items": {
                                             "enum": [
-                                                "isPinned",
-                                                "isReply"
+                                                "isPinned"
                                             ],
                                             "type": "string"
                                         },
@@ -276991,6 +277018,10 @@
                                                                                     "replies": {
                                                                                         "type": "integer"
                                                                                     },
+                                                                                    "repliesContinuationToken": {
+                                                                                        "description": "Token for this comment's replies. Pass it as continuationToken to youtube.comment_replies. Absent when the comment has no replies or the serving source does not return one.",
+                                                                                        "type": "string"
+                                                                                    },
                                                                                     "text": {
                                                                                         "description": "Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -278092,20 +278123,6 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
                                         "type": "integer"
-                                    },
-                                    "requireFields": {
-                                        "description": "Only use sources that return these fields. The cheapest source returns the transcript as one block of text and no timings, so name any of these to be served by a source that carries timed segments instead.",
-                                        "items": {
-                                            "enum": [
-                                                "durationSeconds",
-                                                "segments",
-                                                "startSeconds",
-                                                "text"
-                                            ],
-                                            "type": "string"
-                                        },
-                                        "type": "array",
-                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -283872,7 +283889,7 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "currency": {
-                                                                                        "description": "ISO currency code of the price (e.g. usd).",
+                                                                                        "description": "ISO currency code of the price (e.g. USD).",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "daysOnZillow": {
@@ -283924,7 +283941,7 @@
                                                                                         "type": "number"
                                                                                     },
                                                                                     "propertyType": {
-                                                                                        "description": "Property type (e.g. singleFamily, condo, townhouse).",
+                                                                                        "description": "Property type (e.g. SINGLE_FAMILY, CONDO, TOWNHOUSE).",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "rentZestimate": {
@@ -283939,7 +283956,7 @@
                                                                                         "type": "string"
                                                                                     },
                                                                                     "status": {
-                                                                                        "description": "Listing status (e.g. forSale, forRent, sold).",
+                                                                                        "description": "Listing status (e.g. FOR_SALE, FOR_RENT, RECENTLY_SOLD).",
                                                                                         "type": "string"
                                                                                     },
                                                                                     "streetAddress": {
