@@ -46053,7 +46053,7 @@
         },
         "/v1/run/email.find": {
             "post": {
-                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$15.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
+                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$30.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
                 "operationId": "email_find",
                 "parameters": [
                     {
@@ -46529,7 +46529,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.015400",
+                        "amount": "0.030800",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -46571,7 +46571,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.015400",
+                                "amount": "0.030800",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -46603,7 +46603,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.015400",
+                                "amount": "0.030800",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -136312,7 +136312,7 @@
         },
         "/v1/run/linkedin.profile_thin": {
             "post": {
-                "description": "Lightweight profile: name, avatar, location, followers, and a basic experience/education list (company + dates only, no job titles, descriptions, or skills; past companies may be redacted). For full experience detail, skills, certifications, connections, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Lightweight profile: name, avatar, location, followers, public id, current company, and a basic experience/education list (company + dates; job titles, the current-role flag and the connections label only where the source and the profile show them; no descriptions or skills; past companies may be redacted). For full experience detail, skills, certifications, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_profile_thin",
                 "parameters": [
                     {
@@ -136410,9 +136410,16 @@
                                             "enum": [
                                                 "activityType",
                                                 "articles",
+                                                "companyLinkedinUrl",
+                                                "companyName",
+                                                "connections",
                                                 "createdUtc",
+                                                "current",
+                                                "currentPosition",
                                                 "headline",
                                                 "id",
+                                                "position",
+                                                "publicIdentifier",
                                                 "recentPosts",
                                                 "text",
                                                 "url"
@@ -136517,6 +136524,46 @@
                                                                             "description": "URL of the profile avatar image.",
                                                                             "type": "string"
                                                                         },
+                                                                        "connections": {
+                                                                            "description": "Connections count as LinkedIn's public label shows it, capped at \"500+\" (for example \"8\" or \"500+\"). Null when the serving source does not publish it.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "currentPosition": {
+                                                                            "description": "The member's current role as the serving source reports it: one entry, or an empty list when the profile shows no current employer. Null when the serving source does not publish it.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "companyLinkedinUrl": {
+                                                                                        "description": "Company LinkedIn URL, or null when the serving source does not publish it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "companyName": {
+                                                                                        "description": "Company name.",
+                                                                                        "type": "string"
+                                                                                    },
+                                                                                    "position": {
+                                                                                        "description": "Job title, or null when the serving source does not publish it or the profile hides it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "companyName"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "education": {
                                                                             "description": "Education entries.",
                                                                             "items": {
@@ -136546,7 +136593,7 @@
                                                                             "type": "array"
                                                                         },
                                                                         "experience": {
-                                                                            "description": "Work experience entries (company and dates only in this basic tier). Populated whenever the provider has data for the entity.",
+                                                                            "description": "Work experience entries: company and dates, plus the job title and whether the role is current when the serving source publishes them. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "company": {
@@ -136557,9 +136604,23 @@
                                                                                         "description": "URL of the company page.",
                                                                                         "type": "string"
                                                                                     },
+                                                                                    "current": {
+                                                                                        "description": "Whether this is a current role, or null when the serving source does not say.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "endDate": {
                                                                                         "description": "End date of the role.",
                                                                                         "type": "string"
+                                                                                    },
+                                                                                    "position": {
+                                                                                        "description": "Job title, or null when the serving source does not publish it or the profile hides it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "startDate": {
                                                                                         "description": "Start date of the role.",
@@ -136592,6 +136653,13 @@
                                                                         "name": {
                                                                             "description": "Full name of the profile owner.",
                                                                             "type": "string"
+                                                                        },
+                                                                        "publicIdentifier": {
+                                                                            "description": "LinkedIn public identifier (the /in/ handle), or null when the serving source does not publish it.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
                                                                         },
                                                                         "recentPosts": {
                                                                             "description": "The profile's recent posts, or null when the serving source does not publish them.",
@@ -226658,7 +226726,7 @@
         },
         "/v1/run/tiktok.profile_videos": {
             "post": {
-                "description": "List a TikTok creator's recent videos (views, likes, comments) by handle with cursor pagination.\n\n**Price:** \\$0.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 6 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Profile Videos pricing and uptime](https://getanyapi.com/api/tiktok/profile-videos) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
+                "description": "List a TikTok creator's recent videos (views, likes, comments) by handle with cursor pagination.\n\n**Price:** \\$0.60 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 5 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [TikTok Profile Videos pricing and uptime](https://getanyapi.com/api/tiktok/profile-videos) - live USD price, lane routing, and measured 30-day uptime. [Every TikTok endpoint](https://getanyapi.com/api/tiktok).",
                 "operationId": "tiktok_profile_videos",
                 "parameters": [
                     {
@@ -276193,7 +276261,7 @@
         },
         "/v1/run/youtube.video": {
             "post": {
-                "description": "Fetch a YouTube video or Short's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch a YouTube video or Short's metadata (title, channel, views, likes, duration, publish date) by URL or ID.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video pricing and uptime](https://getanyapi.com/api/youtube/video) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video",
                 "parameters": [
                     {
