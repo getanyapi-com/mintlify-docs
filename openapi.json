@@ -18473,7 +18473,7 @@
         },
         "/v1/run/appstore.reviews": {
             "post": {
-                "description": "Get App Store reviews for any iOS app by app ID, in any storefront country: ratings, titles, and review text.\n\n**Price:** \\$0.90 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [App Store Reviews pricing and uptime](https://getanyapi.com/api/appstore/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Appstore endpoint](https://getanyapi.com/api/appstore).",
+                "description": "Get App Store reviews for any iOS app by app ID, in any storefront country: ratings, titles, and review text.\n\n**Price:** billed per result - \\$0.11 per 1,000 results, capped at \\$11.00 per 1,000 requests.\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [App Store Reviews pricing and uptime](https://getanyapi.com/api/appstore/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Appstore endpoint](https://getanyapi.com/api/appstore).",
                 "operationId": "appstore_reviews",
                 "parameters": [
                     {
@@ -18996,9 +18996,10 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000900",
                         "currency": "USD",
-                        "mode": "fixed"
+                        "max": "0.011000",
+                        "min": "0.000000",
+                        "mode": "dynamic"
                     },
                     "protocols": [
                         {
@@ -19038,10 +19039,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.001000",
                                 "currency": "USD",
+                                "max": "0.011000",
+                                "min": "0.001000",
                                 "minimumUsd": "0.001000",
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -19070,10 +19072,11 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000900",
                                 "currency": "USD",
+                                "max": "0.011000",
+                                "min": "0.000000",
                                 "minimumUsd": null,
-                                "mode": "fixed",
+                                "mode": "dynamic",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -49152,7 +49155,7 @@
         },
         "/v1/run/email.find": {
             "post": {
-                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$30.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
+                "description": "Find a person's work email address from their name and company domain.\n\n**Price:** \\$15.40 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Email Finder pricing and uptime](https://getanyapi.com/api/email/find) - live USD price, lane routing, and measured 30-day uptime. [Every Email endpoint](https://getanyapi.com/api/email).\n\n**How it works:** AnyAPI runs up to three independent email finders in sequence, cheapest first. The first source that returns an address wins and the rest are never called, so most lookups are billed at the bottom of the published price range and only the harder ones reach the top. A source that holds no record of the person returns nothing rather than guessing a likely address, and the next source is tried. When none of them finds an address the response is found:false with a null data, and the call is not charged.",
                 "operationId": "email_find",
                 "parameters": [
                     {
@@ -49628,7 +49631,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.030800",
+                        "amount": "0.015400",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -49670,7 +49673,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.030800",
+                                "amount": "0.015400",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -49702,7 +49705,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.030800",
+                                "amount": "0.015400",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -188980,7 +188983,7 @@
         },
         "/v1/run/reddit.search": {
             "post": {
-                "description": "Search Reddit posts across all subreddits by query.\n\n**Price:** \\$0.35 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Search pricing and uptime](https://getanyapi.com/api/reddit/search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "Search Reddit posts across all subreddits by query.\n\n**Price:** \\$0.35 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Search pricing and uptime](https://getanyapi.com/api/reddit/search) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_search",
                 "parameters": [
                     {
@@ -190253,7 +190256,7 @@
         },
         "/v1/run/reddit.subreddit_posts": {
             "post": {
-                "description": "Fetch posts from a subreddit listing (hot, new, or top).\n\n**Price:** \\$0.38 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Subreddit Posts pricing and uptime](https://getanyapi.com/api/reddit/subreddit-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
+                "description": "Fetch posts from a subreddit listing (hot, new, or top).\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Reddit Subreddit Posts pricing and uptime](https://getanyapi.com/api/reddit/subreddit-posts) - live USD price, lane routing, and measured 30-day uptime. [Every Reddit endpoint](https://getanyapi.com/api/reddit).",
                 "operationId": "reddit_subreddit_posts",
                 "parameters": [
                     {
@@ -190822,7 +190825,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.000380",
+                        "amount": "0.000800",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -190896,7 +190899,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.000380",
+                                "amount": "0.000800",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -291790,7 +291793,7 @@
         },
         "/v1/run/youtube.video_transcript_full": {
             "post": {
-                "description": "Fetch a YouTube video or Short transcript with timed segments and its provenance: whether the words are creator-written captions or machine speech recognition.\n\n**Price:** \\$2.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video Transcript (Provenance) pricing and uptime](https://getanyapi.com/api/youtube/video-transcript-full) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
+                "description": "Fetch a YouTube video or Short transcript with timed segments and its provenance: whether the words are creator-written captions or machine speech recognition.\n\n**Price:** \\$3.00 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [YouTube Video Transcript (Provenance) pricing and uptime](https://getanyapi.com/api/youtube/video-transcript-full) - live USD price, lane routing, and measured 30-day uptime. [Every YouTube endpoint](https://getanyapi.com/api/youtube).",
                 "operationId": "youtube_video_transcript_full",
                 "parameters": [
                     {
@@ -292359,7 +292362,7 @@
                 },
                 "x-payment-info": {
                     "price": {
-                        "amount": "0.002000",
+                        "amount": "0.003000",
                         "currency": "USD",
                         "mode": "fixed"
                     },
@@ -292401,7 +292404,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
+                                "amount": "0.003000",
                                 "currency": "USD",
                                 "minimumUsd": "0.001000",
                                 "mode": "fixed",
@@ -292433,7 +292436,7 @@
                                 ]
                             },
                             "pricing": {
-                                "amount": "0.002000",
+                                "amount": "0.003000",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
