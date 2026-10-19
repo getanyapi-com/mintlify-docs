@@ -23638,6 +23638,648 @@
                 }
             }
         },
+        "/v1/run/brave.search": {
+            "post": {
+                "description": "Run a Brave web search and get the ranked organic results (title, URL, snippet, position, display URL, domain) as clean JSON. Brave answers from its own independent index. Returns up to 20 results per call; pick the country Brave searches from.\n\n**Price:** \\$0.85 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Brave Search pricing and uptime](https://getanyapi.com/api/brave/search) - live USD price, lane routing, and measured 30-day uptime. [Every Brave endpoint](https://getanyapi.com/api/brave).",
+                "operationId": "brave_search",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item: each row of the API's result list, or the `data` object itself for an API that returns one record. Keys are matched relative to that item, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. An API that returns one record is not trimmed. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
+                        "in": "query",
+                        "name": "max_cost_usd",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "country": "US",
+                                "limit": 20,
+                                "query": "best running shoes"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "country": "US",
+                                    "limit": 20,
+                                    "query": "best running shoes"
+                                },
+                                "properties": {
+                                    "allowFallbacks": {
+                                        "default": true,
+                                        "description": "Optional, default true. When false, only the sources listed in `source` may serve; the request is refused with no charge if none of them can. When true, the listed sources are tried first and any other source may serve after them, at the normal price.",
+                                        "type": "boolean"
+                                    },
+                                    "country": {
+                                        "default": "US",
+                                        "description": "ISO-3166 alpha-2 country Brave searches from, e.g. US, GB, DE. Brave ranks and localizes results for that country. Only the countries Brave offers are accepted; US is served by every source and the others by the sources that can target them.",
+                                        "enum": [
+                                            "AR",
+                                            "AU",
+                                            "AT",
+                                            "BE",
+                                            "BR",
+                                            "CA",
+                                            "CL",
+                                            "CN",
+                                            "DK",
+                                            "FI",
+                                            "FR",
+                                            "DE",
+                                            "GR",
+                                            "HK",
+                                            "IN",
+                                            "ID",
+                                            "IT",
+                                            "JP",
+                                            "KR",
+                                            "MY",
+                                            "MX",
+                                            "NL",
+                                            "NZ",
+                                            "NO",
+                                            "PL",
+                                            "PT",
+                                            "PH",
+                                            "RU",
+                                            "SA",
+                                            "SG",
+                                            "ZA",
+                                            "ES",
+                                            "SE",
+                                            "CH",
+                                            "TW",
+                                            "TR",
+                                            "GB",
+                                            "US"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "ignoreSources": {
+                                        "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
+                                    "limit": {
+                                        "default": 20,
+                                        "description": "Maximum number of organic results to return (1-20, default 20). Brave serves about 20 organic results per page, and some queries carry fewer.",
+                                        "maximum": 20,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "preferLatencyUnderMs": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "query": {
+                                        "description": "The Brave search query.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "source": {
+                                        "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    }
+                                },
+                                "required": [
+                                    "query"
+                                ],
+                                "title": "Brave Search input",
+                                "type": "object",
+                                "x-aliases": {
+                                    "q": "query"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireFields: [\"nextCursor\"]` to be served only by a source that can page, which may cost more per request. `malformed_query:` means X read your search query differently than it looks (adjacent bare words are ANDed and OR binds tighter, so a multi-word alternative is not a phrase, and an operator after an unbracketed OR list applies to its last alternative only); the run was served and billed as X read it, and the hint carries the corrected query to send instead. `date_adjusted:` means a date you sent was outside the range the platform accepts, so the run used the nearest accepted date the hint names.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned; an API that returns one record counts it as one row. For per-result APIs the per-item cost is charged against this count; for input-priced APIs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The organic results, or null when Brave returned none.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Organic results in Brave's ranked order. Ads are not included. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "displayUrl": {
+                                                                                        "description": "The URL as Brave displays it under the title, e.g. a host or a breadcrumb path. Its format differs by source. null when the source did not send one.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "domain": {
+                                                                                        "description": "Host of the result URL without a leading www., e.g. runnersworld.com.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "position": {
+                                                                                        "description": "1-based rank of the result on the page. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "snippet": {
+                                                                                        "description": "Text excerpt Brave shows under the result, often led by the page date. Absent on the results where Brave shows none. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Result title as Brave shows it. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Destination URL of the result. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "position",
+                                                                                    "title",
+                                                                                    "url",
+                                                                                    "displayUrl",
+                                                                                    "domain"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "query": {
+                                                                            "description": "The query Brave searched.",
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "query",
+                                                                        "items"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether Brave returned organic results for the query.",
+                                                            "type": "boolean"
+                                                        },
+                                                        "reason": {
+                                                            "description": "Present only when `found` is false, and says why there is no result. `not_found`: the source states the target does not exist, or returned nothing for it. A `found: false` answer is a successful call, not an error, and `costUsd` is what it actually cost.",
+                                                            "enum": [
+                                                                "not_found"
+                                                            ],
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Brave Search output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        },
+                                        "source": {
+                                            "description": "The source that served this run. Pass its `id` back as `source` to prefer it again, or as `ignoreSources` to avoid it. Absent when no source identity applies to the run.",
+                                            "properties": {
+                                                "artworkKey": {
+                                                    "description": "Key for this source's artwork.",
+                                                    "type": "string"
+                                                },
+                                                "id": {
+                                                    "description": "Stable identifier for this source.",
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "description": "anonymous is a stable identity for an unattributed source; brand names the dataset that supplies the data.",
+                                                    "enum": [
+                                                        "anonymous",
+                                                        "brand"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "description": "Display name for this source.",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "kind",
+                                                "artworkKey"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown API. A target that does not exist is not a 404: the call succeeds with `output.found` false and `data` null."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; resend the same request, with the same cursor if one was sent, after Retry-After seconds. Inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "Brave Search",
+                "tags": [
+                    "brave"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/brave/search"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.000850",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.001000",
+                                "currency": "USD",
+                                "minimumUsd": "0.001000",
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.000850",
+                                "currency": "USD",
+                                "minimumUsd": null,
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
         "/v1/run/capterra.reviews": {
             "post": {
                 "description": "Pull Capterra software reviews for any product: overall and sub-ratings, pros and cons, reviewer job title, company size, and industry as clean JSON.\n\n**Price:** billed per result - \\$5.50 per 1,000 requests base + \\$0.88 per 1,000 results, capped at \\$93.50 per 1,000 requests.\n\n**Routing:** 2 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Capterra Reviews pricing and uptime](https://getanyapi.com/api/capterra/reviews) - live USD price, lane routing, and measured 30-day uptime. [Every Capterra endpoint](https://getanyapi.com/api/capterra).",
@@ -45732,6 +46374,667 @@
                             },
                             "pricing": {
                                 "amount": "0.001200",
+                                "currency": "USD",
+                                "minimumUsd": null,
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/duckduckgo.search": {
+            "post": {
+                "description": "Run a DuckDuckGo web search and get the ranked organic results (title, URL, snippet, position, display URL, domain) as clean JSON, ads left out. Returns up to 10 results per call; pick the country DuckDuckGo searches from.\n\n**Price:** \\$0.85 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [DuckDuckGo Search pricing and uptime](https://getanyapi.com/api/duckduckgo/search) - live USD price, lane routing, and measured 30-day uptime. [Every Duckduckgo endpoint](https://getanyapi.com/api/duckduckgo).",
+                "operationId": "duckduckgo_search",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item: each row of the API's result list, or the `data` object itself for an API that returns one record. Keys are matched relative to that item, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. An API that returns one record is not trimmed. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
+                        "in": "query",
+                        "name": "max_cost_usd",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "country": "US",
+                                "limit": 10,
+                                "query": "best running shoes"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "country": "US",
+                                    "limit": 10,
+                                    "query": "best running shoes"
+                                },
+                                "properties": {
+                                    "allowFallbacks": {
+                                        "default": true,
+                                        "description": "Optional, default true. When false, only the sources listed in `source` may serve; the request is refused with no charge if none of them can. When true, the listed sources are tried first and any other source may serve after them, at the normal price.",
+                                        "type": "boolean"
+                                    },
+                                    "country": {
+                                        "default": "US",
+                                        "description": "ISO-3166 alpha-2 country DuckDuckGo searches from, e.g. US, GB, DE: DuckDuckGo's region for that country in its main language (Belgium in Dutch, Canada and the US in English, Switzerland in German, Spain in Spanish). Only the countries DuckDuckGo offers are accepted; every country is served by most sources and US, GB and DE by all of them.",
+                                        "enum": [
+                                            "AR",
+                                            "AU",
+                                            "AT",
+                                            "BE",
+                                            "BR",
+                                            "BG",
+                                            "CA",
+                                            "CL",
+                                            "CN",
+                                            "CO",
+                                            "HR",
+                                            "CZ",
+                                            "DK",
+                                            "EE",
+                                            "FI",
+                                            "FR",
+                                            "DE",
+                                            "GR",
+                                            "HK",
+                                            "HU",
+                                            "IS",
+                                            "IN",
+                                            "ID",
+                                            "IE",
+                                            "IL",
+                                            "IT",
+                                            "JP",
+                                            "KR",
+                                            "LV",
+                                            "LT",
+                                            "MY",
+                                            "MX",
+                                            "NL",
+                                            "NZ",
+                                            "NO",
+                                            "PK",
+                                            "PE",
+                                            "PH",
+                                            "PL",
+                                            "PT",
+                                            "RO",
+                                            "RU",
+                                            "SA",
+                                            "SG",
+                                            "SK",
+                                            "SI",
+                                            "ZA",
+                                            "ES",
+                                            "SE",
+                                            "CH",
+                                            "TW",
+                                            "TH",
+                                            "TR",
+                                            "US",
+                                            "UA",
+                                            "GB",
+                                            "VN"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "ignoreSources": {
+                                        "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
+                                    "limit": {
+                                        "default": 10,
+                                        "description": "Maximum number of organic results to return (1-10, default 10). DuckDuckGo serves about 10 organic results per page, and some queries carry fewer.",
+                                        "maximum": 10,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "preferLatencyUnderMs": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "query": {
+                                        "description": "The DuckDuckGo search query.",
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "source": {
+                                        "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    }
+                                },
+                                "required": [
+                                    "query"
+                                ],
+                                "title": "DuckDuckGo Search input",
+                                "type": "object",
+                                "x-aliases": {
+                                    "q": "query"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireFields: [\"nextCursor\"]` to be served only by a source that can page, which may cost more per request. `malformed_query:` means X read your search query differently than it looks (adjacent bare words are ANDed and OR binds tighter, so a multi-word alternative is not a phrase, and an operator after an unbracketed OR list applies to its last alternative only); the run was served and billed as X read it, and the hint carries the corrected query to send instead. `date_adjusted:` means a date you sent was outside the range the platform accepts, so the run used the nearest accepted date the hint names.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned; an API that returns one record counts it as one row. For per-result APIs the per-item cost is charged against this count; for input-priced APIs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The organic results, or null when DuckDuckGo returned none.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Organic results in DuckDuckGo's ranked order. Ads are not included. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "displayUrl": {
+                                                                                        "description": "The URL as DuckDuckGo displays it under the title, e.g. a host or a host and path. Its format differs by source. null when the source did not send one.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "domain": {
+                                                                                        "description": "Host of the result URL without a leading www., e.g. runnersworld.com.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "position": {
+                                                                                        "description": "1-based rank of the result on the page. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "integer",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "snippet": {
+                                                                                        "description": "Text excerpt DuckDuckGo shows under the result. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Result title as DuckDuckGo shows it. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Destination URL of the result. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "position",
+                                                                                    "title",
+                                                                                    "url",
+                                                                                    "displayUrl",
+                                                                                    "domain"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "query": {
+                                                                            "description": "The query DuckDuckGo searched.",
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "query",
+                                                                        "items"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether DuckDuckGo returned organic results for the query.",
+                                                            "type": "boolean"
+                                                        },
+                                                        "reason": {
+                                                            "description": "Present only when `found` is false, and says why there is no result. `not_found`: the source states the target does not exist, or returned nothing for it. A `found: false` answer is a successful call, not an error, and `costUsd` is what it actually cost.",
+                                                            "enum": [
+                                                                "not_found"
+                                                            ],
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "DuckDuckGo Search output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        },
+                                        "source": {
+                                            "description": "The source that served this run. Pass its `id` back as `source` to prefer it again, or as `ignoreSources` to avoid it. Absent when no source identity applies to the run.",
+                                            "properties": {
+                                                "artworkKey": {
+                                                    "description": "Key for this source's artwork.",
+                                                    "type": "string"
+                                                },
+                                                "id": {
+                                                    "description": "Stable identifier for this source.",
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "description": "anonymous is a stable identity for an unattributed source; brand names the dataset that supplies the data.",
+                                                    "enum": [
+                                                        "anonymous",
+                                                        "brand"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "description": "Display name for this source.",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "kind",
+                                                "artworkKey"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown API. A target that does not exist is not a 404: the call succeeds with `output.found` false and `data` null."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; resend the same request, with the same cursor if one was sent, after Retry-After seconds. Inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "DuckDuckGo Search",
+                "tags": [
+                    "duckduckgo"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/duckduckgo/search"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.000850",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.001000",
+                                "currency": "USD",
+                                "minimumUsd": "0.001000",
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.000850",
                                 "currency": "USD",
                                 "minimumUsd": null,
                                 "mode": "fixed",
@@ -131871,6 +133174,687 @@
                                 "min": "0.000000",
                                 "minimumUsd": null,
                                 "mode": "dynamic",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            },
+                            "rail": "mpp",
+                            "settlement": {
+                                "onExecutionFailure": "charged_undelivered",
+                                "onVerificationError": "indeterminate",
+                                "timing": "before_execution"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "/v1/run/levels.jobs": {
+            "post": {
+                "description": "Search Levels.fyi job listings by title or keyword and get each job with its salary range and estimated total compensation where Levels.fyi has them, plus company, location, posting date and apply link. Returns up to 20 jobs per call, grouped by company; filter by location and sort by relevance, date or pay.\n\n**Price:** \\$0.85 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** one lane serves this API today, so a failed attempt has nowhere to fail over to. Payment outcome follows the selected rail's settlement policy.\n\n**Catalog:** [Levels.fyi Jobs pricing and uptime](https://getanyapi.com/api/levels/jobs) - live USD price, lane routing, and measured 30-day uptime. [Every Levels endpoint](https://getanyapi.com/api/levels).",
+                "operationId": "levels_jobs",
+                "parameters": [
+                    {
+                        "description": "Optional. Comma-separated keys (dotted paths like `author.name` descend into nested objects) to keep on each result item: each row of the API's result list, or the `data` object itself for an API that returns one record. Keys are matched relative to that item, not against the top-level response envelope, so use `jq` to reshape the whole envelope. Shrinks the response without changing cost.",
+                        "in": "query",
+                        "name": "fields",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. Cap the number of result rows returned; a `_truncated` note reports how many were withheld so you can page via the API's own `limit`. An API that returns one record is not trimmed. Does not change cost.",
+                        "in": "query",
+                        "name": "max_items",
+                        "required": false,
+                        "schema": {
+                            "minimum": 0,
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "Optional. Return only a structural outline (top-level keys, item counts, and per-field byte sizes) instead of the full data. Does not change cost.",
+                        "in": "query",
+                        "name": "summary",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Optional. A jq expression applied to the result envelope; its output replaces `output` (multiple outputs collect into an array). Reshape freely, e.g. `jq=.data | {title, description, md: .markdown[:3500]}`. Runs sandboxed with a 250ms / 2MB budget; on failure the full result is returned with a `jqError`. Does not change cost.",
+                        "in": "query",
+                        "name": "jq",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional. The most you are willing to pay for this one request, in US dollars (for example 0.05). Any route that would charge more than this is not used, so a request only ever runs on something you can afford. If nothing is available at or below your amount, the request is refused before it runs, nothing is charged, and the message tells you the cheapest price per request so you can raise it. Leave it out to accept the normal price.",
+                        "in": "query",
+                        "name": "max_cost_usd",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Optional wallet idempotency key, scoped to this customer for 24 hours. When the gateway honors the key, this synchronous in-process execution can continue after the caller disconnects, bounded by its execution deadline. A completed replayable result charges normally exactly once and can be replayed without another provider run or charge. A pending duplicate returns 409 idempotency_in_progress; reuse with different request semantics returns 409 idempotency_conflict.",
+                        "in": "header",
+                        "name": "Idempotency-Key",
+                        "required": false,
+                        "schema": {
+                            "maxLength": 255,
+                            "minLength": 1,
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "example": {
+                                "limit": 10,
+                                "location": "united-states",
+                                "query": "software engineer"
+                            },
+                            "schema": {
+                                "additionalProperties": false,
+                                "example": {
+                                    "limit": 10,
+                                    "location": "united-states",
+                                    "query": "software engineer"
+                                },
+                                "properties": {
+                                    "allowFallbacks": {
+                                        "default": true,
+                                        "description": "Optional, default true. When false, only the sources listed in `source` may serve; the request is refused with no charge if none of them can. When true, the listed sources are tried first and any other source may serve after them, at the normal price.",
+                                        "type": "boolean"
+                                    },
+                                    "ignoreSources": {
+                                        "description": "Optional. Source ids to skip for this request, taken from this endpoint's `lanes[].source.id`. The cheapest remaining source serves and the price is that of the dearest remaining source. An id that does not serve this endpoint, or that is also in `source`, is rejected as invalid input with no charge; skipping every source is rejected the same way.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
+                                    "limit": {
+                                        "default": 20,
+                                        "description": "Maximum number of jobs to return (1-20, default 20). Levels.fyi groups jobs by company, up to 3 per company, so several results can come from one employer.",
+                                        "maximum": 20,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "location": {
+                                        "description": "Levels.fyi location slug as it appears in Levels.fyi URLs, e.g. united-states. Not a free-text city name; omit it to search everywhere.",
+                                        "pattern": "^[a-z0-9][a-z0-9-]{0,127}$",
+                                        "type": "string"
+                                    },
+                                    "preferLatencyUnderMs": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
+                                    "query": {
+                                        "description": "Job title, keywords or company name to search, e.g. software engineer or google.",
+                                        "maxLength": 512,
+                                        "minLength": 1,
+                                        "type": "string"
+                                    },
+                                    "sortBy": {
+                                        "default": "relevance",
+                                        "description": "Sort order: best match (relevance), most recently posted (date), or highest total compensation (compensation).",
+                                        "enum": [
+                                            "relevance",
+                                            "date",
+                                            "compensation"
+                                        ],
+                                        "type": "string"
+                                    },
+                                    "source": {
+                                        "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
+                                        "items": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    }
+                                },
+                                "required": [
+                                    "query"
+                                ],
+                                "title": "Levels.fyi Jobs input",
+                                "type": "object",
+                                "x-aliases": {
+                                    "q": "query"
+                                }
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "costUsd": {
+                                            "description": "USD charged on the original run. On a replay this value is echoed for parity; the replay itself is free.",
+                                            "type": "number"
+                                        },
+                                        "hint": {
+                                            "description": "Optional one-line nudge, absent when there is nothing to say. `large_result:` suggests the fields/max_items/summary/jq controls for a big response. `paging_unavailable:` means this result came from a source that cannot return a `nextCursor`, so it may be INCOMPLETE and cannot be continued - re-run with `requireFields: [\"nextCursor\"]` to be served only by a source that can page, which may cost more per request. `malformed_query:` means X read your search query differently than it looks (adjacent bare words are ANDed and OR binds tighter, so a multi-word alternative is not a phrase, and an operator after an unbracketed OR list applies to its last alternative only); the run was served and billed as X read it, and the hint carries the corrected query to send instead. `date_adjusted:` means a date you sent was outside the range the platform accepts, so the run used the nearest accepted date the hint names.",
+                                            "type": "string"
+                                        },
+                                        "items": {
+                                            "description": "Number of result rows returned; an API that returns one record counts it as one row. For per-result APIs the per-item cost is charged against this count; for input-priced APIs the charge is per submitted input, independent of this count.",
+                                            "type": "integer"
+                                        },
+                                        "jqError": {
+                                            "description": "Present only when a `jq` expression failed; `output` then carries the full unshaped result and this explains why the reshape did not apply.",
+                                            "type": "string"
+                                        },
+                                        "output": {
+                                            "anyOf": [
+                                                {
+                                                    "additionalProperties": false,
+                                                    "properties": {
+                                                        "data": {
+                                                            "description": "The matching jobs, or null when Levels.fyi returned none.",
+                                                            "oneOf": [
+                                                                {
+                                                                    "type": "null"
+                                                                },
+                                                                {
+                                                                    "additionalProperties": false,
+                                                                    "properties": {
+                                                                        "items": {
+                                                                            "description": "Jobs in Levels.fyi's order, grouped by company. Populated whenever the provider has data for the entity.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "applyUrl": {
+                                                                                        "description": "URL that starts the application, usually the employer's own careers page or a job board.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "company": {
+                                                                                        "description": "Hiring company name. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "companySlug": {
+                                                                                        "description": "Levels.fyi company slug, e.g. google; null when the source did not send one.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "createdUtc": {
+                                                                                        "description": "When the job was posted. UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "number",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "isSponsored": {
+                                                                                        "description": "Whether the listing is a paid placement on Levels.fyi.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "jobId": {
+                                                                                        "description": "Levels.fyi job id. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "location": {
+                                                                                        "description": "Job location as Levels.fyi shows it, e.g. San Jose, CA. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "logoUrl": {
+                                                                                        "description": "Company logo image URL.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "remote": {
+                                                                                        "description": "Whether Levels.fyi marks the job as remote; null when it does not say.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "salaryCurrency": {
+                                                                                        "description": "ISO 4217 currency of the salary and compensation figures, e.g. USD.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "salaryMax": {
+                                                                                        "description": "High end of the base salary range in salaryCurrency per salaryUnit. null when Levels.fyi shows no salary for the job. Populated whenever the provider has data for the entity.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ],
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "salaryMin": {
+                                                                                        "description": "Low end of the base salary range in salaryCurrency per salaryUnit. null when Levels.fyi shows no salary for the job. Populated whenever the provider has data for the entity.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ],
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "salaryUnit": {
+                                                                                        "description": "Pay period of the salary and compensation figures, e.g. YEAR.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Job title. Populated whenever the provider has data for the entity.",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "totalCompensationMax": {
+                                                                                        "description": "High end of the total compensation range (base, stock and bonus). Some ranges are Levels.fyi estimates. null when Levels.fyi shows none.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "totalCompensationMin": {
+                                                                                        "description": "Low end of the total compensation range (base, stock and bonus). Some ranges are Levels.fyi estimates. null when Levels.fyi shows none.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Levels.fyi job listing URL. Populated whenever the provider has data for the entity.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string",
+                                                                                        "x-anyapi-must-populate": true
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "jobId",
+                                                                                    "title",
+                                                                                    "url"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": "array",
+                                                                            "x-anyapi-must-populate": true
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "items"
+                                                                    ],
+                                                                    "type": "object"
+                                                                }
+                                                            ]
+                                                        },
+                                                        "found": {
+                                                            "description": "Whether Levels.fyi returned jobs for the search.",
+                                                            "type": "boolean"
+                                                        },
+                                                        "reason": {
+                                                            "description": "Present only when `found` is false, and says why there is no result. `not_found`: the source states the target does not exist, or returned nothing for it. A `found: false` answer is a successful call, not an error, and `costUsd` is what it actually cost.",
+                                                            "enum": [
+                                                                "not_found"
+                                                            ],
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "found",
+                                                        "data"
+                                                    ],
+                                                    "title": "Levels.fyi Jobs output",
+                                                    "type": "object"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "description": "Normalized output, or null when the replay payload was not retained."
+                                        },
+                                        "provider": {
+                                            "description": "Always \"AnyAPI\".",
+                                            "type": "string"
+                                        },
+                                        "replayed": {
+                                            "description": "True when this response replays the durable result of an earlier run without billing or upstream execution.",
+                                            "type": "boolean"
+                                        },
+                                        "resultId": {
+                                            "description": "Opaque handle to the full unshaped result, cached ~15 min. Re-shape it for free (fields/max_items/summary/jq) via GET /v1/results/{id}, no re-billing. Absent when the result was too large to cache.",
+                                            "type": "string"
+                                        },
+                                        "source": {
+                                            "description": "The source that served this run. Pass its `id` back as `source` to prefer it again, or as `ignoreSources` to avoid it. Absent when no source identity applies to the run.",
+                                            "properties": {
+                                                "artworkKey": {
+                                                    "description": "Key for this source's artwork.",
+                                                    "type": "string"
+                                                },
+                                                "id": {
+                                                    "description": "Stable identifier for this source.",
+                                                    "type": "string"
+                                                },
+                                                "kind": {
+                                                    "description": "anonymous is a stable identity for an unattributed source; brand names the dataset that supplies the data.",
+                                                    "enum": [
+                                                        "anonymous",
+                                                        "brand"
+                                                    ],
+                                                    "type": "string"
+                                                },
+                                                "name": {
+                                                    "description": "Display name for this source.",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "kind",
+                                                "artworkKey"
+                                            ],
+                                            "type": "object"
+                                        }
+                                    },
+                                    "required": [
+                                        "output",
+                                        "provider",
+                                        "costUsd",
+                                        "items",
+                                        "replayed"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Normalized result.",
+                        "headers": {
+                            "Idempotency-Replayed": {
+                                "description": "Present only when the request carried an Idempotency-Key this gateway honored. \"false\" means the key was claimed and the run executed freshly; \"true\" means it replayed a prior identical run and was NOT charged again. Absent means either no key was sent or this gateway does not honor keys, so a retry could be charged twice.",
+                                "schema": {
+                                    "enum": [
+                                        "false",
+                                        "true"
+                                    ],
+                                    "type": "string"
+                                }
+                            },
+                            "PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "Payment-Receipt": {
+                                "description": "Inline mpp payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "X-PAYMENT-RESPONSE": {
+                                "description": "Inline x402 payment receipt.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Input did not match the schema, or the upstream rejected the request."
+                    },
+                    "401": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Missing or invalid API key."
+                    },
+                    "402": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PaymentRequiredError"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/TrialCapReached"
+                                        }
+                                    ]
+                                }
+                            },
+                            "application/problem+json": {
+                                "schema": {
+                                    "properties": {
+                                        "challengeId": {
+                                            "minLength": 1,
+                                            "type": "string"
+                                        },
+                                        "status": {
+                                            "const": 402,
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "challengeId"
+                                    ],
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Insufficient wallet balance or spend cap, or an inline-payment challenge. Agent trials receive a trial_cap_reached continuation with a live RFC 8628 device authorization.",
+                        "headers": {
+                            "PAYMENT-REQUIRED": {
+                                "description": "Inline x402 payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "WWW-Authenticate": {
+                                "description": "Inline mpp payment challenge.",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Unknown API. A target that does not exist is not a 404: the call succeeds with `output.found` false and `data` null."
+                    },
+                    "409": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Idempotency collision. Codes: idempotency_in_progress means retry after the Retry-After delay; idempotency_conflict means use a new key for different request semantics; idempotency_needs_review means stop retrying and contact AnyAPI support with X-Anyapi-Request-Id."
+                    },
+                    "422": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The request was well formed but this API cannot serve the requested target site; the body's `alternatives` array lists the AnyAPI APIs that can."
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "The upstream was rate limited; resend the same request, with the same cursor if one was sent, after Retry-After seconds. Inspect `payment` when present before deciding whether to retry."
+                    },
+                    "500": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "An internal error prevented completion. Inspect payment when present before retrying."
+                    },
+                    "502": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        },
+                        "description": "Every provider failed with a server/transport error, or inline payment settlement could not be confirmed; inspect `payment` when present before retrying."
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    },
+                    {
+                        "apiKeyAuth": []
+                    },
+                    {}
+                ],
+                "summary": "Levels.fyi Jobs",
+                "tags": [
+                    "levels"
+                ],
+                "x-mint": {
+                    "href": "/api-reference/levels/jobs"
+                },
+                "x-payment-info": {
+                    "price": {
+                        "amount": "0.000850",
+                        "currency": "USD",
+                        "mode": "fixed"
+                    },
+                    "protocols": [
+                        {
+                            "x402": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            }
+                        },
+                        {
+                            "mpp": {
+                                "asset": "0x20c000000000000000000000b9537d11c60e8b50",
+                                "currency": "USD",
+                                "intent": "charge",
+                                "method": "tempo",
+                                "network": "tempo",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "rail": "tempo",
+                                "scheme": "exact"
+                            }
+                        }
+                    ],
+                    "rails": [
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "PAYMENT-REQUIRED"
+                                ],
+                                "credential": [
+                                    "PAYMENT-SIGNATURE",
+                                    "X-PAYMENT"
+                                ],
+                                "receipt": [
+                                    "PAYMENT-RESPONSE",
+                                    "X-PAYMENT-RESPONSE"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.001000",
+                                "currency": "USD",
+                                "minimumUsd": "0.001000",
+                                "mode": "fixed",
+                                "quoteBasis": "floor"
+                            },
+                            "protocol": {
+                                "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                                "network": "eip155:8453",
+                                "payTo": "0x754BD2A6799e766B1E2b9f1Ae7fBdC0CeD96ef13",
+                                "scheme": "exact"
+                            },
+                            "rail": "x402",
+                            "settlement": {
+                                "onExecutionFailure": "released",
+                                "onUnknownFinalization": "indeterminate",
+                                "timing": "after_execution"
+                            }
+                        },
+                        {
+                            "headers": {
+                                "challenge": [
+                                    "WWW-Authenticate"
+                                ],
+                                "credential": [
+                                    "Authorization"
+                                ],
+                                "receipt": [
+                                    "Payment-Receipt"
+                                ]
+                            },
+                            "pricing": {
+                                "amount": "0.000850",
+                                "currency": "USD",
+                                "minimumUsd": null,
+                                "mode": "fixed",
                                 "quoteBasis": "floor"
                             },
                             "protocol": {
@@ -297655,6 +299639,10 @@
             "x-group": "Booking"
         },
         {
+            "name": "brave",
+            "x-group": "Brave"
+        },
+        {
             "name": "capterra",
             "x-group": "Capterra"
         },
@@ -297693,6 +299681,10 @@
         {
             "name": "douyin",
             "x-group": "Douyin"
+        },
+        {
+            "name": "duckduckgo",
+            "x-group": "Duckduckgo"
         },
         {
             "name": "ebay",
@@ -297769,6 +299761,10 @@
         {
             "name": "job-search",
             "x-group": "Job_search"
+        },
+        {
+            "name": "levels",
+            "x-group": "Levels"
         },
         {
             "name": "linkedin",
