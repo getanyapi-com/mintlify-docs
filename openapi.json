@@ -21275,6 +21275,26 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "features": {
+                                                                                        "description": "Feature bullets from the product page; empty when there are none.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "description": {
+                                                                                                    "description": "Feature text.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "title": {
+                                                                                                    "description": "Feature heading, or null when the bullet has none.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
                                                                                     "image": {
                                                                                         "description": "Primary product image URL. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -21323,10 +21343,54 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "sellerId": {
+                                                                                        "description": "Seller id: \"bby\" for Best Buy itself, a number for a Marketplace seller, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "sellerType": {
+                                                                                        "description": "\"1P\" when Best Buy sells the product itself, \"3P\" when a Marketplace seller does, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "sku": {
                                                                                         "description": "Best Buy SKU. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "specifications": {
+                                                                                        "description": "The specifications table from the product page, in Best Buy's groups (\"Key Specs\", \"General\", ...); empty when the page has none.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "group": {
+                                                                                                    "description": "Group heading, e.g. \"General\".",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "specs": {
+                                                                                                    "description": "Rows in the group.",
+                                                                                                    "items": {
+                                                                                                        "properties": {
+                                                                                                            "name": {
+                                                                                                                "description": "Attribute name, e.g. \"Model Number\".",
+                                                                                                                "type": "string"
+                                                                                                            },
+                                                                                                            "value": {
+                                                                                                                "description": "Attribute value as Best Buy lists it; yes/no attributes read \"true\" or \"false\".",
+                                                                                                                "type": "string"
+                                                                                                            }
+                                                                                                        },
+                                                                                                        "type": "object"
+                                                                                                    },
+                                                                                                    "type": "array"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
                                                                                     },
                                                                                     "title": {
                                                                                         "description": "Product title. Populated whenever the provider has data for the entity.",
@@ -21832,6 +21896,7 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `rating`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
                                         "items": {
                                             "enum": [
+                                                "incentivized",
                                                 "rating"
                                             ],
                                             "type": "string"
@@ -21932,9 +21997,30 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "incentivized": {
+                                                                                        "description": "True when Best Buy marks the review incentivized (the reviewer received promo considerations or a sweepstakes entry for writing it), false when it does not, or null when not reported. One source reports only the true case and leaves the rest null.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "ownershipDays": {
+                                                                                        "description": "Days the reviewer had owned the product when they wrote the review, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "rating": {
                                                                                         "description": "Star rating the reviewer gave, 1-5.",
                                                                                         "type": "number"
+                                                                                    },
+                                                                                    "recommended": {
+                                                                                        "description": "True when the reviewer says they would recommend the product, false when they would not, or null when they did not answer.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "reviewId": {
                                                                                         "description": "Best Buy review id; use it to deduplicate across pages. Populated whenever the provider has data for the entity.",
@@ -22525,7 +22611,12 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `totalResults`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
                                         "items": {
                                             "enum": [
-                                                "totalResults"
+                                                "description",
+                                                "inStock",
+                                                "isSponsored",
+                                                "totalResults",
+                                                "upc",
+                                                "variants"
                                             ],
                                             "type": "string"
                                         },
@@ -22618,10 +22709,31 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "description": {
+                                                                                        "description": "Long product description, or null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "image": {
                                                                                         "description": "Primary product image URL. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "inStock": {
+                                                                                        "description": "True when Best Buy shows the product available to buy, or null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "isSponsored": {
+                                                                                        "description": "True when the result is a sponsored placement, or null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "listPrice": {
                                                                                         "description": "Regular price when the product is on sale, or null when it is not discounted.",
@@ -22629,6 +22741,26 @@
                                                                                             "number",
                                                                                             "null"
                                                                                         ]
+                                                                                    },
+                                                                                    "openBox": {
+                                                                                        "description": "Open-box offers for the product, one per condition; empty when there are none.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "condition": {
+                                                                                                    "description": "Open-box condition as Best Buy names it: \"Excellent\", \"Good\" or \"Fair\".",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "price": {
+                                                                                                    "description": "Open-box price in USD for that condition; absent when the serving source reports only the condition.",
+                                                                                                    "type": [
+                                                                                                        "number",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
                                                                                     },
                                                                                     "position": {
                                                                                         "description": "1-based position of the result in this page.",
@@ -22659,6 +22791,20 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "sellerId": {
+                                                                                        "description": "Seller id: \"bby\" for Best Buy itself, a number for a Marketplace seller, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "sellerType": {
+                                                                                        "description": "\"1P\" when Best Buy sells the product itself, \"3P\" when a Marketplace seller does, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "sku": {
                                                                                         "description": "Best Buy SKU, the number after /sku/ in the product URL; use the product URL with the Best Buy Product or Best Buy Reviews SKU. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -22669,10 +22815,40 @@
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "upc": {
+                                                                                        "description": "UPC barcode, or null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "url": {
                                                                                         "description": "Best Buy product page URL carrying the SKU, with tracking query parameters removed. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "variants": {
+                                                                                        "description": "Sibling versions of the product (colour, size, connector), including this one, or null when the serving source does not report them.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "attributes": {
+                                                                                                    "description": "What sets the variant apart, keyed by Best Buy's attribute name, e.g. {\"Color\": \"Black\"}.",
+                                                                                                    "type": [
+                                                                                                        "object",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "sku": {
+                                                                                                    "description": "Best Buy SKU of the variant.",
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": [
+                                                                                            "array",
+                                                                                            "null"
+                                                                                        ]
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -152781,7 +152957,7 @@
         },
         "/v1/run/linkedin.profile_thin": {
             "post": {
-                "description": "Lightweight profile: name, avatar, location, followers, public id, current company, and a basic experience/education list (company + dates; job titles, the current-role flag and the connections label only where the source and the profile show them; no descriptions or skills; past companies may be redacted). For full experience detail, skills, certifications, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Lightweight profile: name, avatar, location, followers, public id, current company, and a basic experience/education list (company + dates; job titles, the current-role flag and the connections label only where the source and the profile show them; no descriptions or skills; past companies may be redacted). For full experience detail, skills, certifications, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_profile_thin",
                 "parameters": [
                     {
@@ -234776,8 +234952,16 @@
                                             "enum": [
                                                 "availability",
                                                 "category",
+                                                "dpci",
+                                                "highlights",
                                                 "images",
-                                                "rating"
+                                                "listPrice",
+                                                "packageDimensions",
+                                                "rating",
+                                                "ratingCount",
+                                                "returnPolicy",
+                                                "specifications",
+                                                "upc"
                                             ],
                                             "type": "string"
                                         },
@@ -234885,6 +235069,23 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "dpci": {
+                                                                                        "description": "Target's in-store item number (DPCI), e.g. \"072-08-0313\", or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "highlights": {
+                                                                                        "description": "Highlight bullets from the product page, or null when the serving source does not report them.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": [
+                                                                                            "array",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "image": {
                                                                                         "description": "Primary product image URL. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -234896,6 +235097,64 @@
                                                                                             "type": "string"
                                                                                         },
                                                                                         "type": "array"
+                                                                                    },
+                                                                                    "listPrice": {
+                                                                                        "description": "Regular price when the product is on sale, or null when it is not discounted or the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "packageDimensions": {
+                                                                                        "description": "Size and weight of the shipping package as Target lists them, or null when the serving source does not report them.",
+                                                                                        "properties": {
+                                                                                            "depth": {
+                                                                                                "description": "Package depth, in dimensionUnit.",
+                                                                                                "type": [
+                                                                                                    "number",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            },
+                                                                                            "dimensionUnit": {
+                                                                                                "description": "Unit of the three dimensions, e.g. \"INCH\".",
+                                                                                                "type": [
+                                                                                                    "string",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            },
+                                                                                            "height": {
+                                                                                                "description": "Package height, in dimensionUnit.",
+                                                                                                "type": [
+                                                                                                    "number",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            },
+                                                                                            "weight": {
+                                                                                                "description": "Package weight, in weightUnit.",
+                                                                                                "type": [
+                                                                                                    "number",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            },
+                                                                                            "weightUnit": {
+                                                                                                "description": "Unit of the weight, e.g. \"POUND\".",
+                                                                                                "type": [
+                                                                                                    "string",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            },
+                                                                                            "width": {
+                                                                                                "description": "Package width, in dimensionUnit.",
+                                                                                                "type": [
+                                                                                                    "number",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            }
+                                                                                        },
+                                                                                        "type": [
+                                                                                            "object",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "price": {
                                                                                         "description": "Current price in USD, or null when the product shows no current price. Populated whenever the provider has data for the entity.",
@@ -234912,10 +235171,44 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "ratingCount": {
+                                                                                        "description": "Number of star ratings, including ratings left without a written review, or null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "returnPolicy": {
+                                                                                        "description": "Target's return policy text for this item, or null when the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "reviewsCount": {
                                                                                         "description": "Number of written customer reviews, or null when not reported.",
                                                                                         "type": [
                                                                                             "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "specifications": {
+                                                                                        "description": "The specifications table from the product page, one name and value per row, or null when the serving source does not report it.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "name": {
+                                                                                                    "description": "Attribute name as Target labels it, e.g. \"Material\".",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "value": {
+                                                                                                    "description": "Attribute value as Target lists it.",
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": [
+                                                                                            "array",
                                                                                             "null"
                                                                                         ]
                                                                                     },
@@ -234928,6 +235221,13 @@
                                                                                         "description": "Product title. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "upc": {
+                                                                                        "description": "UPC barcode as Target lists it, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "url": {
                                                                                         "description": "Target product page URL with tracking query parameters removed. Populated whenever the provider has data for the entity.",
@@ -235507,9 +235807,47 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "incentivized": {
+                                                                                        "description": "True when the reviewer received an incentive, such as a free sample, for writing the review, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "rating": {
                                                                                         "description": "Star rating the reviewer gave, 1-5.",
                                                                                         "type": "number"
+                                                                                    },
+                                                                                    "recommended": {
+                                                                                        "description": "True when the reviewer says they would recommend the product, false when they would not, or null when they did not answer.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "responses": {
+                                                                                        "description": "Public replies to the review from the brand or Target, oldest first; empty when there are none.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "createdUtc": {
+                                                                                                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. Null when not reported.",
+                                                                                                    "type": [
+                                                                                                        "number",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "name": {
+                                                                                                    "description": "Name the reply is signed with, e.g. the brand's customer team.",
+                                                                                                    "type": "string"
+                                                                                                },
+                                                                                                "text": {
+                                                                                                    "description": "Reply text.",
+                                                                                                    "type": "string"
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
                                                                                     },
                                                                                     "reviewId": {
                                                                                         "description": "Target review id; use it to deduplicate across pages. Populated whenever the provider has data for the entity.",
@@ -235528,6 +235866,13 @@
                                                                                     "title": {
                                                                                         "description": "Review headline; empty when the review has none.",
                                                                                         "type": "string"
+                                                                                    },
+                                                                                    "updatedUtc": {
+                                                                                        "description": "UTC epoch timestamp in seconds (Unix time) of the review's last update on Target. Multiply by 1000 for a JS Date in milliseconds. Null when not reported.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "verifiedPurchase": {
                                                                                         "description": "True when Target marks the review a verified purchase, or null when not reported.",
@@ -236100,6 +236445,8 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `totalPages`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
                                         "items": {
                                             "enum": [
+                                                "hasMore",
+                                                "images",
                                                 "isSponsored",
                                                 "rating",
                                                 "totalPages"
@@ -236177,12 +236524,33 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
+                                                                        "hasMore": {
+                                                                            "description": "True when another page of results exists; request it with page + 1. Null when the serving source does not report it.",
+                                                                            "type": [
+                                                                                "boolean",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "items": {
                                                                             "description": "Matching Target product records for the requested page. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
                                                                                     "brand": {
                                                                                         "description": "Brand name, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "brandUrl": {
+                                                                                        "description": "Target brand page URL, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "category": {
+                                                                                        "description": "Target product type the result belongs to, e.g. \"Coffee Makers\", or null when not reported.",
                                                                                         "type": [
                                                                                             "string",
                                                                                             "null"
@@ -236199,6 +236567,16 @@
                                                                                         "description": "Primary product image URL. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "images": {
+                                                                                        "description": "All product image URLs, primary first, or null when the serving source returns only the primary image.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": [
+                                                                                            "array",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "isSponsored": {
                                                                                         "description": "True when the result is a sponsored placement, or null when the serving source does not report it.",
