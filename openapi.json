@@ -19887,6 +19887,17 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `sizeGuide`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "sizeGuide"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -19897,8 +19908,8 @@
                                         "uniqueItems": true
                                     },
                                     "url": {
-                                        "description": "ASOS product page URL, e.g. https://www.asos.com/pullbear/pullbear-casual-trainers-in-white/prd/211299341. The store is read from the URL path (/us/, /au/, /de/ and so on; none means the UK store), and prices come back in that store's currency.",
-                                        "pattern": "^https?://(www\\.)?asos\\.com/.*/prd/[0-9]+",
+                                        "description": "ASOS product page URL, e.g. https://www.asos.com/pullbear/pullbear-casual-trainers-in-white/prd/211299341, or the short form https://www.asos.com/prd/211299341. The store is read from the URL path (/us/, /au/, /de/ and so on; none means the UK store), and prices come back in that store's currency.",
+                                        "pattern": "^https?://(www\\.)?asos\\.com/(.*/)?prd/[0-9]+",
                                         "type": "string"
                                     }
                                 },
@@ -19960,6 +19971,13 @@
                                                                                         ],
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "careInstructions": {
+                                                                                        "description": "Care instructions as ASOS lists them, e.g. \"Machine wash according to instructions on care label\", or null when not listed.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "colour": {
                                                                                         "description": "Colour name as ASOS lists it, or null when not reported.",
                                                                                         "type": [
@@ -20008,6 +20026,20 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "isDiscontinued": {
+                                                                                        "description": "True when ASOS has discontinued the product, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "materials": {
+                                                                                        "description": "ASOS's \"About me\" section: fabric and material composition, as HTML, or null when not listed.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "price": {
                                                                                         "description": "Current price in the store's currency, or null when no price is shown. Populated whenever the provider has data for the entity.",
                                                                                         "type": [
@@ -20020,6 +20052,13 @@
                                                                                         "description": "ASOS product id. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "sizeGuide": {
+                                                                                        "description": "Link to the ASOS size guide for this product, or null when the serving source does not report one.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "title": {
                                                                                         "description": "Product title. Populated whenever the provider has data for the entity.",
@@ -20035,6 +20074,27 @@
                                                                                         "description": "One entry per size the product is sold in.",
                                                                                         "items": {
                                                                                             "properties": {
+                                                                                                "colour": {
+                                                                                                    "description": "Colour of this variant as ASOS lists it, or null when not reported.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "currency": {
+                                                                                                    "description": "Currency code of this size's price, e.g. \"GBP\", or null when not shown.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "ean": {
+                                                                                                    "description": "EAN barcode of this size, or null when not reported.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
                                                                                                 "inStock": {
                                                                                                     "description": "True when this size is in stock, or null when not reported.",
                                                                                                     "type": [
@@ -20042,8 +20102,29 @@
                                                                                                         "null"
                                                                                                     ]
                                                                                                 },
+                                                                                                "price": {
+                                                                                                    "description": "Current price of this size in the store's currency, or null when not shown.",
+                                                                                                    "type": [
+                                                                                                        "number",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
                                                                                                 "size": {
                                                                                                     "description": "Size label as ASOS shows it, e.g. \"UK 8\", or null when not reported.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "sku": {
+                                                                                                    "description": "ASOS SKU of this size, or null when not reported.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "variantId": {
+                                                                                                    "description": "ASOS variant id of this size, or null when not reported.",
                                                                                                     "type": [
                                                                                                         "string",
                                                                                                         "null"
@@ -20572,6 +20653,17 @@
                                         "minLength": 1,
                                         "type": "string"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `inStock`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "inStock"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "sort": {
                                         "description": "Result sort order; omit for ASOS's recommended order (e.g. new for newest arrivals first).",
                                         "enum": [
@@ -20638,6 +20730,13 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
+                                                                        "hasMore": {
+                                                                            "description": "True when another page of results follows this one (request it with page + 1), or null when not reported.",
+                                                                            "type": [
+                                                                                "boolean",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "items": {
                                                                             "description": "Matching ASOS product records for the requested page. Populated whenever the provider has data for the entity.",
                                                                             "items": {
@@ -20656,6 +20755,13 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "colourWayId": {
+                                                                                        "description": "Id of the colourway this result shows; it appears as #colourWayId-<id> in ASOS product links. Null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "currency": {
                                                                                         "description": "Price currency code, e.g. \"GBP\" or \"USD\", or null when no price is shown. Populated whenever the provider has data for the entity.",
                                                                                         "type": [
@@ -20668,6 +20774,20 @@
                                                                                         "description": "Primary product image URL. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "images": {
+                                                                                        "description": "All product image URLs, primary first.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
+                                                                                    "inStock": {
+                                                                                        "description": "True when the product is in stock, false when it is not, or null when the serving source does not report stock in search results.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "listPrice": {
                                                                                         "description": "Previous price when the product is marked down, or null when it is not.",
@@ -20691,10 +20811,24 @@
                                                                                         ],
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "productCode": {
+                                                                                        "description": "ASOS product code (the style number printed on the product page), or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "productId": {
                                                                                         "description": "ASOS product id, the number after /prd/ in the product URL; use the product URL with the ASOS Product SKU. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "sellingFast": {
+                                                                                        "description": "True when ASOS flags the product as selling fast, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "title": {
                                                                                         "description": "Product title. Populated whenever the provider has data for the entity.",
@@ -110772,6 +110906,17 @@
                                         "minLength": 1,
                                         "type": "string"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `memberOffer`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "memberOffer"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -110839,10 +110984,24 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "dimensions": {
+                                                                                        "description": "Product dimensions as IKEA lists them, e.g. \"31 1/2x11x79 1/2\" (inches on the US store), or null when not listed.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "image": {
                                                                                         "description": "Primary product image URL. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "memberOffer": {
+                                                                                        "description": "IKEA Family member offer shown on the product, e.g. \"In-store only price $65.00\", or null when there is none or the serving source does not report it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "position": {
                                                                                         "description": "1-based position of the result in this page.",
@@ -152957,7 +153116,7 @@
         },
         "/v1/run/linkedin.profile_thin": {
             "post": {
-                "description": "Lightweight profile: name, avatar, location, followers, public id, current company, and a basic experience/education list (company + dates; job titles, the current-role flag and the connections label only where the source and the profile show them; no descriptions or skills; past companies may be redacted). For full experience detail, skills, certifications, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
+                "description": "Lightweight profile: name, avatar, location, followers, public id, current company, and a basic experience/education list (company + dates; job titles, the current-role flag and the connections label only where the source and the profile show them; no descriptions or skills; past companies may be redacted). For full experience detail, skills, certifications, and verified flags use linkedin.profile.\n\n**Price:** \\$0.80 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [LinkedIn Profile (basic) pricing and uptime](https://getanyapi.com/api/linkedin/profile-thin) - live USD price, lane routing, and measured 30-day uptime. [Every Linkedin endpoint](https://getanyapi.com/api/linkedin).",
                 "operationId": "linkedin_profile_thin",
                 "parameters": [
                     {
@@ -205446,6 +205605,13 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "clubName": {
+                                                                                        "description": "Name of the Sam's Club location the price and stock come from, e.g. \"Dallas Sam's Club\", or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "currency": {
                                                                                         "description": "Price currency code, e.g. \"USD\", or null when no price is shown.",
                                                                                         "type": [
@@ -205459,6 +205625,29 @@
                                                                                             "string",
                                                                                             "null"
                                                                                         ]
+                                                                                    },
+                                                                                    "highlights": {
+                                                                                        "description": "Key facts Sam's Club highlights on the product page.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "label": {
+                                                                                                    "description": "Highlight name, e.g. \"Brand\".",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "value": {
+                                                                                                    "description": "Highlight value, e.g. \"Bounty\".",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": "array"
                                                                                     },
                                                                                     "image": {
                                                                                         "description": "Primary product image URL. Populated whenever the provider has data for the entity.",
@@ -205484,10 +205673,24 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "memberLimit": {
+                                                                                        "description": "Most units one member may buy, or null when no limit is shown.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "model": {
                                                                                         "description": "Manufacturer model number, or null when not reported.",
                                                                                         "type": [
                                                                                             "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "orderLimit": {
+                                                                                        "description": "Most units one order may contain, or null when no limit is shown.",
+                                                                                        "type": [
+                                                                                            "integer",
                                                                                             "null"
                                                                                         ]
                                                                                     },
@@ -205506,6 +205709,47 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "ratingDistribution": {
+                                                                                        "description": "Number of reviews at each star rating, keyed \"1\" through \"5\".",
+                                                                                        "properties": {
+                                                                                            "1": {
+                                                                                                "description": "Number of 1-star reviews.",
+                                                                                                "type": [
+                                                                                                    "integer",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            },
+                                                                                            "2": {
+                                                                                                "description": "Number of 2-star reviews.",
+                                                                                                "type": [
+                                                                                                    "integer",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            },
+                                                                                            "3": {
+                                                                                                "description": "Number of 3-star reviews.",
+                                                                                                "type": [
+                                                                                                    "integer",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            },
+                                                                                            "4": {
+                                                                                                "description": "Number of 4-star reviews.",
+                                                                                                "type": [
+                                                                                                    "integer",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            },
+                                                                                            "5": {
+                                                                                                "description": "Number of 5-star reviews.",
+                                                                                                "type": [
+                                                                                                    "integer",
+                                                                                                    "null"
+                                                                                                ]
+                                                                                            }
+                                                                                        },
+                                                                                        "type": "object"
+                                                                                    },
                                                                                     "reviewsCount": {
                                                                                         "description": "Number of customer reviews, or null when the product has none.",
                                                                                         "type": [
@@ -205517,6 +205761,13 @@
                                                                                         "description": "Product title. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "unitPrice": {
+                                                                                        "description": "Unit price as Sam's Club shows it, e.g. \"$0.04/sft\", or null when not shown.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "upc": {
                                                                                         "description": "Universal Product Code, or null when not reported.",
@@ -206092,6 +206343,13 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
+                                                                        "hasMore": {
+                                                                            "description": "True when another page of results follows this one (request it with page + 1), or null when not reported.",
+                                                                            "type": [
+                                                                                "boolean",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "items": {
                                                                             "description": "Matching Sam's Club product records for the requested page, sponsored tiles left out. Prices are those of Sam's Club's default club. Populated whenever the provider has data for the entity.",
                                                                             "items": {
@@ -206110,6 +206368,13 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "fulfillment": {
+                                                                                        "description": "Ways the item can be fulfilled at the pickup club, e.g. \"PICKUP\", \"DELIVERY\", \"SHIPPING\"; empty when none is offered.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
+                                                                                    },
                                                                                     "image": {
                                                                                         "description": "Primary product image URL. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -206127,6 +206392,13 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "pickupClubId": {
+                                                                                        "description": "Id of the Sam's Club location whose stock and fulfillment the result reflects, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "position": {
                                                                                         "description": "1-based organic position of the result in this page.",
                                                                                         "type": [
@@ -206141,6 +206413,13 @@
                                                                                             "null"
                                                                                         ],
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "promotions": {
+                                                                                        "description": "Promotion labels shown on the result, e.g. \"$40 off\" or \"Sam's Cash Offer\"; empty when none.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": "array"
                                                                                     },
                                                                                     "rating": {
                                                                                         "description": "Average customer rating, 0-5, or null when the product is unrated.",
@@ -206180,6 +206459,13 @@
                                                                             "description": "Number of organic products Sam's Club returns for the query (sponsored tiles are left out), or null when not reported.",
                                                                             "type": [
                                                                                 "integer",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "totalResultsExact": {
+                                                                            "description": "True when totalResults is an exact count, false when it is an estimate, or null when not reported.",
+                                                                            "type": [
+                                                                                "boolean",
                                                                                 "null"
                                                                             ]
                                                                         }
@@ -227338,6 +227624,20 @@
                                                                             "description": "Deal detail records (one per requested deal URL). Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
+                                                                                    "asin": {
+                                                                                        "description": "Amazon ASIN of the product when the deal links to Amazon, or null otherwise.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "author": {
+                                                                                        "description": "Username of the member who posted the deal, or null when not shown.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "brand": {
                                                                                         "description": "Brand Slickdeals files the deal under, or null when none.",
                                                                                         "type": [
@@ -227386,6 +227686,13 @@
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "dealLink": {
+                                                                                        "description": "Slickdeals' \"Get Deal\" link, which redirects to the store's offer, or null when the deal has none.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "description": {
                                                                                         "description": "Deal description as posted, or null when it has none.",
                                                                                         "type": [
@@ -227422,6 +227729,20 @@
                                                                                         "description": "Deal price in USD, or null when the deal has no numeric price.",
                                                                                         "type": [
                                                                                             "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "priceIsFrom": {
+                                                                                        "description": "True when the price is a starting (\"from\") price, false when it is the price, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "priceType": {
+                                                                                        "description": "How Slickdeals qualifies the price, e.g. \"fixed\" for a plain price, or null when the deal has no numeric price.",
+                                                                                        "type": [
+                                                                                            "string",
                                                                                             "null"
                                                                                         ]
                                                                                     },
@@ -228031,10 +228352,24 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
+                                                                        "hasMore": {
+                                                                            "description": "True when another page of deals follows this one (request it with page + 1), or null when not reported.",
+                                                                            "type": [
+                                                                                "boolean",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "items": {
                                                                             "description": "Matching Slickdeals deal records for the requested page. Populated whenever the provider has data for the entity.",
                                                                             "items": {
                                                                                 "properties": {
+                                                                                    "author": {
+                                                                                        "description": "Username of the member who posted the deal, or null when not shown.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "commentsCount": {
                                                                                         "description": "Number of comments on the deal, or null when not reported.",
                                                                                         "type": [
@@ -228062,6 +228397,13 @@
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "discountPercent": {
+                                                                                        "description": "Percent off the list price, e.g. 21.9, or null when no list price is posted.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "image": {
                                                                                         "description": "Deal thumbnail image URL.",
                                                                                         "type": "string"
@@ -228084,6 +228426,20 @@
                                                                                         "description": "Deal price in USD, or null when the deal has no numeric price.",
                                                                                         "type": [
                                                                                             "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "priceIsFrom": {
+                                                                                        "description": "True when the price is a starting (\"from\") price, false when it is the price, or null when not reported.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "priceType": {
+                                                                                        "description": "How Slickdeals qualifies the price, e.g. \"fixed\" for a plain price, or null when the deal has no numeric price.",
+                                                                                        "type": [
+                                                                                            "string",
                                                                                             "null"
                                                                                         ]
                                                                                     },
