@@ -27219,7 +27219,7 @@
         },
         "/v1/run/brave.search": {
             "post": {
-                "description": "Run a Brave web search and get the ranked organic results (title, URL, snippet, position, display URL, domain) as clean JSON. Brave answers from its own independent index. Returns up to 20 results per call; pick the country Brave searches from.\n\n**Price:** \\$0.85 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Brave Search pricing and uptime](https://getanyapi.com/api/brave/search) - live USD price, lane routing, and measured 30-day uptime. [Every Brave endpoint](https://getanyapi.com/api/brave).",
+                "description": "Run a Brave web search and get the ranked organic results (title, URL, snippet, position, display URL, domain) as clean JSON. Brave answers from its own independent index. Returns up to 20 results per call, with related searches and video results where the source has them; page deeper with page and pick the country Brave searches from.\n\n**Price:** \\$0.85 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 3 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [Brave Search pricing and uptime](https://getanyapi.com/api/brave/search) - live USD price, lane routing, and measured 30-day uptime. [Every Brave endpoint](https://getanyapi.com/api/brave).",
                 "operationId": "brave_search",
                 "parameters": [
                     {
@@ -27362,6 +27362,13 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "page": {
+                                        "default": 1,
+                                        "description": "Which page of Brave results to return, starting at 1 (up to 10); a page holds about 20 results. Each page is billed as one request. Pages after the first are served only for country US, by the one source that continues each page exactly where the last ended. A limit below the page size drops the rest of that page, so keep the default limit to walk every result.",
+                                        "maximum": 10,
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
@@ -27371,6 +27378,22 @@
                                         "description": "The Brave search query.",
                                         "minLength": 1,
                                         "type": "string"
+                                    },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `relatedSearches` or `publishedUtc`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "durationSeconds",
+                                                "image",
+                                                "publishedUtc",
+                                                "relatedSearches",
+                                                "source",
+                                                "videos"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
                                     },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
@@ -27450,9 +27473,16 @@
                                                                                         ]
                                                                                     },
                                                                                     "position": {
-                                                                                        "description": "1-based rank of the result on the page. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "1-based rank of the result. On page 2 and later, some sources count from the top of page 1 and others from the top of the page returned. Populated whenever the provider has data for the entity.",
                                                                                         "type": "integer",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "publishedUtc": {
+                                                                                        "description": "Page date Brave shows for the result. UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. null when Brave shows no date or the source that answered cannot report it.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "snippet": {
                                                                                         "description": "Text excerpt Brave shows under the result, often led by the page date. Absent on the results where Brave shows none. Populated whenever the provider has data for the entity.",
@@ -27486,6 +27516,71 @@
                                                                         "query": {
                                                                             "description": "The query Brave searched.",
                                                                             "type": "string"
+                                                                        },
+                                                                        "relatedSearches": {
+                                                                            "description": "Brave's related searches for the query. An empty array means Brave showed none; null means the source that answered cannot report them.",
+                                                                            "items": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "videos": {
+                                                                            "description": "Video results Brave shows for the query. An empty array means Brave showed none; null means the source that answered cannot report them.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "durationSeconds": {
+                                                                                        "description": "Video length in seconds; null when Brave shows none.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "image": {
+                                                                                        "description": "Thumbnail image URL.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "publishedUtc": {
+                                                                                        "description": "Date Brave shows for the video. UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. null when Brave shows no date.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "source": {
+                                                                                        "description": "Site hosting the video, e.g. YouTube.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "title": {
+                                                                                        "description": "Video title as Brave shows it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "URL of the video page.",
+                                                                                        "format": "uri",
+                                                                                        "type": "string"
+                                                                                    }
+                                                                                },
+                                                                                "required": [
+                                                                                    "url"
+                                                                                ],
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -49981,7 +50076,7 @@
         },
         "/v1/run/duckduckgo.search": {
             "post": {
-                "description": "Run a DuckDuckGo web search and get the ranked organic results (title, URL, snippet, position, display URL, domain) as clean JSON, ads left out. Returns up to 10 results per call; pick the country DuckDuckGo searches from.\n\n**Price:** \\$0.85 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [DuckDuckGo Search pricing and uptime](https://getanyapi.com/api/duckduckgo/search) - live USD price, lane routing, and measured 30-day uptime. [Every Duckduckgo endpoint](https://getanyapi.com/api/duckduckgo).",
+                "description": "Run a DuckDuckGo web search and get the ranked organic results (title, URL, snippet, position, display URL, domain) as clean JSON, ads left out. Returns up to 10 results per call; page deeper with page and pick the country DuckDuckGo searches from.\n\n**Price:** \\$0.85 per 1,000 requests (flat per request - same cost regardless of results returned).\n\n**Routing:** 4 independent lanes are available in execution order. A failed attempt uses the next lane only when the request's payment authorizes that lane's price; the normalized schema stays the same.\n\n**Catalog:** [DuckDuckGo Search pricing and uptime](https://getanyapi.com/api/duckduckgo/search) - live USD price, lane routing, and measured 30-day uptime. [Every Duckduckgo endpoint](https://getanyapi.com/api/duckduckgo).",
                 "operationId": "duckduckgo_search",
                 "parameters": [
                     {
@@ -50143,6 +50238,12 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "page": {
+                                        "default": 1,
+                                        "description": "Which page of 10 results to return, starting at 1: page 2 returns results 11-20. Each page is billed as one request. Pages after the first are served only for country US, GB or DE, by the one source that continues each page exactly where the last ended. DuckDuckGo can repeat a result from the previous page, so deduplicate on url, and a limit below 10 drops the rest of that page.",
+                                        "minimum": 1,
+                                        "type": "integer"
+                                    },
                                     "preferLatencyUnderMs": {
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Prefer sources whose typical response time (median over the trailing 30 days, as published on this endpoint's lane health) is under this many milliseconds; among those, the cheapest serves. This can raise your price: when the cheapest source misses the target, a faster and dearer one serves, and you are quoted and charged its price. If no source is that fast the request is still served, by whichever source offers the best speed for its price - it is never refused for being slow. Sources we have not timed are tried last. This is a preference, not a guarantee: the median describes past requests and is not a ceiling on this one, and it excludes any wait this request itself asks for. On a paginated walk it applies to the first page only: later pages stay with the source that page chose, at the price it was quoted.",
                                         "minimum": 1,
@@ -50231,7 +50332,7 @@
                                                                                         ]
                                                                                     },
                                                                                     "position": {
-                                                                                        "description": "1-based rank of the result on the page. Populated whenever the provider has data for the entity.",
+                                                                                        "description": "1-based rank of the result. On page 2 and later, some sources count from the top of page 1 and others from the top of the page returned. Populated whenever the provider has data for the entity.",
                                                                                         "type": "integer",
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
@@ -137678,6 +137779,13 @@
                                                                                         ],
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "salarySource": {
+                                                                                        "description": "Where the base salary range comes from, as Levels.fyi labels it, e.g. Levels.fyi base salary. null when the job has no salary range.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "salaryUnit": {
                                                                                         "description": "Pay period of the salary and compensation figures, e.g. YEAR.",
                                                                                         "type": [
@@ -137704,11 +137812,28 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "totalCompensationSource": {
+                                                                                        "description": "Where the total compensation range comes from, as Levels.fyi labels it, e.g. Levels.fyi total compensation. Some ranges are Levels.fyi estimates rather than figures the employer posted. null when the job has no total compensation range.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "url": {
                                                                                         "description": "Levels.fyi job listing URL. Populated whenever the provider has data for the entity.",
                                                                                         "format": "uri",
                                                                                         "type": "string",
                                                                                         "x-anyapi-must-populate": true
+                                                                                    },
+                                                                                    "workplaceTypes": {
+                                                                                        "description": "Where the job is worked as Levels.fyi lists it, e.g. office or remote. null when Levels.fyi does not say.",
+                                                                                        "items": {
+                                                                                            "type": "string"
+                                                                                        },
+                                                                                        "type": [
+                                                                                            "array",
+                                                                                            "null"
+                                                                                        ]
                                                                                     }
                                                                                 },
                                                                                 "required": [
@@ -137720,6 +137845,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "total": {
+                                                                            "description": "Total number of jobs Levels.fyi matches for the search, beyond the ones returned.",
+                                                                            "type": [
+                                                                                "integer",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
@@ -159664,6 +159796,20 @@
                                                                 },
                                                                 {
                                                                     "properties": {
+                                                                        "appleMusic": {
+                                                                            "description": "Apple Music artist URL listed in the page's social icons; null when none.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "applePodcast": {
+                                                                            "description": "Apple Podcasts show URL listed in the page's social icons; null when none.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "avatarUrl": {
                                                                             "description": "Profile picture URL; null when none is set. Populated whenever the provider has data for the entity.",
                                                                             "type": [
@@ -159699,6 +159845,13 @@
                                                                         },
                                                                         "instagram": {
                                                                             "description": "Instagram profile URL listed in the page's social icons; null when none.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "linkedin": {
+                                                                            "description": "LinkedIn profile URL listed in the page's social icons; null when none.",
                                                                             "type": [
                                                                                 "string",
                                                                                 "null"
@@ -159756,6 +159909,13 @@
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
                                                                         },
+                                                                        "soundcloud": {
+                                                                            "description": "SoundCloud profile URL listed in the page's social icons; null when none.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "spotify": {
                                                                             "description": "Spotify artist or show URL listed in the page's social icons; null when none.",
                                                                             "type": [
@@ -159779,6 +159939,13 @@
                                                                         },
                                                                         "title": {
                                                                             "description": "The page's title; the username when none is set. Null when this source does not report it.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "twitch": {
+                                                                            "description": "Twitch channel URL listed in the page's social icons; null when none.",
                                                                             "type": [
                                                                                 "string",
                                                                                 "null"
@@ -238303,6 +238470,7 @@
                                                 "fileCount",
                                                 "linkCount",
                                                 "photoCount",
+                                                "previewEnabled",
                                                 "videoCount"
                                             ],
                                             "type": "string"
@@ -238405,6 +238573,13 @@
                                                                             "description": "Photos the channel has posted. Telegram rounds this count (\"1.2K\" becomes 1200). Null when not shown or when this source does not report it.",
                                                                             "type": [
                                                                                 "integer",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "previewEnabled": {
+                                                                            "description": "True when the channel's public web preview is on, which is what telegram.channel_posts and telegram.post read the channel's posts from. Null when this source does not report it.",
+                                                                            "type": [
+                                                                                "boolean",
                                                                                 "null"
                                                                             ]
                                                                         },
@@ -238912,6 +239087,21 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `linkPreviewUrl` or `edited`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "edited",
+                                                "linkPreviewDescription",
+                                                "linkPreviewTitle",
+                                                "linkPreviewUrl",
+                                                "media"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -238994,6 +239184,13 @@
                                                                                         ],
                                                                                         "x-anyapi-must-populate": true
                                                                                     },
+                                                                                    "edited": {
+                                                                                        "description": "True when the post was edited after it was published. Null when this source does not report it.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "id": {
                                                                                         "description": "Post number, unique within the channel. Posts are numbered in order. Populated whenever the provider has data for the entity.",
                                                                                         "type": "string",
@@ -239003,6 +239200,67 @@
                                                                                         "description": "Thumbnail image URL for the post's photo, video or link preview; null when it has none. Temporary: Telegram's CDN link expires.",
                                                                                         "type": [
                                                                                             "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "linkPreviewDescription": {
+                                                                                        "description": "Description on the post's link preview card. Null when the post has no link preview, the card has no description, or this source does not report it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "linkPreviewTitle": {
+                                                                                        "description": "Title on the post's link preview card. Null when the post has no link preview, the card has no title, or this source does not report it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "linkPreviewUrl": {
+                                                                                        "description": "URL of the page the post's link preview card shows. Null when the post has no link preview or this source does not report it.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "media": {
+                                                                                        "description": "The post's attachments in order, each with its kind, file URL, preview image and length. Empty when the post has none; null when this source does not report them.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "durationSeconds": {
+                                                                                                    "description": "Video length in seconds; null for other attachments.",
+                                                                                                    "type": [
+                                                                                                        "number",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "image": {
+                                                                                                    "description": "Preview image URL (the photo itself for a photo). Temporary: Telegram's CDN link expires. Null when there is none.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "type": {
+                                                                                                    "description": "Attachment kind as Telegram labels it, e.g. photo or video.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "url": {
+                                                                                                    "description": "Direct file URL. Temporary and signed: keep the query string. Null when Telegram withholds the file, as for a large video.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": [
+                                                                                            "array",
                                                                                             "null"
                                                                                         ]
                                                                                     },
@@ -239527,6 +239785,23 @@
                                         "minimum": 1,
                                         "type": "integer"
                                     },
+                                    "requireFields": {
+                                        "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `linkPreviewUrl` or `edited`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
+                                        "items": {
+                                            "enum": [
+                                                "durationSeconds",
+                                                "edited",
+                                                "linkPreviewDescription",
+                                                "linkPreviewTitle",
+                                                "linkPreviewUrl",
+                                                "media",
+                                                "type"
+                                            ],
+                                            "type": "string"
+                                        },
+                                        "type": "array",
+                                        "uniqueItems": true
+                                    },
                                     "source": {
                                         "description": "Optional. Source ids to prefer, in order, taken from this endpoint's `lanes[].source.id` in /catalog or /apis. Omit it and the cheapest source serves, with automatic failover. Listed sources are tried first in the order given, then the others, unless `allowFallbacks` is false. A single source with `allowFallbacks` false is served only by that source at its price, quoted and charged exactly, with no failover. The price is that of the dearest source that may serve. An id that does not serve this endpoint is rejected as invalid input with no charge; a listed source that is not serving right now is refused with no charge, so omit `source` to be served by another. On a paginated walk, later pages must include the source that served page one, or omit `source`.",
                                         "items": {
@@ -239599,6 +239874,13 @@
                                                                             ],
                                                                             "x-anyapi-must-populate": true
                                                                         },
+                                                                        "edited": {
+                                                                            "description": "True when the post was edited after it was published. Null when this source does not report it.",
+                                                                            "type": [
+                                                                                "boolean",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "id": {
                                                                             "description": "Post number, unique within the channel. Posts are numbered in order. Populated whenever the provider has data for the entity.",
                                                                             "type": "string",
@@ -239608,6 +239890,67 @@
                                                                             "description": "Thumbnail image URL for the post's photo, video or link preview; null when it has none. Temporary: Telegram's CDN link expires.",
                                                                             "type": [
                                                                                 "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "linkPreviewDescription": {
+                                                                            "description": "Description on the post's link preview card. Null when the post has no link preview, the card has no description, or this source does not report it.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "linkPreviewTitle": {
+                                                                            "description": "Title on the post's link preview card. Null when the post has no link preview, the card has no title, or this source does not report it.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "linkPreviewUrl": {
+                                                                            "description": "URL of the page the post's link preview card shows. Null when the post has no link preview or this source does not report it.",
+                                                                            "type": [
+                                                                                "string",
+                                                                                "null"
+                                                                            ]
+                                                                        },
+                                                                        "media": {
+                                                                            "description": "The post's attachments in order, each with its kind, file URL, preview image and length. Empty when the post has none; null when this source does not report them.",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "durationSeconds": {
+                                                                                        "description": "Video length in seconds; null for other attachments.",
+                                                                                        "type": [
+                                                                                            "number",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "image": {
+                                                                                        "description": "Preview image URL (the photo itself for a photo). Temporary: Telegram's CDN link expires. Null when there is none.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "type": {
+                                                                                        "description": "Attachment kind as Telegram labels it, e.g. photo or video.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "url": {
+                                                                                        "description": "Direct file URL. Temporary and signed: keep the query string. Null when Telegram withholds the file, as for a large video.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            },
+                                                                            "type": [
+                                                                                "array",
                                                                                 "null"
                                                                             ]
                                                                         },
@@ -261027,7 +261370,11 @@
                                         "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `expiresUtc`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a story that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge.",
                                         "items": {
                                             "enum": [
-                                                "expiresUtc"
+                                                "authorVerified",
+                                                "expiresUtc",
+                                                "photos",
+                                                "reposts",
+                                                "totalCount"
                                             ],
                                             "type": "string"
                                         },
@@ -261093,6 +261440,13 @@
                                                                 {
                                                                     "additionalProperties": false,
                                                                     "properties": {
+                                                                        "hasMore": {
+                                                                            "description": "True when TikTok reports more active stories than the ones returned; they cannot be fetched with another call.",
+                                                                            "type": [
+                                                                                "boolean",
+                                                                                "null"
+                                                                            ]
+                                                                        },
                                                                         "stories": {
                                                                             "description": "The account's active public stories, up to 20, oldest first. Populated whenever the provider has data for the entity.",
                                                                             "items": {
@@ -261100,6 +261454,34 @@
                                                                                     "authorHandle": {
                                                                                         "description": "Author's TikTok handle, without the leading @.",
                                                                                         "type": "string"
+                                                                                    },
+                                                                                    "authorImage": {
+                                                                                        "description": "Author's avatar image URL. Signed and short-lived, so keep the query string.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "authorName": {
+                                                                                        "description": "Author's display name.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "authorUserId": {
+                                                                                        "description": "Author's numeric TikTok user id.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "authorVerified": {
+                                                                                        "description": "Whether the author's account carries a TikTok verification badge. Null when this source does not report it.",
+                                                                                        "type": [
+                                                                                            "boolean",
+                                                                                            "null"
+                                                                                        ]
                                                                                     },
                                                                                     "caption": {
                                                                                         "description": "Caption text; usually empty on stories.",
@@ -261161,6 +261543,46 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "photos": {
+                                                                                        "description": "The photos of a photo story with their pixel dimensions; empty for a video story. Null when this source does not report dimensions; imageUrls still lists the photos.",
+                                                                                        "items": {
+                                                                                            "properties": {
+                                                                                                "height": {
+                                                                                                    "description": "Photo height in pixels.",
+                                                                                                    "type": [
+                                                                                                        "integer",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "url": {
+                                                                                                    "description": "Photo URL. Signed and short-lived, so keep the query string.",
+                                                                                                    "type": [
+                                                                                                        "string",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                },
+                                                                                                "width": {
+                                                                                                    "description": "Photo width in pixels.",
+                                                                                                    "type": [
+                                                                                                        "integer",
+                                                                                                        "null"
+                                                                                                    ]
+                                                                                                }
+                                                                                            },
+                                                                                            "type": "object"
+                                                                                        },
+                                                                                        "type": [
+                                                                                            "array",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "reposts": {
+                                                                                        "description": "Repost count. Null when this source does not report it.",
+                                                                                        "type": [
+                                                                                            "integer",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "saves": {
                                                                                         "description": "Save (favorite) count.",
                                                                                         "type": [
@@ -261175,8 +261597,29 @@
                                                                                             "null"
                                                                                         ]
                                                                                     },
+                                                                                    "soundAuthor": {
+                                                                                        "description": "Credited author of the sound.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "soundClipId": {
+                                                                                        "description": "Id of the sound the story uses. Pass it to tiktok.song or tiktok.song_videos as clipId.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
                                                                                     "soundTitle": {
                                                                                         "description": "Name of the sound the story uses; null when it has none.",
+                                                                                        "type": [
+                                                                                            "string",
+                                                                                            "null"
+                                                                                        ]
+                                                                                    },
+                                                                                    "soundUrl": {
+                                                                                        "description": "Audio file URL of the sound. Signed and short-lived, so keep the query string.",
                                                                                         "type": [
                                                                                             "string",
                                                                                             "null"
@@ -261209,6 +261652,13 @@
                                                                             },
                                                                             "type": "array",
                                                                             "x-anyapi-must-populate": true
+                                                                        },
+                                                                        "totalCount": {
+                                                                            "description": "How many active stories TikTok reports for the account, which can exceed the stories returned. Null when this source does not report it.",
+                                                                            "type": [
+                                                                                "integer",
+                                                                                "null"
+                                                                            ]
                                                                         }
                                                                     },
                                                                     "required": [
