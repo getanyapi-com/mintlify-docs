@@ -28,8 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Compact JSON: Mintlify skips an OpenAPI file over about 20 MiB, and the
+      # pretty-printed spec is past that.
       - name: regenerate from live gateway
-        run: curl -fsS https://api.getanyapi.com/openapi.json | python3 -m json.tool > openapi.json
+        run: curl -fsS https://api.getanyapi.com/openapi.json | python3 -m json.tool --compact > openapi.json
 
       - name: sanity check (refuse a truncated/broken spec)
         run: |
