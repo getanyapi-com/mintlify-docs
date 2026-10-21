@@ -1,0 +1,137 @@
+---
+title: "Choose sources"
+description: "Allow only the sources you trust, or skip ones you don't, on any API."
+---
+
+By default AnyAPI picks the cheapest source that can serve your request, and falls back to
+the next if it fails. Use `source`, `allowFallbacks`, and `ignoreSources` when you want a say
+in which sources may serve it.
+
+Every API accepts these three optional fields in the request body, next to its normal input.
+They apply to one request only. There is no account-wide or per-key setting.
+
+## Find source ids
+
+Source ids are published in `lanes[].source.id` on `GET /catalog`, no key needed, and on `/apis`:
+
+```bash
+curl -s https://api.getanyapi.com/catalog \
+  | jq '.apis[] | select(.slug=="tiktok.profile") | .lanes[]
+        | {id: .source.id, name: .source.name, per1k: .pricing.maxPer1kUsd}'
+```
+
+```json
+{ "id": "anonymous-bison-cb2f8f3c", "name": "Bison",    "per1k": 0.4 }
+{ "id": "anonymous-flamingo",       "name": "Flamingo", "per1k": 0.45 }
+{ "id": "anonymous-quokka",         "name": "Quokka",   "per1k": 0.5 }
+{ "id": "anonymous-badger",         "name": "Badger",   "per1k": 1.2 }
+```
+
+## The default: cheapest serves
+
+Without any of the fields, the cheapest source serves and failover is automatic.
+
+## Allow only some sources
+
+To allowlist sources, send `source` with `allowFallbacks: false`:
+
+```json
+{ "handle": "zachking", "source": ["anonymous-bison-cb2f8f3c", "anonymous-flamingo"], "allowFallbacks": false }
+```
+
+Only the listed sources may serve. If none of them is serving, the request is refused with no
+charge. If they are tried and all fail, it fails like any other request.
+
+With a single source and `allowFallbacks: false`, only that source serves, at its price.
+You are quoted and charged exactly that price, with no failover.
+
+## Skip sources
+
+Send `ignoreSources` to skip sources for this request:
+
+```json
+{ "handle": "zachking", "ignoreSources": ["anonymous-badger"] }
+```
+
+The cheapest remaining source serves.
+
+## Prefer without restricting
+
+`source` on its own is a preference:
+
+```json
+{ "handle": "zachking", "source": ["anonymous-flamingo"] }
+```
+
+The listed sources are tried first, in the order you give. After them, any other source may
+serve at the normal price.
+
+An empty list or `null` counts as if you left the field out.
+
+## Errors
+
+None of these charge you. The 400s return `code: "invalid_input"` with an `error` message that
+starts with `source_unknown:`, gives the reason, and lists the valid source ids for the API.
+
+| Case | What happens |
+|---|---|
+| An id that does not serve this API | HTTP 400 `invalid_input` |
+| The same id in `source` and `ignoreSources` | HTTP 400 `invalid_input` |
+| `ignoreSources` skips every source | HTTP 400 `invalid_input` |
+| With `allowFallbacks: false`, none of the listed sources is serving right now | HTTP 502 `source_unavailable`; list other sources, or set `allowFallbacks: true` or drop both fields |
+
+## Pagination
+
+To keep the restriction on every page, send the same `source` and `allowFallbacks: false` with
+each page's cursor. The list must include the source that served page one, or the request is
+rejected with HTTP 400. See [Pagination](/pagination).
+
+## Example
+
+<CodeGroup>
+```python python
+import requests
+
+response = requests.post(
+    "https://api.getanyapi.com/v1/run/tiktok.profile",
+    headers={"X-API-Key": "YOUR_ANYAPI_KEY"},
+    json={
+        "handle": "zachking",
+        "source": ["anonymous-bison-cb2f8f3c", "anonymous-flamingo"],
+        "allowFallbacks": False,
+    },
+    timeout=60,
+)
+result = response.json()
+print(result["source"]["id"], result["costUsd"])
+```
+
+```javascript node
+const response = await fetch("https://api.getanyapi.com/v1/run/tiktok.profile", {
+  method: "POST",
+  headers: {
+    "X-API-Key": "YOUR_ANYAPI_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    handle: "zachking",
+    source: ["anonymous-bison-cb2f8f3c", "anonymous-flamingo"],
+    allowFallbacks: false,
+  }),
+});
+
+const result = await response.json();
+console.log(result.source.id, result.costUsd);
+```
+
+```bash curl
+curl -s -X POST https://api.getanyapi.com/v1/run/tiktok.profile \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"handle":"zachking","source":["anonymous-bison-cb2f8f3c","anonymous-flamingo"],"allowFallbacks":false}'
+```
+</CodeGroup>
+
+Every successful response includes a `source` object (`id`, `name`, `kind`, `artworkKey`) for
+the source that served, so you can reuse its id on your next call. These fields combine with
+`preferLatencyUnderMs`; see [Speed and price](/speed-and-price).
