@@ -1,6 +1,6 @@
 ---
 title: "API keys & spend controls"
-description: "Create keys with spend limits, reset windows, and expirations; track per-key usage; recharge your wallet automatically."
+description: "Create keys with access levels, spend limits, reset windows, and expirations; rotate keys; track per-key usage; recharge your wallet automatically."
 ---
 
 Every request authenticates with an API key, and every key spends your one wallet.
@@ -34,6 +34,38 @@ All fields except `name` are optional:
 A request that would take the key past its limit is rejected with **402** and the message
 `this API key has reached its spend limit`, and nothing is charged. The wallet balance
 applies independently.
+
+## Access levels
+
+Pick an access level when you create a key in the dashboard. It can't be changed later;
+create a new key instead. Keys created before access levels existed have **Full access**.
+
+| Level | The key can |
+| --- | --- |
+| **Full access** | Run APIs, fetch results, and see balance, usage, and history. |
+| **Run only** | Run APIs, get quotes, browse the API catalog, fetch results, check a request by its id, and use company research. It can't see balance, usage, transactions, or billing. |
+| **Read only** | See balance, billing settings, transactions and invoices, usage and usage reports, request activity and results, the catalog, and referral earnings. It can't run APIs or spend. |
+| **Seller info only** | See seller earnings, payouts, payout account, and payout quote. Nothing else. |
+
+Every level can send feedback and bug reports. A key that calls something outside its
+access gets **403** with error code `forbidden`. The same limits apply through the
+[MCP server](/mcp-server).
+
+Give CI or an agent a **Run only** key, and a finance dashboard a **Read only** key.
+
+## Rotate a key
+
+If a secret may have leaked, rotate the key. Open the key's page in
+[dashboard > API keys](https://getanyapi.com/dashboard/keys) and choose **Rotate key**
+under **Danger zone**.
+
+- The new secret is issued immediately and shown once.
+- The old secret stops working on its next request. There is no grace period, so update
+  anything that uses it right away.
+- The name, spend limit, amount spent, usage history, and access level stay the same.
+
+Deleting is different: it ends the key for good, and a replacement key starts with fresh
+limits and empty history.
 
 ## Update, disable, delete
 
