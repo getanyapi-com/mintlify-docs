@@ -1,0 +1,165 @@
+---
+title: "Teams"
+description: "Share one balance and one set of API keys with your colleagues, with a role for each person."
+---
+
+A Team is a second kind of AnyAPI account. It has one balance, its own API keys, and many
+people, each with a role. Keys belong to the Team, so they keep working when the person who
+created them leaves.
+
+Your personal account doesn't change. Every person keeps their own personal account, and
+can belong to any number of Teams as well.
+
+Use a Team when several people spend from the same budget, or when keys must outlive the
+person who made them. Keep working on your personal account when you work alone.
+
+## Create a Team
+
+Open the account switcher at the bottom of the dashboard sidebar and choose **Create Team**.
+Enter a name. You become the Team's Admin, and the dashboard switches to the new Team.
+
+A new Team is an empty account:
+
+- Its balance starts at $0. Add funds to the Team before you run APIs from it.
+- It has no API keys yet. Create Team keys after you switch to it.
+- Your personal balance stays on your personal account. Balances can't be moved between
+  accounts.
+- Your existing keys and connected apps keep billing your personal account. To share work,
+  fund the Team and use Team keys.
+
+A personal account can't be turned into a Team.
+
+## Switch accounts
+
+The account switcher at the bottom of the sidebar lists your personal account and every Team
+you belong to. Choose one to act for it. Everything in the dashboard then shows that account:
+its balance, usage, request history, keys, and billing.
+
+API keys and connected apps don't follow the switcher. A key always spends the account it
+was created in. See [Keys belong to an account](/api-keys#keys-belong-to-an-account).
+
+## Invite people
+
+Admins invite people from the Team's **Members** page:
+
+1. Switch to the Team and open **Members**.
+2. Choose **Invite**, then enter the person's email address and pick a role.
+3. AnyAPI emails them an invitation.
+
+Pending invitations are listed on the **Invitations** tab. An Admin can resend or revoke one
+there. The role comes from the invitation, so the person joins with the role you picked.
+
+### Accept an invitation
+
+Open the link in the invitation email. Sign in, or sign up if you don't have an AnyAPI
+account yet, and the dashboard switches to the Team.
+
+If you're already signed in, pending invitations also appear in the account switcher. Choose
+**Accept** to join.
+
+## Roles
+
+Every member has one role. Everyone on a Team sees the same account data; roles limit who can
+spend and who can change things.
+
+| Action | Admin | Developer | Billing | Viewer |
+| --- | :-: | :-: | :-: | :-: |
+| See balance, usage, request history, results, transactions, invoices, and members | Yes | Yes | Yes | Yes |
+| Run APIs from the dashboard (Playground, company research) | Yes | Yes | No | No |
+| Add funds and change auto top-up | Yes | No | Yes | No |
+| See API keys | Yes | Yes | No | No |
+| Create, edit, rotate, disable, and delete API keys | Yes, any access level | **Run APIs** and **View account** keys only | No | No |
+| Connect apps such as the CLI or an MCP client | Yes | Yes | No | No |
+| Disconnect apps | Any app | Apps they connected | No | No |
+| Change the response retention setting | Yes | No | No | No |
+| Invite people, change roles, and remove members | Yes | No | No | No |
+| Rename or delete the Team | Yes | No | No | No |
+
+A Developer can't create, edit, rotate, re-enable, disable, or delete a **Full access** key.
+Rotating a key shows its new secret, so this keeps Full access in the hands of Admins.
+
+Teams can't have **View seller earnings** keys. See [Personal-only features](#personal-only-features).
+
+A request your role doesn't allow fails with **403** and error code `forbidden`.
+
+Role changes take effect on your next request. An Admin changes a role from the **Members**
+tab. A Team always needs at least one Admin, so the last Admin can't be given another role.
+
+## Connected apps
+
+When you approve an app such as the CLI (`anyapi login`) or an MCP client, it connects to the
+account selected in the dashboard at that moment. Switch to the Team first to connect an app
+to the Team. If you switch accounts while the approval page is open, the approval is refused;
+reload the page and approve again.
+
+On a Team, each connection belongs to the person who approved it:
+
+- Only Admins and Developers can connect apps.
+- Your connection is your own. A colleague connecting the same app doesn't disconnect yours.
+- The connection follows your current role on every request. If you become Billing or
+  Viewer, it can only read the balance and can no longer run APIs.
+- If you're removed from the Team, your connections stop working at once.
+
+## Remove a member or leave
+
+An Admin removes a member from the **Members** tab. Removal takes effect at once:
+
+- The person loses access to the Team on their next request.
+- Apps they connected to the Team are disconnected.
+- **Team API keys keep working**, including the keys that person created. Keys belong to the
+  Team. Rotate any key the person could see. See [Rotate a key](/api-keys#rotate-a-key).
+
+To leave a Team, ask an Admin to remove you. The last Admin can't be removed; make another
+member an Admin first, or delete the Team.
+
+## Rename a Team
+
+An Admin renames the Team from the **Settings** tab of the **Members** page.
+
+## Delete a Team
+
+An Admin deletes the Team from the **Settings** tab. Deleting removes the Team for everyone,
+and its API keys and connected apps stop working. It can't be undone.
+
+AnyAPI refuses to delete a Team while money could still reach it or work is still running:
+
+| The Team | Error code | What to do |
+| --- | --- | --- |
+| Still has a balance | `team_has_balance` | Spend the balance down to $0, then delete. |
+| Has auto top-up turned on | `team_auto_topup_on` | Turn off auto top-up, then delete. |
+| Has a payment that is still completing | `team_payment_pending` | Try again once the payment has landed. |
+| Has requests still running | `team_busy` | Try again when they finish. |
+
+When a deletion is refused, the Team stays exactly as it was.
+
+### A Team that is closing
+
+While AnyAPI deletes a Team, the Team is closing. If the deletion is interrupted before it
+finishes, the Team stays closing until an Admin acts. While a Team is closing:
+
+- Every API key, connected app, and member session is refused with **409** and error code
+  `team_closing`.
+- An Admin can choose **Retry deletion** or **Cancel deletion** on the **Settings** tab.
+
+Cancelling returns the Team to normal, with its balance, keys, and members unchanged.
+
+## Notifications
+
+Top-up receipts, low balance and balance-ran-out emails, and paused-key emails for a Team go
+to every current Admin, at the email address of their own account.
+
+## Personal-only features
+
+These stay on your personal account and aren't available on a Team, for any role or key:
+
+- **Sell APIs**: seller earnings, payouts, and the payout account. Teams can't have
+  **View seller earnings** keys.
+- **Referrals** and referral earnings.
+- **Agent** and its Slack connection.
+- The onboarding bonus and the free balance a new personal account starts with. A new Team
+  starts at $0.
+- Continuing an [agent's free trial](/agent-self-signup#upgrade-past-the-trial). Approve the
+  upgrade from your personal account.
+
+A Team API key or connected app that calls one of these gets **403** with error code
+`forbidden`.

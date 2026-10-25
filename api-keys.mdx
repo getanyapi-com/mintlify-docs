@@ -3,9 +3,20 @@ title: "API keys & spend controls"
 description: "Create keys with access levels, spend limits, reset windows, and expirations; rotate keys; track per-key usage; recharge your wallet automatically."
 ---
 
-Every request authenticates with an API key, and every key spends your one wallet.
+Every request authenticates with an API key, and every key spends one account's balance.
 Manage keys at [dashboard > API keys](https://getanyapi.com/dashboard/keys), or call the
 endpoints below with any key or session.
+
+## Keys belong to an account
+
+A key spends the account it was created in: your personal account, or a
+[Team](/teams). Switching accounts in the dashboard doesn't move a key. To spend a Team's
+balance, switch to the Team and create the key there.
+
+Team keys belong to the Team, not to the person who made them. They keep working when that
+person leaves the Team; rotate any key a departing member could see. On a Team, the key list
+shows who created each key. On a Team, your [role](/teams#roles) decides whether you can see
+and manage keys, and a Developer manages only **Run APIs** and **View account** keys.
 
 ## Create a key
 
@@ -52,6 +63,9 @@ access gets **403** with error code `forbidden`. The same limits apply through t
 [MCP server](/mcp-server).
 
 Give CI or an agent a **Run APIs** key, and a finance dashboard a **View account** key.
+
+On a Team, keys can't have **View seller earnings** access, and no key reaches referral
+earnings. Selling and referrals are [personal-only](/teams#personal-only-features).
 
 ## Rotate a key
 
