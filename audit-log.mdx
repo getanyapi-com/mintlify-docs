@@ -1,0 +1,64 @@
+---
+title: "Audit log"
+description: "See who changed what on your Team, and when."
+---
+
+The audit log is a record of changes made to a Team: who made each change, what changed,
+and when. Use it to answer questions such as who created a key, who changed a spending limit,
+or who removed a member.
+
+The audit log is available on Teams only. Personal accounts don't have one.
+
+## Open the audit log
+
+Only a Team's Admins can see the audit log. Switch to the Team, then open **Account** >
+**Audit log** in the dashboard sidebar, below **Members**.
+
+Entries are grouped by day. Each entry shows:
+
+- The time of the change.
+- Who made it, and the role they had at that moment.
+- What changed, such as a key's old and new name.
+
+Names stay readable after a person leaves the Team or a key is deleted.
+
+## What the audit log records
+
+| Area | Changes recorded |
+| --- | --- |
+| API keys | Created (with its name, access level, expiry, and spending limit), renamed, spending limit changed, disabled, enabled, rotated, and deleted |
+| Team | Created, renamed, billing email changed, deletion started, deletion cancelled, and a deletion that didn't finish and left the Team active |
+| Members | Invited, invitation resent, invitation cancelled, joined, role changed, and removed (with how many connected apps were disconnected) |
+| Connected apps | An app such as the CLI or an MCP client approved or disconnected |
+| Settings | How long API responses are stored, and auto top-up |
+
+API key values never appear in the audit log.
+
+Auto top-up changes are recorded once the payment service confirms them, so in rare cases one
+can be missing from the log.
+
+## What it doesn't record
+
+- **API requests.** See your request history.
+- **Money in and out.** See **Wallet activity** on the **Billing** page.
+- **Sign-ins.**
+
+The audit log starts on the day the feature launched. Changes made before then aren't in it.
+
+## How long entries are kept
+
+Entries are kept for as long as the Team exists.
+
+## Download the log
+
+Choose **Download CSV** to export the whole audit log. The file has these columns:
+
+| Column | Contents |
+| --- | --- |
+| time | When the change happened, in UTC |
+| who | The name of whoever made the change |
+| who type | Whether a person, an API key, a connected app, or AnyAPI made the change |
+| role | Their role at the time of the change |
+| what | The change, in words |
+| action code | A code for the kind of change, such as `key.created` |
+| target | The key, member, invitation, app, or Team that changed |
