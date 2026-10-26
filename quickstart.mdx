@@ -268,8 +268,13 @@ Each entry in `requests` has `id`, `sku`, `level`, `httpStatus`, `costUsd`, `ite
 when the request failed. Read the full response of one request with `GET /v1/requests/{id}`
 as shown above.
 
-`nextCursor` is set when the page is full. Pass it as `before`, with the same other parameters,
-to get the next page; it is `null` on the last page.
+`nextCursor` is set when older requests match your parameters, and it is `null` once none
+remain. Pass it as `before`, with the same other parameters, to get the next page. A page can
+hold a few more rows than `limit`, so that requests sharing one timestamp are never split
+across two pages.
+
+`to` defaults to now and `from` to 24 hours before `to`, so both move with the clock. To walk a
+fixed window, pass explicit `from` and `to` on every call.
 
 ## Check your balance
 
