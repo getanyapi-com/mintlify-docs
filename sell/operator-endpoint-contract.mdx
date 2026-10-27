@@ -231,9 +231,32 @@ Reply `2xx` with JSON that validates against the API's output schema, in this en
 
 | Budget | Limit |
 | --- | --- |
-| Response time | 15 seconds |
+| Response time | The API's time limit, set by AnyAPI and shown on the endpoint's page |
+| Concurrent requests | Your declared capacity, 4 unless you set it |
 | Response body | 8 MB |
 | Transport | HTTPS on port 443, public host, no embedded credentials |
+
+## How requests reach your endpoint
+
+AnyAPI sends each request to the cheapest endpoint on the API first. Your endpoint gets
+at most its **capacity** in requests at once; further requests go to the next cheapest
+endpoint until one of yours finishes.
+
+- **Capacity** is how many requests your endpoint takes at once. Declare it as `capacity`
+  when you register with `POST /v1/operator/endpoints`; it defaults to 4. Change it from
+  the endpoint's page in the [dashboard](https://getanyapi.com/dashboard/sell/endpoints) or
+  with `POST /v1/operator/endpoints/{id}/capacity` and a body of `{"capacity": 8}`.
+- **429 pauses your endpoint.** Answer `429` when you are overloaded. AnyAPI stops
+  sending you requests until your `Retry-After` has passed, honored as given in seconds
+  or as an HTTP date. Without a usable `Retry-After`, the pause lasts 60 seconds.
+  Requests during the pause go to other endpoints.
+- **The time limit is set per API.** AnyAPI sets how long it waits for any seller's
+  endpoint on each API. The endpoint's page shows it, and so does `timeLimitSeconds` in
+  `GET /v1/operator/endpoints/{id}`. A response after the limit counts as timed out: the
+  buyer is not charged and you are not paid for it.
+- **Ties at the same price.** Among endpoints at the same price, a new endpoint with no
+  traffic yet goes first so it gets measured. After that, the endpoint with the lower
+  share of timed-out requests goes first, then the faster one.
 
 ## What the compatibility checks test
 
@@ -244,7 +267,7 @@ your endpoint as signed requests and verifies, per request:
 1. HTTP 2xx
 2. Output validates against the output schema
 3. `found: true` for the example inputs
-4. Answer within the 15-second budget
+4. Answer within the API's time limit, the same limit live traffic runs under
 5. Body under the 8 MB cap
 
 Every check must pass to enter the live trial. A failed run returns a per-check report,

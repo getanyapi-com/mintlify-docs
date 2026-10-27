@@ -35,6 +35,11 @@ routing, earnings, and payouts, and is never shown to buyers.
     you want to sell. Your account stays **pending** until a person at AnyAPI approves it.
     Until then you can't register endpoints or run checks; once approved, Sell APIs opens
     the full seller dashboard.
+
+    AnyAPI approves an account only once its seller profile has a name, a photo, and a
+    description. Set the name and description with `PATCH /v1/operator/profile` and a body
+    of `{"displayName": "...", "description": "..."}`. Upload the photo as the raw request
+    body of `POST /v1/operator/profile/photo`: a PNG, JPEG, or WebP image of at most 1 MB.
   </Step>
   <Step title="Connect PayPal">
     In [Sell APIs > Earnings](https://getanyapi.com/dashboard/sell/earnings), click
@@ -59,15 +64,18 @@ routing, earnings, and payouts, and is never shown to buyers.
   <Step title="Register it">
     In [Sell APIs > Endpoints](https://getanyapi.com/dashboard/sell/endpoints), enter the
     API it serves, your base URL (HTTPS, port 443, public host), an optional path (default
-    `/run`), and your price in USD per 1,000 requests. You get a **signing secret, shown
+    `/run`), and your price in USD per 1,000 requests. Through
+    `POST /v1/operator/endpoints` you can also send `capacity`, how many requests your
+    endpoint takes at once (default 4). You get a **signing secret, shown
     exactly once**. Store it; your endpoint uses it to verify that requests come from
     AnyAPI.
   </Step>
   <Step title="Pass the compatibility checks">
     Run the checks from the endpoint's page (the API calls this step *conformance*).
     AnyAPI sends the API's example requests to your endpoint, signed, and verifies HTTP
-    2xx, a response that validates against the schema, `found: true`, an answer within 15
-    seconds, and a body under 8 MB. On failure you get a per-check report and can rerun
+    2xx, a response that validates against the schema, `found: true`, an answer within the
+    API's time limit, and a body under 8 MB. AnyAPI sets the time limit for each API and
+    shows it on the endpoint's page. On failure you get a per-check report and can rerun
     as often as you like. On success the live trial starts automatically. The checks, the
     trial, and live traffic all wait until you have connected PayPal and verified your
     identity: none of your endpoints receives any request before then.

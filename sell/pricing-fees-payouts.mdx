@@ -10,7 +10,8 @@ platform fee.
 
 When you register an endpoint you set the **customer list price in USD per 1,000
 requests** (minimum $0.01/1k). Routing is cheapest-first among healthy endpoints on the
-same API: price lower to win more requests, higher to earn more per request.
+same API, up to each endpoint's capacity: price lower to win more requests, higher to earn
+more per request. See [how requests reach your endpoint](/sell/operator-endpoint-contract#how-requests-reach-your-endpoint).
 
 ### Changing your price
 
@@ -81,6 +82,27 @@ Every payout, including an automatic one, shows as **Waiting for review** in you
 history until AnyAPI approves it, then **Sending**, then **Paid**. A declined payout shows
 **Declined** with the reason, and a failed one shows **Failed**. In both cases the amount
 returns to your available balance.
+
+## Refunds, chargebacks, and adjustments
+
+When money a buyer spent on your endpoint is given back, what you earned from it comes out
+of your future payouts.
+
+- **Refunds.** When AnyAPI refunds a buyer's top-up, you give back your share of the part
+  of it the buyer had already spent on your endpoint. Any bonus AnyAPI added to the
+  top-up is never taken from you.
+- **Chargebacks.** A chargeback deducts your share when it opens. If AnyAPI wins the
+  dispute, the deduction is restored.
+- **Compensation for a bad result.** When AnyAPI compensates a buyer for a bad result
+  from your endpoint, the amount comes out of your earnings, capped at what you earned on
+  that request.
+- **90-day limit.** A refund or chargeback of a top-up paid more than 90 days earlier
+  takes nothing from you.
+
+Every deduction and restoration is listed under **Adjustments** in
+[Earnings](https://getanyapi.com/dashboard/sell/earnings). Deductions can take your
+available balance below zero; while it is negative, no payout is made until later
+earnings bring it back above zero.
 
 ## Quality affects earnings
 
