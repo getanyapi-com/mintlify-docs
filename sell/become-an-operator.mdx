@@ -27,19 +27,24 @@ routing, earnings, and payouts, and is never shown to buyers.
 
 ## The journey
 
-<Steps>
-  <Step title="Ask to sell">
-    Selling opens by approval, one seller at a time. In the dashboard, open
-    [Sell APIs](https://getanyapi.com/dashboard/sell) and email
-    [support@getanyapi.com](mailto:support@getanyapi.com) with your account email and the API
-    you want to sell. Your account stays **pending** until a person at AnyAPI approves it.
-    Until then you can't register endpoints or run checks; once approved, Sell APIs opens
-    the full seller dashboard.
+<Warning>
+  Before you go live, every seller passes an identity check (a government photo ID and a
+  selfie, with our verification partner Didit) and connects PayPal to get paid. If PayPal
+  isn't available to you, email [support@getanyapi.com](mailto:support@getanyapi.com) and
+  we'll look at alternatives.
+</Warning>
 
-    AnyAPI approves an account only once its seller profile has a name, a photo, and a
-    description. Set the name and description with `PATCH /v1/operator/profile` and a body
-    of `{"displayName": "...", "description": "..."}`. Upload the photo as the raw request
-    body of `POST /v1/operator/profile/photo`: a PNG, JPEG, or WebP image of at most 1 MB.
+<Steps>
+  <Step title="Start selling">
+    In the dashboard, open [Sell APIs](https://getanyapi.com/dashboard/sell) and click
+    **Start selling**, or call `POST /v1/operator/profile`. Registering an endpoint, the
+    compatibility checks and the live trial need no approval.
+
+    AnyAPI approves a seller for paid traffic only once the seller profile has a name, a
+    photo, and a description. Set the name and description with `PATCH /v1/operator/profile`
+    and a body of `{"displayName": "...", "description": "..."}`. Upload the photo as the raw
+    request body of `POST /v1/operator/profile/photo`: a PNG, JPEG, or WebP image of at most
+    1 MB.
   </Step>
   <Step title="Build your endpoint">
     Pick one of the [APIs open to sellers](/sell/apis/index) and deploy an HTTPS endpoint
@@ -57,47 +62,48 @@ routing, earnings, and payouts, and is never shown to buyers.
     AnyAPI.
   </Step>
   <Step title="Pass the compatibility checks">
-    Run the checks from the endpoint's page (the API calls this step *conformance*) as soon
-    as it is registered, and rerun them any time, for example after you change your
-    endpoint. AnyAPI sends the API's example requests to your endpoint, signed, and verifies
-    HTTP 2xx, a response that validates against the schema, `found: true`, an answer within
-    the API's time limit, and a body under 8 MB. AnyAPI sets the time limit for each API and
-    shows it on the endpoint's page. On failure you get a per-check report and can rerun as
-    often as you like. These test requests are the only requests your endpoint receives
-    until you have connected PayPal and verified your identity.
+    Run the checks from the endpoint's page (the API calls this step *conformance*).
+    AnyAPI sends the API's example requests to your endpoint, signed, and verifies HTTP
+    2xx, a response that validates against the schema, `found: true`, an answer within the
+    API's time limit, and a body under 8 MB. AnyAPI sets the time limit for each API and
+    shows it on the endpoint's page. On failure you get a per-check report and can rerun
+    as often as you like. When every check passes, the live trial starts.
+  </Step>
+  <Step title="Pass the live trial (free)">
+    Up to 500 real customer calls are mirrored to your endpoint: you receive the customer's
+    request input, never who the customer is. Your answers are compared automatically with
+    the current provider's. Customers never see your output during the trial and nothing is
+    billed. Your trial passes at **at least 95% pass rate over at least 200 comparisons
+    spanning at least 7 days, with zero flags for made-up data or tampered URLs**. A passed
+    endpoint then waits, with no traffic, until you go live.
+  </Step>
+  <Step title="Before you go live: verify your identity">
+    Once one of your endpoints passes its trial, complete an identity check from the
+    **Getting started** checklist in [Sell APIs](https://getanyapi.com/dashboard/sell): a
+    government photo ID and a selfie with our verification partner Didit, plus a sanctions
+    screening. You get 3 attempts; after that, email
+    [support@getanyapi.com](mailto:support@getanyapi.com). AnyAPI keeps only the result,
+    your legal name, the country that issued your ID, and the sanctions result. We don't
+    store your ID images or selfie.
   </Step>
   <Step title="Before you go live: connect PayPal">
     In [Sell APIs > Earnings](https://getanyapi.com/dashboard/sell/earnings), click
     **Connect PayPal** and sign in with Log in with PayPal. PayPal is how you get paid. The
     account must be verified, in your own name, and in a
     [country PayPal Payouts supports](https://docs.paypal.ai/growth/payouts/reference/countries-supported-features).
-    Sellers in other countries can't sell through AnyAPI yet. You can connect PayPal
-    before, during, or after the compatibility checks.
+    If its name differs from the name on your ID, we show a warning and check it during
+    review; it doesn't stop you. If PayPal isn't available to you, email
+    [support@getanyapi.com](mailto:support@getanyapi.com) and we'll look at alternatives.
   </Step>
-  <Step title="Before you go live: verify your identity">
-    From the **Getting started** checklist in [Sell APIs](https://getanyapi.com/dashboard/sell),
-    complete an identity check with our verification partner Didit: a government photo ID
-    and a selfie, plus a sanctions screening. The name on your ID must match your PayPal
-    account name. AnyAPI keeps only the result, your legal name, the country that issued
-    your ID, and the sanctions result. We don't store your ID images or selfie. Connect
-    PayPal first, because the check compares the two names. Once your checks have passed
-    and you are verified, the live trial starts automatically, and the endpoint's page
-    tells you what is still missing until then.
-  </Step>
-  <Step title="Pass the live trial (free)">
-    Up to 500 real customer calls are mirrored to your endpoint, and your answers are
-    compared automatically with the current provider's. Customers never see your output
-    during the trial and nothing is billed. You are promoted automatically at **at least
-    95% pass rate over at least 200 comparisons spanning at least 7 days, with zero flags
-    for made-up data or tampered URLs**.
-  </Step>
-  <Step title="Go live and earn">
-    Your endpoint serves real traffic in a monitored phase, then fully live while quality
-    holds. You earn from the first request you win. If quality drops, the endpoint is
-    paused automatically and re-tested until it recovers. You can also pause it yourself
-    with the kill switch on its page. Withdraw your earnings to PayPal from $20; the first
-    payout unlocks 30 days after you become a seller, and AnyAPI reviews every payout before
-    it's sent. See [Pricing, fees & payouts](/sell/pricing-fees-payouts).
+  <Step title="Get approved and go live">
+    A person at AnyAPI reviews your trial results, your identity check, and your PayPal
+    account, then approves your account. Your endpoint then serves real traffic in a
+    monitored phase, and fully live while quality holds. You earn from the first request
+    you win. If quality drops, the endpoint is paused automatically and re-tested until it
+    recovers. You can also pause it yourself with the kill switch on its page. Withdraw
+    your earnings to PayPal from $20; the first payout unlocks 30 days after you become a
+    seller, and AnyAPI reviews every payout before it's sent. See
+    [Pricing, fees & payouts](/sell/pricing-fees-payouts).
   </Step>
 </Steps>
 
@@ -107,8 +113,8 @@ routing, earnings, and payouts, and is never shown to buyers.
 | --- | --- |
 | Draft | Registered but not serving traffic. Run the compatibility checks when your endpoint is ready. |
 | Checks running | AnyAPI is verifying your responses match the API's schema. |
-| Checks passed | Passed the compatibility checks; receives no traffic until you have connected PayPal and verified your identity, then the live trial starts automatically. |
 | Live trial | Real traffic is mirrored to you for free and compared with the current provider. |
+| Trial passed | Passed the live trial; receives no traffic until you have verified your identity, connected PayPal, and AnyAPI has approved your account. |
 | Live (monitored) | Serving and earning, with quality watched extra closely. |
 | Live | Serving and earning on real customer traffic. |
 | Paused (quality) | Paused by the automatic quality checks; re-tested and restored automatically when it passes. |
