@@ -250,6 +250,24 @@ non-2xx status (`429` for a rate limit). Never answer `found: false` or an empty
 for a call you could not make. A `found: false` may only carry a `reason` the API's
 output schema lists.
 
+## Spot-checks
+
+AnyAPI re-runs some of your answers on its own sources, at its own cost, and compares them
+field by field. Counts, timestamps, and media links can change between two calls and are
+not compared.
+
+- **How often.** Every answer is checked until your record shows you answer falsely under
+  1% of the time. After that a sample keeps being checked, and a caught answer starts the
+  full checks again. Answers that come back faster than AnyAPI's own sources can fetch,
+  repeat the same body for different inputs, or carry impossible timestamps are checked
+  more often.
+- **A caught answer** is unpaid, and what it earned is taken back from your available
+  balance. It counts as a failed request when AnyAPI shares requests among sellers. You
+  get an email naming the request, what was wrong, and what it cost.
+- **Repeat offences.** If spot-checks catch more than 1% of your sampled answers on an API
+  over 30 days, that endpoint is paused and you are emailed. Reply to that email to talk
+  about turning it back on.
+
 ## Budgets
 
 | Budget | Limit |
