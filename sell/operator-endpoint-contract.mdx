@@ -238,9 +238,10 @@ Reply `2xx` with JSON that validates against the API's output schema, in this en
 
 ## How requests reach your endpoint
 
-AnyAPI sends each request to the cheapest endpoint on the API first. Your endpoint gets
-at most its **capacity** in requests at once; further requests go to the next cheapest
-endpoint until one of yours finishes.
+AnyAPI sends each request to the cheapest source on the API first, whoever runs it. Your
+endpoint goes ahead of one of AnyAPI's own sources only when your price is lower; at the
+same price, AnyAPI's goes first. Your endpoint gets at most its **capacity** in requests at
+once; further requests go to the next cheapest source until one of yours finishes.
 
 - **Capacity** is how many requests your endpoint takes at once. Declare it as `capacity`
   when you register with `POST /v1/operator/endpoints`; it defaults to 4. Change it from
@@ -254,9 +255,13 @@ endpoint until one of yours finishes.
   endpoint on each API. The endpoint's page shows it, and so does `timeLimitSeconds` in
   `GET /v1/operator/endpoints/{id}`. A response after the limit counts as timed out: the
   buyer is not charged and you are not paid for it.
-- **Ties at the same price.** Among endpoints at the same price, a new endpoint with no
-  traffic yet goes first so it gets measured. After that, the endpoint with the lower
-  share of timed-out requests goes first, then the faster one.
+- **Ahead only while you finish as often.** Your endpoint stays ahead of one of AnyAPI's
+  sources only while the share of its requests it finishes is at least that source's;
+  otherwise it is asked right after it.
+- **Endpoints at the same price share the requests.** Each request picks among them at
+  random, weighted by how many paid requests each completed for the time its requests took
+  over the last 30 days. A new endpoint with no traffic yet starts at the average of the
+  endpoints at its price.
 
 ## What the compatibility checks test
 
