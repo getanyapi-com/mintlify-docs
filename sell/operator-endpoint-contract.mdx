@@ -227,6 +227,29 @@ Reply `2xx` with JSON that validates against the API's output schema, in this en
   request fails over to another provider, you do not earn it, and repeated failures pause
   the endpoint.
 
+## What you're paid for
+
+Every answer your endpoint gives is either charged to the customer, and you are paid 80%
+of what they paid, or free to the customer and unpaid.
+
+| Your answer | Customer | You | Next source tried |
+| --- | --- | --- | --- |
+| A real result | Charged | Paid 80% | No |
+| `found: false` because the thing does not exist | Charged | Paid 80% | No |
+| `found: false` because the account is suspended, private, or unavailable | Charged | Paid 80% | No |
+| A search with zero results | Charged | Paid 80% | No |
+| A bot wall or block page | Free | Unpaid | Yes |
+| `found: true` with every required field empty | Free | Unpaid | Yes |
+| An error (any non-2xx status) | Free | Unpaid | Yes |
+| A timeout | Free | Unpaid | Yes |
+| A rate limit (`429`) | Free | Unpaid | Yes |
+| A malformed reply (not JSON, or not matching the schema) | Free | Unpaid | Yes |
+
+If the site blocked you, rate limited you, or anything else went wrong, answer with a
+non-2xx status (`429` for a rate limit). Never answer `found: false` or an empty result
+for a call you could not make. A `found: false` may only carry a `reason` the API's
+output schema lists.
+
 ## Budgets
 
 | Budget | Limit |
