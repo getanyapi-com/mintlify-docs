@@ -45,10 +45,15 @@ routing, earnings, and payouts, and is never shown to buyers.
     compatibility checks and the live trial need no approval.
 
     AnyAPI approves a seller for paid traffic only once the seller profile has a name, a
-    photo, and a description. Set the name and description with `PATCH /v1/operator/profile`
-    and a body of `{"displayName": "...", "description": "..."}`. Upload the photo as the raw
-    request body of `POST /v1/operator/profile/photo`: a PNG, JPEG, or WebP image of at most
-    1 MB.
+    photo, and a description, or the seller has chosen to be listed anonymously. Set the name
+    and description with `PATCH /v1/operator/profile` and a body of
+    `{"displayName": "...", "description": "..."}`. Upload the photo as the raw request body of
+    `POST /v1/operator/profile/photo`: a PNG, JPEG, or WebP image of at most 1 MB.
+
+    To be listed anonymously, tick **List me anonymously** in the seller profile, or send
+    `"anonymous": true` in the same `PATCH`. The public sellers pages then show only the animal
+    name AnyAPI assigns you, never your name, photo, or description. You still pass the
+    identity check and are paid the same way.
   </Step>
   <Step title="Build your endpoint">
     Pick one of the [APIs open to sellers](/sell/apis/index) and deploy an HTTPS endpoint
