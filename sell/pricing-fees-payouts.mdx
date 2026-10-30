@@ -9,12 +9,9 @@ registering an endpoint, are the full rules.
 
 ## You set the price
 
-When you register an endpoint you set the **customer list price in USD per 1,000 units**
-(minimum $0.01/1k). The unit belongs to the API: a request on every API open to sellers
-today, or a record on an API priced by how many records it returns.
-`GET /v1/operator/sellable-apis` names each open API's unit in `units`, and the register
-dialog labels the price field with it. That price is what the customer pays when your
-endpoint serves.
+When you register an endpoint you set the **customer list price in USD per 1,000
+requests** (minimum $0.01/1k). That price is what the customer pays when your endpoint
+serves.
 Each request goes to the cheapest source on the API first, whether it is yours, another
 seller's or one of AnyAPI's own, up to each endpoint's capacity. Price below one of AnyAPI's
 sources and you go ahead of it; at the same price, AnyAPI's goes first. Your price never
@@ -24,8 +21,8 @@ changes AnyAPI's prices. See [how requests reach your endpoint](/sell/operator-e
 
 Change it from the endpoint's page in the
 [dashboard](https://getanyapi.com/dashboard/sell/endpoints), or with
-`POST /v1/operator/endpoints/{id}/price` and the new price in the unit the endpoint was
-listed in: `{"unit": "request", "usdPer1kUnits": 4.5}`. Each endpoint reports its price as
+`POST /v1/operator/endpoints/{id}/price` and the new price per 1,000 requests:
+`{"unit": "request", "usdPer1kUnits": 4.5}`. Each endpoint reports its price as
 `priceUnit` and `priceUsdPer1kUnits`, and a scheduled increase as
 `pendingPriceUsdPer1kUnits`.
 
