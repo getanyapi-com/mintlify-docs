@@ -40,9 +40,9 @@ routing, earnings, and payouts, and is never shown to buyers.
     In the dashboard, open [Sell APIs](https://getanyapi.com/dashboard/sell) and click
     **Start selling**, or call `POST /v1/operator/profile`. First tick **I agree to the
     Seller Terms**: you accept the [Seller Terms](https://getanyapi.com/seller-terms)
-    before you can register an endpoint or run the checks (through the API, a person reads
-    them and calls `POST /v1/operator/seller-terms`). Registering an endpoint, the
-    compatibility checks and the live trial need no approval.
+    before you can register an endpoint or run the registration tests (a person reads and
+    accepts them in the dashboard). Registering an endpoint, the registration tests and the
+    live trial need no approval.
 
     AnyAPI approves a seller for paid traffic only once the seller profile has a name, a
     photo, and a description, or the seller has chosen to be listed anonymously. Set the name
@@ -70,13 +70,16 @@ routing, earnings, and payouts, and is never shown to buyers.
     exactly once**. Store it; your endpoint uses it to verify that requests come from
     AnyAPI.
   </Step>
-  <Step title="Pass the compatibility checks">
-    Run the checks from the endpoint's page (the API calls this step *conformance*).
-    AnyAPI sends the API's example requests to your endpoint, signed, and verifies HTTP
-    2xx, a response that validates against the schema, `found: true`, an answer within the
-    API's time limit, and a body under 8 MB. AnyAPI sets the time limit for each API and
-    shows it on the endpoint's page. On failure you get a per-check report and can rerun
-    as often as you like. When every check passes, the live trial starts.
+  <Step title="Pass the registration tests">
+    Run the registration tests from the endpoint's page, or with
+    `POST /v1/operator/endpoints/{id}/suite-runs`, then read the run at
+    `GET /v1/operator/endpoints/{id}/suite-runs/{runId}` until it ends. AnyAPI sends your
+    endpoint the API's test inputs, signed: a record it finds, an empty list, each not-found
+    reason, each input variant the schema allows, and, for an API that pages, the next page through your own cursor.
+    Each answer is checked against the API's schema and, where AnyAPI holds a recorded answer
+    for that input, field by field against it. Every answer must arrive within the API's time
+    limit and under 8 MB. A failed test says why and which fields differed; fix your endpoint
+    and run the tests again as often as you like. A passing run starts the live trial.
   </Step>
   <Step title="Pass the live trial (free)">
     Up to 500 real customer calls are mirrored to your endpoint: you receive the customer's
@@ -85,6 +88,18 @@ routing, earnings, and payouts, and is never shown to buyers.
     billed. Your trial passes at **at least 95% pass rate over at least 200 comparisons
     spanning at least 7 days, with zero flags for made-up data or tampered URLs**. A passed
     endpoint then waits, with no traffic, until you go live.
+
+    Read every judged call with `GET /v1/operator/endpoints/{id}/trial`. Each call shows its
+    outcome (pass, fail, or inconclusive, which counts neither way), each compared field with
+    your value and AnyAPI's, how your endpoint failed the call if it did, and the request's
+    `X-AnyAPI-Nonce` header so you can find it in your own logs. The customer's input is never
+    shown.
+
+    After a fix, restart the trial yourself with
+    `POST /v1/operator/endpoints/{id}/trial/restart`; there is no need to email support. You
+    can restart during the trial, or in draft after one; a trial that already passed can't be
+    restarted. Earlier calls stay readable but stop counting, and the endpoint goes back to
+    draft: it re-enters the trial once it passes the registration tests again.
   </Step>
   <Step title="Before you go live: verify your identity">
     Once one of your endpoints passes its trial, complete an identity check from the
@@ -116,12 +131,36 @@ routing, earnings, and payouts, and is never shown to buyers.
   </Step>
 </Steps>
 
+## When AnyAPI's answer looks wrong
+
+If you believe AnyAPI's recorded answer for a registration test or a trial call is wrong,
+don't copy it. File a data report with
+`POST /v1/operator/endpoints/{id}/data-reports`: send `suiteRunId` and `caseId` for a test,
+or the call's `trialComparisonId` for a trial call, plus a `message` saying what is wrong
+(and optionally the `field`). A person at AnyAPI reviews it; filing one doesn't change your
+results by itself. `GET` on the same path lists your reports and their status.
+
+## Let your agent manage it: seller keys
+
+Under **Connect your agent** in [Sell APIs](https://getanyapi.com/dashboard/sell), create a
+seller key and copy the prompt for your own AI agent. With that key your agent can do what the
+seller dashboard does: register endpoints, run the registration tests, read trial results and
+restart a trial, file data reports, set price and capacity, pause an endpoint, rotate its
+signing secret, edit the seller profile, and read earnings, payouts, the identity check status
+and whether PayPal is connected.
+
+A seller key can't run APIs as a customer or spend your balance. Four steps stay with a
+person in the dashboard: accepting the Seller Terms, starting the identity check, linking
+PayPal, and requesting a payout. The full seller API, with every route, its errors, and what a
+seller key may call, is in
+[`getanyapi.com/operator-onboarding/SKILL.md`](https://getanyapi.com/operator-onboarding/SKILL.md).
+
 ## What the statuses mean
 
 | Status in the dashboard | What it means |
 | --- | --- |
-| Draft | Registered but not serving traffic. Run the compatibility checks when your endpoint is ready. |
-| Checks running | AnyAPI is verifying your responses match the API's schema. |
+| Draft | Registered but not serving traffic. Run the registration tests when your endpoint is ready. |
+| Tests running | AnyAPI is verifying your responses match the API's schema. |
 | Live trial | Real traffic is mirrored to you for free and compared with the current provider. |
 | Trial passed | Passed the live trial; receives no traffic until you have verified your identity, connected PayPal, and AnyAPI has approved your account. |
 | Live (monitored) | Serving and earning, with quality watched extra closely. |

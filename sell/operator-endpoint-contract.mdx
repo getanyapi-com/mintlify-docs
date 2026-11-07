@@ -36,7 +36,7 @@ curl https://api.getanyapi.com/v1/apis/{sku} \
   -H "Authorization: Bearer aa_live_..."
 ```
 
-The response includes `inputSchema` and `outputSchema`, which the compatibility checks and
+The response includes `inputSchema` and `outputSchema`, which the registration tests and
 the live trial judge against. The register dialog in the
 [dashboard](https://getanyapi.com/dashboard/sell/endpoints) shows them too.
 
@@ -298,20 +298,24 @@ once; further requests go to the next cheapest source until one of yours finishe
   over the last 30 days. A new endpoint with no traffic yet starts at the average of the
   endpoints at its price.
 
-## What the compatibility checks test
+## What the registration tests check
 
-When you run the checks from the dashboard or
-`POST /v1/operator/endpoints/{id}/conformance`, AnyAPI sends the API's schema examples to
-your endpoint as signed requests and verifies, per request:
+When you run the registration tests from the dashboard or
+`POST /v1/operator/endpoints/{id}/suite-runs`, AnyAPI sends the API's test inputs to your
+endpoint as signed requests: a record it finds, an empty list, each not-found reason, each
+input variant the schema allows, and, for an API that pages, the next page through your own cursor. Each answer must:
 
-1. HTTP 2xx
-2. Output validates against the output schema
-3. `found: true` for the example inputs
-4. Answer within the API's time limit, the same limit live traffic runs under
-5. Body under the 8 MB cap
+1. Return HTTP 2xx
+2. Validate against the output schema
+3. Give the outcome the test expects (found, an empty list, or `found: false` with its reason)
+4. Arrive within the API's time limit, the same limit live traffic runs under
+5. Stay under the 8 MB cap
 
-Every check must pass to enter the live trial, and a pass starts it. A failed run
-returns a per-check report, and you can rerun without limit.
+Where AnyAPI holds a recorded answer for the input, the answer is also compared with it field
+by field; a test with no recorded answer never passes or fails the run by itself. Each test
+result lists its fields with your value and AnyAPI's. A passing run starts the live trial,
+and you can rerun without limit. A pass counts only while your base URL, path and signing
+secret are unchanged.
 
 During the live trial, mirrored requests also carry `X-AnyAPI-Trial: 1`, so you can tell
 trial traffic from paid traffic in your logs.
@@ -331,4 +335,8 @@ Graduation needs at least 95% of compared requests passing, over at least 200 co
 requests spanning at least 7 days, with no fabricated or injected content.
 
 A fix shipped part-way through the trial is measured by the remaining paced requests,
-so a bad first day is not permanent.
+so a bad first day is not permanent. Each judged call is listed at
+`GET /v1/operator/endpoints/{id}/trial` with its outcome, its field results, and the
+request's `X-AnyAPI-Nonce` so you can match it in your logs. To start over after a fix,
+restart the trial with `POST /v1/operator/endpoints/{id}/trial/restart`: the endpoint returns
+to draft and enters a fresh trial once it passes the registration tests again.
