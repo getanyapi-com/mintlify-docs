@@ -125,6 +125,51 @@ Approve from your personal account. A trial can't be continued on a [Team](/team
   </Tab>
 </Tabs>
 
+## Sign up your person over plain HTTP
+
+An agent with only HTTP that can message you can connect it to your own AnyAPI account
+instead of a trial key. It follows the `service_auth` flow in
+[auth.md](https://getanyapi.com/auth.md), which has the full request and response detail.
+
+<Steps>
+  <Step title="Registers with your email">
+    The agent asks for your email and sends it as `login_hint`:
+
+    ```bash
+    curl -X POST https://api.getanyapi.com/agent/identity \
+      -H "Content-Type: application/json" \
+      -d '{ "type": "service_auth", "login_hint": "you@example.com", "client_name": "My agent" }'
+    ```
+
+    The response carries a `claim_token` the agent keeps private, and a `claim` block with
+    a `user_code` and a `verification_uri`.
+  </Step>
+  <Step title="Hands you a link and a code">
+    You open [getanyapi.com/dashboard/authorize](https://getanyapi.com/dashboard/authorize),
+    sign in or sign up with that email, and type the code. Only an account that holds the
+    email as a verified address can approve.
+  </Step>
+  <Step title="Polls for its token">
+    The agent polls `https://api.getanyapi.com/oauth/token` with
+    `grant_type=urn:workos:agent-auth:grant-type:claim` and its `claim_token`. Once you
+    approve, it gets an `aa_at_` access token, valid for one hour, and an `aa_ia_`
+    `identity_assertion`.
+  </Step>
+  <Step title="Refreshes on its own">
+    When the access token expires, the agent exchanges the `identity_assertion` with
+    `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer` for a new one. You don't
+    approve again.
+  </Step>
+</Steps>
+
+An access token works on one interface. By default that is the REST API. For the
+[MCP server](/mcp-server), the agent adds `resource=https://api.getanyapi.com/mcp` to the
+token request.
+
+If the code expires before you approve, the agent gets a fresh one from
+`POST https://api.getanyapi.com/agent/identity/claim` with its `claim_token` and your email.
+A registration stays open for 24 hours.
+
 <Tip>
   Connect the [MCP server](/mcp-server) for live tools, or use the [CLI](/cli) to keep tool
   schemas out of the agent's context window.

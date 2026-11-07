@@ -20,11 +20,14 @@ discover and run every API in the catalog through the same small set of tools.
 - An MCP client that speaks Streamable HTTP, such as Claude Code, Claude Desktop, Cursor, or Codex.
 
 <Note>
-  The MCP surface accepts **API keys only**, not session tokens. Send
-  `Authorization: Bearer <your-key>`. `initialize`, `tools/list`, and the catalog tools
+  The MCP surface accepts **API keys** and OAuth access tokens issued for it, not dashboard
+  session tokens. Send `Authorization: Bearer <your-key>`. `initialize`, `tools/list`, and the catalog tools
   (`list_apis`, `search_apis`, `get_api`, `quote_api`) answer without a key. Running an API
   and reading account data need the key; without one they return `unauthorized`. The same
-  catalog is public over REST at `GET /catalog` and `GET /catalog/search`.
+  catalog is public over REST at `GET /catalog` and `GET /catalog/search`. A client that signs
+  in with OAuth instead of a key can register through dynamic client registration or an OAuth
+  Client ID Metadata Document (`client_id_metadata_document_supported` in
+  `https://api.getanyapi.com/.well-known/oauth-authorization-server`).
 </Note>
 
 ## Connect
