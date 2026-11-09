@@ -79,9 +79,11 @@ routing, earnings, and payouts, and is never shown to buyers.
     Each answer is checked against the API's schema and, where AnyAPI has an answer for that
     input, field by field against it. Your answer to the example input is compared with
     AnyAPI's own answer, fetched while the tests run, and your next page with AnyAPI's next
-    page, fetched the same way. When AnyAPI's fetch fails or finds nothing, the example is
-    compared with AnyAPI's recorded answer instead, and the next page is checked against the
-    API's contract only. Every answer must arrive within the API's time
+    page, fetched the same way. Each falls back on its own. If AnyAPI's fetch of the example
+    fails or finds nothing, the example is compared with AnyAPI's recorded answer instead. If
+    AnyAPI has no next page to compare (its fetch fails, or its first page gave no next page),
+    your next page is checked against the API's contract only, and the example keeps its own
+    comparison. Every answer must arrive within the API's time
     limit and under 8 MB. A failed test says why and which fields differed; fix your endpoint
     and run the tests again as often as you like. A passing run starts the live trial.
   </Step>

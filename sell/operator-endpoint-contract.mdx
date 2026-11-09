@@ -315,8 +315,10 @@ Where AnyAPI has an answer for the input, the answer is also compared with it fi
 a test with no answer of AnyAPI's is checked against the API's contract only. Your answer to the
 example input (page 1) is compared with AnyAPI's own answer, fetched while the tests run. For an
 API that pages, your page 2 is compared with AnyAPI's page 2, fetched through AnyAPI's own
-cursor. When AnyAPI's fetch fails or finds nothing, page 1 is compared with AnyAPI's recorded
-answer instead, and page 2 is checked against the API's contract only. A run
+cursor. Each page falls back on its own. If AnyAPI's page 1 fetch fails or finds nothing, your
+page 1 is compared with AnyAPI's recorded answer instead. If AnyAPI has no page 2 to compare (its
+page 2 fetch fails, or its page 1 gave no next page), your page 2 is checked against the API's
+contract only; a failed page 2 fetch does not change how page 1 is compared. A run
 where no test failed passes, and the live trial judges the data AnyAPI could not compare. Each test
 result lists its fields with your value and AnyAPI's. A passing run starts the live trial,
 and you can rerun without limit. A pass counts only while your base URL, path and signing
