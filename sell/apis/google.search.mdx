@@ -3,13 +3,13 @@ title: "Google Search"
 description: "Sell google.search on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
 ---
 
-Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Send page 2, 3, ... to walk further, or use google.search_100 for up to 100 ranked results in one call, which is cheaper past roughly 20 results.
+Run a Google web search and get the organic results (title, link, snippet, position) as clean JSON. Returns about 10 results per call - Google stopped honoring bulk result counts in September 2025, so a limit above 10 is accepted but returns no more than a page. Send page 2, 3, ... to walk further, or use google.search_100 for up to 100 ranked results in one call, which is normally cheaper past roughly 20 results.
 
 This page is the seller-facing summary of one catalog API, `google.search`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.40 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -123,7 +123,7 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
 | `data.nextCursor` | string or null | no | Opaque cursor for the next page of results, or null when this lane has no more. Pass it back as cursor to continue. |
 | `data.query` | string | yes |  |
 | `data.results` | array | yes |  |
-| `data.results[].link` | string | yes |  |
+| `data.results[].link` | string | yes | The result's destination URL. When Google withholds the destination this is a Google redirect link (google.com/goto?url=...), which google.resolve_links turns into the destination URL. |
 | `data.results[].position` | integer | yes |  |
 | `data.results[].snippet` | string | yes |  |
 | `data.results[].title` | string | yes |  |
@@ -189,7 +189,8 @@ Extra fields are kept, missing declared fields fail.
                   },
                   "link": {
                     "x-anyapi-must-populate": true,
-                    "type": "string"
+                    "type": "string",
+                    "description": "The result's destination URL. When Google withholds the destination this is a Google redirect link (google.com/goto?url=...), which google.resolve_links turns into the destination URL."
                   },
                   "snippet": {
                     "x-anyapi-must-populate": true,

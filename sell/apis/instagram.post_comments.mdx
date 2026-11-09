@@ -17,7 +17,7 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
 | --- | --- | --- | --- |
 | `cursor` | string | no | Pagination cursor from a previous response's nextCursor. |
 | `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `replies`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a comment that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
-| `url` | string | yes | Full Instagram post or reel URL. |
+| `url` | string | yes | Full Instagram post or reel URL, carrying the media shortcode: /p/, /reel/, /reels/, or /tv/. A profile URL such as https://www.instagram.com/username names no post, so it is rejected instead of charged for an empty result - send that account's handle to instagram.user_posts to list its posts. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -37,7 +37,8 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
   "properties": {
     "url": {
       "type": "string",
-      "description": "Full Instagram post or reel URL."
+      "pattern": "^[Hh][Tt][Tt][Pp][Ss]?://(?:[Ww][Ww][Ww]\\.)?[Ii][Nn][Ss][Tt][Aa][Gg][Rr][Aa][Mm]\\.[Cc][Oo][Mm]/(?:[A-Za-z0-9_.]+/)?(?:p|reel|reels|tv)/[A-Za-z0-9_-]+/?(?:[?#].*)?$",
+      "description": "Full Instagram post or reel URL, carrying the media shortcode: /p/, /reel/, /reels/, or /tv/. A profile URL such as https://www.instagram.com/username names no post, so it is rejected instead of charged for an empty result - send that account's handle to instagram.user_posts to list its posts."
     },
     "cursor": {
       "type": "string",

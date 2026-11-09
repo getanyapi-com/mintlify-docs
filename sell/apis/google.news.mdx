@@ -81,7 +81,7 @@ AnyAPI publishes this API from **$0.99 per 1,000 requests**. That is the price a
 | --- | --- | --- | --- |
 | `data` | null or object | yes | Result payload, or null when nothing was found. |
 | `data.items` | array | yes | Article records: headline, source name, article link, and publish time. |
-| `data.items[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.items[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Some sources only show a relative age such as "4 days ago", so the value is estimated from it and can be off by up to the label's unit (a day, a week, a month). Multiply by 1000 for a JS Date in milliseconds. |
 | `data.items[].image` | string | no | Thumbnail image URL for the article. The query string carries the image identity, so it is kept. |
 | `data.items[].snippet` | string | no | Article snippet when available. |
 | `data.items[].source` | string | no | Publisher name. |
@@ -155,7 +155,7 @@ Extra fields are kept, missing declared fields fail.
                   "createdUtc": {
                     "x-anyapi-must-populate": true,
                     "type": "number",
-                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                    "description": "UTC epoch timestamp in seconds (Unix time). Some sources only show a relative age such as \"4 days ago\", so the value is estimated from it and can be off by up to the label's unit (a day, a week, a month). Multiply by 1000 for a JS Date in milliseconds."
                   },
                   "image": {
                     "type": "string",

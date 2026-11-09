@@ -9,14 +9,14 @@ This page is the seller-facing summary of one catalog API, `reddit.post_comments
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Cursor from a previous response for more comments. |
-| `url` | string | yes | Full Reddit post URL on reddit.com. A gallery link (https://www.reddit.com/gallery/&lt;id&gt;) is read as the post it belongs to. |
+| `url` | string | yes | Full Reddit post URL on reddit.com. A gallery link (https://www.reddit.com/gallery/&lt;id&gt;) is read as the post it belongs to, and a relative permalink (/r/&lt;subreddit&gt;/comments/&lt;id&gt;/...) as the same path on https://www.reddit.com. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -40,7 +40,7 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
     "url": {
       "type": "string",
       "pattern": "^(?:https?://)?(?:[A-Za-z0-9-]+\\.)*(?:reddit\\.com|redd\\.it)(?:[/?#]|$)",
-      "description": "Full Reddit post URL on reddit.com. A gallery link (https://www.reddit.com/gallery/<id>) is read as the post it belongs to."
+      "description": "Full Reddit post URL on reddit.com. A gallery link (https://www.reddit.com/gallery/<id>) is read as the post it belongs to, and a relative permalink (/r/<subreddit>/comments/<id>/...) as the same path on https://www.reddit.com."
     },
     "cursor": {
       "type": "string",
