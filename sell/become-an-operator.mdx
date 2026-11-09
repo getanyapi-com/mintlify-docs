@@ -76,8 +76,12 @@ routing, earnings, and payouts, and is never shown to buyers.
     `GET /v1/operator/endpoints/{id}/suite-runs/{runId}` until it ends. AnyAPI sends your
     endpoint the API's test inputs, signed: a record it finds, an empty list, each not-found
     reason, each input variant the schema allows, and, for an API that pages, the next page through your own cursor.
-    Each answer is checked against the API's schema and, where AnyAPI holds a recorded answer
-    for that input, field by field against it. Every answer must arrive within the API's time
+    Each answer is checked against the API's schema and, where AnyAPI has an answer for that
+    input, field by field against it. Your answer to the example input is compared with
+    AnyAPI's own answer, fetched while the tests run, and your next page with AnyAPI's next
+    page, fetched the same way. When AnyAPI's fetch fails or finds nothing, the example is
+    compared with AnyAPI's recorded answer instead, and the next page is checked against the
+    API's contract only. Every answer must arrive within the API's time
     limit and under 8 MB. A failed test says why and which fields differed; fix your endpoint
     and run the tests again as often as you like. A passing run starts the live trial.
   </Step>
@@ -134,7 +138,7 @@ routing, earnings, and payouts, and is never shown to buyers.
 
 ## When AnyAPI's answer looks wrong
 
-If you believe AnyAPI's recorded answer for a registration test or a trial call is wrong,
+If you believe AnyAPI's answer for a registration test or a trial call is wrong,
 don't copy it. File a data report with
 `POST /v1/operator/endpoints/{id}/data-reports`: send `suiteRunId` and `caseId` for a test,
 or the call's `trialComparisonId` for a trial call, plus a `message` saying what is wrong

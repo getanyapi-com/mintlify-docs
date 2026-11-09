@@ -311,8 +311,12 @@ input variant the schema allows, and, for an API that pages, the next page throu
 4. Arrive within the API's time limit, the same limit live traffic runs under
 5. Stay under the 8 MB cap
 
-Where AnyAPI holds a recorded answer for the input, the answer is also compared with it field
-by field; a test with no recorded answer is checked against the API's contract only. A run
+Where AnyAPI has an answer for the input, the answer is also compared with it field by field;
+a test with no answer of AnyAPI's is checked against the API's contract only. Your answer to the
+example input (page 1) is compared with AnyAPI's own answer, fetched while the tests run. For an
+API that pages, your page 2 is compared with AnyAPI's page 2, fetched through AnyAPI's own
+cursor. When AnyAPI's fetch fails or finds nothing, page 1 is compared with AnyAPI's recorded
+answer instead, and page 2 is checked against the API's contract only. A run
 where no test failed passes, and the live trial judges the data AnyAPI could not compare. Each test
 result lists its fields with your value and AnyAPI's. A passing run starts the live trial,
 and you can rerun without limit. A pass counts only while your base URL, path and signing
