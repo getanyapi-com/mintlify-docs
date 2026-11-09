@@ -124,7 +124,8 @@ routing, earnings, and payouts, and is never shown to buyers.
     account, then approves your account. Your endpoint then serves real traffic in a
     monitored phase, and fully live while quality holds. You earn from the first request
     you win. If quality drops, the endpoint is paused automatically and re-tested until it
-    recovers. You can also pause it yourself with the kill switch on its page. Withdraw
+    recovers. You can also pause it yourself, and resume it later, from its page (see
+    [Pause and resume an endpoint](#pause-and-resume-an-endpoint)). Withdraw
     your earnings to PayPal from $20; the first payout unlocks 30 days after you become a
     seller, and AnyAPI reviews every payout before it's sent. See
     [Pricing, fees & payouts](/sell/pricing-fees-payouts).
@@ -145,7 +146,7 @@ results by itself. `GET` on the same path lists your reports and their status.
 Under **Connect your agent** in [Sell APIs](https://getanyapi.com/dashboard/sell), create a
 seller key and copy the prompt for your own AI agent. With that key your agent can do what the
 seller dashboard does: register endpoints, run the registration tests, read trial results and
-restart a trial, file data reports, set price and capacity, pause an endpoint, rotate its
+restart a trial, file data reports, set price and capacity, pause and resume an endpoint, rotate its
 signing secret, edit the seller profile, and read earnings, payouts, the identity check status
 and whether PayPal is connected.
 
@@ -157,6 +158,19 @@ accepted, it gives you the link to
 key that tries to accept them is refused with that same link. The full seller API, with every
 route, its errors, and what a seller key may call, is in
 [`getanyapi.com/operator-onboarding/SKILL.md`](https://getanyapi.com/operator-onboarding/SKILL.md).
+
+## Pause and resume an endpoint
+
+To stop an endpoint from receiving customer traffic right away, click **Pause endpoint**
+under **Danger zone** on its page and then **Confirm pause**, or call
+`POST /v1/operator/endpoints/{id}/pause`. The endpoint keeps its status and trial progress,
+and `GET /v1/operator/endpoints/{id}` shows `pausedBySeller: true`.
+
+To turn it back on, click **Resume endpoint** on the same page, or call
+`POST /v1/operator/endpoints/{id}/resume`. The endpoint picks up where it stopped: same
+status, same trial progress, and `pausedBySeller` returns to `false`. Resume only undoes
+your own pause. A pause AnyAPI made, such as *Paused (quality)* or a pause for false
+answers, stays in place.
 
 ## What the statuses mean
 
