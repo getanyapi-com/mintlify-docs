@@ -1,0 +1,348 @@
+---
+title: "Facebook Event Details"
+description: "Sell facebook.event_details on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch full details for a single Facebook event by ID or URL (name, schedule, venue, hosts, and attendance) as normalized JSON.
+
+This page is the seller-facing summary of one catalog API, `facebook.event_details`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `id` | string | no | The event's numeric identifier. |
+| `url` | string | no | The event's Facebook URL. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/facebook.event_details.input.json",
+  "example": {
+    "id": "4045709448982422"
+  },
+  "title": "Facebook Event Details input",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The event's numeric identifier."
+    },
+    "url": {
+      "type": "string",
+      "description": "The event's Facebook URL."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.address` | string | no | Street address of the event venue. |
+| `data.attendanceCount` | integer | no | Number of people Facebook reports as attending. |
+| `data.canViewMembers` | boolean | no | Whether the event's member list is publicly viewable. |
+| `data.city` | string | yes |  |
+| `data.cityId` | string | no | Numeric Facebook id of the event's city page, as a string. |
+| `data.coverPhotoUrl` | string | yes |  |
+| `data.creatorId` | string | no | Numeric Facebook id of the event's creator, as a string. |
+| `data.creatorName` | string | no | Display name of the event's creator. |
+| `data.dayTimeSentence` | string | yes |  |
+| `data.description` | string | yes |  |
+| `data.duration` | string | no | Human-readable event duration, e.g. "2 days". |
+| `data.endTime` | string | yes |  |
+| `data.eventKind` | string | no | Event kind Facebook reports, e.g. "PUBLIC_TYPE". |
+| `data.goingCount` | integer | yes |  |
+| `data.hostContextText` | string | no | Host line Facebook shows for the event, e.g. "Event by Kansas Comic Con". |
+| `data.hostNames` | array | no | Names of the event's hosts. |
+| `data.hosts` | array | no | Pages or profiles hosting the event. |
+| `data.hosts[].id` | string | no | Numeric Facebook id of the host, as a string. |
+| `data.hosts[].image` | string | no | Profile picture URL of the host. |
+| `data.hosts[].name` | string | no | Display name of the host. |
+| `data.hosts[].type` | string | no | Kind of Facebook entity the host is, e.g. "User" or "Page". |
+| `data.hosts[].url` | string | no | Canonical Facebook URL of the host. |
+| `data.hosts[].verified` | boolean | no | Whether the host carries a Facebook verification badge. |
+| `data.id` | string | yes |  |
+| `data.interestedCount` | integer | yes |  |
+| `data.isCanceled` | boolean | yes |  |
+| `data.isOnline` | boolean | yes |  |
+| `data.isPast` | boolean | no | Whether the event has already finished. |
+| `data.latitude` | number | no | Latitude of the event venue. |
+| `data.locationName` | string | yes |  |
+| `data.longitude` | number | no | Longitude of the event venue. |
+| `data.name` | string | yes |  |
+| `data.placeId` | string | no | Numeric Facebook id of the event's place, as a string. |
+| `data.privacy` | string | no | Privacy setting of the event, e.g. "public". |
+| `data.rsvpStyle` | string | no | RSVP style of the event, e.g. "PUBLIC_RSVP_STYLE". |
+| `data.startTime` | string | yes |  |
+| `data.startTimeFormatted` | string | no | Human-readable start time Facebook shows, e.g. "Sat, Oct 31 - Nov 1". |
+| `data.startTimestamp` | integer | no | UTC epoch timestamp in seconds (Unix time) the event starts. Multiply by 1000 for a JS Date in milliseconds. |
+| `data.url` | string | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/facebook.event_details.output.json",
+  "title": "Facebook Event Details output",
+  "x-anyapi-result-list": false,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "id",
+            "url",
+            "name",
+            "description",
+            "dayTimeSentence",
+            "startTime",
+            "endTime",
+            "locationName",
+            "city",
+            "interestedCount",
+            "goingCount",
+            "coverPhotoUrl",
+            "isOnline",
+            "isCanceled"
+          ],
+          "properties": {
+            "id": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "url": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "name": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "description": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "dayTimeSentence": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "startTime": {
+              "type": "string"
+            },
+            "endTime": {
+              "type": "string"
+            },
+            "locationName": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "city": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "interestedCount": {
+              "type": "integer"
+            },
+            "goingCount": {
+              "type": "integer"
+            },
+            "coverPhotoUrl": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "isOnline": {
+              "type": "boolean"
+            },
+            "isCanceled": {
+              "type": "boolean"
+            },
+            "eventKind": {
+              "type": "string",
+              "description": "Event kind Facebook reports, e.g. \"PUBLIC_TYPE\"."
+            },
+            "privacy": {
+              "type": "string",
+              "description": "Privacy setting of the event, e.g. \"public\"."
+            },
+            "duration": {
+              "type": "string",
+              "description": "Human-readable event duration, e.g. \"2 days\"."
+            },
+            "isPast": {
+              "type": "boolean",
+              "description": "Whether the event has already finished."
+            },
+            "address": {
+              "type": "string",
+              "description": "Street address of the event venue."
+            },
+            "cityId": {
+              "type": "string",
+              "description": "Numeric Facebook id of the event's city page, as a string."
+            },
+            "latitude": {
+              "type": "number",
+              "description": "Latitude of the event venue."
+            },
+            "longitude": {
+              "type": "number",
+              "description": "Longitude of the event venue."
+            },
+            "placeId": {
+              "type": "string",
+              "description": "Numeric Facebook id of the event's place, as a string."
+            },
+            "attendanceCount": {
+              "type": "integer",
+              "description": "Number of people Facebook reports as attending."
+            },
+            "canViewMembers": {
+              "type": "boolean",
+              "description": "Whether the event's member list is publicly viewable."
+            },
+            "rsvpStyle": {
+              "type": "string",
+              "description": "RSVP style of the event, e.g. \"PUBLIC_RSVP_STYLE\"."
+            },
+            "hostContextText": {
+              "type": "string",
+              "description": "Host line Facebook shows for the event, e.g. \"Event by Kansas Comic Con\"."
+            },
+            "hostNames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Names of the event's hosts."
+            },
+            "startTimestamp": {
+              "type": "integer",
+              "description": "UTC epoch timestamp in seconds (Unix time) the event starts. Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "startTimeFormatted": {
+              "type": "string",
+              "description": "Human-readable start time Facebook shows, e.g. \"Sat, Oct 31 - Nov 1\"."
+            },
+            "creatorId": {
+              "type": "string",
+              "description": "Numeric Facebook id of the event's creator, as a string."
+            },
+            "creatorName": {
+              "type": "string",
+              "description": "Display name of the event's creator."
+            },
+            "hosts": {
+              "type": "array",
+              "description": "Pages or profiles hosting the event.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Numeric Facebook id of the host, as a string."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Display name of the host."
+                  },
+                  "type": {
+                    "type": "string",
+                    "description": "Kind of Facebook entity the host is, e.g. \"User\" or \"Page\"."
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Canonical Facebook URL of the host."
+                  },
+                  "verified": {
+                    "type": "boolean",
+                    "description": "Whether the host carries a Facebook verification badge."
+                  },
+                  "image": {
+                    "type": "string",
+                    "description": "Profile picture URL of the host."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `city`
+- `coverPhotoUrl`
+- `dayTimeSentence`
+- `description`
+- `id`
+- `locationName`
+- `name`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `hostNames` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "id": "4045709448982422"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

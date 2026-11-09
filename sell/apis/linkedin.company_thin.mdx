@@ -1,0 +1,232 @@
+---
+title: "LinkedIn Company (basic)"
+description: "Sell linkedin.company_thin on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Basic company: name, description, employee count, industry, logo, website, tagline. No follower count, founded year, office locations, or funding data - for those use linkedin.company.
+
+This page is the seller-facing summary of one catalog API, `linkedin.company_thin`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `companyType` or `coverImage`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a company page that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `url` | string | yes | Full LinkedIn company page URL. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.company_thin.input.json",
+  "example": {
+    "url": "https://www.linkedin.com/company/stripe"
+  },
+  "title": "LinkedIn company (basic) input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Full LinkedIn company page URL."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "companyType",
+          "coverImage"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `companyType` or `coverImage`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a company page that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.companyType` | string or null | no | Company type, e.g. Privately Held, Public Company. |
+| `data.coverImage` | string or null | no | Company page cover image URL. The query string is a signed token, so keep the URL intact. |
+| `data.description` | string | yes | Company about/description text. |
+| `data.employeeCount` | integer | yes | Reported employee count. |
+| `data.followerCount` | integer | no | LinkedIn page follower count. |
+| `data.foundedYear` | integer | no | Year the company was founded, or 0 when unknown. |
+| `data.id` | string | no | LinkedIn's numeric company id, as a string. |
+| `data.industry` | string | yes | Primary industry. |
+| `data.linkedinUrl` | string | no | Canonical LinkedIn company page URL. |
+| `data.logoUrl` | string | yes | Company logo image URL. |
+| `data.name` | string | yes | Company name. |
+| `data.tagline` | string | yes | Company tagline/slogan. |
+| `data.universalName` | string | no | LinkedIn universal (vanity) name for the company. |
+| `data.website` | string | yes | Company website URL. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.company_thin.output.json",
+  "title": "LinkedIn company (basic) output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "name",
+            "description",
+            "employeeCount",
+            "industry",
+            "website",
+            "tagline",
+            "logoUrl"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Company name."
+            },
+            "description": {
+              "type": "string",
+              "description": "Company about/description text.",
+              "x-anyapi-must-populate": true
+            },
+            "employeeCount": {
+              "type": "integer",
+              "description": "Reported employee count."
+            },
+            "industry": {
+              "type": "string",
+              "description": "Primary industry.",
+              "x-anyapi-must-populate": true
+            },
+            "website": {
+              "type": "string",
+              "description": "Company website URL.",
+              "x-anyapi-must-populate": true
+            },
+            "tagline": {
+              "type": "string",
+              "description": "Company tagline/slogan.",
+              "x-anyapi-must-populate": true
+            },
+            "logoUrl": {
+              "type": "string",
+              "description": "Company logo image URL.",
+              "x-anyapi-must-populate": true
+            },
+            "id": {
+              "type": "string",
+              "description": "LinkedIn's numeric company id, as a string."
+            },
+            "linkedinUrl": {
+              "type": "string",
+              "description": "Canonical LinkedIn company page URL."
+            },
+            "universalName": {
+              "type": "string",
+              "description": "LinkedIn universal (vanity) name for the company."
+            },
+            "followerCount": {
+              "type": "integer",
+              "description": "LinkedIn page follower count."
+            },
+            "companyType": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Company type, e.g. Privately Held, Public Company."
+            },
+            "foundedYear": {
+              "type": "integer",
+              "description": "Year the company was founded, or 0 when unknown."
+            },
+            "coverImage": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Company page cover image URL. The query string is a signed token, so keep the URL intact."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `description`
+- `industry`
+- `logoUrl`
+- `tagline`
+- `website`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty result is not a not-found: when the entity exists but carries nothing, answer 2xx with `found: true` and the empty values.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.linkedin.com/company/stripe"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

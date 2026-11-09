@@ -1,0 +1,361 @@
+---
+title: "LinkedIn Job"
+description: "Sell linkedin.job on AnyAPI: the request your endpoint receives, the response it must return, and what the live trial grades."
+---
+
+Fetch one LinkedIn job posting by URL: title, full description, location, salary when disclosed, applicant count, employment and workplace type, seniority, benefits, industries, apply links, posting and expiry dates, the hiring team, the applicant tracking system behind it, and the hiring company with its size, follower count, website and description.
+
+This page is the seller-facing summary of one catalog API, `linkedin.job`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.50 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `url` | string | yes | Full LinkedIn job posting URL, e.g. https://www.linkedin.com/jobs/view/4431721875/. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.job.input.json",
+  "example": {
+    "url": "https://www.linkedin.com/jobs/view/4431721875/"
+  },
+  "title": "LinkedIn job input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Full LinkedIn job posting URL, e.g. https://www.linkedin.com/jobs/view/4431721875/."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The job posting record, or null when not found. |
+| `data.applicantTrackingSystem` | string | no | Applicant tracking system behind the posting (e.g. Workday, Lever, Greenhouse), when LinkedIn reports one. |
+| `data.applicants` | integer | no | Number of applicants reported by LinkedIn. |
+| `data.applyUrl` | string | no | External company apply URL when the job applies off-site. |
+| `data.benefits` | array | no | Listed benefits. |
+| `data.city` | string | no | City of the job location. |
+| `data.company` | object | no | Hiring company details. |
+| `data.company.description` | string | no | Company About text. |
+| `data.company.employeeCount` | integer | no | Number of employees LinkedIn reports for the company. |
+| `data.company.followerCount` | integer | no | Number of followers of the company page. |
+| `data.company.id` | string | no | LinkedIn's numeric company id, as a string. |
+| `data.company.linkedinUrl` | string | no | Canonical LinkedIn company URL. |
+| `data.company.logo` | string | no | Company logo image URL. |
+| `data.company.name` | string | no | Company name. |
+| `data.company.universalName` | string | no | Company LinkedIn universal (vanity) name. |
+| `data.company.website` | string | no | Company website. |
+| `data.country` | string | no | Country of the job location. |
+| `data.countryCode` | string | no | Two-letter country code of the job location. |
+| `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time) the job was posted. Multiply by 1000 for a JS Date in milliseconds. |
+| `data.descriptionText` | string | no | Full job description as plain text. |
+| `data.easyApplyUrl` | string | no | LinkedIn Easy Apply URL when available. |
+| `data.employmentType` | string | no | Employment type (e.g. full_time, contract, part_time). |
+| `data.experienceLevel` | string | no | Seniority / experience level (e.g. Mid-Senior level, Entry level). |
+| `data.expireUtc` | number | no | UTC epoch timestamp in seconds (Unix time) the posting expires. Multiply by 1000 for a JS Date in milliseconds. |
+| `data.hiringTeam` | array | no | LinkedIn members named on the posting as the hiring contacts. |
+| `data.hiringTeam[].linkedinUrl` | string | no | Canonical LinkedIn profile URL. |
+| `data.hiringTeam[].name` | string | no | Member name. |
+| `data.hiringTeam[].position` | string | no | Member headline or job title. |
+| `data.id` | string | no | LinkedIn job posting id. |
+| `data.industries` | array | no | Industries associated with the role. |
+| `data.jobState` | string | no | Posting state reported by LinkedIn (e.g. LISTED, CLOSED). |
+| `data.location` | string | no | Job location (city, region, or country). |
+| `data.remote` | boolean | no | Whether LinkedIn flags the role as remote-allowed. |
+| `data.salary` | object | no | Salary range when disclosed by the poster. |
+| `data.salary.max` | number | no | Maximum salary. |
+| `data.salary.min` | number | no | Minimum salary. |
+| `data.salary.text` | string | no | Salary as displayed (e.g. '300,000 - 330,000 USD'). |
+| `data.state` | string | no | State or region of the job location. |
+| `data.title` | string | yes | Job title. |
+| `data.url` | string | yes | Canonical LinkedIn job posting URL. |
+| `data.views` | integer | no | Number of views LinkedIn reports for the posting. |
+| `data.workplaceType` | string | no | Workplace type (e.g. remote, on_site, hybrid). |
+| `found` | boolean | yes | Whether the job posting was found. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.job.output.json",
+  "title": "LinkedIn job output",
+  "x-anyapi-result-list": false,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "Whether the job posting was found."
+    },
+    "data": {
+      "description": "The job posting record, or null when not found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "description": "A single LinkedIn job posting with full detail: title, description, salary, applicant count, seniority, apply links, hiring team, and the hiring company.",
+          "required": [
+            "title",
+            "url"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "LinkedIn job posting id."
+            },
+            "title": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Job title."
+            },
+            "url": {
+              "type": "string",
+              "description": "Canonical LinkedIn job posting URL."
+            },
+            "createdUtc": {
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time) the job was posted. Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "expireUtc": {
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time) the posting expires. Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "jobState": {
+              "type": "string",
+              "description": "Posting state reported by LinkedIn (e.g. LISTED, CLOSED)."
+            },
+            "company": {
+              "type": "object",
+              "description": "Hiring company details.",
+              "properties": {
+                "name": {
+                  "x-anyapi-must-populate": true,
+                  "type": "string",
+                  "description": "Company name."
+                },
+                "universalName": {
+                  "type": "string",
+                  "description": "Company LinkedIn universal (vanity) name."
+                },
+                "linkedinUrl": {
+                  "type": "string",
+                  "description": "Canonical LinkedIn company URL."
+                },
+                "logo": {
+                  "type": "string",
+                  "description": "Company logo image URL."
+                },
+                "website": {
+                  "type": "string",
+                  "description": "Company website."
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Company About text."
+                },
+                "employeeCount": {
+                  "type": "integer",
+                  "description": "Number of employees LinkedIn reports for the company."
+                },
+                "followerCount": {
+                  "type": "integer",
+                  "description": "Number of followers of the company page."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "LinkedIn's numeric company id, as a string."
+                }
+              }
+            },
+            "location": {
+              "type": "string",
+              "description": "Job location (city, region, or country)."
+            },
+            "city": {
+              "type": "string",
+              "description": "City of the job location."
+            },
+            "state": {
+              "type": "string",
+              "description": "State or region of the job location."
+            },
+            "country": {
+              "type": "string",
+              "description": "Country of the job location."
+            },
+            "countryCode": {
+              "type": "string",
+              "description": "Two-letter country code of the job location."
+            },
+            "views": {
+              "type": "integer",
+              "description": "Number of views LinkedIn reports for the posting."
+            },
+            "remote": {
+              "type": "boolean",
+              "description": "Whether LinkedIn flags the role as remote-allowed."
+            },
+            "descriptionText": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Full job description as plain text."
+            },
+            "salary": {
+              "type": "object",
+              "description": "Salary range when disclosed by the poster.",
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "description": "Salary as displayed (e.g. '300,000 - 330,000 USD')."
+                },
+                "min": {
+                  "type": "number",
+                  "description": "Minimum salary."
+                },
+                "max": {
+                  "type": "number",
+                  "description": "Maximum salary."
+                }
+              }
+            },
+            "applicants": {
+              "x-anyapi-must-populate": true,
+              "type": "integer",
+              "description": "Number of applicants reported by LinkedIn."
+            },
+            "employmentType": {
+              "type": "string",
+              "description": "Employment type (e.g. full_time, contract, part_time)."
+            },
+            "workplaceType": {
+              "type": "string",
+              "description": "Workplace type (e.g. remote, on_site, hybrid)."
+            },
+            "experienceLevel": {
+              "type": "string",
+              "description": "Seniority / experience level (e.g. Mid-Senior level, Entry level)."
+            },
+            "benefits": {
+              "type": "array",
+              "description": "Listed benefits.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "industries": {
+              "type": "array",
+              "description": "Industries associated with the role.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "easyApplyUrl": {
+              "type": "string",
+              "description": "LinkedIn Easy Apply URL when available."
+            },
+            "applyUrl": {
+              "type": "string",
+              "description": "External company apply URL when the job applies off-site."
+            },
+            "applicantTrackingSystem": {
+              "type": "string",
+              "description": "Applicant tracking system behind the posting (e.g. Workday, Lever, Greenhouse), when LinkedIn reports one."
+            },
+            "hiringTeam": {
+              "type": "array",
+              "description": "LinkedIn members named on the posting as the hiring contacts.",
+              "items": {
+                "type": "object",
+                "description": "One named hiring contact.",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Member name."
+                  },
+                  "position": {
+                    "type": "string",
+                    "description": "Member headline or job title."
+                  },
+                  "linkedinUrl": {
+                    "type": "string",
+                    "description": "Canonical LinkedIn profile URL."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `applicants`
+- `descriptionText`
+- `name`
+- `title`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `benefits` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.linkedin.com/jobs/view/4431721875/"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, your answers are graded against what the currently serving source returned for the same real customer inputs.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the live trial.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).
