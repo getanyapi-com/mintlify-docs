@@ -55,11 +55,48 @@ curl https://api.getanyapi.com/v1/requests/req_123 \
 ```
 
 The public status is `queued`, `running`, `succeeded`, `failed`, or `expired`. Honor
-`retryAfterSeconds` before polling again. A succeeded snapshot includes the standard run envelope
-as `result`. A failed snapshot includes a safe AnyAPI error code.
+`retryAfterSeconds` before polling again: AnyAPI admits one read of a pending Request per that
+interval, and an earlier read returns `429` with a new `Retry-After`. Reading a Request is free.
+A succeeded snapshot includes the standard run envelope as `result`. A failed snapshot includes a
+safe AnyAPI error code.
 
 Request IDs are private to the wallet customer that created them. Unknown IDs and IDs owned by
 another customer both return `404`.
+
+## Lookups charged when they start
+
+Some lookups, such as `youtube.channel_contact`, are charged as soon as AnyAPI starts them. If the
+answer is ready during the initial wait, you get the usual `200` result. Otherwise the `202`
+arrives within seconds and its snapshot also carries:
+
+- `costUsd`: what the lookup was charged in USD. That charge is final: it is never taken again
+  when the answer arrives and never refunded, whatever the answer is.
+- `collectUrl`: a link to `GET /v1/requests/{requestId}/collect?token=...` that reads this one
+  Request with no API key. Hand it to whoever needs the answer.
+- `note`: a short instruction for finishing the lookup.
+
+```json
+{
+  "requestId": "req_123",
+  "sku": "youtube.channel_contact",
+  "status": "running",
+  "createdAt": "2026-08-04T00:00:00Z",
+  "retryAfterSeconds": 5,
+  "costUsd": 0.33,
+  "collectUrl": "https://api.getanyapi.com/v1/requests/req_123/collect?token=...",
+  "note": "Charged. The lookup is still running: GET collectUrl (no API key needed), waiting Retry-After seconds between reads, until status is succeeded; the email is in result.output."
+}
+```
+
+Collecting is free, through `collectUrl` or `GET /v1/requests/{requestId}` with your key. Both
+share one pace per Request: read no faster than `Retry-After` (one read every 5 seconds for
+`youtube.channel_contact`), or you get `429` with a new `Retry-After`. Keep reading until `status`
+is `succeeded`; the answer is in `result.output`.
+
+You can collect a charged lookup for up to 31 days. If its data is gone before the answer is
+read, the Request fails and the charge stays; a retry with the same `Idempotency-Key` returns
+that failure instead of buying a second lookup. `collectUrl` returns `404` for a wrong token, an
+unknown Request, or a Request whose connected app was disconnected.
 
 ## Resume safely
 
