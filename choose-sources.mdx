@@ -1,14 +1,41 @@
 ---
 title: "Choose sources"
-description: "Allow only the sources you trust, or skip ones you don't, on any API."
+description: "Why to let routing choose the source, how to cap cost per request, and the experimental source fields."
 ---
 
 By default AnyAPI picks the cheapest source that can serve your request, and falls back to
-the next if it fails. Use `source`, `allowFallbacks`, and `ignoreSources` when you want a say
-in which sources may serve it.
+the next if it fails. `source`, `allowFallbacks`, and `ignoreSources` let you have a say in
+which sources may serve it.
 
-Every API accepts these three optional fields in the request body, next to its normal input.
-They apply to one request only. There is no account-wide or per-key setting.
+## Recommended: let routing choose
+
+Leave `source` and `allowFallbacks` out. Automatic routing:
+
+- Uses cheaper sources as we add them, with no change on your side.
+- Fails over to another source when one fails, so your requests are not tied to the uptime
+  of one source.
+
+<Warning>
+  `source` and `allowFallbacks: false` are experimental, and their behavior may change.
+  Avoid pinning a single source, especially with `allowFallbacks: false`: when that source
+  has an outage, your requests fail while requests that let routing choose are still served.
+</Warning>
+
+## Control cost with a price ceiling
+
+If you pin a source to keep the price down, set a ceiling instead. Add the `max_cost_usd`
+query parameter to a REST run made with an API key:
+
+```bash
+curl -s -X POST "https://api.getanyapi.com/v1/run/tiktok.profile?max_cost_usd=0.0005" \
+  -H "X-API-Key: YOUR_ANYAPI_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"handle":"zachking"}'
+```
+
+Any source that would charge more than the ceiling is skipped, and failover still runs among
+the ones that do not. If none is left, the request is refused before it runs and you are not
+charged. The ceiling is not available on MCP `run_api` or on x402 and MPP payments.
 
 ## Find source ids
 
@@ -27,11 +54,7 @@ curl -s https://api.getanyapi.com/catalog \
 { "id": "anonymous-badger",         "name": "Badger",   "per1k": 1.2 }
 ```
 
-## The default: cheapest serves
-
-Without any of the fields, the cheapest source serves and failover is automatic.
-
-## Allow only some sources
+## Allow only some sources (experimental)
 
 To allowlist sources, send `source` with `allowFallbacks: false`:
 
@@ -42,8 +65,8 @@ To allowlist sources, send `source` with `allowFallbacks: false`:
 Only the listed sources may serve. If none of them is serving, the request is refused with no
 charge. If they are tried and all fail, it fails like any other request.
 
-With a single source and `allowFallbacks: false`, only that source serves, at its price.
-You are quoted and charged exactly that price, with no failover.
+With a single source and `allowFallbacks: false`, only that source serves, at its price, with
+no failover.
 
 ## Skip sources
 
@@ -55,7 +78,7 @@ Send `ignoreSources` to skip sources for this request:
 
 The cheapest remaining source serves.
 
-## Prefer without restricting
+## Prefer without restricting (experimental)
 
 `source` on its own is a preference:
 
@@ -64,7 +87,7 @@ The cheapest remaining source serves.
 ```
 
 The listed sources are tried first, in the order you give. After them, any other source may
-serve at the normal price.
+serve. The price is that of the dearest source that may serve.
 
 An empty list or `null` counts as if you left the field out.
 
@@ -133,5 +156,5 @@ curl -s -X POST https://api.getanyapi.com/v1/run/tiktok.profile \
 </CodeGroup>
 
 Every successful response includes a `source` object (`id`, `name`, `kind`, `artworkKey`) for
-the source that served, so you can reuse its id on your next call. These fields combine with
+the source that served. Its id is the value `source` and `ignoreSources` accept. These fields combine with
 `preferLatencyUnderMs`; see [Speed and price](/speed-and-price).
