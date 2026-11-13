@@ -269,6 +269,7 @@ validation, routing, failover, pricing, and billing are identical.
     |---|---|---|---|
     | `sku_id` | string | yes | The API SKU slug to execute |
     | `input` | object | yes | Normalized payload matching the API's input schema |
+    | `max_cost_usd` | number | no | The most you will pay for this one request, in USD (for example `0.05`). Sources that would charge more are skipped; if none is left, the request is refused before it runs and you are not charged. See [Choose sources](/choose-sources#control-cost-with-a-price-ceiling). |
     | `fields` | string | no | Comma-separated keys (dotted paths like `author.name`) to keep on each result item. Trims the response, not the charge. |
     | `max_items` | integer | no | Cap the number of result rows returned; a `_truncated` note reports how many were withheld. Trims the response, not the charge. |
     | `summary` | boolean | no | Return only a structural outline (top-level keys and item counts) instead of the full data. Trims the response, not the charge. |
@@ -458,6 +459,7 @@ Tool failures come back as MCP tool errors with a short machine-readable prefix:
 | `invalid_input` | Payload did not match the API's input schema | No |
 | `insufficient_balance` | Wallet balance too low; top up to run | No |
 | `key_cap_exceeded` | The API key reached its configured spend cap | No |
+| `max_cost_exceeded` | No source serves the request within your `max_cost_usd`; the message names the cheapest price per request | No |
 | `grant_cap_exceeded` | The authorization reached the spending limit its owner approved | No |
 | `trial_cap_reached` | The autonomous trial reached its cap | No |
 | `idempotency_in_progress` | An identical call is still running; wait a few seconds and repeat the same call to get its result | No |

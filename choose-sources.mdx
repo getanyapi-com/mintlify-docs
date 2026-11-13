@@ -23,8 +23,8 @@ Leave `source` and `allowFallbacks` out. Automatic routing:
 
 ## Control cost with a price ceiling
 
-If you pin a source to keep the price down, set a ceiling instead. Add the `max_cost_usd`
-query parameter to a REST run made with an API key:
+If you pin a source to keep the price down, set a ceiling instead. On a REST run paid from
+your wallet, add the `max_cost_usd` query parameter:
 
 ```bash
 curl -s -X POST "https://api.getanyapi.com/v1/run/tiktok.profile?max_cost_usd=0.0005" \
@@ -35,7 +35,15 @@ curl -s -X POST "https://api.getanyapi.com/v1/run/tiktok.profile?max_cost_usd=0.
 
 Any source that would charge more than the ceiling is skipped, and failover still runs among
 the ones that do not. If none is left, the request is refused before it runs and you are not
-charged. The ceiling is not available on MCP `run_api` or on x402 and MPP payments.
+charged.
+
+Over MCP, pass the same amount as the `max_cost_usd` argument of `run_api`:
+
+```json
+{ "sku_id": "tiktok.profile", "input": { "handle": "zachking" }, "max_cost_usd": 0.0005 }
+```
+
+The ceiling is not available on x402 and MPP payments.
 
 ## Find source ids
 
