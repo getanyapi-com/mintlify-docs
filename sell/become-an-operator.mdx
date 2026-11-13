@@ -89,7 +89,7 @@ routing, earnings, and payouts, and is never shown to buyers.
   </Step>
   <Step title="Pass the real-request check (free the first time)">
     AnyAPI replays real past customer requests for this API to your endpoint, up to 5 at
-    once, signed and sent exactly like paid requests: you receive the request input, never
+    once across all of your endpoints being checked, signed and sent exactly like paid requests: you receive the request input, never
     who the customer is. Customers never see your answers and nothing is billed to them. An
     AI reviewer compares each answer with AnyAPI's own answer to the same input and gives a
     verdict:
@@ -100,21 +100,52 @@ routing, earnings, and payouts, and is never shown to buyers.
     | `sources_differ` | Clean: both answers are right, the sources just differ |
     | `looks_wrong` | A miss |
     | `no_evidence` | Neither way: the reviewer could not tell |
+    | `call_failed` | Reliability only: your endpoint failed the call, and failed again when it was retried once a minute later |
+
+    The check measures two things and reports them apart. **Data quality** is the clean
+    answers and misses. Where AnyAPI has a second source for the API, an answer that looks
+    wrong is checked against it too, and it stays a miss only if both AnyAPI answers agree.
+    **Reliability** is how many calls to your endpoint failed. A failed call is never a miss,
+    but too many of them fail the check by themselves. A check that did not pass says which of
+    the two failed it: `summary.failReason` is `data_quality` or `reliability`, with
+    `summary.failReasonText` in plain words.
 
     The check passes once **at least 95% of answers are clean, at 95% confidence**: 59 clean
     answers with no miss, 93 judged answers with 1 miss, or 124 with 2, within 500 calls.
-    There is no minimum number of days; it runs by itself and usually takes minutes to hours.
+    There is no minimum number of days and it runs by itself. `summary.progress` estimates the
+    time left from your endpoint's own pace so far, or says in plain words why it can't.
     If AnyAPI runs out of past requests for the API, the check uses copies of new customer
     requests as they arrive, which can take longer. If the review is paused on AnyAPI's side,
     the check waits and resumes by itself; that is never a failure of your endpoint. A passed
     endpoint then waits, with no traffic, until you go live.
 
     Follow it on the endpoint's page or with `GET /v1/operator/endpoints/{id}/trial`.
-    `summary` holds the clean answers, misses, calls used, and how many more clean answers
-    would pass it. Each call shows the reviewer's verdict and reason, its notes per field, each
-    compared field with your value and AnyAPI's, how your endpoint failed the call if it did,
-    and the request's `X-AnyAPI-Nonce` header so you can find it in your own logs. The
-    customer's input is never shown.
+    `summary` holds the clean answers, misses, calls used, how many more clean answers
+    would pass it, and `reliability` (`callsFailed`, `callsAnswered`, and `successNeeded`, how
+    many more calls must succeed before the failed ones stop holding a pass back). Each call
+    shows the verdict and reason, its notes per field, each compared field with your value and
+    AnyAPI's, how your endpoint failed the call if it did, and the request's `X-AnyAPI-Nonce`
+    header so you can find it in your own logs.
+
+    **See one call in full.** Open a checked answer on the endpoint's page, or call
+    `GET /v1/operator/endpoints/{id}/trial/calls/{trialComparisonId}`: it returns the request
+    your endpoint was sent (`input`, never who the customer is), your answer and AnyAPI's.
+    `sellerCall` says whether the call was retried (`tries`, `firstTryError`) and, for a failed
+    call, what your server answered (`errorBody`, with anything shaped like a credential
+    removed). `confirmation` says whether a second AnyAPI source agreed that an answer was
+    wrong. Each of the three documents is kept up to 64 KiB.
+
+    **Wait as the API tells you.** Don't poll on a fixed interval. `summary.progress` carries
+    `etaMinSeconds`, `etaMaxSeconds`, an `explanation`, and `pollAfterSeconds`; the response
+    also sends the same delay as the `Retry-After` header. Both estimates are null when no time
+    can be estimated, for example while the check waits for new customer requests. All of your
+    endpoints being checked share one limit on calls in flight, so one endpoint's pace changes
+    when another of your checks starts or ends.
+
+    **You are told when it ends.** AnyAPI emails your account's address when a check passes or
+    fails and when AnyAPI changes an endpoint's status, one email for everything new. The same
+    events are at `GET /v1/operator/events`, across all your endpoints: pass `?since=` on the
+    first read, then the returned `cursor` as `?after=`.
   </Step>
   <Step title="Read the rundown and fix what it lists">
     When the check ends, pass or fail, the reviewer writes a **data quality rundown**: a
@@ -135,6 +166,11 @@ routing, earnings, and payouts, and is never shown to buyers.
     starts. `summary.nextAttemptUsd` shows the amount, and the endpoint's page states it next to
     the button. If your balance can't cover it, the restart answers HTTP 402
     `check_charge_short` with a message naming the amount; top up and try again.
+
+    **If a failure was our fault, the re-run is free.** When AnyAPI finds that a check failed
+    because of a mistake on its side, it puts the endpoint back into its check itself. You get
+    a `check_rerun` event and email saying so, that check charges nothing
+    (`summary.freeRerun` is true), and you don't need to restart anything.
   </Step>
   <Step title="Before you go live: verify your identity">
     Once one of your endpoints passes its check, complete an identity check from the
@@ -174,7 +210,9 @@ don't copy it. File a data report with
 `POST /v1/operator/endpoints/{id}/data-reports`: send `suiteRunId` and `caseId` for a test,
 or the call's `trialComparisonId` for a check call, plus a `message` saying what is wrong
 (and optionally the `field`). A person at AnyAPI reviews it; filing one doesn't change your
-results by itself. `GET` on the same path lists your reports and their status.
+results by itself. `GET` on the same path lists your reports and their status. On the
+endpoint's page, open a missed answer and choose **This is wrong** to file the same report;
+its status then shows on that call.
 
 ## Let your agent manage it: seller keys
 

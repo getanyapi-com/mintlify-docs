@@ -327,28 +327,40 @@ secret are unchanged.
 ## How the real-request check works
 
 Once the registration tests pass, AnyAPI replays real past customer requests for the API to
-your endpoint, up to 5 at once. They are signed and sent exactly like paid requests, with no
+your endpoint, up to 5 at once across all of your endpoints being checked. They are signed and sent exactly like paid requests, with no
 header that sets them apart, so serve every request the same way. Check requests are neither
 billed to a customer nor paid to you, and customers never see your answers. If AnyAPI runs out
 of past requests for the API, the check uses copies of new customer requests as they arrive.
 
 An AI reviewer compares each answer with AnyAPI's own answer to the same input and gives a
 verdict: `clean`, `sources_differ` (both are right and the sources differ; counts as clean),
-`looks_wrong` (a miss), or `no_evidence` (it could not tell; counts neither way). A non-2xx, a
-timeout, or output that does not validate against the schema is a miss.
+`looks_wrong` (a miss), or `no_evidence` (it could not tell; counts neither way). Where AnyAPI
+has a second source for the API, a `looks_wrong` answer is checked against it too and stays a
+miss only if both AnyAPI answers agree.
+
+A call your endpoint fails (a non-2xx or a timeout) is retried once, a minute later. If it
+fails again it is `call_failed`: that counts toward reliability and neither way toward the
+clean rate. Reliability is its own measure. A check with clean answers still does not pass
+while too many of its calls have failed, and one whose calls keep failing ends as failed for
+reliability (`summary.failReason`), not for data quality.
 
 The check passes once at least 95% of answers are clean at 95% confidence: 59 clean answers
 with no miss, 93 judged answers with 1 miss, or 124 with 2, within 500 calls. There is no
-minimum number of days, and it usually takes minutes to hours. A check that can no longer pass
-ends as failed and the endpoint goes back to draft.
+minimum number of days; `summary.progress` estimates the time left and `pollAfterSeconds` (also
+the `Retry-After` header) says when to read again. A check that can no longer pass ends as
+failed and the endpoint goes back to draft.
 
 Each call is listed at `GET /v1/operator/endpoints/{id}/trial` with the reviewer's verdict,
 its reason and notes per field, the field results, and the request's `X-AnyAPI-Nonce` so you
-can match it in your logs. When the check ends, `summary.rundown` holds the reviewer's data
+can match it in your logs. `GET /v1/operator/endpoints/{id}/trial/calls/{trialComparisonId}`
+returns one call in full: the request sent, both answers, and for a failed call what your
+server answered. `GET /v1/operator/events` lists every check that ended and every status change
+AnyAPI made, across your endpoints; AnyAPI emails the account about the same events. When the check ends, `summary.rundown` holds the reviewer's data
 quality rundown: a summary, the top fixes, and for each output field a rating (`fine`,
 `could_be_better`, or `wrong`), what it saw, what to change, the answers affected, and up to 3
 example calls. To start over after a fix, call `POST /v1/operator/endpoints/{id}/trial/restart`:
 the endpoint returns to draft and a new check starts once it passes the registration tests
 again. The first check is free; a repeat costs what the previous check cost AnyAPI to run,
 taken from your AnyAPI balance, and a restart your balance can't cover answers HTTP 402
-`check_charge_short` naming the amount.
+`check_charge_short` naming the amount. A check AnyAPI runs again because the earlier failure
+was its own fault is free.
