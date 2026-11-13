@@ -42,7 +42,7 @@ routing, earnings, and payouts, and is never shown to buyers.
     Seller Terms**: you accept the [Seller Terms](https://getanyapi.com/seller-terms)
     before you can register an endpoint or run the registration tests (a person reads and
     accepts them in the dashboard). Registering an endpoint, the registration tests and the
-    live trial need no approval.
+    real-request check need no approval.
 
     AnyAPI approves a seller for paid traffic only once the seller profile has a name, a
     photo, and a description, or the seller has chosen to be listed anonymously. Set the name
@@ -85,30 +85,59 @@ routing, earnings, and payouts, and is never shown to buyers.
     your next page is checked against the API's contract only, and the example keeps its own
     comparison. Every answer must arrive within the API's time
     limit and under 8 MB. A failed test says why and which fields differed; fix your endpoint
-    and run the tests again as often as you like. A passing run starts the live trial.
+    and run the tests again as often as you like. A passing run starts the real-request check.
   </Step>
-  <Step title="Pass the live trial (free)">
-    Up to 500 real customer calls are mirrored to your endpoint: you receive the customer's
-    request input, never who the customer is. Your answers are compared automatically with
-    the current provider's. Customers never see your output during the trial and nothing is
-    billed. Your trial passes at **at least 95% pass rate over at least 200 comparisons
-    spanning at least 7 days, with zero flags for made-up data or tampered URLs**. A passed
+  <Step title="Pass the real-request check (free the first time)">
+    AnyAPI replays real past customer requests for this API to your endpoint, up to 5 at
+    once, signed and sent exactly like paid requests: you receive the request input, never
+    who the customer is. Customers never see your answers and nothing is billed to them. An
+    AI reviewer compares each answer with AnyAPI's own answer to the same input and gives a
+    verdict:
+
+    | Verdict | Counts as |
+    | --- | --- |
+    | `clean` | Clean |
+    | `sources_differ` | Clean: both answers are right, the sources just differ |
+    | `looks_wrong` | A miss |
+    | `no_evidence` | Neither way: the reviewer could not tell |
+
+    The check passes once **at least 95% of answers are clean, at 95% confidence**: 59 clean
+    answers with no miss, 93 judged answers with 1 miss, or 124 with 2, within 500 calls.
+    There is no minimum number of days; it runs by itself and usually takes minutes to hours.
+    If AnyAPI runs out of past requests for the API, the check uses copies of new customer
+    requests as they arrive, which can take longer. If the review is paused on AnyAPI's side,
+    the check waits and resumes by itself; that is never a failure of your endpoint. A passed
     endpoint then waits, with no traffic, until you go live.
 
-    Read every judged call with `GET /v1/operator/endpoints/{id}/trial`. Each call shows its
-    outcome (pass, fail, or inconclusive, which counts neither way), each compared field with
-    your value and AnyAPI's, how your endpoint failed the call if it did, and the request's
-    `X-AnyAPI-Nonce` header so you can find it in your own logs. The customer's input is never
-    shown.
+    Follow it on the endpoint's page or with `GET /v1/operator/endpoints/{id}/trial`.
+    `summary` holds the clean answers, misses, calls used, and how many more clean answers
+    would pass it. Each call shows the reviewer's verdict and reason, its notes per field, each
+    compared field with your value and AnyAPI's, how your endpoint failed the call if it did,
+    and the request's `X-AnyAPI-Nonce` header so you can find it in your own logs. The
+    customer's input is never shown.
+  </Step>
+  <Step title="Read the rundown and fix what it lists">
+    When the check ends, pass or fail, the reviewer writes a **data quality rundown**: a
+    summary, the top fixes, and for each output field a rating (*fine*, *could be better*,
+    or *wrong*), what it saw, what to change, how many answers it affected, and up to 3
+    example calls. The endpoint's page shows it, and clicking an example opens that call. Through
+    the API it is `summary.rundown` in `GET /v1/operator/endpoints/{id}/trial`; each example is
+    a call's nonce, or `input <hash>` for an input with no call left to show.
 
-    After a fix, restart the trial yourself with
-    `POST /v1/operator/endpoints/{id}/trial/restart`; there is no need to email support. You
-    can restart during the trial, or in draft after one; a trial that already passed can't be
-    restarted. Earlier calls stay readable but stop counting, and the endpoint goes back to
-    draft: it re-enters the trial once it passes the registration tests again.
+    If the check did not pass, fix what the rundown lists, worst first, then click **Fix these,
+    then run the check again**, or call `POST /v1/operator/endpoints/{id}/trial/restart` and run
+    the registration tests again; their pass starts a new check. You can restart while the check
+    runs, or in draft after one; a check that already passed can't be restarted. Earlier calls
+    stay readable but stop counting.
+
+    **The first check is free. Running it again costs what the previous check cost AnyAPI to
+    run** (its own fetches and the AI review), taken from your AnyAPI balance when the new check
+    starts. `summary.nextAttemptUsd` shows the amount, and the endpoint's page states it next to
+    the button. If your balance can't cover it, the restart answers HTTP 402
+    `check_charge_short` with a message naming the amount; top up and try again.
   </Step>
   <Step title="Before you go live: verify your identity">
-    Once one of your endpoints passes its trial, complete an identity check from the
+    Once one of your endpoints passes its check, complete an identity check from the
     **Getting started** checklist in [Sell APIs](https://getanyapi.com/dashboard/sell): a
     government photo ID and a selfie with our verification partner Didit, plus a sanctions
     screening. You get 3 attempts; after that, email
@@ -126,7 +155,7 @@ routing, earnings, and payouts, and is never shown to buyers.
     [support@getanyapi.com](mailto:support@getanyapi.com) and we'll look at alternatives.
   </Step>
   <Step title="Get approved and go live">
-    A person at AnyAPI reviews your trial results, your identity check, and your PayPal
+    A person at AnyAPI reviews your check results, your identity check, and your PayPal
     account, then approves your account. Your endpoint then serves real traffic in a
     monitored phase, and fully live while quality holds. You earn from the first request
     you win. If quality drops, the endpoint is paused automatically and re-tested until it
@@ -140,10 +169,10 @@ routing, earnings, and payouts, and is never shown to buyers.
 
 ## When AnyAPI's answer looks wrong
 
-If you believe AnyAPI's answer for a registration test or a trial call is wrong,
+If you believe AnyAPI's answer for a registration test or a check call is wrong,
 don't copy it. File a data report with
 `POST /v1/operator/endpoints/{id}/data-reports`: send `suiteRunId` and `caseId` for a test,
-or the call's `trialComparisonId` for a trial call, plus a `message` saying what is wrong
+or the call's `trialComparisonId` for a check call, plus a `message` saying what is wrong
 (and optionally the `field`). A person at AnyAPI reviews it; filing one doesn't change your
 results by itself. `GET` on the same path lists your reports and their status.
 
@@ -151,10 +180,11 @@ results by itself. `GET` on the same path lists your reports and their status.
 
 Under **Connect your agent** in [Sell APIs](https://getanyapi.com/dashboard/sell), create a
 seller key and copy the prompt for your own AI agent. With that key your agent can do what the
-seller dashboard does: register endpoints, run the registration tests, read trial results and
-restart a trial, file data reports, set price and capacity, pause and resume an endpoint, rotate its
+seller dashboard does: register endpoints, run the registration tests, read the real-request check's results and
+restart it, file data reports, set price and capacity, pause and resume an endpoint, rotate its
 signing secret, edit the seller profile, and read earnings, payouts, the identity check status
-and whether PayPal is connected.
+and whether PayPal is connected. It can also change an endpoint's URL and retire an endpoint,
+which only the API offers today.
 
 A seller key can't run APIs as a customer or spend your balance. Four steps stay with a
 person in the dashboard: accepting the Seller Terms, starting the identity check, linking
@@ -169,14 +199,35 @@ route, its errors, and what a seller key may call, is in
 
 To stop an endpoint from receiving customer traffic right away, click **Pause endpoint**
 under **Danger zone** on its page and then **Confirm pause**, or call
-`POST /v1/operator/endpoints/{id}/pause`. The endpoint keeps its status and trial progress,
+`POST /v1/operator/endpoints/{id}/pause`. The endpoint keeps its status and check progress,
 and `GET /v1/operator/endpoints/{id}` shows `pausedBySeller: true`.
 
 To turn it back on, click **Resume endpoint** on the same page, or call
 `POST /v1/operator/endpoints/{id}/resume`. The endpoint picks up where it stopped: same
-status, same trial progress, and `pausedBySeller` returns to `false`. Resume only undoes
+status, same check progress, and `pausedBySeller` returns to `false`. Resume only undoes
 your own pause. A pause AnyAPI made, such as *Paused (quality)* or a pause for false
 answers, stays in place.
+
+## Change an endpoint's URL
+
+If you mistyped the URL or moved to a new host, call
+`POST /v1/operator/endpoints/{id}/url` with `{"baseUrl": "https://...", "path": "/run"}`.
+Leave out `path` to use the default `/run`. The new URL is checked exactly as registration
+checks it: HTTPS, port 443, a public host, and no credentials in the URL. A refused URL
+answers 400 with the reason.
+
+A new URL means a new endpoint to verify. The endpoint goes back to draft from any status
+at once, so it receives no paid requests and no check calls. Earlier test passes and check
+calls no longer count. It must pass the registration tests, the real-request check and
+AnyAPI's approval again. A suspended account gets 403, and a retired endpoint gets 409.
+
+## Retire an endpoint
+
+To stop selling on an endpoint for good, call `POST /v1/operator/endpoints/{id}/retire`.
+No paid request or check call reaches it again, and nothing brings it back. It stays in your
+endpoint list with status `retired`, and its earnings stay yours. Retiring it again answers
+409. A retired endpoint still counts as your endpoint for that API, so registering the same
+API again answers 409.
 
 ## What the statuses mean
 
@@ -184,8 +235,8 @@ answers, stays in place.
 | --- | --- |
 | Draft | Registered but not serving traffic. Run the registration tests when your endpoint is ready. |
 | Tests running | AnyAPI is verifying your responses match the API's schema. |
-| Live trial | Real traffic is mirrored to you for free and compared with the current provider. |
-| Trial passed | Passed the live trial; receives no traffic until you have verified your identity, connected PayPal, and AnyAPI has approved your account. |
+| Check running | Real past customer requests are sent to you, and an AI reviewer compares each answer with AnyAPI's. |
+| Check passed | Passed the real-request check; receives no traffic until you have verified your identity, connected PayPal, and AnyAPI has approved your account. |
 | Live (monitored) | Serving and earning, with quality watched extra closely. |
 | Live | Serving and earning on real customer traffic. |
 | Paused (quality) | Paused by the automatic quality checks; re-tested and restored automatically when it passes. |

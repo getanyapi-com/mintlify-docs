@@ -52,6 +52,16 @@ Worked example at a $5.00/1k list price:
 - **Months finalize 7 days after they end.** Finalized earnings move to your **Available**
   balance, which is withdrawable.
 
+## What the real-request check costs
+
+The registration tests and your endpoint's first
+[real-request check](/sell/operator-endpoint-contract#how-the-real-request-check-works) are
+free. Running the check again after a failed one costs what the previous check cost AnyAPI to
+run, its own fetches and the AI review, and is taken from your AnyAPI balance when the new
+check starts. The endpoint's page shows the amount next to **Fix these, then run the check
+again**, and the API returns it as `summary.nextAttemptUsd`. If your balance can't cover it,
+the restart answers HTTP 402 `check_charge_short` naming the amount; top up and try again.
+
 ## Payouts
 
 AnyAPI pays sellers through PayPal only. Connect a verified PayPal account in your own name

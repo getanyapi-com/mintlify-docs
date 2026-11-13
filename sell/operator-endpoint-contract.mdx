@@ -37,7 +37,7 @@ curl https://api.getanyapi.com/v1/apis/{sku} \
 ```
 
 The response includes `inputSchema` and `outputSchema`, which the registration tests and
-the live trial judge against. The register dialog in the
+the real-request check judge against. The register dialog in the
 [dashboard](https://getanyapi.com/dashboard/sell/endpoints) shows them too.
 
 Redirects are never followed, so answer directly at the registered URL.
@@ -319,31 +319,36 @@ cursor. Each page falls back on its own. If AnyAPI's page 1 fetch fails or finds
 page 1 is compared with AnyAPI's recorded answer instead. If AnyAPI has no page 2 to compare (its
 page 2 fetch fails, or its page 1 gave no next page), your page 2 is checked against the API's
 contract only; a failed page 2 fetch does not change how page 1 is compared. A run
-where no test failed passes, and the live trial judges the data AnyAPI could not compare. Each test
-result lists its fields with your value and AnyAPI's. A passing run starts the live trial,
+where no test failed passes, and the real-request check judges the data AnyAPI could not compare. Each test
+result lists its fields with your value and AnyAPI's. A passing run starts the real-request check,
 and you can rerun without limit. A pass counts only while your base URL, path and signing
 secret are unchanged.
 
-During the live trial, mirrored requests also carry `X-AnyAPI-Trial: 1`, so you can tell
-trial traffic from paid traffic in your logs.
+## How the real-request check works
 
-## How the live trial works
+Once the registration tests pass, AnyAPI replays real past customer requests for the API to
+your endpoint, up to 5 at once. They are signed and sent exactly like paid requests, with no
+header that sets them apart, so serve every request the same way. Check requests are neither
+billed to a customer nor paid to you, and customers never see your answers. If AnyAPI runs out
+of past requests for the API, the check uses copies of new customer requests as they arrive.
 
-An endpoint in the trial receives up to 500 mirrored real customer requests, paced evenly
-across 7 days from its first request. Trial traffic is neither billed nor paid.
+An AI reviewer compares each answer with AnyAPI's own answer to the same input and gives a
+verdict: `clean`, `sources_differ` (both are right and the sources differ; counts as clean),
+`looks_wrong` (a miss), or `no_evidence` (it could not tell; counts neither way). A non-2xx, a
+timeout, or output that does not validate against the schema is a miss.
 
-Each trial response is compared with what the customer was served:
+The check passes once at least 95% of answers are clean at 95% confidence: 59 clean answers
+with no miss, 93 judged answers with 1 miss, or 124 with 2, within 500 calls. There is no
+minimum number of days, and it usually takes minutes to hours. A check that can no longer pass
+ends as failed and the endpoint goes back to draft.
 
-- Agreeing on an empty list, or agreeing on `found: false`, counts as a pass.
-- A non-2xx, a timeout, or output that does not validate against the schema counts as a
-  failure.
-
-Graduation needs at least 95% of compared requests passing, over at least 200 compared
-requests spanning at least 7 days, with no fabricated or injected content.
-
-A fix shipped part-way through the trial is measured by the remaining paced requests,
-so a bad first day is not permanent. Each judged call is listed at
-`GET /v1/operator/endpoints/{id}/trial` with its outcome, its field results, and the
-request's `X-AnyAPI-Nonce` so you can match it in your logs. To start over after a fix,
-restart the trial with `POST /v1/operator/endpoints/{id}/trial/restart`: the endpoint returns
-to draft and enters a fresh trial once it passes the registration tests again.
+Each call is listed at `GET /v1/operator/endpoints/{id}/trial` with the reviewer's verdict,
+its reason and notes per field, the field results, and the request's `X-AnyAPI-Nonce` so you
+can match it in your logs. When the check ends, `summary.rundown` holds the reviewer's data
+quality rundown: a summary, the top fixes, and for each output field a rating (`fine`,
+`could_be_better`, or `wrong`), what it saw, what to change, the answers affected, and up to 3
+example calls. To start over after a fix, call `POST /v1/operator/endpoints/{id}/trial/restart`:
+the endpoint returns to draft and a new check starts once it passes the registration tests
+again. The first check is free; a repeat costs what the previous check cost AnyAPI to run,
+taken from your AnyAPI balance, and a restart your balance can't cover answers HTTP 402
+`check_charge_short` naming the amount.
