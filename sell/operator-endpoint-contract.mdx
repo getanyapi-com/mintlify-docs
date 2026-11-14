@@ -278,6 +278,13 @@ endpoint goes ahead of one of AnyAPI's own sources only when your price is lower
 same price, AnyAPI's goes first. Your endpoint gets at most its **capacity** in requests at
 once; further requests go to the next cheapest source until one of yours finishes.
 
+A new endpoint starts with a share of that traffic, which grows as its spot checks stay
+clean: 5% of the requests it is the cheapest for, then 25%, then 50%, then all of them. Each
+move up takes at least 24 hours at the current share and 299 clean spot checks in a row; a
+spot check that looks wrong restarts that count. `GET /v1/operator/endpoints/{id}` reports
+it as `traffic` (`sharePercent`, `growing`, `nextSharePercent`). While the share is growing
+the endpoint gets at most 5 requests at once, whatever capacity it declared.
+
 - **Capacity** is how many requests your endpoint takes at once. Declare it as `capacity`
   when you register with `POST /v1/operator/endpoints`; it defaults to 4. Change it from
   the endpoint's page in the [dashboard](https://getanyapi.com/dashboard/sell/endpoints) or
