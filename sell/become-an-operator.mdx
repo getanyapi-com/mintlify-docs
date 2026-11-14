@@ -192,9 +192,14 @@ routing, earnings, and payouts, and is never shown to buyers.
   </Step>
   <Step title="Get approved and go live">
     A person at AnyAPI reviews your check results, your identity check, and your PayPal
-    account, then approves your account. Your endpoint then serves real traffic in a
-    monitored phase, and fully live while quality holds. You earn from the first request
-    you win. If quality drops, the endpoint is paused automatically and re-tested until it
+    account, then approves your account and starts your endpoints, which may be a few at a
+    time: an endpoint not started yet stays at Check passed. A started endpoint serves real
+    traffic in a monitored phase, and fully live while quality holds. You earn from the first
+    request you win. A new endpoint starts with a share of traffic that grows: it receives 5%
+    of the requests it is the cheapest for, then 25%, then 50%, then all of them, and the rest
+    are served elsewhere. Each move up takes at least 24 hours at the current share and 299
+    clean spot checks in a row; a spot check that looks wrong restarts that count. The
+    endpoint's page shows its current share. If quality drops, the endpoint is paused automatically and re-tested until it
     recovers. You can also pause it yourself, and resume it later, from its page (see
     [Pause and resume an endpoint](#pause-and-resume-an-endpoint)). Withdraw
     your earnings to PayPal from $20; the first payout unlocks 30 days after your seller
@@ -274,8 +279,8 @@ API again answers 409.
 | Draft | Registered but not serving traffic. Run the registration tests when your endpoint is ready. |
 | Tests running | AnyAPI is verifying your responses match the API's schema. |
 | Check running | Real past customer requests are sent to you, and an AI reviewer compares each answer with AnyAPI's. |
-| Check passed | Passed the real-request check; receives no traffic until you have verified your identity, connected PayPal, and AnyAPI has approved your account. |
-| Live (monitored) | Serving and earning, with quality watched extra closely. |
+| Check passed | Passed the real-request check; receives no traffic until you have verified your identity, connected PayPal, and AnyAPI has approved your account and started this endpoint. |
+| Live (monitored) | Serving and earning, with quality watched extra closely. A new endpoint starts with a share of traffic that grows while its spot checks stay clean. |
 | Live | Serving and earning on real customer traffic. |
 | Paused (quality) | Paused by the automatic quality checks; re-tested and restored automatically when it passes. |
 | Retired | Permanently removed from routing. |
