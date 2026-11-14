@@ -214,10 +214,32 @@ results by itself. `GET` on the same path lists your reports and their status. O
 endpoint's page, open a missed answer and choose **This is wrong** to file the same report;
 its status then shows on that call.
 
-## See what an endpoint's history shows
+## See how your endpoints are doing
 
-An endpoint's page has three views built from everything AnyAPI has stored for it. The same
-data is at `GET /v1/operator/endpoints/{id}/insights`.
+**Every endpoint at once.** The **Sell APIs** page opens on an overview of all your endpoints
+over one period: the last 7, 30 or 90 days. It shows what you earned in the period, what you
+can withdraw, what is still pending and what has been paid out, then your earnings per day
+and per API, then one row per endpoint with its status, price, whether it is tried first, its
+requests answered and failed, its uptime, its earnings and the misses on its latest check.
+Sort the table by earnings or by requests, and click a row to open that endpoint.
+
+Through the API, the same figures come from two reads that take `?range=7d`, `30d` or `90d`
+(`30d` when you leave it out):
+
+- `GET /v1/operator/earnings` adds `range`, `ranges` and `byEndpoint` (`endpointId`, `sku`,
+  `requests`, `operatorUsd`, best earner first). `daily` and `byEndpoint` cover the range; the
+  balances and `byApi` do not depend on it.
+- `GET /v1/operator/endpoint-stats` returns `endpoints`, one per endpoint: `id`, `check` (its
+  newest real-request check: `status`, `clean`, `misses`, `callsUsed`, `callsCap`,
+  `failReason`; `null` before the first), `pricePosition` (below), and `answered`, `failed`
+  and `uptimePct` over the range.
+
+**One endpoint.** An endpoint's page opens with its price, where that price puts it, its
+uptime and what it earned, and then has one section per subject: **Overview** (where it is on
+the way to going live, and what to do next), **Check and misses**, **Price**, **Reliability**,
+**Contract** and **Settings**. Each section has its own link: add `?tab=check`, `price`,
+`reliability`, `contract` or `settings` to the endpoint's URL. The three sections below read
+`GET /v1/operator/endpoints/{id}/insights`.
 
 **Misses by cause.** Every answer judged wrong across all of the endpoint's checks, earlier
 ones included, grouped by what went wrong and listed most frequent first. `misses.causes`
