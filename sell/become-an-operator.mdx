@@ -190,10 +190,39 @@ routing, earnings, and payouts, and is never shown to buyers.
     review; it doesn't stop you. If PayPal isn't available to you, email
     [support@getanyapi.com](mailto:support@getanyapi.com) and we'll look at alternatives.
   </Step>
+  <Step title="Submit for approval">
+    This is the last step you take. Once your endpoint has passed its check and you have
+    verified your identity and connected PayPal, submit it for approval: in
+    [Sell APIs](https://getanyapi.com/dashboard/sell), tick the endpoints to submit, confirm
+    they are ready to serve real customers, and click **Submit for approval**. With a seller
+    API key, call `POST /v1/operator/final-submission` with a body of
+    `{"endpoints": ["<endpoint id>"], "confirmGoLiveOnApproval": true}`.
+
+    By submitting, you confirm that each endpoint is ready for real customers and that it
+    goes live as soon as AnyAPI approves it, with no further step from you. Approval usually
+    takes less than a day. Until then the endpoint shows **Submitted, waiting for approval**
+    in the dashboard, and `GET /v1/operator/endpoints` returns it with status `passed` and
+    `submittedAt` set (`submittedAt` is `null` on every other endpoint).
+
+    | Response | Meaning |
+    | --- | --- |
+    | 200 | The endpoints are submitted. Submitting one again keeps its first submission. |
+    | 400 `confirmation_required` | `confirmGoLiveOnApproval` is not `true`. |
+    | 409 `go_live_steps_incomplete` | Verify your identity and connect PayPal first. |
+    | 409 | An endpoint has not passed its real-request check. |
+    | 404 | An endpoint is not yours. |
+
+    If you change an endpoint's URL after submitting, it goes back to draft and you submit it
+    again once it has passed again. To hold an endpoint back after submitting, pause it (see
+    [Pause and resume an endpoint](#pause-and-resume-an-endpoint)): a paused endpoint gets no
+    requests even once approved.
+  </Step>
   <Step title="Get approved and go live">
     A person at AnyAPI reviews your check results, your identity check, and your PayPal
-    account, then approves your account and starts your endpoints, which may be a few at a
-    time: an endpoint not started yet stays at Check passed. A started endpoint serves real
+    account, then approves your account and the endpoints you submitted, which may be a few at
+    a time: a submitted endpoint not approved yet keeps waiting, and AnyAPI never approves an
+    endpoint you have not submitted. Approval starts paid traffic at once, and AnyAPI sends
+    your account one email listing every endpoint that went live. An approved endpoint serves real
     traffic in a monitored phase, and fully live while quality holds. You earn from the first
     request you win. A new endpoint starts with a share of traffic that grows: it receives 5%
     of the requests it is the cheapest for, then 25%, then 50%, then all of them, and the rest
@@ -326,8 +355,8 @@ answers 400 with the reason.
 
 A new URL means a new endpoint to verify. The endpoint goes back to draft from any status
 at once, so it receives no paid requests and no check calls. Earlier test passes and check
-calls no longer count. It must pass the registration tests, the real-request check and
-AnyAPI's approval again. A suspended account gets 403, and a retired endpoint gets 409.
+calls no longer count. It must pass the registration tests and the real-request check
+again, and you submit it for AnyAPI's approval again. A suspended account gets 403, and a retired endpoint gets 409.
 
 ## Retire an endpoint
 
@@ -344,7 +373,7 @@ API again answers 409.
 | Draft | Registered but not serving traffic. Run the registration tests when your endpoint is ready. |
 | Tests running | AnyAPI is verifying your responses match the API's schema. |
 | Check running | Real past customer requests are sent to you, and an AI reviewer compares each answer with AnyAPI's. |
-| Check passed | Passed the real-request check; receives no traffic until you have verified your identity, connected PayPal, and AnyAPI has approved your account and started this endpoint. |
+| Check passed | Passed the real-request check; receives no traffic until you have verified your identity, connected PayPal and submitted it for approval, and AnyAPI has approved it. After you submit it, the dashboard shows **Submitted, waiting for approval**. |
 | Live (monitored) | Serving and earning, with quality watched extra closely. A new endpoint starts with a share of traffic that grows while its spot checks stay clean. |
 | Live | Serving and earning on real customer traffic. |
 | Paused (quality) | Paused by the automatic quality checks; re-tested and restored automatically when it passes. |
