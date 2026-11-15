@@ -76,6 +76,10 @@ charge. If they are tried and all fail, it fails like any other request.
 With a single source and `allowFallbacks: false`, only that source serves, at its price, with
 no failover.
 
+A source handles a limited number of requests at once. When the one source you pinned is at
+that limit, your request waits for its turn instead of failing, so it can take longer to
+answer. If its turn does not come in time, the request fails with no charge.
+
 ## Skip sources
 
 Send `ignoreSources` to skip sources for this request:
