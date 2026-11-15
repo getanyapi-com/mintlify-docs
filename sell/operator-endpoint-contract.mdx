@@ -221,8 +221,11 @@ Reply `2xx` with JSON that validates against the API's output schema, in this en
 
 - **Extra fields are kept; missing declared fields fail.** Anything beyond the schema is
   passed to the customer, but every declared field must be present.
-- **No result is not an error.** When the entity does not exist, return the schema's
-  `found: false` shape with a 2xx. That is a valid, billable answer.
+- **No result is not an error, and the two kinds are different answers.** When what was
+  asked for does not exist (or is suspended or deleted), return `found: false` with
+  `reason: "not_found"` and a 2xx. When it exists and has nothing to return (a search with
+  no results, an account with no posts), return `found: true` with an empty list. Both are
+  valid, billable answers, and the registration tests check that you give the right one.
 - A non-2xx status, output that does not validate, or a timeout is a failed attempt. The
   request fails over to another provider, you do not earn it, and repeated failures pause
   the endpoint.
