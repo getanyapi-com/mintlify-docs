@@ -330,7 +330,10 @@ input variant the schema allows, and, for an API that pages, the next page throu
 5. Stay under the 8 MB cap
 
 Where AnyAPI has an answer for the input, the answer is also compared with it field by field;
-a test with no answer of AnyAPI's is checked against the API's contract only. Your answer to the
+a test with no answer of AnyAPI's is checked against the API's contract only. One answer fails
+such a test anyway: on an API that returns a list, the test whose input names something that does
+not exist fails if you answer `found: true` with an empty list. That answer says it exists and has
+nothing to return, so answer `found: false` with its reason. Your answer to the
 example input (page 1) is compared with AnyAPI's own answer, fetched while the tests run. For an
 API that pages, your page 2 is compared with AnyAPI's page 2, fetched through AnyAPI's own
 cursor. Each page falls back on its own. If AnyAPI's page 1 fetch fails or finds nothing, your
