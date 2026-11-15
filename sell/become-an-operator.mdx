@@ -192,8 +192,13 @@ routing, earnings, and payouts, and is never shown to buyers.
   </Step>
   <Step title="Get approved and go live">
     A person at AnyAPI reviews your check results, your identity check, and your PayPal
-    account, then approves your account and starts your endpoints, which may be a few at a
-    time: an endpoint not started yet stays at Check passed. A started endpoint serves real
+    account, then approves your account and your endpoints, which may be a few at a time: an
+    endpoint not approved yet stays at Check passed. Approval starts no traffic. You get one
+    email listing the endpoints we approved, with a **Start serving** button that opens
+    [Sell APIs](https://getanyapi.com/dashboard/sell). There you start all of them at once or
+    one at a time; until you do, each shows **Approved: ready to start** and serves nothing.
+    By API, `POST /v1/operator/endpoints/start` starts every approved endpoint and
+    `POST /v1/operator/endpoints/{id}/start` starts one. A started endpoint serves real
     traffic in a monitored phase, and fully live while quality holds. You earn from the first
     request you win. A new endpoint starts with a share of traffic that grows: it receives 5%
     of the requests it is the cheapest for, then 25%, then 50%, then all of them, and the rest
@@ -289,7 +294,7 @@ on a day nothing was answered). The page draws both per day.
 Under **Connect your agent** in [Sell APIs](https://getanyapi.com/dashboard/sell), create a
 seller key and copy the prompt for your own AI agent. With that key your agent can do what the
 seller dashboard does: register endpoints, run the registration tests, read the real-request check's results and
-restart it, file data reports, set price and capacity, pause and resume an endpoint, rotate its
+restart it, file data reports, set price and capacity, start an approved endpoint, pause and resume an endpoint, rotate its
 signing secret, edit the seller profile, and read earnings, payouts, the identity check status
 and whether PayPal is connected. It can also change an endpoint's URL and retire an endpoint,
 which only the API offers today.
@@ -344,7 +349,8 @@ API again answers 409.
 | Draft | Registered but not serving traffic. Run the registration tests when your endpoint is ready. |
 | Tests running | AnyAPI is verifying your responses match the API's schema. |
 | Check running | Real past customer requests are sent to you, and an AI reviewer compares each answer with AnyAPI's. |
-| Check passed | Passed the real-request check; receives no traffic until you have verified your identity, connected PayPal, and AnyAPI has approved your account and started this endpoint. |
+| Check passed | Passed the real-request check; receives no traffic until you have verified your identity, connected PayPal, and AnyAPI has approved your account and this endpoint. |
+| Approved: ready to start | AnyAPI approved this endpoint. It serves no paid requests until you start it. The API reports it as status `passed` with `awaitingStart: true`. |
 | Live (monitored) | Serving and earning, with quality watched extra closely. A new endpoint starts with a share of traffic that grows while its spot checks stay clean. |
 | Live | Serving and earning on real customer traffic. |
 | Paused (quality) | Paused by the automatic quality checks; re-tested and restored automatically when it passes. |
