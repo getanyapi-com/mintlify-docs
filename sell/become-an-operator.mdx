@@ -262,7 +262,9 @@ Through the API, the same figures come from two reads that take `?range=7d`, `30
 
 - `GET /v1/operator/earnings` adds `range`, `ranges` and `byEndpoint` (`endpointId`, `sku`,
   `requests`, `operatorUsd`, best earner first). `daily` and `byEndpoint` cover the range; the
-  balances and `byApi` do not depend on it.
+  balances and `byApi` do not depend on it. Each `daily` entry also carries its own
+  `byEndpoint`: the endpoints that earned that day, in the same shape, adding up to that day's
+  `requests` and `operatorUsd`.
 - `GET /v1/operator/endpoint-stats` returns `endpoints`, one per endpoint: `id`, `check` (its
   newest real-request check: `status`, `clean`, `misses`, `callsUsed`, `callsCap`,
   `failReason`; `null` before the first), `pricePosition` (below), and `answered`, `failed`
