@@ -94,13 +94,35 @@ share one pace per Request: read no faster than `Retry-After` (one read every 5 
 `youtube.channel_contact`), or you get `429` with a new `Retry-After`. Keep reading until `status`
 is `succeeded` or `failed`; an email is in `result.output`.
 
-`youtube.channel_contact` has two sources, from $0.11 to $0.132 per lookup, and one source
+`youtube.channel_contact` has two sources, $0.11 or $0.132 per lookup ($0.44 with `fresh`, below), and one source
 serves each lookup: the one you name in `source` (the lowest-priced, if you name several), or
 otherwise the lowest-priced. A lookup never moves to the other source, and `allowFallbacks` has no
 effect on it. If that source is not serving right now, is in `ignoreSources`, or costs more than
 your `max_cost_usd`, the request is refused with no charge. Every outcome is charged at the price
 of the source that served it: an email at that price, a definite "no email" free, and a `202` at
 that price when the lookup starts. See [Choose sources](/choose-sources#apis-served-by-one-source).
+
+### An up-to-date email with `fresh`
+
+Setting `fresh: true` costs more: **$0.44 per email found**, instead of the usual $0.11 or $0.132.
+It has the address read from YouTube now, not taken from one a source already holds. Use it for a
+channel that may have changed its email. A channel with no email is still free.
+
+Only one source offers `fresh`: its lane in `lanes[]` on `GET /catalog` lists the `fresh` add-on.
+Leave `source` out or name that source. Naming the other source with `fresh`, or sending a
+`max_cost_usd` below 0.44, is refused with HTTP 400 and no charge.
+
+A live read takes minutes, so a `fresh` request usually answers `202` after about a minute, with
+`costUsd: 0.44` and a `collectUrl`. The email appears there later, often after about 10 minutes.
+If no email is found within 48 hours, the $0.44 is refunded automatically. Leave `fresh` out and
+nothing changes.
+
+```json
+{
+  "handle": "@mkbhd",
+  "fresh": true
+}
+```
 
 A `youtube.channel_contact` lookup answers within 48 hours of the start. If it ends with no email,
 fails, or finds nothing within 48 hours, AnyAPI refunds the charge in full automatically: the

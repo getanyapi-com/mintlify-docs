@@ -131,6 +131,12 @@ On `youtube.channel_contact`, one source serves each request and there is no aut
 You are charged the price of the source that served. Its sources and their prices are in
 `lanes[]` on `GET /catalog` (see [Find source ids](#find-source-ids)).
 
+The optional `fresh: true` input costs more: $0.44 per email found instead of $0.11 or $0.132. It
+reads the address from YouTube now, and only one source offers it (its lane lists the `fresh`
+add-on). With `fresh`, leave `source` out or name that source; naming the other one is refused
+with HTTP 400 and no charge. A `fresh` request usually answers `202` and takes minutes. See
+[Durable requests](/durable-requests#an-up-to-date-email-with-fresh).
+
 ## Pagination
 
 To keep the restriction on every page, send the same `source` and `allowFallbacks: false` with
