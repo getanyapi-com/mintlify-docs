@@ -85,7 +85,7 @@ carries:
   "retryAfterSeconds": 5,
   "costUsd": 0.132,
   "collectUrl": "https://api.getanyapi.com/v1/requests/req_123/collect?token=...",
-  "note": "Charged. The lookup is still running: GET collectUrl (no API key needed), waiting Retry-After seconds between reads, until status is succeeded; the email is in result.output. If no email is found within 48 hours of the start, the charge is refunded automatically."
+  "note": "Charged. The lookup is still running: GET collectUrl (no API key needed), waiting Retry-After seconds between reads, until status is succeeded; the email is in result.output. If no email is found within 48 hours of the start, the charge is refunded automatically. A found email stays readable at this link for 3 days after it is found."
 }
 ```
 
@@ -96,7 +96,8 @@ is `succeeded` or `failed`; an email is in `result.output`.
 
 A `youtube.channel_contact` lookup answers within 48 hours of the start. If it ends with no email,
 fails, or finds nothing within 48 hours, AnyAPI refunds the charge in full automatically: the
-Request ends `succeeded` with `found: false`, or `failed`.
+Request ends `succeeded` with `found: false`, or `failed`. A finished lookup stays readable for 3
+days after it finished, through `collectUrl` or with your key.
 
 `collectUrl` returns `404` for a wrong token, an unknown Request, or a Request whose connected app
 was disconnected.
@@ -109,7 +110,8 @@ times out, resume with `GET /v1/requests/{requestId}`. Do not send another paid 
 AnyAPI returns the same active Request for concurrent calls that use the same key, SKU, and input.
 It replays a completed success. Reusing a key with different input returns `409`.
 
-Successful output remains retrievable for 24 hours, whatever your response retention setting.
+Successful output remains retrievable for 24 hours after it finished (3 days for
+`youtube.channel_contact`), whatever your response retention setting; `expiresAt` says until when.
 After that, the output stays readable for the rest of your retention window (see
 [Read a past response](/quickstart#read-a-past-response)), and once it ends the Request metadata
 remains available with `resultExpired: true`.
