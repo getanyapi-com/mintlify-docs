@@ -83,7 +83,7 @@ carries:
   "status": "running",
   "createdAt": "2026-08-04T00:00:00Z",
   "retryAfterSeconds": 5,
-  "costUsd": 0.132,
+  "costUsd": 0.11,
   "collectUrl": "https://api.getanyapi.com/v1/requests/req_123/collect?token=...",
   "note": "Charged. The lookup is still running: GET collectUrl (no API key needed), waiting Retry-After seconds between reads, until status is succeeded; the email is in result.output. If no email is found within 48 hours of the start, the charge is refunded automatically. A found email stays readable at this link for 3 days after it is found."
 }
@@ -93,6 +93,14 @@ Collecting is free, through `collectUrl` or `GET /v1/requests/{requestId}` with 
 share one pace per Request: read no faster than `Retry-After` (one read every 5 seconds for
 `youtube.channel_contact`), or you get `429` with a new `Retry-After`. Keep reading until `status`
 is `succeeded` or `failed`; an email is in `result.output`.
+
+`youtube.channel_contact` has two sources, from $0.11 to $0.132 per lookup, and one source
+serves each lookup: the one you name in `source` (the lowest-priced, if you name several), or
+otherwise the lowest-priced. A lookup never moves to the other source, and `allowFallbacks` has no
+effect on it. If that source is not serving right now, is in `ignoreSources`, or costs more than
+your `max_cost_usd`, the request is refused with no charge. Every outcome is charged at the price
+of the source that served it: an email at that price, a definite "no email" free, and a `202` at
+that price when the lookup starts. See [Choose sources](/choose-sources#apis-served-by-one-source).
 
 A `youtube.channel_contact` lookup answers within 48 hours of the start. If it ends with no email,
 fails, or finds nothing within 48 hours, AnyAPI refunds the charge in full automatically: the
