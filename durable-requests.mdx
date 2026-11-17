@@ -28,7 +28,7 @@ curl -i https://api.getanyapi.com/v1/run/YOUR_SKU \
 ```
 
 `Prefer: respond-async` asks AnyAPI to return the Request snapshot immediately, even if an existing
-same-key Request has already completed. Omit it to wait up to 10 seconds. You can also send
+same-key Request has already completed. Omit it to wait up to 60 seconds. You can also send
 `Prefer: wait=N`; AnyAPI clamps `N` to 90 seconds.
 
 A pending response includes `Location`, `Retry-After`, and `X-Anyapi-Request-Id` headers:
@@ -140,8 +140,8 @@ times out, resume with `GET /v1/requests/{requestId}`. Do not send another paid 
 AnyAPI returns the same active Request for concurrent calls that use the same key, SKU, and input.
 It replays a completed success. Reusing a key with different input returns `409`.
 
-Successful output remains retrievable for 24 hours after it finished (3 days for
-`youtube.channel_contact`), whatever your response retention setting; `expiresAt` says until when.
+Successful output remains retrievable for 3 days after it finished, whatever your response
+retention setting; `expiresAt` says until when.
 After that, the output stays readable for the rest of your retention window (see
 [Read a past response](/quickstart#read-a-past-response)), and once it ends the Request metadata
 remains available with `resultExpired: true`.
