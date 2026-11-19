@@ -17,8 +17,8 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
 | --- | --- | --- | --- |
 | `after` | string | no | Legacy pagination alias. Prefer `cursor`; omit both fields for the first page. |
 | `cursor` | string | no | Opaque pagination cursor from a previous response's `nextCursor`; omit for the first page. |
-| `limit` | integer | no | Page size to ask for (up to 100). Some sources honor it; others always return their whole page of about 25 posts. A page is never trimmed after the call, so pass nextCursor back as cursor to continue exactly where this response ended. Default `25`. |
-| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived` or `selftext`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
+| `limit` | integer | no | Page size to ask for (up to 100). Some sources honor it; others always return their whole page of about 25 posts. A page is never trimmed after the call, so pass nextCursor back as cursor to continue exactly where this response ended. Default `100`. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 | `sort` | string | no | Listing sort order. One of: `hot`, `new`, `top`. Default `"hot"`. |
 | `subreddit` | string | yes | Subreddit name without the leading r/ (e.g. "golang"). |
 | `timeframe` | string | no | Time window, applied when sort is "top" (e.g. "year" for the year's top posts). Ignored for hot/new. Omit to default to the current day for top. One of: `all`, `year`, `month`, `week`, `day`, `hour`. |
@@ -30,8 +30,7 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://getanyapi.com/schemas/reddit.subreddit_posts.input.json",
   "example": {
-    "subreddit": "programming",
-    "limit": 5
+    "subreddit": "programming"
   },
   "title": "Reddit subreddit posts input",
   "type": "object",
@@ -48,7 +47,7 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
       "type": "integer",
       "minimum": 1,
       "maximum": 100,
-      "default": 25,
+      "default": 100,
       "description": "Page size to ask for (up to 100). Some sources honor it; others always return their whole page of about 25 posts. A page is never trimmed after the call, so pass nextCursor back as cursor to continue exactly where this response ended."
     },
     "sort": {
@@ -89,11 +88,10 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
         "type": "string",
         "enum": [
           "isArchived",
-          "isLocked",
-          "selftext"
+          "isLocked"
         ]
       },
-      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived` or `selftext`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `isArchived`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
     }
   }
 }
@@ -122,7 +120,7 @@ AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a
 | `data.posts[].subreddit` | string | yes | Subreddit name, without the r/ prefix. |
 | `data.posts[].title` | string | yes | Post title. |
 | `data.posts[].upvoteRatio` | number | no | Share of votes on the post that are upvotes, between 0 and 1. |
-| `data.posts[].url` | string | yes | The post's destination link (the external URL for link posts, or the thread URL for self posts). |
+| `data.posts[].url` | string | yes | The post's destination link: the external URL for a link post, the media URL for an image, gallery or video post, or the thread URL for a text post. A text post that also carries an image may give either its thread URL or the image URL. |
 | `found` | boolean | yes |  |
 
 Extra fields are kept, missing declared fields fail.
@@ -204,7 +202,7 @@ Extra fields are kept, missing declared fields fail.
                   "url": {
                     "x-anyapi-must-populate": true,
                     "type": "string",
-                    "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts)."
+                    "description": "The post's destination link: the external URL for a link post, the media URL for an image, gallery or video post, or the thread URL for a text post. A text post that also carries an image may give either its thread URL or the image URL."
                   },
                   "permalink": {
                     "x-anyapi-must-populate": true,
@@ -293,8 +291,7 @@ This output schema declares no `reason` field, so `found: false` is the whole no
 
 ```json
 {
-  "subreddit": "programming",
-  "limit": 5
+  "subreddit": "programming"
 }
 ```
 

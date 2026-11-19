@@ -9,14 +9,14 @@ This page is the seller-facing summary of one catalog API, `reddit.search`. The 
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.35 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.34 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of results. Include `nextCursor` in requireFields on the first request to make sure a source that supports pagination serves it. |
-| `query` | string | yes | Free-text search across all of Reddit. Reddit's field operators are supported inside the string: subreddit:&lt;name&gt; to scope to one subreddit, author:&lt;user&gt;, title:&lt;text&gt;, selftext:&lt;text&gt;, self:yes\|no, nsfw:yes\|no, and boolean AND/OR/NOT. To restrict to a single subreddit you can use subreddit:&lt;name&gt; here, or use the reddit.subreddit_posts SKU for a plain subreddit listing. |
+| `query` | string | yes | Free-text search across all of Reddit. The words are searched exactly as given: Reddit's default spelling correction is not applied. Reddit's field operators are supported inside the string: subreddit:&lt;name&gt; to scope to one subreddit, author:&lt;user&gt;, title:&lt;text&gt;, selftext:&lt;text&gt;, self:yes\|no, nsfw:yes\|no, and boolean AND/OR/NOT. To restrict to a single subreddit you can use subreddit:&lt;name&gt; here, or use the reddit.subreddit_posts SKU for a plain subreddit listing. |
 | `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor` or `media`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Name `nextCursor` only if you will fetch more than the first page: when you leave it out, a cheaper source that cannot paginate may serve the request, and its nextCursor is null, so there is no next page to ask for. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 | `sort` | string | no | Result sort order. One of: `relevance`, `hot`, `top`, `new`, `comments`. |
 | `timeframe` | string | no | Time window for results. One of: `hour`, `day`, `week`, `month`, `year`, `all`. |
@@ -44,7 +44,7 @@ AnyAPI publishes this API from **$0.35 per 1,000 requests**. That is the price a
   "properties": {
     "query": {
       "type": "string",
-      "description": "Free-text search across all of Reddit. Reddit's field operators are supported inside the string: subreddit:<name> to scope to one subreddit, author:<user>, title:<text>, selftext:<text>, self:yes|no, nsfw:yes|no, and boolean AND/OR/NOT. To restrict to a single subreddit you can use subreddit:<name> here, or use the reddit.subreddit_posts SKU for a plain subreddit listing."
+      "description": "Free-text search across all of Reddit. The words are searched exactly as given: Reddit's default spelling correction is not applied. Reddit's field operators are supported inside the string: subreddit:<name> to scope to one subreddit, author:<user>, title:<text>, selftext:<text>, self:yes|no, nsfw:yes|no, and boolean AND/OR/NOT. To restrict to a single subreddit you can use subreddit:<name> here, or use the reddit.subreddit_posts SKU for a plain subreddit listing."
     },
     "sort": {
       "type": "string",
@@ -119,7 +119,7 @@ AnyAPI publishes this API from **$0.35 per 1,000 requests**. That is the price a
 | `data.posts[].selftext` | string | no | Body text of a self post, as Markdown. Empty on a link post, which has no body. |
 | `data.posts[].subreddit` | string | yes | Subreddit name, without the r/ prefix. |
 | `data.posts[].title` | string | yes | Post title. |
-| `data.posts[].url` | string | yes | The post's destination link (the external URL for link posts, or the thread URL for self posts). |
+| `data.posts[].url` | string | yes | The post's destination link: the external URL for a link post, the media URL for an image, gallery or video post, or the thread URL for a text post. A text post that also carries an image may give either its thread URL or the image URL. |
 | `found` | boolean | yes |  |
 
 Extra fields are kept, missing declared fields fail.
@@ -196,7 +196,7 @@ Extra fields are kept, missing declared fields fail.
                   "url": {
                     "x-anyapi-must-populate": true,
                     "type": "string",
-                    "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts)."
+                    "description": "The post's destination link: the external URL for a link post, the media URL for an image, gallery or video post, or the thread URL for a text post. A text post that also carries an image may give either its thread URL or the image URL."
                   },
                   "permalink": {
                     "x-anyapi-must-populate": true,
@@ -239,11 +239,21 @@ Extra fields are kept, missing declared fields fail.
                           "description": "One of photo, video, or gif."
                         },
                         "url": {
+                          "x-anyapi-domain": [
+                            "redd.it",
+                            "redditmedia.com",
+                            "redditstatic.com"
+                          ],
                           "type": "string",
                           "format": "uri",
                           "description": "Image URL. For a video or GIF this is the poster/thumbnail frame."
                         },
                         "videoUrl": {
+                          "x-anyapi-domain": [
+                            "redd.it",
+                            "redditmedia.com",
+                            "redditstatic.com"
+                          ],
                           "type": "string",
                           "format": "uri",
                           "description": "Playable video file URL. Present only for video and gif items."

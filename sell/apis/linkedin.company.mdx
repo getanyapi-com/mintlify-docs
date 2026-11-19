@@ -1,0 +1,347 @@
+---
+title: "LinkedIn Company"
+description: "Sell linkedin.company on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Fetch a full LinkedIn company page by URL: name, description, industry, employee count and range, follower count, founded year, headquarters and office locations, funding data, tagline, logo, website, and specialities.
+
+This page is the seller-facing summary of one catalog API, `linkedin.company`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.10 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `city` or `postalCode`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `url` | string | yes | Full LinkedIn company page URL. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.company.input.json",
+  "example": {
+    "url": "https://www.linkedin.com/company/stripe"
+  },
+  "title": "LinkedIn company input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Full LinkedIn company page URL."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "city",
+          "companyType",
+          "foundedOn",
+          "fundingData",
+          "line1",
+          "pageVerified",
+          "postalCode",
+          "similarOrganizations"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `city` or `postalCode`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.companyType` | string or null | no | Company type, e.g. Privately Held, Public Company. |
+| `data.description` | string | yes | Company about/description text. |
+| `data.employeeCount` | integer | yes | Reported total employee count. |
+| `data.employeeCountRange` | object | no | LinkedIn size bucket the company falls in. |
+| `data.employeeCountRange.end` | integer or null | no | Upper bound of the employee-count bucket; null when the source does not report it. |
+| `data.employeeCountRange.start` | integer or null | no | Lower bound of the employee-count bucket; null when the source does not report it. |
+| `data.followerCount` | integer | yes | LinkedIn page follower count. |
+| `data.foundedOn` | object | no | Founding date (year populated when known). |
+| `data.foundedOn.year` | integer | no | Year the company was founded. |
+| `data.fundingData` | object or null | no | Funding summary sourced from Crunchbase, when available. |
+| `data.fundingData.companyCrunchbaseUrl` | string | no | Crunchbase profile URL for the company. |
+| `data.fundingData.lastFundingType` | string | no | Type of the most recent funding round. |
+| `data.fundingData.numFundingRounds` | integer or null | no | Total number of funding rounds; null when the source does not report it. |
+| `data.id` | string | no | LinkedIn's numeric company id, as a string. |
+| `data.industry` | string | yes | Primary industry. |
+| `data.linkedinUrl` | string | no | Canonical LinkedIn company page URL. |
+| `data.locations` | array | no | Company office locations, including headquarters. |
+| `data.locations[].city` | string | no | City. |
+| `data.locations[].country` | string | no | ISO country code. |
+| `data.locations[].headquarter` | boolean | no | True when this location is the headquarters. |
+| `data.locations[].line1` | string | no | Street address line. |
+| `data.locations[].postalCode` | string | no | Postal code. |
+| `data.logoUrl` | string | yes | Company logo image URL. |
+| `data.name` | string | yes | Company name. |
+| `data.pageVerified` | boolean or null | no | Whether LinkedIn has verified the company page. |
+| `data.similarOrganizations` | array or null | no | Similar organizations surfaced by LinkedIn. |
+| `data.specialities` | array | no | Company-declared specialities. |
+| `data.tagline` | string | yes | Company tagline/slogan. |
+| `data.universalName` | string | no | LinkedIn universal (vanity) name for the company. |
+| `data.website` | string | yes | Company website URL. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.company.output.json",
+  "title": "LinkedIn company output",
+  "x-anyapi-result-list": false,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "name",
+            "description",
+            "employeeCount",
+            "followerCount",
+            "industry",
+            "website",
+            "tagline",
+            "logoUrl"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Company name."
+            },
+            "description": {
+              "type": "string",
+              "description": "Company about/description text.",
+              "x-anyapi-must-populate": true
+            },
+            "employeeCount": {
+              "type": "integer",
+              "description": "Reported total employee count.",
+              "x-anyapi-must-populate": true
+            },
+            "employeeCountRange": {
+              "type": "object",
+              "description": "LinkedIn size bucket the company falls in.",
+              "properties": {
+                "start": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Lower bound of the employee-count bucket; null when the source does not report it."
+                },
+                "end": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Upper bound of the employee-count bucket; null when the source does not report it."
+                }
+              }
+            },
+            "followerCount": {
+              "type": "integer",
+              "description": "LinkedIn page follower count.",
+              "x-anyapi-must-populate": true
+            },
+            "industry": {
+              "type": "string",
+              "description": "Primary industry."
+            },
+            "companyType": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Company type, e.g. Privately Held, Public Company."
+            },
+            "foundedOn": {
+              "type": "object",
+              "description": "Founding date (year populated when known).",
+              "properties": {
+                "year": {
+                  "type": "integer",
+                  "description": "Year the company was founded."
+                }
+              }
+            },
+            "website": {
+              "type": "string",
+              "description": "Company website URL."
+            },
+            "tagline": {
+              "type": "string",
+              "description": "Company tagline/slogan."
+            },
+            "logoUrl": {
+              "x-anyapi-domain": "licdn.com",
+              "type": "string",
+              "description": "Company logo image URL."
+            },
+            "universalName": {
+              "type": "string",
+              "description": "LinkedIn universal (vanity) name for the company."
+            },
+            "id": {
+              "type": "string",
+              "description": "LinkedIn's numeric company id, as a string."
+            },
+            "linkedinUrl": {
+              "x-anyapi-domain": "linkedin.com",
+              "type": "string",
+              "description": "Canonical LinkedIn company page URL."
+            },
+            "pageVerified": {
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "Whether LinkedIn has verified the company page."
+            },
+            "specialities": {
+              "type": "array",
+              "description": "Company-declared specialities.",
+              "items": {}
+            },
+            "similarOrganizations": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "description": "Similar organizations surfaced by LinkedIn.",
+              "items": {}
+            },
+            "locations": {
+              "type": "array",
+              "description": "Company office locations, including headquarters.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "country": {
+                    "type": "string",
+                    "description": "ISO country code."
+                  },
+                  "city": {
+                    "type": "string",
+                    "description": "City."
+                  },
+                  "line1": {
+                    "type": "string",
+                    "description": "Street address line."
+                  },
+                  "postalCode": {
+                    "type": "string",
+                    "description": "Postal code."
+                  },
+                  "headquarter": {
+                    "type": "boolean",
+                    "description": "True when this location is the headquarters."
+                  }
+                }
+              }
+            },
+            "fundingData": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "Funding summary sourced from Crunchbase, when available.",
+              "properties": {
+                "numFundingRounds": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "description": "Total number of funding rounds; null when the source does not report it."
+                },
+                "lastFundingType": {
+                  "type": "string",
+                  "description": "Type of the most recent funding round."
+                },
+                "companyCrunchbaseUrl": {
+                  "x-anyapi-domain": "crunchbase.com",
+                  "type": "string",
+                  "description": "Crunchbase profile URL for the company."
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `description`
+- `employeeCount`
+- `followerCount`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `locations` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.linkedin.com/company/stripe"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

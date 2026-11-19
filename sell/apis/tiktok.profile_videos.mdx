@@ -17,7 +17,7 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
 | --- | --- | --- | --- |
 | `cursor` | string | no | Pagination cursor from a previous response's nextCursor. |
 | `handle` | string | yes | TikTok username without the leading @. |
-| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `locationName`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -54,14 +54,10 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
         "enum": [
           "authorFollowers",
           "authorVerified",
-          "locationName",
-          "nextCursor",
-          "paidPartnership",
-          "soundAuthor",
-          "soundTitle"
+          "locationName"
         ]
       },
-      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `locationName`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
     }
   }
 }
@@ -161,6 +157,7 @@ Extra fields are kept, missing declared fields fail.
                     "type": "string"
                   },
                   "url": {
+                    "x-anyapi-domain": "tiktok.com",
                     "x-anyapi-must-populate": true,
                     "type": "string"
                   },
@@ -169,6 +166,14 @@ Extra fields are kept, missing declared fields fail.
                     "type": "string"
                   },
                   "image": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "ibyteimg.com",
+                      "ttcdn-us.com",
+                      "lh3.googleusercontent.com"
+                    ],
                     "type": "string",
                     "description": "URL of the video's cover/thumbnail image. A signed, short-lived TikTok CDN URL (typically expires within about a day; query params are load-bearing and kept intact), often served as HEIC rather than JPEG, so fetch it promptly and transcode if you need broad browser support. Absent when the upstream provides no cover."
                   },
@@ -198,6 +203,16 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Video duration in seconds."
                   },
                   "videoUrl": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "tiktokv.com",
+                      "tiktokv.us",
+                      "tiktokv.eu",
+                      "tiktok.com",
+                      "tokcdn.com"
+                    ],
                     "type": "string",
                     "description": "Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact."
                   },
@@ -214,6 +229,14 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Author's numeric TikTok user id."
                   },
                   "authorImage": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "ibyteimg.com",
+                      "ttcdn-us.com",
+                      "lh3.googleusercontent.com"
+                    ],
                     "type": "string",
                     "description": "Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact."
                   },

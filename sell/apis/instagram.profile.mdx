@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `instagram.profile`. 
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.55 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -47,10 +47,29 @@ AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a
       "items": {
         "type": "string",
         "enum": [
+          "caption",
+          "category",
+          "coauthors",
+          "comments",
           "contactMethod",
+          "countsHidden",
+          "createdUtc",
+          "durationSeconds",
+          "hashtags",
           "highlightsCount",
+          "id",
           "isBusiness",
-          "posts"
+          "isPinned",
+          "latestPosts",
+          "likes",
+          "media",
+          "mentions",
+          "paidPartnership",
+          "posts",
+          "productType",
+          "taggedUsers",
+          "username",
+          "views"
         ]
       },
       "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `contactMethod`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
@@ -66,12 +85,12 @@ AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a
 | Field | Type | Always present | What it means |
 | --- | --- | --- | --- |
 | `data` | null or object | yes |  |
-| `data.avatarUrl` | string | yes | Profile picture URL at the highest resolution the account exposes. |
+| `data.avatarUrl` | string | yes | Profile picture URL. Often the highest resolution the account exposes, but it can be a 150 by 150 pixel version. |
 | `data.bio` | string | yes | Profile biography text. |
 | `data.bioLinks` | array | no | Every link the account publishes in its bio, in the order Instagram returns them. Business accounts often list several here while externalUrl carries only the first. |
 | `data.bioLinks[].title` | string | no | Display label for the link, empty when the account set none. |
 | `data.bioLinks[].url` | string | yes | Destination URL, exactly as the account published it. |
-| `data.category` | string | no | Instagram's category label for the account (for example "Government Agencies" or "Coffee shop"). Absent when the account publishes no category. |
+| `data.category` | string or null | no | Instagram's category label for the account (for example "Government Agencies" or "Coffee shop"). Absent when the account publishes no category. Null when the serving source does not report it; name category in requireFields to get it. |
 | `data.contactMethod` | string | no | The contact button Instagram shows on the profile, for example CALL, TEXT, EMAIL, or UNKNOWN. Absent when the account exposes no contact button. Instagram no longer publishes the underlying email or phone number to unauthenticated callers. |
 | `data.displayName` | string | yes | Account display name. |
 | `data.externalUrl` | string | no | The single website link on the profile. Absent when the account publishes no link. |
@@ -79,8 +98,52 @@ AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a
 | `data.following` | integer | yes | Number of accounts this account follows. |
 | `data.handle` | string | yes | Instagram username without the leading @. |
 | `data.highlightsCount` | integer or null | no | Number of story highlights pinned on the profile. Null when this source does not report it. |
-| `data.isBusiness` | boolean | no | Whether Instagram flags the account as a business account. |
-| `data.posts` | integer or null | yes | Total number of posts on the account. Null when the serving source does not report it. |
+| `data.isBusiness` | boolean or null | no | Whether Instagram flags the account as a business account. Null when the serving source does not report it; name isBusiness in requireFields to get it. |
+| `data.latestPosts` | array | no | The account's most recent posts, up to about 12. Best-effort: returned when you name latestPosts in requireFields, or whenever the serving source has them, and absent otherwise. Each post has the same fields as instagram.user_posts returns, except that verified, likes, comments and createdUtc are absent when the source does not report them. Empty when the account is private or has not posted. |
+| `data.latestPosts[].audioId` | string or null | no | Instagram audio id of the post's sound, licensed track or original audio, the audioId instagram.audio_reels takes to list other reels using it. Absent when the post has no sound. Null when the serving source does not report it. |
+| `data.latestPosts[].avatarUrl` | string | no | Profile picture URL of the posting account. |
+| `data.latestPosts[].caption` | string | yes |  |
+| `data.latestPosts[].carouselCount` | integer or null | no | Number of slides, present on carousel posts only. Null when the serving source does not report it. |
+| `data.latestPosts[].coauthors` | array or null | no | Accounts listed as coauthors of the post. Null when the serving source does not report it. |
+| `data.latestPosts[].coauthors[].displayName` | string | no | Account display name. |
+| `data.latestPosts[].coauthors[].userId` | string | no | Instagram's numeric account id, as a string. |
+| `data.latestPosts[].coauthors[].username` | string | yes | Instagram username without the leading @. |
+| `data.latestPosts[].coauthors[].verified` | boolean | no | Whether the account carries Instagram's verified badge. |
+| `data.latestPosts[].comments` | integer | no |  |
+| `data.latestPosts[].countsHidden` | boolean or null | no | Whether the author has hidden the like and view counts. Null when the serving source does not report it. |
+| `data.latestPosts[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.latestPosts[].displayName` | string | no | Display name of the posting account. |
+| `data.latestPosts[].durationSeconds` | number | no | Video duration in seconds. Absent on photo posts. |
+| `data.latestPosts[].hashtags` | array | no | Hashtags carried in the caption, each including its leading #. |
+| `data.latestPosts[].id` | string | yes | Instagram media id. |
+| `data.latestPosts[].isPinned` | boolean or null | no | Whether the post is pinned to the top of a profile grid. On a collaboration post this can be true because a coauthor pinned it to their own profile. Null when the serving source does not report it. |
+| `data.latestPosts[].likes` | integer | no |  |
+| `data.latestPosts[].locationId` | string or null | no | Instagram location id the post is tagged at. Absent when the post has no location. Null when the serving source does not report it. |
+| `data.latestPosts[].locationLat` | number or null | no | Latitude of the tagged location, in decimal degrees. Null when the serving source does not report it. |
+| `data.latestPosts[].locationLng` | number or null | no | Longitude of the tagged location, in decimal degrees. Null when the serving source does not report it. |
+| `data.latestPosts[].locationName` | string or null | no | Name of the location the post is tagged at. Null when the serving source does not report it. |
+| `data.latestPosts[].media` | array | no | Photo, video, and GIF attachments on the post. Empty when the post has none. |
+| `data.latestPosts[].media[].height` | integer | no | Pixel height of the media item, when the lane reports it. |
+| `data.latestPosts[].media[].type` | string | yes | One of photo, video, or gif. |
+| `data.latestPosts[].media[].url` | string | yes | Image URL. For a video or GIF this is the poster/thumbnail frame. |
+| `data.latestPosts[].media[].videoUrl` | string | no | Playable video file URL. Present only for video and gif items. |
+| `data.latestPosts[].media[].width` | integer | no | Pixel width of the media item, when the lane reports it. |
+| `data.latestPosts[].mentions` | array | no | Accounts @mentioned in the caption, each including its leading @. |
+| `data.latestPosts[].paidPartnership` | boolean or null | no | Whether the post is tagged as a paid partnership. Null when the serving source does not report it. |
+| `data.latestPosts[].productType` | string or null | no | Instagram's own surface label for the post, such as feed, clips or carousel_container. Null when the serving source does not report it. |
+| `data.latestPosts[].reshares` | integer or null | no | Number of times the post has been reshared, when Instagram reports it. Null when the serving source does not report it. |
+| `data.latestPosts[].soundAuthor` | string or null | no | Credited artist of a licensed track, or the username of the account whose original audio it is. Absent when the post has no sound. Null when the serving source does not report it. |
+| `data.latestPosts[].soundTitle` | string or null | no | Name of the sound on a reel or a post with music. "Original audio" means the creator's own audio rather than a licensed track. Absent when the post has no sound. Null when the serving source does not report it. |
+| `data.latestPosts[].taggedUsers` | array or null | no | Accounts tagged in the media. Null when the serving source does not report it. |
+| `data.latestPosts[].taggedUsers[].displayName` | string | no | Account display name. |
+| `data.latestPosts[].taggedUsers[].userId` | string | no | Instagram's numeric account id, as a string. |
+| `data.latestPosts[].taggedUsers[].username` | string | yes | Instagram username without the leading @. |
+| `data.latestPosts[].url` | string | yes |  |
+| `data.latestPosts[].userId` | string or null | no | Instagram user id of the posting account. Null when the serving source does not report it. |
+| `data.latestPosts[].username` | string | yes | Username of the account that posted. A profile feed includes collaborator posts, so this is not always the requested handle. |
+| `data.latestPosts[].verified` | boolean | no | True when the posting account is verified. |
+| `data.latestPosts[].views` | integer | no | Play count, present on video posts and reels only. |
+| `data.posts` | integer or null | yes | Total number of posts on the account. On some responses this is rounded from the count Instagram displays (for example 1.2M), so it can be approximate; name posts in requireFields for an exact count. Null when the serving source does not report it. |
 | `data.private` | boolean | yes | Whether the account is private. |
 | `data.userId` | string | no | Instagram's numeric account id, as a string. |
 | `data.verified` | boolean | yes | Whether the account carries Instagram's verified badge. |
@@ -153,7 +216,7 @@ Extra fields are kept, missing declared fields fail.
                 "integer",
                 "null"
               ],
-              "description": "Total number of posts on the account. Null when the serving source does not report it."
+              "description": "Total number of posts on the account. On some responses this is rounded from the count Instagram displays (for example 1.2M), so it can be approximate; name posts in requireFields for an exact count. Null when the serving source does not report it."
             },
             "highlightsCount": {
               "type": [
@@ -176,9 +239,13 @@ Extra fields are kept, missing declared fields fail.
               "description": "Whether the account is private."
             },
             "avatarUrl": {
+              "x-anyapi-domain": [
+                "fbcdn.net",
+                "cdninstagram.com"
+              ],
               "x-anyapi-must-populate": true,
               "type": "string",
-              "description": "Profile picture URL at the highest resolution the account exposes."
+              "description": "Profile picture URL. Often the highest resolution the account exposes, but it can be a 150 by 150 pixel version."
             },
             "externalUrl": {
               "x-anyapi-must-populate": true,
@@ -207,17 +274,299 @@ Extra fields are kept, missing declared fields fail.
               }
             },
             "category": {
-              "x-anyapi-must-populate": true,
-              "type": "string",
-              "description": "Instagram's category label for the account (for example \"Government Agencies\" or \"Coffee shop\"). Absent when the account publishes no category."
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Instagram's category label for the account (for example \"Government Agencies\" or \"Coffee shop\"). Absent when the account publishes no category. Null when the serving source does not report it; name category in requireFields to get it."
             },
             "isBusiness": {
-              "type": "boolean",
-              "description": "Whether Instagram flags the account as a business account."
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "Whether Instagram flags the account as a business account. Null when the serving source does not report it; name isBusiness in requireFields to get it."
             },
             "contactMethod": {
               "type": "string",
               "description": "The contact button Instagram shows on the profile, for example CALL, TEXT, EMAIL, or UNKNOWN. Absent when the account exposes no contact button. Instagram no longer publishes the underlying email or phone number to unauthenticated callers."
+            },
+            "latestPosts": {
+              "type": "array",
+              "description": "The account's most recent posts, up to about 12. Best-effort: returned when you name latestPosts in requireFields, or whenever the serving source has them, and absent otherwise. Each post has the same fields as instagram.user_posts returns, except that verified, likes, comments and createdUtc are absent when the source does not report them. Empty when the account is private or has not posted.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "url",
+                  "caption",
+                  "username"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Instagram media id."
+                  },
+                  "url": {
+                    "x-anyapi-domain": "instagram.com",
+                    "type": "string"
+                  },
+                  "hashtags": {
+                    "type": "array",
+                    "description": "Hashtags carried in the caption, each including its leading #.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "mentions": {
+                    "type": "array",
+                    "description": "Accounts @mentioned in the caption, each including its leading @.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "views": {
+                    "type": "integer",
+                    "description": "Play count, present on video posts and reels only."
+                  },
+                  "taggedUsers": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "Accounts tagged in the media. Null when the serving source does not report it.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "username"
+                      ],
+                      "properties": {
+                        "username": {
+                          "type": "string",
+                          "description": "Instagram username without the leading @."
+                        },
+                        "userId": {
+                          "type": "string",
+                          "description": "Instagram's numeric account id, as a string."
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "description": "Account display name."
+                        }
+                      }
+                    }
+                  },
+                  "coauthors": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "Accounts listed as coauthors of the post. Null when the serving source does not report it.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "username"
+                      ],
+                      "properties": {
+                        "username": {
+                          "type": "string",
+                          "description": "Instagram username without the leading @."
+                        },
+                        "userId": {
+                          "type": "string",
+                          "description": "Instagram's numeric account id, as a string."
+                        },
+                        "displayName": {
+                          "type": "string",
+                          "description": "Account display name."
+                        },
+                        "verified": {
+                          "type": "boolean",
+                          "description": "Whether the account carries Instagram's verified badge."
+                        }
+                      }
+                    }
+                  },
+                  "isPinned": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the post is pinned to the top of a profile grid. On a collaboration post this can be true because a coauthor pinned it to their own profile. Null when the serving source does not report it."
+                  },
+                  "productType": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Instagram's own surface label for the post, such as feed, clips or carousel_container. Null when the serving source does not report it."
+                  },
+                  "paidPartnership": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the post is tagged as a paid partnership. Null when the serving source does not report it."
+                  },
+                  "countsHidden": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether the author has hidden the like and view counts. Null when the serving source does not report it."
+                  },
+                  "soundTitle": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Name of the sound on a reel or a post with music. \"Original audio\" means the creator's own audio rather than a licensed track. Absent when the post has no sound. Null when the serving source does not report it."
+                  },
+                  "soundAuthor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Credited artist of a licensed track, or the username of the account whose original audio it is. Absent when the post has no sound. Null when the serving source does not report it."
+                  },
+                  "audioId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Instagram audio id of the post's sound, licensed track or original audio, the audioId instagram.audio_reels takes to list other reels using it. Absent when the post has no sound. Null when the serving source does not report it."
+                  },
+                  "reshares": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of times the post has been reshared, when Instagram reports it. Null when the serving source does not report it."
+                  },
+                  "carouselCount": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of slides, present on carousel posts only. Null when the serving source does not report it."
+                  },
+                  "locationId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Instagram location id the post is tagged at. Absent when the post has no location. Null when the serving source does not report it."
+                  },
+                  "locationName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Name of the location the post is tagged at. Null when the serving source does not report it."
+                  },
+                  "locationLat": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Latitude of the tagged location, in decimal degrees. Null when the serving source does not report it."
+                  },
+                  "locationLng": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Longitude of the tagged location, in decimal degrees. Null when the serving source does not report it."
+                  },
+                  "caption": {
+                    "type": "string"
+                  },
+                  "likes": {
+                    "type": "integer"
+                  },
+                  "comments": {
+                    "type": "integer"
+                  },
+                  "createdUtc": {
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "Username of the account that posted. A profile feed includes collaborator posts, so this is not always the requested handle."
+                  },
+                  "verified": {
+                    "type": "boolean",
+                    "description": "True when the posting account is verified."
+                  },
+                  "durationSeconds": {
+                    "type": "number",
+                    "description": "Video duration in seconds. Absent on photo posts."
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "description": "Display name of the posting account."
+                  },
+                  "avatarUrl": {
+                    "x-anyapi-domain": [
+                      "fbcdn.net",
+                      "cdninstagram.com"
+                    ],
+                    "type": "string",
+                    "description": "Profile picture URL of the posting account."
+                  },
+                  "userId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Instagram user id of the posting account. Null when the serving source does not report it."
+                  },
+                  "media": {
+                    "type": "array",
+                    "description": "Photo, video, and GIF attachments on the post. Empty when the post has none.",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "type",
+                        "url"
+                      ],
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "description": "One of photo, video, or gif."
+                        },
+                        "url": {
+                          "x-anyapi-domain": [
+                            "fbcdn.net",
+                            "cdninstagram.com"
+                          ],
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Image URL. For a video or GIF this is the poster/thumbnail frame."
+                        },
+                        "videoUrl": {
+                          "x-anyapi-domain": [
+                            "fbcdn.net",
+                            "cdninstagram.com"
+                          ],
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Playable video file URL. Present only for video and gif items."
+                        },
+                        "width": {
+                          "type": "integer",
+                          "description": "Pixel width of the media item, when the lane reports it."
+                        },
+                        "height": {
+                          "type": "integer",
+                          "description": "Pixel height of the media item, when the lane reports it."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -234,7 +583,6 @@ Extra fields are kept, missing declared fields fail.
 - `avatarUrl`
 - `bio`
 - `bioLinks`
-- `category`
 - `displayName`
 - `externalUrl`
 - `handle`

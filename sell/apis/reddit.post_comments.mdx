@@ -9,13 +9,14 @@ This page is the seller-facing summary of one catalog API, `reddit.post_comments
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.58 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Cursor from a previous response for more comments. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `media`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 | `url` | string | yes | Full Reddit post URL on reddit.com. A gallery link (https://www.reddit.com/gallery/&lt;id&gt;) is read as the post it belongs to, and a relative permalink (/r/&lt;subreddit&gt;/comments/&lt;id&gt;/...) as the same path on https://www.reddit.com. |
 
 <Accordion title="Full input JSON Schema">
@@ -45,6 +46,18 @@ AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a
     "cursor": {
       "type": "string",
       "description": "Cursor from a previous response for more comments."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "media",
+          "type"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `media`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
     }
   }
 }
@@ -132,11 +145,21 @@ Extra fields are kept, missing declared fields fail.
                     "description": "One of photo, video, or gif."
                   },
                   "url": {
+                    "x-anyapi-domain": [
+                      "redd.it",
+                      "redditmedia.com",
+                      "redditstatic.com"
+                    ],
                     "type": "string",
                     "format": "uri",
                     "description": "Image URL. For a video or GIF this is the poster/thumbnail frame."
                   },
                   "videoUrl": {
+                    "x-anyapi-domain": [
+                      "redd.it",
+                      "redditmedia.com",
+                      "redditstatic.com"
+                    ],
                     "type": "string",
                     "format": "uri",
                     "description": "Playable video file URL. Present only for video and gif items."
@@ -187,6 +210,7 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Net score (upvotes minus downvotes) on the comment at fetch time."
                   },
                   "url": {
+                    "x-anyapi-domain": "reddit.com",
                     "x-anyapi-must-populate": true,
                     "type": "string",
                     "description": "Permalink to the comment on reddit.com."

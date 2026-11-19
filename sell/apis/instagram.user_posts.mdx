@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `instagram.user_posts
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.69 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -17,7 +17,7 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
 | --- | --- | --- | --- |
 | `cursor` | string | no | Pagination cursor from a previous response's nextCursor. |
 | `handle` | string | yes | Instagram username without the leading @. |
-| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `userId`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `locationName`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -54,23 +54,21 @@ AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a
         "enum": [
           "audioId",
           "carouselCount",
-          "coauthors",
           "countsHidden",
+          "durationSeconds",
           "isPinned",
           "locationId",
           "locationLat",
           "locationLng",
           "locationName",
-          "paidPartnership",
           "productType",
           "reshares",
           "soundAuthor",
           "soundTitle",
-          "taggedUsers",
-          "userId"
+          "taggedUsers"
         ]
       },
-      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `userId`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `locationName`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -191,6 +189,7 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Instagram media id."
                   },
                   "url": {
+                    "x-anyapi-domain": "instagram.com",
                     "x-anyapi-must-populate": true,
                     "type": "string"
                   },
@@ -395,6 +394,10 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Display name of the posting account."
                   },
                   "avatarUrl": {
+                    "x-anyapi-domain": [
+                      "fbcdn.net",
+                      "cdninstagram.com"
+                    ],
                     "type": "string",
                     "description": "Profile picture URL of the posting account."
                   },
@@ -420,11 +423,19 @@ Extra fields are kept, missing declared fields fail.
                           "description": "One of photo, video, or gif."
                         },
                         "url": {
+                          "x-anyapi-domain": [
+                            "fbcdn.net",
+                            "cdninstagram.com"
+                          ],
                           "type": "string",
                           "format": "uri",
                           "description": "Image URL. For a video or GIF this is the poster/thumbnail frame."
                         },
                         "videoUrl": {
+                          "x-anyapi-domain": [
+                            "fbcdn.net",
+                            "cdninstagram.com"
+                          ],
                           "type": "string",
                           "format": "uri",
                           "description": "Playable video file URL. Present only for video and gif items."

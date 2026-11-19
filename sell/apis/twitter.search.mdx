@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `twitter.search`. The
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.54 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.47 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -19,7 +19,6 @@ AnyAPI publishes this API from **$0.54 per 1,000 requests**. That is the price a
 | `limit` | integer | no | Page size to ask for (1-50, default 20). Some sources honor it; others always return their whole native page of about 20. A page is never trimmed after the call, so follow nextCursor to continue exactly where this response ended. Default `20`. |
 | `query` | string | yes | Search query using X (Twitter) advanced-search syntax. IMPORTANT: bare terms are ANDed - a tweet must contain EVERY word, so a list of loosely related keywords matches nothing; use one short phrase or OR between alternatives (e.g. 'anyapi OR getanyapi'). When an operator follows an OR list, put the list in parentheses, e.g. '(anyapi OR getanyapi) -filter:replies': without them X applies the operator to the last alternative only, so such a query still runs as X reads it and the response's hint carries the corrected query. You can embed X advanced-search operators directly in the query to filter results: from:username and to:username (author or recipient), since:YYYY-MM-DD and until:YYYY-MM-DD (date range), min_faves:N, min_retweets:N, min_replies:N (engagement floors), "exact phrase", -term to exclude, filter:media and filter:links and -filter:replies (content filters), lang:en, near:city, and geocode:lat,long,radius. Examples: 'from:OpenAI', 'AI agents min_faves:500 -filter:replies', 'nvidia since:2026-01-01 until:2026-03-01'. A query with no matches returns an empty items array; prefer the fewest words that identify the topic. |
 | `queryType` | string | no | Which posts to return: 'Latest' (newest first, the default), 'Top' (most popular), 'Photos' (newest posts with images), or 'Videos' (newest posts with video). Photos and Videos search your query as written with filter:images or filter:videos added after it, so they cost the same as a Latest search. One of: `Latest`, `Top`, `Photos`, `Videos`. Default `"Latest"`. |
-| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 | `requireSinglePage` | boolean | no | Set true to get up to limit results in one response instead of provider-native pages, served by a bulk provider when needed. |
 
 <Accordion title="Full input JSON Schema">
@@ -54,17 +53,6 @@ AnyAPI publishes this API from **$0.54 per 1,000 requests**. That is the price a
     "query"
   ],
   "properties": {
-    "requireFields": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "enum": [
-          "nextCursor"
-        ]
-      },
-      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
-    },
     "limit": {
       "type": "integer",
       "minimum": 1,
@@ -184,6 +172,10 @@ Extra fields are kept, missing declared fields fail.
                     "type": "string"
                   },
                   "url": {
+                    "x-anyapi-domain": [
+                      "x.com",
+                      "twitter.com"
+                    ],
                     "x-anyapi-must-populate": true,
                     "type": "string"
                   },
@@ -207,6 +199,7 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Numeric X user id of the account that posted, as a string."
                   },
                   "authorImage": {
+                    "x-anyapi-domain": "twimg.com",
                     "type": "string",
                     "description": "Avatar image URL of the account that posted."
                   },
@@ -272,11 +265,13 @@ Extra fields are kept, missing declared fields fail.
                           "description": "One of photo, video, or gif."
                         },
                         "url": {
+                          "x-anyapi-domain": "twimg.com",
                           "type": "string",
                           "format": "uri",
                           "description": "Image URL. For a video or GIF this is the poster/thumbnail frame. X media URLs on pbs.twimg.com are publicly fetchable without authentication; append ?name=orig for the full-resolution original."
                         },
                         "videoUrl": {
+                          "x-anyapi-domain": "twimg.com",
                           "type": "string",
                           "format": "uri",
                           "description": "Playable video file URL. Present only for video and gif items."

@@ -1,0 +1,186 @@
+---
+title: "YouTube Video Transcript"
+description: "Sell youtube.video_transcript on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Fetch the transcript/captions of a YouTube video or Short by URL or ID.
+
+This page is the seller-facing summary of one catalog API, `youtube.video_transcript`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.90 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+This API takes no input fields.
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.video_transcript.input.json",
+  "example": {
+    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+  },
+  "title": "YouTube video transcript input",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "url": {
+      "type": "string",
+      "pattern": "^$|(?:[?&]v=|youtu\\.be/|/shorts/|/live/|/embed/)[A-Za-z0-9_-]{6,}",
+      "description": "Full YouTube video URL carrying the video id. Shorts (youtube.com/shorts/...), youtu.be, live, and embed URLs all work. A link without the video id, such as https://www.youtube.com/watch?v= or a channel link, is refused as invalid input, with no charge; send the video's link or its id instead."
+    },
+    "id": {
+      "type": "string",
+      "description": "YouTube video ID. A Short uses the same ID as any other video."
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "url"
+      ]
+    },
+    {
+      "required": [
+        "id"
+      ]
+    }
+  ]
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.language` | string | yes |  |
+| `data.segments` | array | no | Timed transcript segments in source order when the serving lane supplies caption timing. |
+| `data.segments[].durationSeconds` | number | yes | Segment duration in seconds. |
+| `data.segments[].startSeconds` | number | yes | Segment start offset in seconds. |
+| `data.segments[].text` | string | yes | Text of this transcript segment. |
+| `data.transcript` | string | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.video_transcript.output.json",
+  "title": "YouTube video transcript output",
+  "x-anyapi-result-list": false,
+  "type": "object",
+  "x-anyapi-heavy": true,
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "transcript",
+            "language"
+          ],
+          "properties": {
+            "transcript": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "language": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "segments": {
+              "type": "array",
+              "description": "Timed transcript segments in source order when the serving lane supplies caption timing.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "text",
+                  "startSeconds",
+                  "durationSeconds"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "Text of this transcript segment."
+                  },
+                  "startSeconds": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Segment start offset in seconds."
+                  },
+                  "durationSeconds": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Segment duration in seconds."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `language`
+- `transcript`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `segments` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

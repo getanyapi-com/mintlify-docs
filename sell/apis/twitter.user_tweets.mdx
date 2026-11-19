@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `twitter.user_tweets`
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.45 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.44 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -165,6 +165,10 @@ Extra fields are kept, missing declared fields fail.
                     "type": "string"
                   },
                   "url": {
+                    "x-anyapi-domain": [
+                      "x.com",
+                      "twitter.com"
+                    ],
                     "x-anyapi-must-populate": true,
                     "type": "string"
                   },
@@ -223,11 +227,13 @@ Extra fields are kept, missing declared fields fail.
                           "description": "One of photo, video, or gif."
                         },
                         "url": {
+                          "x-anyapi-domain": "twimg.com",
                           "type": "string",
                           "format": "uri",
                           "description": "Image URL. For a video or GIF this is the poster/thumbnail frame. X media URLs on pbs.twimg.com are publicly fetchable without authentication; append ?name=orig for the full-resolution original."
                         },
                         "videoUrl": {
+                          "x-anyapi-domain": "twimg.com",
                           "type": "string",
                           "format": "uri",
                           "description": "Playable video file URL. Present only for video and gif items."
@@ -262,6 +268,7 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Handle of the account that posted."
                   },
                   "authorImage": {
+                    "x-anyapi-domain": "twimg.com",
                     "type": "string",
                     "description": "Avatar image URL of the account that posted."
                   }
@@ -327,6 +334,7 @@ The registration tests send this example to your endpoint, with the API's other 
 - Reposts are not part of this timeline: return only what the account wrote itself. twitter.user_posts is the API that carries reposts.
 - isPinned has three states: true or false when the serving source publishes it, and null when it does not. Never answer false to mean unknown.
 - found false covers only a handle that cannot be resolved or an account whose posts are not available; an account with nothing to return is found true with an empty tweets array.
+- A suspended account is found false, data null, reason suspended: never an error, and never an empty page.
 - limit is a per-page maximum of 1 to 100 and most sources return about 20, so a caller walks further with nextCursor rather than asking for one large page.
 - nextCursor is null when the page just served is the last one available.
 

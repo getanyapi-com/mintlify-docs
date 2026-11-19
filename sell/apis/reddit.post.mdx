@@ -70,7 +70,7 @@ AnyAPI publishes this API from **$0.50 per 1,000 requests**. That is the price a
 | `data.subreddit` | string | yes | Subreddit name, without the r/ prefix. |
 | `data.title` | string | yes | Post title. |
 | `data.upvoteRatio` | number | no | Fraction of votes that are upvotes, between 0 and 1. Zero when the upstream does not report it. |
-| `data.url` | string | yes | The post's destination link (the external URL for link posts, or the thread URL for self posts). |
+| `data.url` | string | yes | The post's destination link: the external URL for a link post, the media URL for an image, gallery or video post, or the thread URL for a text post. A text post that also carries an image may give either its thread URL or the image URL. |
 | `found` | boolean | yes | True when the post was found; false when the lookup returned nothing. |
 
 Extra fields are kept, missing declared fields fail.
@@ -148,7 +148,7 @@ Extra fields are kept, missing declared fields fail.
             "url": {
               "x-anyapi-must-populate": true,
               "type": "string",
-              "description": "The post's destination link (the external URL for link posts, or the thread URL for self posts)."
+              "description": "The post's destination link: the external URL for a link post, the media URL for an image, gallery or video post, or the thread URL for a text post. A text post that also carries an image may give either its thread URL or the image URL."
             },
             "permalink": {
               "x-anyapi-must-populate": true,

@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `maps.search`. The tr
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$1.75 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$1.50 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -102,7 +102,6 @@ AnyAPI publishes this API from **$1.75 per 1,000 requests**. That is the price a
           "countryCode",
           "hours",
           "permanentlyClosed",
-          "phone",
           "postalCode",
           "priceLevel",
           "state",
@@ -129,7 +128,7 @@ AnyAPI publishes this API from **$1.75 per 1,000 requests**. That is the price a
 | `data.items[].cid` | string | no | Google customer/place id (cid). |
 | `data.items[].city` | string | no | City the place is in. |
 | `data.items[].countryCode` | string | no | Two-letter country code. |
-| `data.items[].hours` | array | no | Opening hours by day: each element is an object with the day name and its hours. |
+| `data.items[].hours` | array or null | no | Opening hours by day: each element is an object with the day name and its hours. null when the serving source does not return hours; name `hours` in `requireFields` to be served by one that does. |
 | `data.items[].image` | string | no | Primary place photo URL. |
 | `data.items[].latitude` | number | no | Latitude of the place in decimal degrees. |
 | `data.items[].longitude` | number | no | Longitude of the place in decimal degrees. |
@@ -207,6 +206,7 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Place name."
                   },
                   "url": {
+                    "x-anyapi-domain": "google.com",
                     "x-anyapi-must-populate": true,
                     "type": "string",
                     "description": "Canonical Google Maps URL for the place."
@@ -279,12 +279,19 @@ Extra fields are kept, missing declared fields fail.
                     "description": "True when the place is marked permanently closed."
                   },
                   "image": {
+                    "x-anyapi-domain": [
+                      "googleusercontent.com",
+                      "streetviewpixels-pa.googleapis.com"
+                    ],
                     "type": "string",
                     "description": "Primary place photo URL."
                   },
                   "hours": {
-                    "type": "array",
-                    "description": "Opening hours by day: each element is an object with the day name and its hours.",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "description": "Opening hours by day: each element is an object with the day name and its hours. null when the serving source does not return hours; name `hours` in `requireFields` to be served by one that does.",
                     "items": {
                       "type": "object"
                     }

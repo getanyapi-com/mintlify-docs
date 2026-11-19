@@ -15,7 +15,7 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
-| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `videoId` or `views`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `videoUrl` or `views`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 | `url` | string | yes | Full Facebook post URL. |
 
 <Accordion title="Full input JSON Schema">
@@ -47,12 +47,11 @@ AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a
           "authorVerified",
           "feedbackId",
           "reactions",
-          "videoId",
           "videoUrl",
           "views"
         ]
       },
-      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `videoId` or `views`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `videoUrl` or `views`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -160,6 +159,7 @@ Extra fields are kept, missing declared fields fail.
               "description": "Number of views on the post's video. Null when the source cannot report an exact count, for example when it gives only a rounded figure such as 14K."
             },
             "url": {
+              "x-anyapi-domain": "facebook.com",
               "type": "string",
               "description": "Canonical Facebook URL of the post."
             },
@@ -168,6 +168,10 @@ Extra fields are kept, missing declared fields fail.
               "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
             },
             "image": {
+              "x-anyapi-domain": [
+                "fbcdn.net",
+                "cdninstagram.com"
+              ],
               "type": "string",
               "description": "Preview image or video thumbnail URL for the post."
             },
@@ -184,6 +188,10 @@ Extra fields are kept, missing declared fields fail.
               "description": "Display name of the page or profile that posted."
             },
             "authorImage": {
+              "x-anyapi-domain": [
+                "fbcdn.net",
+                "cdninstagram.com"
+              ],
               "type": "string",
               "description": "Profile picture URL of the page or profile that posted."
             },
@@ -229,6 +237,10 @@ Extra fields are kept, missing declared fields fail.
               }
             },
             "videoUrl": {
+              "x-anyapi-domain": [
+                "fbcdn.net",
+                "cdninstagram.com"
+              ],
               "type": [
                 "string",
                 "null"

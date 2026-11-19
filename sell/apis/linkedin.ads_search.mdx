@@ -1,0 +1,266 @@
+---
+title: "LinkedIn Ad Search"
+description: "Sell linkedin.ads_search on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Search the LinkedIn Ad Library by company or keyword and list matching ads (advertiser, headline, creative text, format, CTA, and run dates) with pagination.
+
+This page is the seller-facing summary of one catalog API, `linkedin.ads_search`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `company` | string | no | Company name to search (e.g. "microsoft"). |
+| `companyId` | string | no | LinkedIn company identifier. |
+| `countries` | string | no | Comma-separated two-letter country codes (e.g. "US,CA,MX"). |
+| `cursor` | string | no | Opaque pagination cursor from a previous response's `nextCursor`; omit for the first page. |
+| `endDate` | string | no | Search end date in YYYY-MM-DD format. Today or a later date is moved back to yesterday in UTC when your range overlaps LinkedIn's accepted dates. When you send startDate without endDate, the search ends yesterday in UTC, the latest day LinkedIn accepts. |
+| `keyword` | string | no | Keyword term for the ad search. |
+| `paginationToken` | string | no | Legacy pagination alias. Prefer `cursor`; omit both fields for the first page. |
+| `startDate` | string | no | Search start date in YYYY-MM-DD format. An earlier date is moved up to one year ago in UTC when your range overlaps LinkedIn's accepted dates. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.ads_search.input.json",
+  "example": {
+    "company": "microsoft"
+  },
+  "title": "LinkedIn ad search input",
+  "description": "LinkedIn accepts dates from one year ago through yesterday in UTC. Dates outside that window are adjusted only when your range overlaps it; the response hint names the adjusted dates. Reversed ranges and ranges with no accepted day are rejected before the search.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "company": {
+      "type": "string",
+      "description": "Company name to search (e.g. \"microsoft\")."
+    },
+    "keyword": {
+      "type": "string",
+      "description": "Keyword term for the ad search."
+    },
+    "companyId": {
+      "type": "string",
+      "description": "LinkedIn company identifier."
+    },
+    "countries": {
+      "type": "string",
+      "description": "Comma-separated two-letter country codes (e.g. \"US,CA,MX\")."
+    },
+    "startDate": {
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
+      "description": "Search start date in YYYY-MM-DD format. An earlier date is moved up to one year ago in UTC when your range overlaps LinkedIn's accepted dates."
+    },
+    "endDate": {
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
+      "description": "Search end date in YYYY-MM-DD format. Today or a later date is moved back to yesterday in UTC when your range overlaps LinkedIn's accepted dates. When you send startDate without endDate, the search ends yesterday in UTC, the latest day LinkedIn accepts."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque pagination cursor from a previous response's `nextCursor`; omit for the first page."
+    },
+    "paginationToken": {
+      "type": "string",
+      "deprecated": true,
+      "description": "Legacy pagination alias. Prefer `cursor`; omit both fields for the first page."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.ads` | array | yes |  |
+| `data.ads[].adType` | string | yes |  |
+| `data.ads[].advertiser` | string | yes |  |
+| `data.ads[].advertiserLinkedinPage` | string | yes |  |
+| `data.ads[].advertiserLogo` | string | no | Advertiser logo image URL. The query string is a signed token, so keep the URL intact. |
+| `data.ads[].cta` | string | yes |  |
+| `data.ads[].description` | string | yes | Ad text. LinkedIn's search results show a preview cut at about 120 characters ending in "..." on some ads; linkedin.ad returns the full text. |
+| `data.ads[].destinationUrl` | string | yes |  |
+| `data.ads[].endDate` | string | yes |  |
+| `data.ads[].headline` | string | yes |  |
+| `data.ads[].id` | string | yes |  |
+| `data.ads[].startDate` | string | yes |  |
+| `data.ads[].totalImpressions` | string | yes |  |
+| `data.ads[].url` | string | no | Canonical LinkedIn Ad Library URL for this ad. |
+| `data.nextCursor` | string or null | yes |  |
+| `data.totalAds` | integer | yes | Total matching ads LinkedIn reports for the search. LinkedIn gives it on the first page only; on later pages it is 0, meaning not given, so keep the first page's total. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.ads_search.output.json",
+  "title": "LinkedIn ad search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "nextCursor",
+            "totalAds",
+            "ads"
+          ],
+          "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "totalAds": {
+              "type": "integer",
+              "description": "Total matching ads LinkedIn reports for the search. LinkedIn gives it on the first page only; on later pages it is 0, meaning not given, so keep the first page's total."
+            },
+            "ads": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "advertiser",
+                  "advertiserLinkedinPage",
+                  "headline",
+                  "description",
+                  "adType",
+                  "cta",
+                  "destinationUrl",
+                  "startDate",
+                  "endDate",
+                  "totalImpressions"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "advertiser": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "advertiserLinkedinPage": {
+                    "x-anyapi-domain": "linkedin.com",
+                    "type": "string"
+                  },
+                  "headline": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Ad text. LinkedIn's search results show a preview cut at about 120 characters ending in \"...\" on some ads; linkedin.ad returns the full text."
+                  },
+                  "adType": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "cta": {
+                    "type": "string"
+                  },
+                  "destinationUrl": {
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "type": "string"
+                  },
+                  "endDate": {
+                    "type": "string"
+                  },
+                  "totalImpressions": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "x-anyapi-domain": "linkedin.com",
+                    "type": "string",
+                    "description": "Canonical LinkedIn Ad Library URL for this ad."
+                  },
+                  "advertiserLogo": {
+                    "x-anyapi-domain": "licdn.com",
+                    "type": "string",
+                    "description": "Advertiser logo image URL. The query string is a signed token, so keep the URL intact."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `adType`
+- `ads`
+- `advertiser`
+- `id`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `ads` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "company": "microsoft"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

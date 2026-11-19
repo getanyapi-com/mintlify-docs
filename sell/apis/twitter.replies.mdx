@@ -16,7 +16,7 @@ AnyAPI publishes this API from **$0.45 per 1,000 requests**. That is the price a
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of replies. |
-| `limit` | integer | no | Maximum number of results to return (1-40, default 40). Per-result lanes cost less at lower limits; a backup that bills its native page may cost up to the advertised request price. |
+| `limit` | integer | no | Most replies to return (1-40, default 40). Ignored on sources that page: each call returns one full page of up to about 36 replies, never trimmed; follow nextCursor for more. Sources that cannot page return up to `limit` replies in one call with no nextCursor, and per-result ones cost less at lower limits; a source that bills its native page may cost up to the advertised request price. |
 | `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 | `url` | string | yes | Full URL of the X (Twitter) post to fetch replies for (e.g. https://x.com/nasa/status/1846987139428634858). |
 
@@ -40,7 +40,7 @@ AnyAPI publishes this API from **$0.45 per 1,000 requests**. That is the price a
       "type": "integer",
       "minimum": 1,
       "maximum": 40,
-      "description": "Maximum number of results to return (1-40, default 40). Per-result lanes cost less at lower limits; a backup that bills its native page may cost up to the advertised request price."
+      "description": "Most replies to return (1-40, default 40). Ignored on sources that page: each call returns one full page of up to about 36 replies, never trimmed; follow nextCursor for more. Sources that cannot page return up to `limit` replies in one call with no nextCursor, and per-result ones cost less at lower limits; a source that bills its native page may cost up to the advertised request price."
     },
     "url": {
       "type": "string",
@@ -146,6 +146,10 @@ Extra fields are kept, missing declared fields fail.
                     "description": "The reply's numeric tweet ID, as a string."
                   },
                   "url": {
+                    "x-anyapi-domain": [
+                      "x.com",
+                      "twitter.com"
+                    ],
                     "x-anyapi-must-populate": true,
                     "type": "string",
                     "description": "Canonical x.com URL of the reply, with tracking query params stripped."
@@ -208,11 +212,13 @@ Extra fields are kept, missing declared fields fail.
                           "description": "One of photo, video, or gif."
                         },
                         "url": {
+                          "x-anyapi-domain": "twimg.com",
                           "type": "string",
                           "format": "uri",
                           "description": "Image URL. For a video or GIF this is the poster/thumbnail frame. X media URLs on pbs.twimg.com are publicly fetchable without authentication; append ?name=orig for the full-resolution original."
                         },
                         "videoUrl": {
+                          "x-anyapi-domain": "twimg.com",
                           "type": "string",
                           "format": "uri",
                           "description": "Playable video file URL. Present only for video and gif items."

@@ -1,0 +1,238 @@
+---
+title: "YouTube Channel"
+description: "Sell youtube.channel on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Fetch a YouTube channel's stats (subscribers, video count, total views, description) and the links on its About page, by handle or channel ID.
+
+This page is the seller-facing summary of one catalog API, `youtube.channel`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.45 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+This API takes no input fields.
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.channel.input.json",
+  "example": {
+    "handle": "@mkbhd"
+  },
+  "title": "YouTube channel input",
+  "type": "object",
+  "additionalProperties": false,
+  "x-aliases": {
+    "username": "handle"
+  },
+  "properties": {
+    "handle": {
+      "type": "string",
+      "description": "YouTube channel handle."
+    },
+    "channelId": {
+      "type": "string",
+      "description": "YouTube channel ID (UC...). Pass it directly when you have it: some sources accept only the ID and otherwise look up the handle first, which adds a step."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "handle",
+          "links",
+          "videos",
+          "views"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `views`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a record that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "handle"
+      ]
+    },
+    {
+      "required": [
+        "channelId"
+      ]
+    }
+  ]
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.avatarUrl` | string | yes |  |
+| `data.channelId` | string | yes |  |
+| `data.description` | string | yes |  |
+| `data.handle` | string | no | The channel's @handle, for example "@mkbhd". |
+| `data.links` | array | no | The links the channel lists in the Links section of its About page, in the order shown. Empty when the channel lists none, and absent when the serving source does not report links; name `links` in requireFields to be served only by a source that does. |
+| `data.links[].title` | string | no | The label the channel gave the link, when the serving source reports it. |
+| `data.links[].url` | string | yes | The link's address, starting with https://. |
+| `data.subscribers` | integer | yes |  |
+| `data.title` | string | yes |  |
+| `data.url` | string | no | Canonical URL of the channel page, tracking query parameters stripped. |
+| `data.videos` | integer | yes |  |
+| `data.views` | integer or null | yes | Lifetime view count across the channel's videos, or null when the serving source does not report it. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.channel.output.json",
+  "title": "YouTube channel output",
+  "x-anyapi-result-list": false,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "channelId",
+            "title",
+            "subscribers",
+            "videos",
+            "views",
+            "description",
+            "avatarUrl"
+          ],
+          "properties": {
+            "channelId": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "title": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "subscribers": {
+              "type": "integer"
+            },
+            "videos": {
+              "type": "integer"
+            },
+            "views": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Lifetime view count across the channel's videos, or null when the serving source does not report it."
+            },
+            "description": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "avatarUrl": {
+              "x-anyapi-domain": [
+                "ggpht.com",
+                "yt3.googleusercontent.com"
+              ],
+              "type": "string"
+            },
+            "handle": {
+              "type": "string",
+              "description": "The channel's @handle, for example \"@mkbhd\"."
+            },
+            "url": {
+              "x-anyapi-domain": "youtube.com",
+              "type": "string",
+              "description": "Canonical URL of the channel page, tracking query parameters stripped."
+            },
+            "links": {
+              "type": "array",
+              "description": "The links the channel lists in the Links section of its About page, in the order shown. Empty when the channel lists none, and absent when the serving source does not report links; name `links` in requireFields to be served only by a source that does.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "The label the channel gave the link, when the serving source reports it."
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "The link's address, starting with https://."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `channelId`
+- `description`
+- `title`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `links` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "handle": "@mkbhd"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).
