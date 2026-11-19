@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `instagram.post`. The
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.39 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.38 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -65,6 +65,7 @@ AnyAPI publishes this API from **$0.39 per 1,000 requests**. That is the price a
           "locationId",
           "locationLat",
           "locationLng",
+          "paidPartnership",
           "plays",
           "reshares",
           "soundAuthor",
@@ -107,7 +108,7 @@ AnyAPI publishes this API from **$0.39 per 1,000 requests**. That is the price a
 | `data.locationName` | string | no | Name of the tagged place, when the post tags one. |
 | `data.mentions` | array | no | Accounts mentioned in the caption, each including its leading @, in caption order. Empty when the caption mentions none. |
 | `data.owner` | string | yes |  |
-| `data.paidPartnership` | boolean | no | True when the post is tagged as a paid partnership. |
+| `data.paidPartnership` | boolean or null | no | True when the post is tagged as a paid partnership. Null when this source does not report it. |
 | `data.plays` | integer | no | Number of plays of the reel or video. Absent when Instagram does not expose a play count for this media, and on lanes that cannot serve it. |
 | `data.productType` | string | no | Instagram product type of the media, for example feed, clips or igtv. |
 | `data.reshares` | integer or null | no | Number of times the post has been reshared. Null when this source does not report it. |
@@ -206,8 +207,11 @@ Extra fields are kept, missing declared fields fail.
               "description": "True when the media carries an audio track."
             },
             "paidPartnership": {
-              "type": "boolean",
-              "description": "True when the post is tagged as a paid partnership."
+              "type": [
+                "boolean",
+                "null"
+              ],
+              "description": "True when the post is tagged as a paid partnership. Null when this source does not report it."
             },
             "productType": {
               "type": "string",
