@@ -143,7 +143,9 @@ routing, earnings, and payouts, and is never shown to buyers.
     when another of your checks starts or ends.
 
     **You are told when it ends.** AnyAPI emails your account's address when a check passes or
-    fails and when AnyAPI changes an endpoint's status, one email for everything new. The same
+    fails and when AnyAPI changes an endpoint's status, one email for everything new. When the
+    email tells you something is still stopped when it is sent, an endpoint or your account, the
+    subject starts `[Action required]` and names what is disabled. The same
     events are at `GET /v1/operator/events`, across all your endpoints: pass `?since=` on the
     first read, then the returned `cursor` as `?after=`.
   </Step>
@@ -274,7 +276,7 @@ Through the API, the same figures come from two reads that take `?range=7d`, `30
 uptime and what it earned, and then has one section per subject: **Overview** (where it is on
 the way to going live, and what to do next), **Check and misses**, **Price**, **Reliability**,
 **Contract** and **Settings**. Each section has its own link: add `?tab=check`, `price`,
-`reliability`, `contract` or `settings` to the endpoint's URL. The three sections below read
+`reliability`, `contract` or `settings` to the endpoint's URL. The four sections below read
 `GET /v1/operator/endpoints/{id}/insights`.
 
 **Misses by cause.** Every answer judged wrong across all of the endpoint's checks, earlier
@@ -291,6 +293,24 @@ A miss with two wrong fields counts under both, so the counts can add up to more
 `misses.total`. `latest.trialComparisonId` is the newest call with that cause. Open it on the
 page with **See that answer**, or read it with
 `GET /v1/operator/endpoints/{id}/trial/calls/{trialComparisonId}`.
+
+**Wrong answers to customer requests.** Answers your endpoint gave a customer request, confirmed
+wrong against the request or two AnyAPI answers to it, fetched separately. This list, and the email
+about it, stop nothing by themselves. AnyAPI also emails your account's address about them, with
+a subject starting `[Warning]`, at most once an hour. `liveWrongAnswers.count` is how many there
+are, and `liveWrongAnswers.answers` lists them newest first, each with `at` and `input` (`null`
+when it was not kept), which identify the answer, and `fields`:
+
+| Field | What it means |
+| --- | --- |
+| `kind` | `missing_result`: your answer found nothing where AnyAPI's answers found results. `missing_value`: a field's value differs from AnyAPI's, or your answer lacks it. `different_record`: your answer is about another record than the one asked for. |
+| `record` | The result in a list the field is on; empty on an API that returns one record. |
+| `field` | The field; empty for `missing_result`. |
+| `yourValue` | What your answer had, whole; empty when it had none. |
+| `anyapiValues` | What each of the two AnyAPI answers had, whole; the two can differ. |
+| `says` | The point in words, as the email says it. |
+
+If one of them is mistaken, reply to the email.
 
 **Price position.** A request tries the cheapest source first, and AnyAPI's own source goes
 first at an equal price. `pricePosition` shows where your price puts you. Every price is in
