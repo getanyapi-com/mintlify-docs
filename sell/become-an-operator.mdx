@@ -144,8 +144,8 @@ routing, earnings, and payouts, and is never shown to buyers.
 
     **You are told when it ends.** AnyAPI emails your account's address when a check passes or
     fails and when AnyAPI changes an endpoint's status, one email for everything new. When the
-    change stops an endpoint or your account, the subject starts `[Action required]` and names
-    what was disabled. The same
+    email tells you something is still stopped when it is sent, an endpoint or your account, the
+    subject starts `[Action required]` and names what is disabled. The same
     events are at `GET /v1/operator/events`, across all your endpoints: pass `?since=` on the
     first read, then the returned `cursor` as `?after=`.
   </Step>
@@ -294,12 +294,12 @@ A miss with two wrong fields counts under both, so the counts can add up to more
 page with **See that answer**, or read it with
 `GET /v1/operator/endpoints/{id}/trial/calls/{trialComparisonId}`.
 
-**Wrong answers to customer requests.** Answers your endpoint gave a customer request where a
-value differed from AnyAPI's answer to the same request, and a second AnyAPI answer, fetched
-separately, had the same value as the first. Your endpoint keeps serving. AnyAPI also emails
-your account's address about them, with a subject starting `[Warning]`, at most once an hour.
-`liveWrongAnswers.count` is how many there are, and `liveWrongAnswers.answers` lists them newest
-first, each with `at`, `requestId`, `input` (`null` when it was not kept) and `fields`:
+**Wrong answers to customer requests.** Answers your endpoint gave a customer request that two
+AnyAPI answers to the same request, fetched separately, disagree with. This list, and the email
+about it, stop nothing by themselves. AnyAPI also emails your account's address about them, with
+a subject starting `[Warning]`, at most once an hour. `liveWrongAnswers.count` is how many there
+are, and `liveWrongAnswers.answers` lists them newest first, each with `at` and `input` (`null`
+when it was not kept), which identify the answer, and `fields`:
 
 | Field | What it means |
 | --- | --- |
@@ -307,7 +307,8 @@ first, each with `at`, `requestId`, `input` (`null` when it was not kept) and `f
 | `record` | The result in a list the field is on; empty on an API that returns one record. |
 | `field` | The field; empty for `missing_result`. |
 | `yourValue` | What your answer had, whole; empty when it had none. |
-| `anyapiValue` | What AnyAPI's answer had, whole. |
+| `anyapiValues` | What each of the two AnyAPI answers had, whole; the two can differ. |
+| `says` | The point in words, as the email says it. |
 
 If one of them is mistaken, reply to the email.
 
