@@ -310,6 +310,7 @@ is wrong or the sources simply differ.
 | --- | --- |
 | Response time | The API's time limit, set by AnyAPI and shown on the endpoint's page |
 | Concurrent requests | Your declared capacity, 4 unless you set it |
+| New requests a second | Your declared requests per second, 5 unless you set it |
 | Response body | 8 MB |
 | Transport | HTTPS on port 443, public host, no embedded credentials |
 
@@ -331,6 +332,18 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   when you register with `POST /v1/operator/endpoints`; it defaults to 4. Change it from
   the endpoint's page in the [dashboard](https://getanyapi.com/dashboard/sell/endpoints) or
   with `POST /v1/operator/endpoints/{id}/capacity` and a body of `{"capacity": 8}`.
+- **Requests per second** is how many new requests your endpoint takes a second. Declare it
+  as `requestsPerSecond` when you register, or change it on the endpoint's page or with the
+  same `POST /v1/operator/endpoints/{id}/capacity`, for example `{"requestsPerSecond": 2}`.
+  Send `capacity`, `requestsPerSecond` or both; a field you leave out stays as it is. The
+  value must be more than 0, and a fraction such as `0.5` means one request every two
+  seconds; 0 or below is refused with `400`. Once you declare it, AnyAPI never starts two
+  customer requests on your endpoint less than 1/r seconds apart, across all of its servers,
+  with no burst. Until you declare it, AnyAPI's default of 5 new requests a second applies,
+  and after a quiet spell several requests may start at once. `GET /v1/operator/endpoints/{id}`
+  returns `requestsPerSecond` and `requestsPerSecondDeclared`, which is `false` while the
+  default applies. It applies to customer requests only today: AnyAPI's registration tests
+  and its other checks on your endpoint are not yet held to it.
 - **Fields customers ask for.** <a id="fields-customers-ask-for"></a> Some APIs let a customer
   name output fields that must be filled, with `requireFields`. Tick the ones your endpoint
   fills when you register, or later on the endpoint's page; through the API, send
@@ -347,10 +360,8 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   sending you requests until your `Retry-After` has passed, honored as given in seconds
   or as an HTTP date. Without a usable `Retry-After`, the pause lasts 60 seconds.
   Requests during the pause go to other endpoints.
-- **Declare a capacity your endpoint can really hold.** Whatever capacity you declare, AnyAPI
-  starts at most 5 new requests a second on each endpoint, and you cannot change that rate.
-  When requests arrive faster than you can serve them, answer `429` with a `Retry-After` at
-  once rather than answering slowly. A slow answer that passes the time limit is a timeout.
+- **Declare a capacity and a rate your endpoint can really hold.** When requests arrive
+  faster than you can serve them, answer `429` with a `Retry-After` at once rather than answering slowly. A slow answer that passes the time limit is a timeout.
 - **What a failure costs.** <a id="what-a-failure-costs"></a> An error (any non-2xx status
   other than `429`), a timeout or a malformed reply is unpaid and counts as a failure toward
   the automatic pause, *Paused (quality)*. A `429` is unpaid too. It counts as a failure toward
