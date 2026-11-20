@@ -1,0 +1,273 @@
+---
+title: "LinkedIn Post Comments"
+description: "Sell linkedin.post_comments on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+List comments on a LinkedIn post - full text, commenter name/URL/job title, timestamps, and engagement.
+
+This page is the seller-facing summary of one catalog API, `linkedin.post_comments`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$2.90 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `limit` | integer | no | Maximum number of comments to return. Default `100`. |
+| `postedLimit` | string | no | Only return comments posted within this window (default any). One of: `any`, `24h`, `week`, `month`, `3months`, `6months`, `year`. |
+| `url` | string | yes | Full URL of the LinkedIn post to list comments for. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.post_comments.input.json",
+  "example": {
+    "url": "https://www.linkedin.com/posts/stripe_philip-kl%C3%B6ckner-in-conversation-with-conor-activity-7477791740645564416-tIbZ",
+    "limit": 10
+  },
+  "title": "LinkedIn post comments input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Full URL of the LinkedIn post to list comments for."
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 100,
+      "description": "Maximum number of comments to return."
+    },
+    "postedLimit": {
+      "type": "string",
+      "enum": [
+        "any",
+        "24h",
+        "week",
+        "month",
+        "3months",
+        "6months",
+        "year"
+      ],
+      "description": "Only return comments posted within this window (default any)."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The post comments result, or null when not found. |
+| `data.items` | array | yes | The post's comments. |
+| `data.items[].actor` | object | no | The commenter (a profile or a company). |
+| `data.items[].actor.id` | string | no | LinkedIn identifier of the commenter. |
+| `data.items[].actor.image` | string | no | Profile picture URL of the commenter. |
+| `data.items[].actor.linkedinUrl` | string | no | Canonical LinkedIn URL of the commenter. |
+| `data.items[].actor.name` | string | no | Display name of the commenter. |
+| `data.items[].actor.position` | string | no | Commenter's headline or job title as displayed. |
+| `data.items[].actor.type` | string | no | Commenter kind, e.g. 'profile' or 'company'. |
+| `data.items[].commentary` | string | yes | Full text of the comment. |
+| `data.items[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.items[].edited` | boolean | no | Whether the comment has been edited. |
+| `data.items[].engagement` | object | no | Engagement metrics for the comment. |
+| `data.items[].engagement.comments` | integer | no | Number of replies to the comment. |
+| `data.items[].engagement.likes` | integer | no | Number of likes on the comment. |
+| `data.items[].id` | string | yes | Unique identifier of the comment. |
+| `data.items[].pinned` | boolean | no | Whether the comment is pinned on the post. |
+| `data.items[].url` | string | no | Canonical permalink URL of the comment. |
+| `found` | boolean | yes | Whether comments were found for the post. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.post_comments.output.json",
+  "title": "LinkedIn post comments output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "Whether comments were found for the post."
+    },
+    "data": {
+      "description": "The post comments result, or null when not found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "The post's comments.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "commentary"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Unique identifier of the comment."
+                  },
+                  "commentary": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Full text of the comment."
+                  },
+                  "url": {
+                    "x-anyapi-domain": "linkedin.com",
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Canonical permalink URL of the comment."
+                  },
+                  "createdUtc": {
+                    "x-anyapi-must-populate": true,
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "pinned": {
+                    "type": "boolean",
+                    "description": "Whether the comment is pinned on the post."
+                  },
+                  "edited": {
+                    "type": "boolean",
+                    "description": "Whether the comment has been edited."
+                  },
+                  "actor": {
+                    "type": "object",
+                    "description": "The commenter (a profile or a company).",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "LinkedIn identifier of the commenter."
+                      },
+                      "name": {
+                        "x-anyapi-must-populate": true,
+                        "type": "string",
+                        "description": "Display name of the commenter."
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Commenter kind, e.g. 'profile' or 'company'."
+                      },
+                      "linkedinUrl": {
+                        "x-anyapi-domain": "linkedin.com",
+                        "x-anyapi-must-populate": true,
+                        "type": "string",
+                        "description": "Canonical LinkedIn URL of the commenter."
+                      },
+                      "position": {
+                        "x-anyapi-must-populate": true,
+                        "type": "string",
+                        "description": "Commenter's headline or job title as displayed."
+                      },
+                      "image": {
+                        "x-anyapi-domain": "licdn.com",
+                        "x-anyapi-must-populate": true,
+                        "type": "string",
+                        "description": "Profile picture URL of the commenter."
+                      }
+                    }
+                  },
+                  "engagement": {
+                    "type": "object",
+                    "description": "Engagement metrics for the comment.",
+                    "properties": {
+                      "likes": {
+                        "type": "integer",
+                        "description": "Number of likes on the comment."
+                      },
+                      "comments": {
+                        "type": "integer",
+                        "description": "Number of replies to the comment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `commentary`
+- `createdUtc`
+- `id`
+- `image`
+- `items`
+- `linkedinUrl`
+- `name`
+- `position`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.linkedin.com/posts/stripe_philip-kl%C3%B6ckner-in-conversation-with-conor-activity-7477791740645564416-tIbZ",
+  "limit": 10
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

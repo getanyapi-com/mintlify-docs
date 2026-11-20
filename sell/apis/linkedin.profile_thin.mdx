@@ -1,0 +1,405 @@
+---
+title: "LinkedIn Profile (basic)"
+description: "Sell linkedin.profile_thin on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Lightweight profile: name, avatar, location, followers, public id, current company, and a basic experience/education list (company + dates; job titles, the current-role flag and the connections label only where the source and the profile show them; no descriptions or skills; past companies may be redacted). For full experience detail, skills, certifications, and verified flags use linkedin.profile.
+
+This page is the seller-facing summary of one catalog API, `linkedin.profile_thin`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `headline` or `recentPosts`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `url` | string | yes | Full LinkedIn person profile URL, carrying the profile id after /in/, for example https://www.linkedin.com/in/williamhgates. Any other LinkedIn URL names no person, so it is rejected instead of charged: send a company page to linkedin.company_thin or linkedin.company, and a post to linkedin.post. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.profile_thin.input.json",
+  "example": {
+    "url": "https://www.linkedin.com/in/williamhgates"
+  },
+  "title": "LinkedIn profile (basic) input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "pattern": "/in/[^/?#]+",
+      "description": "Full LinkedIn person profile URL, carrying the profile id after /in/, for example https://www.linkedin.com/in/williamhgates. Any other LinkedIn URL names no person, so it is rejected instead of charged: send a company page to linkedin.company_thin or linkedin.company, and a post to linkedin.post."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "activityType",
+          "articles",
+          "companyLinkedinUrl",
+          "companyName",
+          "connections",
+          "createdUtc",
+          "current",
+          "currentPosition",
+          "headline",
+          "id",
+          "position",
+          "publicIdentifier",
+          "recentPosts",
+          "text",
+          "url"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `headline` or `recentPosts`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a profile that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The profile result, or null when not found. |
+| `data.about` | string | no | About/summary text of the profile. |
+| `data.articles` | array or null | no | The profile's published articles, or null when the serving source does not publish them. |
+| `data.articles[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.articles[].headline` | string | yes | Headline of the article. |
+| `data.articles[].url` | string | no | Canonical URL of the article. |
+| `data.avatarUrl` | string | no | URL of the profile avatar image. |
+| `data.connections` | string or null | no | Connections count as LinkedIn's public label shows it, capped at "500+" (for example "8" or "500+"). Null when the serving source does not publish it. |
+| `data.currentPosition` | array or null | no | The member's current role as the serving source reports it: one entry, or an empty list when the profile shows no current employer. Null when the serving source does not publish it. |
+| `data.currentPosition[].companyLinkedinUrl` | string or null | no | Company LinkedIn URL, or null when the serving source does not publish it. |
+| `data.currentPosition[].companyName` | string | yes | Company name. |
+| `data.currentPosition[].position` | string or null | no | Job title, or null when the serving source does not publish it or the profile hides it. |
+| `data.education` | array | no | Education entries. |
+| `data.education[].endDate` | string | no | End date of study. |
+| `data.education[].school` | string | yes | Name of the school. |
+| `data.education[].schoolUrl` | string | no | URL of the school page. |
+| `data.education[].startDate` | string | no | Start date of study. |
+| `data.experience` | array | no | Work experience entries: company and dates, plus the job title and whether the role is current when the serving source publishes them. |
+| `data.experience[].company` | string | yes | Name of the company. |
+| `data.experience[].companyUrl` | string | no | URL of the company page. |
+| `data.experience[].current` | boolean or null | no | Whether this is a current role, or null when the serving source does not say. |
+| `data.experience[].endDate` | string | no | End date of the role. |
+| `data.experience[].position` | string or null | no | Job title, or null when the serving source does not publish it or the profile hides it. |
+| `data.experience[].startDate` | string | no | Start date of the role. |
+| `data.followers` | integer | no | Number of followers. |
+| `data.headline` | string or null | no | Profile headline, or null when the serving source does not publish it. |
+| `data.location` | string | no | Location of the profile owner. |
+| `data.name` | string | yes | Full name of the profile owner. |
+| `data.publicIdentifier` | string or null | no | LinkedIn public identifier (the /in/ handle), or null when the serving source does not publish it. |
+| `data.recentPosts` | array or null | no | The profile's recent posts, or null when the serving source does not publish them. |
+| `data.recentPosts[].activityType` | string | no | Type of activity for the post. |
+| `data.recentPosts[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.recentPosts[].id` | string | yes | Unique identifier of the post. |
+| `data.recentPosts[].text` | string | no | Text content of the post. |
+| `data.recentPosts[].url` | string | no | Canonical URL of the post. |
+| `found` | boolean | yes | Whether the profile was found. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.profile_thin.output.json",
+  "title": "LinkedIn profile (basic) output",
+  "x-anyapi-result-list": false,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "Whether the profile was found."
+    },
+    "data": {
+      "description": "The profile result, or null when not found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Full name of the profile owner."
+            },
+            "location": {
+              "type": "string",
+              "description": "Location of the profile owner."
+            },
+            "followers": {
+              "type": "integer",
+              "description": "Number of followers."
+            },
+            "about": {
+              "type": "string",
+              "description": "About/summary text of the profile."
+            },
+            "avatarUrl": {
+              "x-anyapi-domain": "licdn.com",
+              "type": "string",
+              "description": "URL of the profile avatar image."
+            },
+            "headline": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Profile headline, or null when the serving source does not publish it."
+            },
+            "publicIdentifier": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "LinkedIn public identifier (the /in/ handle), or null when the serving source does not publish it."
+            },
+            "connections": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Connections count as LinkedIn's public label shows it, capped at \"500+\" (for example \"8\" or \"500+\"). Null when the serving source does not publish it."
+            },
+            "currentPosition": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "description": "The member's current role as the serving source reports it: one entry, or an empty list when the profile shows no current employer. Null when the serving source does not publish it.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "companyName"
+                ],
+                "properties": {
+                  "position": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Job title, or null when the serving source does not publish it or the profile hides it."
+                  },
+                  "companyName": {
+                    "type": "string",
+                    "description": "Company name."
+                  },
+                  "companyLinkedinUrl": {
+                    "x-anyapi-domain": "linkedin.com",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Company LinkedIn URL, or null when the serving source does not publish it."
+                  }
+                }
+              }
+            },
+            "experience": {
+              "type": "array",
+              "x-anyapi-must-populate": true,
+              "description": "Work experience entries: company and dates, plus the job title and whether the role is current when the serving source publishes them.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "company"
+                ],
+                "properties": {
+                  "company": {
+                    "type": "string",
+                    "description": "Name of the company."
+                  },
+                  "companyUrl": {
+                    "x-anyapi-domain": "linkedin.com",
+                    "type": "string",
+                    "description": "URL of the company page."
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "description": "Start date of the role."
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "description": "End date of the role."
+                  },
+                  "position": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Job title, or null when the serving source does not publish it or the profile hides it."
+                  },
+                  "current": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "Whether this is a current role, or null when the serving source does not say."
+                  }
+                }
+              }
+            },
+            "education": {
+              "type": "array",
+              "description": "Education entries.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "school"
+                ],
+                "properties": {
+                  "school": {
+                    "type": "string",
+                    "description": "Name of the school."
+                  },
+                  "schoolUrl": {
+                    "x-anyapi-domain": "linkedin.com",
+                    "type": "string",
+                    "description": "URL of the school page."
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "description": "Start date of study."
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "description": "End date of study."
+                  }
+                }
+              }
+            },
+            "recentPosts": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "description": "The profile's recent posts, or null when the serving source does not publish them.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "Unique identifier of the post."
+                  },
+                  "url": {
+                    "x-anyapi-domain": "linkedin.com",
+                    "type": "string",
+                    "description": "Canonical URL of the post."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Text content of the post."
+                  },
+                  "activityType": {
+                    "type": "string",
+                    "description": "Type of activity for the post."
+                  },
+                  "createdUtc": {
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  }
+                }
+              }
+            },
+            "articles": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "description": "The profile's published articles, or null when the serving source does not publish them.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "headline"
+                ],
+                "properties": {
+                  "headline": {
+                    "type": "string",
+                    "description": "Headline of the article."
+                  },
+                  "url": {
+                    "x-anyapi-domain": "linkedin.com",
+                    "type": "string",
+                    "description": "Canonical URL of the article."
+                  },
+                  "createdUtc": {
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `experience`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `articles` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.linkedin.com/in/williamhgates"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).
