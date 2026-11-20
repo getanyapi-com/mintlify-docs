@@ -311,6 +311,18 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   when you register with `POST /v1/operator/endpoints`; it defaults to 4. Change it from
   the endpoint's page in the [dashboard](https://getanyapi.com/dashboard/sell/endpoints) or
   with `POST /v1/operator/endpoints/{id}/capacity` and a body of `{"capacity": 8}`.
+- **Fields customers ask for.** <a id="fields-customers-ask-for"></a> Some APIs let a customer
+  name output fields that must be filled, with `requireFields`. Tick the ones your endpoint
+  fills when you register, or later on the endpoint's page; through the API, send
+  `fillsRequireFields` when you register, or
+  `POST /v1/operator/endpoints/{id}/fills-require-fields` with a body of
+  `{"fillsRequireFields": ["views"]}`. That body must carry the list: `[]` clears it, and a
+  body without the list is refused with `400`. `GET /v1/operator/sellable-apis` lists each
+  API's options as `requireFields`. A request that names fields is sent to your endpoint only
+  when you ticked every field it names; a request that names none is not affected. Of these
+  options, only the ones you ticked are listed and counted when AnyAPI reports how often your
+  answers fill each field. A ticked field that your answers never fill stops the endpoint, as
+  for any other field.
 - **429 pauses your endpoint.** Answer `429` when you are overloaded. AnyAPI stops
   sending you requests until your `Retry-After` has passed, honored as given in seconds
   or as an HTTP date. Without a usable `Retry-After`, the pause lasts 60 seconds.
