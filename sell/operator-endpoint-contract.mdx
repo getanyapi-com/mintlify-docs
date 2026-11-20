@@ -275,6 +275,26 @@ is wrong or the sources simply differ.
   `request_filter` (see [Wrong answers to customer requests](/sell/become-an-operator#see-how-your-endpoints-are-doing)).
   This warning stops nothing: it does not pause your endpoint, hold its traffic share, or
   restart its count of clean spot checks.
+- **A field your answers never fill stops the endpoint.** <a id="a-field-your-answers-never-fill"></a>
+  Every output field the API's output schema lists and does not require is owed whenever the
+  platform shows it. A `requireFields` option is owed only if you ticked it (see
+  [Fields customers ask for](#fields-customers-ask-for)). When AnyAPI checks an answer against
+  its own, it counts, on the results both answers have about the same thing, how often its
+  answer filled each field and how often yours filled it on those same results. A value is
+  filled unless it is `null`, `""`, `[]`, `{}`, `0` or `false`, on either side. So a field your
+  answers always send as `false`, `0` or `null` counts as never filled, even though it is
+  present. A result where AnyAPI's own value is `false` or `0` is not counted against you.
+  Once AnyAPI's answers filled a field at least 20 times over the last 30 days and yours filled
+  it none of those times, the endpoint is stopped at once and gets no requests. The endpoint's
+  page and the email you get name each field with both counts. Fill the field whenever the
+  platform shows it, then run the re-test with `POST /v1/operator/endpoints/{id}/retest`. Once
+  the registration tests pass, the re-test sends requests your endpoint served before the stop
+  to your endpoint and to AnyAPI's own sources. A field passes on the first request where both
+  answers fill it, and fails once AnyAPI's answers filled it 20 times and yours none. If the
+  requests run out first, the field is not judged and the endpoint stays stopped. When every
+  field passes, the endpoint is back on at the first traffic share (5%), and what it answered
+  before the stop never stops it again. During the real-request check, the same count fails
+  the check on data quality.
 - **Text addressed to an AI reader suspends your account.** An answer must hold only what
   the source holds. If a check finds text in your answer that the source does not have and
   that speaks to an AI, a model, or a reviewer (for example, an instruction to ignore
@@ -322,11 +342,32 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   when you ticked every field it names; a request that names none is not affected. Of these
   options, only the ones you ticked are listed and counted when AnyAPI reports how often your
   answers fill each field. A ticked field that your answers never fill stops the endpoint, as
-  for any other field.
+  for any other field (see [A field your answers never fill](#a-field-your-answers-never-fill)).
 - **429 pauses your endpoint.** Answer `429` when you are overloaded. AnyAPI stops
   sending you requests until your `Retry-After` has passed, honored as given in seconds
   or as an HTTP date. Without a usable `Retry-After`, the pause lasts 60 seconds.
   Requests during the pause go to other endpoints.
+- **Declare a capacity your endpoint can really hold.** Whatever capacity you declare, AnyAPI
+  starts at most 5 new requests a second on each endpoint, and you cannot change that rate.
+  When requests arrive faster than you can serve them, answer `429` with a `Retry-After` at
+  once rather than answering slowly. A slow answer that passes the time limit is a timeout.
+- **What a failure costs.** <a id="what-a-failure-costs"></a> An error (any non-2xx status
+  other than `429`), a timeout or a malformed reply is unpaid and counts as a failure toward
+  the automatic pause, *Paused (quality)*. A `429` is unpaid too. It counts as a failure toward
+  that pause only when no other source answered the request and the request did not end as a
+  confirmed not-found; requests turned away during the pause your `429` set count the same
+  way. A `429` on a request another source answered counts nothing toward the pause.
+- **When the automatic pause happens.** AnyAPI pauses an endpoint when, over the last 24 hours
+  and since its status last changed, it had at least 20 answers and failures, at least 10 of
+  them failures, one failure in the last hour, and more than 20% failures. An endpoint is not
+  paused while it is the only one serving the API. An endpoint paused from *Live* is sent
+  unpaid copies of customer requests, one at a time, and is back on once at least 8 of the
+  latest 10 succeed; a `429` among them counts as a failure.
+- **Failures also move your place.** In the share of requests your endpoint finishes (see
+  *Ahead only while you finish as often*, below), every error, timeout and `429` counts as not
+  finished over the last 30 days, even when another source then answered. This does not apply
+  while the endpoint's traffic share is growing. Among endpoints at the same price, time your
+  endpoint spent on unpaid answers lowers its weight.
 - **The time limit is set per API.** AnyAPI sets how long it waits for any seller's
   endpoint on each API. The endpoint's page shows it, and so does `timeLimitSeconds` in
   `GET /v1/operator/endpoints/{id}`. A response after the limit counts as timed out: the
