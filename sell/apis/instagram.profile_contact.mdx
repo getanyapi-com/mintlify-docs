@@ -76,7 +76,7 @@ AnyAPI publishes this API from **$0.40 per 1,000 requests**. That is the price a
 | `data.externalUrl` | string | no | The website link on the profile. Absent when the account publishes no link. |
 | `data.handle` | string | yes | Instagram username without the leading @. |
 | `data.isBusiness` | boolean or null | no | Whether Instagram flags the account as a business account. Null when this source does not report it. |
-| `data.phones` | array | no | Every phone number found for the account, in E.164 form where the number could be normalized. Empty when the account publishes none. |
+| `data.phones` | array | no | Phone numbers found for the account. A number read from the bio (written with + and a country code) is in E.164 form; a contact number a source supplies is as the source writes it, and a number found both ways appears once when the source writes it with its country code. Empty when none is found. |
 | `data.private` | boolean | no | Whether the account is private. |
 | `data.publicEmail` | string | no | The address behind the profile's Email contact button, as the account owner entered it. Absent when the account publishes no contact email. |
 | `data.publicPhone` | string | no | The number behind the profile's Call or Text contact button, as the account owner entered it. Absent when the account publishes no contact phone. |
@@ -164,7 +164,7 @@ Extra fields are kept, missing declared fields fail.
               "items": {
                 "type": "string"
               },
-              "description": "Every phone number found for the account, in E.164 form where the number could be normalized. Empty when the account publishes none."
+              "description": "Phone numbers found for the account. A number read from the bio (written with + and a country code) is in E.164 form; a contact number a source supplies is as the source writes it, and a number found both ways appears once when the source writes it with its country code. Empty when none is found."
             },
             "isBusiness": {
               "type": [
