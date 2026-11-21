@@ -210,7 +210,8 @@ func verify(secret string, r *http.Request, path string, rawBody []byte) bool {
 
 ## The response you must return
 
-Reply `2xx` with JSON that validates against the API's output schema, in this envelope:
+Reply `2xx` to a request you completed, with JSON that validates against the API's output
+schema, in this envelope:
 
 ```json
 {
@@ -221,11 +222,14 @@ Reply `2xx` with JSON that validates against the API's output schema, in this en
 
 - **Extra fields are kept; missing declared fields fail.** Anything beyond the schema is
   passed to the customer, but every declared field must be present.
-- **No result is not an error, and the two kinds are different answers.** When what was
-  asked for does not exist (or is suspended or deleted), return `found: false` with
+- **No result is not an error, and the two kinds are different answers.** When you completed
+  the lookup and what was asked for does not exist (or is suspended or deleted), return `found: false` with
   `reason: "not_found"` and a 2xx. When it exists and has nothing to return (a search with
   no results, an account with no posts), return `found: true` with an empty list. Both are
   valid, billable answers, and the registration tests check that you give the right one.
+- **A lookup you could not complete is an error.** When a lookup cannot be completed, answer
+  with an error, not with "not found" or an empty answer. An error is unpaid but never counts
+  as a wrong answer.
 - A non-2xx status, output that does not validate, or a timeout is a failed attempt. The
   request fails over to another provider, you do not earn it, and repeated failures pause
   the endpoint.
