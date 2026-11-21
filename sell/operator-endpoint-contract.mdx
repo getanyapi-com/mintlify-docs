@@ -338,12 +338,12 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   Send `capacity`, `requestsPerSecond` or both; a field you leave out stays as it is. The
   value must be more than 0, and a fraction such as `0.5` means one request every two
   seconds; 0 or below is refused with `400`. Once you declare it, AnyAPI never starts two
-  customer requests on your endpoint less than 1/r seconds apart, across all of its servers,
+  requests on your endpoint less than 1/r seconds apart, across all of its servers,
   with no burst. Until you declare it, AnyAPI's default of 5 new requests a second applies,
   and after a quiet spell several requests may start at once. `GET /v1/operator/endpoints/{id}`
   returns `requestsPerSecond` and `requestsPerSecondDeclared`, which is `false` while the
-  default applies. It applies to customer requests only today: AnyAPI's registration tests
-  and its other checks on your endpoint are not yet held to it.
+  default applies. A declared requests-per-second rate applies to every request AnyAPI sends
+  your endpoint, its registration tests and checks included, not only customer requests.
 - **Fields customers ask for.** <a id="fields-customers-ask-for"></a> Some APIs let a customer
   name output fields that must be filled, with `requireFields`. Tick the ones your endpoint
   fills when you register, or later on the endpoint's page; through the API, send
@@ -411,7 +411,9 @@ API that pages, your page 2 is compared with AnyAPI's page 2, fetched through An
 cursor. Each page falls back on its own. If AnyAPI's page 1 fetch fails or finds nothing, your
 page 1 is compared with AnyAPI's recorded answer instead. If AnyAPI has no page 2 to compare (its
 page 2 fetch fails, or its page 1 gave no next page), your page 2 is checked against the API's
-contract only; a failed page 2 fetch does not change how page 1 is compared. A run
+contract only; a failed page 2 fetch does not change how page 1 is compared. A run that
+could not start every test in time at your declared requests per second shows as "did not
+finish": nothing counts against your endpoint, and you can run it again. A run
 where no test failed passes, and the real-request check judges the data AnyAPI could not compare. Each test
 result lists its fields with your value and AnyAPI's. A passing run starts the real-request check,
 and you can rerun without limit. A pass counts only while your base URL, path and signing
