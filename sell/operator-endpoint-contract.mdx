@@ -387,8 +387,11 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   confirmed not-found; requests turned away during the pause your `429` set count the same
   way. A `429` on a request another source answered counts nothing toward the pause.
 - **When the automatic pause happens.** AnyAPI pauses an endpoint when, over the last 24 hours
-  and since its status last changed, it had at least 20 answers and failures, at least 10 of
-  them failures, one failure in the last hour, and more than 20% failures. An endpoint is not
+  and since its status last changed, it had at least 20 requests, at least 10 of
+  them failed, one failure in the last hour, and more than 20% failed. It also pauses an
+  endpoint whose last hour alone meets the same 20, 10 and 20% marks, counting one outcome per
+  customer request (a retry on your endpoint is not a second failure) and only requests that
+  started since the status last changed. An endpoint is not
   paused while it is the only one serving the API. An endpoint paused from *Live* is sent
   unpaid copies of customer requests, one at a time, and is back on once at least 8 of the
   latest 10 succeed; a `429` among them counts as a failure.
