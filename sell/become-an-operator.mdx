@@ -412,7 +412,7 @@ API again answers 409.
 | Live (monitored) | Serving and earning, with quality watched extra closely. A new endpoint starts with a share of traffic that grows while its spot checks stay clean. |
 | Live | Serving and earning on real customer traffic. |
 | Paused (quality) | Paused by the automatic quality checks; re-tested and restored automatically when it passes. |
-| Stopped by AnyAPI | Stopped for answers that were wrong; gets no requests. The reason is on the endpoint's page. Fix it and run the re-test (`POST /v1/operator/endpoints/{id}/retest`). You can re-test at any time to see the result, but a re-test can turn the endpoint back on only from 24 hours after the stop (the endpoint's `retestFrom`); one that passes before then does not, so run it again after that time. Answering with an error when a lookup cannot be completed is free and never counted against you. |
+| Stopped by AnyAPI | Stopped for answers that were wrong; gets no requests. The reason is on the endpoint's page. Fix it and run the re-test (`POST /v1/operator/endpoints/{id}/retest`). You can re-test at any time to see the result, but a re-test can turn the endpoint back on only from 24 hours after the stop (the endpoint's `retestFrom`); one that passes before then does not, so run it again after that time. When a lookup cannot be completed, answer with an error, not with "not found" or an empty answer. An error is unpaid but never counts as a wrong answer; many errors can pause the endpoint, but that pause has no 24-hour wait. |
 | Retired | Permanently removed from routing. |
 
 ## Where to go next
