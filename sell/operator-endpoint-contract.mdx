@@ -393,7 +393,8 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   customer request (a retry on your endpoint is not a second failure) and only requests that
   started since the status last changed. The same goes for the last 10 minutes alone, and an
   endpoint is also paused when 10 requests in a row fail on it with none succeeding in between. An endpoint is not
-  paused while it is the only one serving the API. An endpoint paused from *Live* is sent
+  paused while it is the only one serving the API, and a pause for its share of failed requests
+  can be held back while the API as a whole is failing. An endpoint paused from *Live* is sent
   unpaid copies of customer requests, one at a time, and is back on once at least 8 of the
   latest 10 succeed; a `429` among them counts as a failure.
 - **Failures also move your place.** In the share of requests your endpoint finishes (see
