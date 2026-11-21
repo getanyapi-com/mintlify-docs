@@ -293,7 +293,9 @@ is wrong or the sources simply differ.
   answers fill it, and fails once AnyAPI's answers filled it 20 times and yours none. If the
   requests run out first, the field is not judged and the endpoint stays stopped. When every
   field passes, the endpoint is back on at the first traffic share (5%), and what it answered
-  before the stop never stops it again. During the real-request check, the same count fails
+  before the stop never stops it again. A re-test can turn the endpoint back on only from 24
+  hours after the stop (the endpoint's `retestFrom`); one that passes before then does not, so
+  run it again after that time. During the real-request check, the same count fails
   the check on data quality.
 - **Text addressed to an AI reader suspends your account.** An answer must hold only what
   the source holds. If a check finds text in your answer that the source does not have and
