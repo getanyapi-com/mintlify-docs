@@ -273,8 +273,24 @@ is wrong or the sources simply differ.
   receive to talk about turning it back on.
 - **False "not found" answers to ten different requests in 24 hours stop the endpoint.** <a id="false-not-found-answers"></a>
   An answer is a false "not found" when it said nothing was found, or was empty, where
-  AnyAPI's own answer had the result and a second AnyAPI source confirmed it. Once your
-  endpoint gave them to 10 different requests within the last 24 hours, it is stopped
+  AnyAPI's own answer had the result and a second AnyAPI source confirmed it. On a search API
+  (a free-text query that returns a list of results, on its first page of results), the two
+  AnyAPI answers must come from
+  different sources, and each must hold a valid result that matches the request. A valid result
+  meets every condition of the request AnyAPI can check (its time window, quoted phrases, and
+  filters, and a publish date on news) and, where results carry a creation time, was posted
+  more than 320 seconds before the request, so a result too new to have reached every source
+  never counts. A date in the query, such as `since:2026-11-22`, is read at its narrowest: a
+  result counts only when it falls inside that date in every time zone. A later page of a
+  search is never counted either way. A lookup that returns at most one result is not such a search: it returns its
+  best match, and two honest sources can return the same loose match for a name that exists
+  nowhere, so their agreeing proves nothing there. On a search API, an answer
+  with results also counts here when none of them is among the results of either AnyAPI answer,
+  the two AnyAPI answers share a valid result, and a smaller share of your results matched the
+  request than of AnyAPI's (kind `different_list`). Any other difference between your list and
+  AnyAPI's on a search API is taken as the sources differing: it is not listed, emailed or
+  counted, and it neither breaks nor extends a run of clean spot checks. Once your
+  endpoint gave such answers to 10 different requests within the last 24 hours, it is stopped
   automatically at once and gets no requests; the same request asked again counts once. The
   endpoint's page and the email you get say it was stopped automatically and give the count
   and the API. Answers from before an earlier stop for wrong answers are not counted again. Fix
@@ -344,7 +360,9 @@ clean: 5% of the requests it is the cheapest for, then 25%, then 50%, then all o
 move up takes at least 24 hours at the current share and 299 clean spot checks in a row; a
 spot check that looks wrong restarts that count. An answer that was empty or said nothing was
 found, where AnyAPI's own answer had results and a second AnyAPI source confirmed them, always
-restarts it. `GET /v1/operator/endpoints/{id}` reports
+restarts it; on a search API, an empty answer restarts it only when it counts as a false "not
+found" there, and so does an answer confirmed wrong for a different list (see
+[False "not found" answers](#false-not-found-answers)). `GET /v1/operator/endpoints/{id}` reports
 it as `traffic` (`sharePercent`, `growing`, `nextSharePercent`). While the share is growing
 the endpoint gets at most 5 requests at once, whatever capacity it declared.
 
