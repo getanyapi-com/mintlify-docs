@@ -292,6 +292,11 @@ network failures retry, with jittered exponential backoff that honors `Retry-Aft
 timeouts are never retried. The default `maxRetries` / `max_retries` is 2 (up to 3
 attempts), and you can set it on the client or per request.
 
+From version 0.179.0, `RateLimitedError` carries the 429's `Retry-After` as
+`retryAfterSeconds` / `retry_after_seconds`. A 429 is retried only when that delay is 8 seconds
+or less. A longer one is raised at once, such as the `rate_limited` answer when your account
+reaches its [per-minute limit](/rate-limits) on an API.
+
 REST error bodies carry an `error` message and, when available, a stable `code` such as
 `invalid_input`, `provider_rate_limited`, or `unclassified_upstream_response`. Branch on
 `code`, not the message text.
@@ -303,7 +308,7 @@ REST error bodies carry an `error` message and, when available, a stable `code` 
 | `InsufficientBalanceError` | 402 | Wallet balance or per-key cap exceeded |
 | `NotFoundError` | 404 | The API slug does not exist; a missing target is `found: false`, not a 404 |
 | `ResultNotFoundError` | - | `unwrap` on an empty found-data result |
-| `RateLimitedError` | 429 | Too many requests (retried automatically) |
+| `RateLimitedError` | 429 | Too many requests; see [Rate limits](/rate-limits) |
 | `UpstreamError` | 502 | An upstream request failed |
 | `ConnectionError` | 0 | Network or transport failure (retried) |
 | `TimeoutError` | 0 | Request exceeded its timeout (not retried) |
