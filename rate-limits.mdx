@@ -1,0 +1,60 @@
+---
+title: "Rate limits"
+description: "How many new requests your account can start to each API per minute, and what to do when you reach the limit."
+---
+
+Each account can start up to 500 new requests to one API in each minute. Minutes are UTC
+calendar minutes, so the count starts again at the top of every minute. Each API has its own
+count: a burst of `twitter.search` calls does not slow your `google.search` calls.
+
+The limit applies to requests paid from your AnyAPI wallet, through REST, the SDKs, the CLI,
+n8n, and MCP. Requests paid per call with [x402 or MPP](/agent-payments) are not limited.
+
+## When you reach the limit
+
+A request over the limit gets HTTP `429` with error code `rate_limited`. The `Retry-After`
+header gives the number of seconds until the next minute starts. Nothing runs and nothing is
+charged.
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 23
+Content-Type: application/json
+
+{
+  "error": "this account has reached its limit of 500 requests a minute to this API, so nothing was run or charged; retry in 23 seconds, when the next minute starts",
+  "code": "rate_limited"
+}
+```
+
+On MCP, `run_api` returns an error result with the same message, followed by a second text
+block you can parse:
+
+```json
+{"error":"rate_limited","retryAfterSeconds":23}
+```
+
+Once in a while AnyAPI cannot confirm your count. You get the same `429 rate_limited`, and the
+same advice applies: wait `Retry-After` seconds and send the request again.
+
+## What counts
+
+- Only new requests count toward the limit.
+- Sending a request again with the `Idempotency-Key` of one that was already accepted returns
+  that request's result without using up the limit. While the limit is reached, that call is
+  refused like a new one until the next minute.
+- Reading a request with `GET /v1/requests/{id}` or MCP `get_request` never counts. It has its
+  own pacing, described in [Durable requests](/durable-requests).
+
+## Handle a 429
+
+1. Read `Retry-After` (MCP: `retryAfterSeconds`).
+2. Wait that many seconds. A shorter wait is refused again, because the count has not reset yet.
+3. Send the same request again. It was never run, so this does not charge you twice.
+
+If you send large batches, spread them across minutes instead of sending them all at once.
+
+## Need a higher limit
+
+Email [support@getanyapi.com](mailto:support@getanyapi.com) with your account email, the API
+you call, and how many requests a minute you need.
