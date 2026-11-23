@@ -10,8 +10,7 @@ Pagination support is SKU-specific.
 
 Fetch the selected API's contract with `GET /v1/apis/{sku}` or MCP `get_api`. Use cursor
 pagination only when `inputSchema` declares `cursor` and the output schema declares
-`nextCursor`. Include `limit` or `requireSinglePage` only when `inputSchema` also declares
-those fields.
+`nextCursor`. Include `limit` only when `inputSchema` also declares it.
 
 Call again with `data.nextCursor` as `cursor` until `nextCursor` is `null`. The examples
 use `instagram.followers`, whose schema declares these fields.
@@ -89,19 +88,7 @@ curl -s https://api.getanyapi.com/v1/run/instagram.followers \
   from another API. If a cursor is rejected because it expired, start again without a cursor.
 </Note>
 
-## Get everything in one call
-
-If you cannot loop and the selected `inputSchema` declares `requireSinglePage`, set
-**`requireSinglePage: true`** to request up to the schema's allowed `limit` in one response.
-This route can cost more than walking pages.
-
-```bash curl
-curl -s https://api.getanyapi.com/v1/run/instagram.followers \
-  -H "X-API-Key: YOUR_ANYAPI_KEY" -H "Content-Type: application/json" \
-  -d '{"username":"natgeo","limit":500,"requireSinglePage":true}'
-```
-
 ## Cost
 
-Check the selected API's `pricing` before choosing between paging and a supported
-single-page request. Your exact charge in USD is returned as `costUsd`.
+Check the selected API's `pricing` before walking a large result set. Your exact
+charge in USD is returned as `costUsd`.
