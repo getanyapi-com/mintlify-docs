@@ -1,0 +1,284 @@
+---
+title: "TikTok Shop Product Reviews"
+description: "Sell tiktok_shop.product_reviews on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Fetch customer reviews for a TikTok Shop product by URL (rating, text, reviewer, country, and verified-purchase flag).
+
+This page is the seller-facing summary of one catalog API, `tiktok_shop.product_reviews`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.95 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `page` | integer | no | 1-based results page. Use with hasMore in the output to paginate. Default `1`. |
+| `region` | string | no | Two-letter country code of the product's shop region (e.g. US). Strongly recommended for correct results. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `rating`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be empty on a review that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `url` | string | yes | TikTok Shop product URL (e.g. https://www.tiktok.com/shop/pdp/.../1729385633899532161). |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok_shop.product_reviews.input.json",
+  "example": {
+    "url": "https://www.tiktok.com/shop/pdp/cat-nail-clipper-by-potaroma-adjustable-sizes-built-in-file-safe-for-kittens-cats/1731578642912612516"
+  },
+  "title": "TikTok Shop product reviews input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "TikTok Shop product URL (e.g. https://www.tiktok.com/shop/pdp/.../1729385633899532161)."
+    },
+    "region": {
+      "type": "string",
+      "description": "Two-letter country code of the product's shop region (e.g. US). Strongly recommended for correct results."
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "1-based results page. Use with hasMore in the output to paginate."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "rating"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `rating`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be empty on a review that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | Wrapper holding the reviews array plus totals, or null when nothing was found. |
+| `data.hasMore` | boolean | yes | True when more reviews are available beyond this page. |
+| `data.rating` | number or null | yes | Overall product score (1-5), or null when the serving source does not report it. |
+| `data.reviews` | array | yes | Product reviews. |
+| `data.reviews[].avatarUrl` | string | no | Reviewer's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.reviews[].country` | string | yes | Reviewer's country code. |
+| `data.reviews[].createdUtc` | number | yes | Review time as epoch milliseconds. |
+| `data.reviews[].id` | string | yes | Review identifier. |
+| `data.reviews[].images` | array | no | Photos the reviewer attached, as image URLs; empty when the review has none. Some are signed and short-lived, so the query string is kept intact. Omitted when the serving source does not report review photos. |
+| `data.reviews[].productId` | string | no | Identifier of the reviewed product. |
+| `data.reviews[].rating` | number | yes | Star rating for this review (1-5). |
+| `data.reviews[].reviewerName` | string | yes | Display name of the reviewer. |
+| `data.reviews[].sku` | string | yes | Variant bought, e.g. "Color: Black". |
+| `data.reviews[].text` | string | yes | Review text content. |
+| `data.reviews[].verifiedPurchase` | boolean | yes | True when the review is from a verified purchase. |
+| `data.totalReviews` | integer or null | yes | Total number of reviews for the product, or null when the serving source does not report it. |
+| `found` | boolean | yes | True when reviews were found; false when the lookup returned nothing. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok_shop.product_reviews.output.json",
+  "title": "TikTok Shop product reviews output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "True when reviews were found; false when the lookup returned nothing."
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "totalReviews",
+            "rating",
+            "hasMore",
+            "reviews"
+          ],
+          "properties": {
+            "totalReviews": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Total number of reviews for the product, or null when the serving source does not report it."
+            },
+            "rating": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Overall product score (1-5), or null when the serving source does not report it."
+            },
+            "hasMore": {
+              "type": "boolean",
+              "description": "True when more reviews are available beyond this page."
+            },
+            "reviews": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "rating",
+                  "text",
+                  "reviewerName",
+                  "country",
+                  "sku",
+                  "verifiedPurchase",
+                  "createdUtc"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Review identifier."
+                  },
+                  "rating": {
+                    "type": "number",
+                    "description": "Star rating for this review (1-5)."
+                  },
+                  "text": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Review text content."
+                  },
+                  "reviewerName": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Display name of the reviewer."
+                  },
+                  "country": {
+                    "type": "string",
+                    "description": "Reviewer's country code."
+                  },
+                  "sku": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Variant bought, e.g. \"Color: Black\"."
+                  },
+                  "verifiedPurchase": {
+                    "type": "boolean",
+                    "description": "True when the review is from a verified purchase."
+                  },
+                  "createdUtc": {
+                    "x-anyapi-must-populate": true,
+                    "type": "number",
+                    "description": "Review time as epoch milliseconds."
+                  },
+                  "productId": {
+                    "type": "string",
+                    "description": "Identifier of the reviewed product."
+                  },
+                  "avatarUrl": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "ibyteimg.com",
+                      "ttcdn-us.com",
+                      "lh3.googleusercontent.com"
+                    ],
+                    "type": "string",
+                    "description": "Reviewer's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "x-anyapi-domain": [
+                        "tiktokcdn.com",
+                        "tiktokcdn-us.com",
+                        "tiktokcdn-eu.com",
+                        "ibyteimg.com",
+                        "ttcdn-us.com",
+                        "lh3.googleusercontent.com"
+                      ],
+                      "type": "string"
+                    },
+                    "description": "Photos the reviewer attached, as image URLs; empty when the review has none. Some are signed and short-lived, so the query string is kept intact. Omitted when the serving source does not report review photos."
+                  }
+                }
+              },
+              "description": "Product reviews."
+            }
+          }
+        }
+      ],
+      "description": "Wrapper holding the reviews array plus totals, or null when nothing was found."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `createdUtc`
+- `id`
+- `reviewerName`
+- `reviews`
+- `sku`
+- `text`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `reviews` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.tiktok.com/shop/pdp/cat-nail-clipper-by-potaroma-adjustable-sizes-built-in-file-safe-for-kittens-cats/1731578642912612516"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).
