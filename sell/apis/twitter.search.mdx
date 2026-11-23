@@ -3,23 +3,21 @@ title: "X / Twitter Search"
 description: "Sell twitter.search on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
 ---
 
-Search X (Twitter) with full advanced-search syntax (operators like from:, since:, until:, min_faves: work inline in the query) and get structured tweets with text, author, engagement, and cursor pagination. Limit is a per-page maximum; native pages contain approximately 20 tweets unless requireSinglePage selects a bulk lane.
+Search X (Twitter) with full advanced-search syntax (operators like from:, since:, until:, min_faves: work inline in the query) and get structured tweets with text, author, engagement, and cursor pagination. Every call returns one full native page of about 20 tweets; follow nextCursor for more.
 
 This page is the seller-facing summary of one catalog API, `twitter.search`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.47 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.49 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
 | Field | Type | Required | What it means |
 | --- | --- | --- | --- |
 | `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of search results. |
-| `limit` | integer | no | Page size to ask for (1-50, default 20). Some sources honor it; others always return their whole native page of about 20. A page is never trimmed after the call, so follow nextCursor to continue exactly where this response ended. Default `20`. |
 | `query` | string | yes | Search query using X (Twitter) advanced-search syntax. IMPORTANT: bare terms are ANDed - a tweet must contain EVERY word, so a list of loosely related keywords matches nothing; use one short phrase or OR between alternatives (e.g. 'anyapi OR getanyapi'). When an operator follows an OR list, put the list in parentheses, e.g. '(anyapi OR getanyapi) -filter:replies': without them X applies the operator to the last alternative only, so such a query still runs as X reads it and the response's hint carries the corrected query. You can embed X advanced-search operators directly in the query to filter results: from:username and to:username (author or recipient), since:YYYY-MM-DD and until:YYYY-MM-DD (date range), min_faves:N, min_retweets:N, min_replies:N (engagement floors), "exact phrase", -term to exclude, filter:media and filter:links and -filter:replies (content filters), lang:en, near:city, and geocode:lat,long,radius. Examples: 'from:OpenAI', 'AI agents min_faves:500 -filter:replies', 'nvidia since:2026-01-01 until:2026-03-01'. A query with no matches returns an empty items array; prefer the fewest words that identify the topic. |
 | `queryType` | string | no | Which posts to return: 'Latest' (newest first, the default), 'Top' (most popular), 'Photos' (newest posts with images), or 'Videos' (newest posts with video). Photos and Videos search your query as written with filter:images or filter:videos added after it, so they cost the same as a Latest search. One of: `Latest`, `Top`, `Photos`, `Videos`. Default `"Latest"`. |
-| `requireSinglePage` | boolean | no | Set true to get up to limit results in one response instead of provider-native pages, served by a bulk provider when needed. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -34,6 +32,12 @@ AnyAPI publishes this API from **$0.47 per 1,000 requests**. That is the price a
   "type": "object",
   "additionalProperties": false,
   "x-anyapi-compat-inputs": {
+    "limit": {
+      "ignore": true
+    },
+    "requireSinglePage": {
+      "ignore": true
+    },
     "lang": {
       "fold_into": "query",
       "template": " lang:{value}",
@@ -53,13 +57,6 @@ AnyAPI publishes this API from **$0.47 per 1,000 requests**. That is the price a
     "query"
   ],
   "properties": {
-    "limit": {
-      "type": "integer",
-      "minimum": 1,
-      "maximum": 50,
-      "default": 20,
-      "description": "Page size to ask for (1-50, default 20). Some sources honor it; others always return their whole native page of about 20. A page is never trimmed after the call, so follow nextCursor to continue exactly where this response ended."
-    },
     "query": {
       "type": "string",
       "description": "Search query using X (Twitter) advanced-search syntax. IMPORTANT: bare terms are ANDed - a tweet must contain EVERY word, so a list of loosely related keywords matches nothing; use one short phrase or OR between alternatives (e.g. 'anyapi OR getanyapi'). When an operator follows an OR list, put the list in parentheses, e.g. '(anyapi OR getanyapi) -filter:replies': without them X applies the operator to the last alternative only, so such a query still runs as X reads it and the response's hint carries the corrected query. You can embed X advanced-search operators directly in the query to filter results: from:username and to:username (author or recipient), since:YYYY-MM-DD and until:YYYY-MM-DD (date range), min_faves:N, min_retweets:N, min_replies:N (engagement floors), \"exact phrase\", -term to exclude, filter:media and filter:links and -filter:replies (content filters), lang:en, near:city, and geocode:lat,long,radius. Examples: 'from:OpenAI', 'AI agents min_faves:500 -filter:replies', 'nvidia since:2026-01-01 until:2026-03-01'. A query with no matches returns an empty items array; prefer the fewest words that identify the topic."
@@ -78,10 +75,6 @@ AnyAPI publishes this API from **$0.47 per 1,000 requests**. That is the price a
     "cursor": {
       "type": "string",
       "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of search results."
-    },
-    "requireSinglePage": {
-      "type": "boolean",
-      "description": "Set true to get up to limit results in one response instead of provider-native pages, served by a bulk provider when needed."
     }
   }
 }
@@ -349,7 +342,7 @@ The registration tests send this example to your endpoint, with the API's other 
 - Latest is the default ranking, so a request that omits queryType asks for the newest matching posts.
 - There are no separate filter inputs: an author, date range, engagement floor or language is written inside the query string with X advanced-search operators such as from:, since:, until:, min_faves: and lang:en.
 - A query that matches nothing returns found true with an empty items array; found false never means no matches.
-- limit is a per-page maximum of 1 to 50, never a total, and nextCursor is null only when there is no further page.
+- Every call returns one full native page of about 20 posts, and nextCursor is null only when there is no further page.
 - Every item carries id, url and text.
 - text is the post's whole text with its links in place, each link either as X's short `https://t.co/` link or written out; removing a link must never remove the words or characters written right against it.
 
