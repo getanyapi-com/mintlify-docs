@@ -130,7 +130,7 @@ This API takes no input fields.
 | `data.ads[].creatives[].videoUrl` | string | no | Card video file URL (HD when supplied, otherwise SD). Present only on video cards. |
 | `data.ads[].ctaText` | string | no | Call-to-action button label on the ad. |
 | `data.ads[].ctaType` | string | no | Call-to-action button type on the ad, e.g. "SHOP_NOW". |
-| `data.ads[].currency` | string | yes |  |
+| `data.ads[].currency` | string or null | no | Currency code of the ad's reported spend, such as USD or EUR. Null when the source does not report one, which is the case for most ads. |
 | `data.ads[].displayFormat` | string | yes |  |
 | `data.ads[].endDate` | integer | yes | Epoch seconds. |
 | `data.ads[].id` | string | yes | Ad Library archive ID. |
@@ -208,7 +208,6 @@ Extra fields are kept, missing declared fields fail.
                   "active",
                   "startDate",
                   "endDate",
-                  "currency",
                   "text",
                   "displayFormat",
                   "platforms",
@@ -241,7 +240,11 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Epoch seconds."
                   },
                   "currency": {
-                    "type": "string"
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Currency code of the ad's reported spend, such as USD or EUR. Null when the source does not report one, which is the case for most ads."
                   },
                   "text": {
                     "x-anyapi-must-populate": true,
