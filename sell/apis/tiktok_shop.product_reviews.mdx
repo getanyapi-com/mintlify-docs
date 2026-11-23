@@ -77,7 +77,7 @@ AnyAPI publishes this API from **$0.95 per 1,000 requests**. That is the price a
 | `data.reviews` | array | yes | Product reviews. |
 | `data.reviews[].avatarUrl` | string | no | Reviewer's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
 | `data.reviews[].country` | string | yes | Reviewer's country code. |
-| `data.reviews[].createdUtc` | number | yes | Review time as epoch milliseconds. |
+| `data.reviews[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the review was posted. |
 | `data.reviews[].id` | string | yes | Review identifier. |
 | `data.reviews[].images` | array | no | Photos the reviewer attached, as image URLs; empty when the review has none. Some are signed and short-lived, so the query string is kept intact. Omitted when the serving source does not report review photos. |
 | `data.reviews[].productId` | string | no | Identifier of the reviewed product. |
@@ -193,7 +193,7 @@ Extra fields are kept, missing declared fields fail.
                   "createdUtc": {
                     "x-anyapi-must-populate": true,
                     "type": "number",
-                    "description": "Review time as epoch milliseconds."
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. When the review was posted."
                   },
                   "productId": {
                     "type": "string",
