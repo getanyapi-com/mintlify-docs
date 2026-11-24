@@ -1,0 +1,324 @@
+---
+title: "TikTok Photos"
+description: "Sell tiktok.photos on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Get every image in a TikTok photo-mode (slideshow) post by URL, in order, with pixel dimensions and both the clean and watermarked variant of each. Videos carry no images - use tiktok.video_download for those.
+
+This page is the seller-facing summary of one catalog API, `tiktok.photos`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `authorFollowers`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `url` | string | yes | Full TikTok photo-mode post URL. TikTok serves slideshow posts under the same /video/&lt;id&gt; path as videos, so the normal share link works. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.photos.input.json",
+  "example": {
+    "url": "https://www.tiktok.com/@foodbyfranchi/video/7479916555602513174"
+  },
+  "title": "TikTok Photos input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Full TikTok photo-mode post URL. TikTok serves slideshow posts under the same /video/<id> path as videos, so the normal share link works."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "authorFollowers"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `authorFollowers`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.authorFollowers` | integer or null | no | The author's follower count at the time of the request. Null when the serving source does not report it. |
+| `data.authorHandle` | string | no | Author's TikTok handle, without the leading @. |
+| `data.authorImage` | string | no | Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.authorName` | string | no | Author's display name. |
+| `data.authorUserId` | string | no | Author's numeric TikTok user id. |
+| `data.caption` | string | no | Post caption. |
+| `data.comments` | integer | no | Comment count. |
+| `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.hashtags` | array | no | Hashtags carried in the caption, without the leading #. Empty when the post uses none; @-mentions are excluded. |
+| `data.id` | string | yes | TikTok post id. |
+| `data.images` | array | yes | Every image in the post, in the order the creator arranged them. |
+| `data.images[].height` | integer | no | Pixel height of the image. |
+| `data.images[].image` | string | yes | The image without TikTok's watermark or the creator's handle. A signed, short-lived TikTok CDN URL, so fetch it promptly; the query params are the signature and must be kept intact. Despite the .jpeg in the path this is often served as HEIC, so transcode if you need broad browser support. |
+| `data.images[].watermarkedImage` | string | no | The same image carrying TikTok's watermark and the creator's handle. Signed and short-lived on the same terms as image. |
+| `data.images[].width` | integer | no | Pixel width of the image. |
+| `data.likes` | integer | no | Like count. |
+| `data.region` | string | no | Two-letter region code the post was published from. |
+| `data.saves` | integer | no | Save count. |
+| `data.shares` | integer | no | Share count. |
+| `data.soundAuthor` | string | no | Credited author of the sound. |
+| `data.soundClipId` | string | no | Id of the sound the post uses. Pass it to tiktok.song or tiktok.song_videos as clipId. |
+| `data.soundTitle` | string | no | Name of the sound. "original sound" means the creator's own audio rather than a licensed track. |
+| `data.url` | string | no | Canonical TikTok URL of the photo post. |
+| `data.views` | integer | no | View count. |
+| `found` | boolean | yes | False when the post carries no photo-mode images: a plain video (use tiktok.video_download), or a deleted or private post. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.photos.output.json",
+  "title": "TikTok Photos output",
+  "x-anyapi-result-list": "images",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "False when the post carries no photo-mode images: a plain video (use tiktok.video_download), or a deleted or private post."
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "images"
+          ],
+          "properties": {
+            "id": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "TikTok post id."
+            },
+            "images": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Every image in the post, in the order the creator arranged them.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "image"
+                ],
+                "properties": {
+                  "image": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "ibyteimg.com",
+                      "ibytedtos.com",
+                      "ttcdn-us.com",
+                      "lh3.googleusercontent.com"
+                    ],
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The image without TikTok's watermark or the creator's handle. A signed, short-lived TikTok CDN URL, so fetch it promptly; the query params are the signature and must be kept intact. Despite the .jpeg in the path this is often served as HEIC, so transcode if you need broad browser support."
+                  },
+                  "watermarkedImage": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "ibyteimg.com",
+                      "ibytedtos.com",
+                      "ttcdn-us.com",
+                      "lh3.googleusercontent.com"
+                    ],
+                    "type": "string",
+                    "format": "uri",
+                    "description": "The same image carrying TikTok's watermark and the creator's handle. Signed and short-lived on the same terms as image."
+                  },
+                  "width": {
+                    "type": "integer",
+                    "description": "Pixel width of the image."
+                  },
+                  "height": {
+                    "type": "integer",
+                    "description": "Pixel height of the image."
+                  }
+                }
+              }
+            },
+            "caption": {
+              "type": "string",
+              "description": "Post caption."
+            },
+            "url": {
+              "x-anyapi-domain": "tiktok.com",
+              "type": "string",
+              "description": "Canonical TikTok URL of the photo post."
+            },
+            "createdUtc": {
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "region": {
+              "type": "string",
+              "description": "Two-letter region code the post was published from."
+            },
+            "views": {
+              "type": "integer",
+              "description": "View count."
+            },
+            "likes": {
+              "type": "integer",
+              "description": "Like count."
+            },
+            "comments": {
+              "type": "integer",
+              "description": "Comment count."
+            },
+            "shares": {
+              "type": "integer",
+              "description": "Share count."
+            },
+            "saves": {
+              "type": "integer",
+              "description": "Save count."
+            },
+            "authorHandle": {
+              "type": "string",
+              "description": "Author's TikTok handle, without the leading @."
+            },
+            "authorName": {
+              "type": "string",
+              "description": "Author's display name."
+            },
+            "authorUserId": {
+              "type": "string",
+              "description": "Author's numeric TikTok user id."
+            },
+            "authorImage": {
+              "x-anyapi-domain": [
+                "tiktokcdn.com",
+                "tiktokcdn-us.com",
+                "tiktokcdn-eu.com",
+                "ibyteimg.com",
+                "ibytedtos.com",
+                "ttcdn-us.com",
+                "lh3.googleusercontent.com"
+              ],
+              "type": "string",
+              "description": "Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+            },
+            "soundClipId": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Id of the sound the post uses. Pass it to tiktok.song or tiktok.song_videos as clipId."
+            },
+            "soundTitle": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Name of the sound. \"original sound\" means the creator's own audio rather than a licensed track."
+            },
+            "soundAuthor": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Credited author of the sound."
+            },
+            "hashtags": {
+              "type": "array",
+              "description": "Hashtags carried in the caption, without the leading #. Empty when the post uses none; @-mentions are excluded.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "authorFollowers": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "The author's follower count at the time of the request. Null when the serving source does not report it."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `id`
+- `image`
+- `images`
+- `soundAuthor`
+- `soundClipId`
+- `soundTitle`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+This API says what comes back as not found:
+
+> False when the post carries no photo-mode images: a plain video (use tiktok.video_download), or a deleted or private post.
+
+Answer those cases with the not-found shape above. Otherwise, an empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `images` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://www.tiktok.com/@foodbyfranchi/video/7479916555602513174"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

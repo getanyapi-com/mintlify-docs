@@ -310,7 +310,13 @@ When the entity does not exist, answer 2xx with the not-found shape:
 }
 ```
 
-An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `hashtags` array.
+This API says what comes back as not found:
+
+> False when the post is deleted or private. A photo-mode post can also come back false; when it comes back true, videoUrl and sdVideoUrl carry its music, not a video, and watermarkedUrl is usually absent (use tiktok.photos for its images).
+>
+> A photo-mode post has no video: for one, videoUrl and sdVideoUrl carry the post's music (an audio file) and watermarkedUrl is usually absent, or the call may answer not found; use tiktok.photos for its images.
+
+Answer those cases with the not-found shape above, never with `found: true` and empty values. A field the entity genuinely leaves empty otherwise comes back empty, with `found: true`.
 
 This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
 
