@@ -3,13 +3,13 @@ title: "YouTube Channel Videos"
 description: "Sell youtube.channel_videos on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
 ---
 
-List a YouTube channel's videos by handle or channel ID with cursor pagination (title, views, length, publish time).
+List the regular videos on a YouTube channel's Videos tab by handle or channel ID, with cursor pagination (title, views, length, publish time). Shorts are not included; use youtube.channel_shorts for them and youtube.channel_lives for live streams.
 
 This page is the seller-facing summary of one catalog API, `youtube.channel_videos`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.79 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.70 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -88,7 +88,7 @@ This API takes no input fields.
 | --- | --- | --- | --- |
 | `data` | null or object | yes |  |
 | `data.nextCursor` | string or null | yes | Opaque cursor for the next page of videos, or null when this lane has no more. Pass it back as cursor to continue. |
-| `data.videos` | array | yes |  |
+| `data.videos` | array | yes | The channel's regular videos, as its Videos tab lists them. Shorts are not included; they are returned by youtube.channel_shorts. |
 | `data.videos[].createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Some sources only show a relative age such as "4 days ago", so the value is estimated from it and can be off by up to the label's unit (a day, a week, a month); name `createdUtc` in requireFields to be served only by a source that returns the exact time. Multiply by 1000 for a JS Date in milliseconds. |
 | `data.videos[].id` | string | yes |  |
 | `data.videos[].image` | string | no | URL of the video thumbnail image, tracking query parameters stripped. |
@@ -141,6 +141,7 @@ Extra fields are kept, missing declared fields fail.
             "videos": {
               "x-anyapi-must-populate": true,
               "type": "array",
+              "description": "The channel's regular videos, as its Videos tab lists them. Shorts are not included; they are returned by youtube.channel_shorts.",
               "items": {
                 "type": "object",
                 "required": [
