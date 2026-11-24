@@ -1,22 +1,12 @@
 ---
-title: "Pay per call with x402 and MPP"
-description: "Agents can pay AnyAPI inline per request with no account and no API key, settling on-chain via x402 (Base, USDC) or MPP (Tempo). The wallet is the identity."
+title: "Pay per call with x402"
+description: "Agents can pay AnyAPI inline per request with no account and no API key, settling on-chain via x402 (Base, USDC). The wallet is the identity."
 ---
 
 Every AnyAPI endpoint accepts **inline crypto payment**. An agent with a funded wallet can
 call any of the 200+ APIs with no account, key, or balance. The wallet is the identity, and
-you pay per call in USD. Two rails work on the same endpoints:
-
-<CardGroup cols={2}>
-  <Card title="x402" icon="ethereum">
-    Settle in USDC on **Base** mainnet. The facilitator sponsors gas; you sign an
-    authorization. Works with any standard x402 client.
-  </Card>
-  <Card title="MPP" icon="bolt">
-    Machine Payments Protocol, settling on **Tempo**. The buyer signs and broadcasts the
-    transfer, then replays the credential.
-  </Card>
-</CardGroup>
+you pay per call in USD with **x402**: you settle in USDC on **Base** mainnet, the
+facilitator sponsors gas, and you sign an authorization. Any standard x402 client works.
 
 <Info>
   To hold a USD balance and call with an API key instead, see the [Quickstart](/quickstart)
@@ -26,7 +16,7 @@ you pay per call in USD. Two rails work on the same endpoints:
 
 ## How inline payment works
 
-Both rails use the standard HTTP 402 handshake. AnyAPI validates the SKU and input first,
+x402 uses the standard HTTP 402 handshake. AnyAPI validates the SKU and input first,
 so an unknown SKU or invalid payload fails without asking for payment.
 
 <Steps>
@@ -36,13 +26,12 @@ so an unknown SKU or invalid payload fails without asking for payment.
   </Step>
   <Step title="Get a 402 with payment instructions">
     AnyAPI responds `402 Payment Required`. The x402 challenge rides in the
-    `PAYMENT-REQUIRED` header (and the response body); the MPP challenge rides in the
-    `WWW-Authenticate: Payment` header. Each carries the price, the network, the asset, and
-    the address to pay.
+    `PAYMENT-REQUIRED` header (and the response body). It carries the price, the network,
+    the asset, and the address to pay.
   </Step>
   <Step title="Pay and retry">
     Your client signs the payment and re-sends the request with the credential attached
-    (`PAYMENT-SIGNATURE` / `X-PAYMENT` for x402, `Authorization: Payment` for MPP). AnyAPI
+    (`PAYMENT-SIGNATURE`, or `X-PAYMENT` for x402 v1). AnyAPI
     verifies the payment, runs the API, and returns `200` with the result plus a receipt
     header.
   </Step>
@@ -95,54 +84,6 @@ What the challenge advertises, if you implement the wire format yourself:
 - **Versions:** the v2 challenge is in the `PAYMENT-REQUIRED` header; the v1 challenge is in
   the response body, so stock `x402-fetch` works out of the box. Pay back with
   `PAYMENT-SIGNATURE` (v2) or `X-PAYMENT` (v1).
-
-## Pay with MPP (Tempo)
-
-The [`mppx`](https://www.npmjs.com/package/mppx) client signs and broadcasts the transfer,
-then replays the credential:
-
-<CodeGroup>
-```javascript Node (mppx)
-import { Mppx, tempo } from "mppx/client";
-import { Receipt } from "mppx";
-import { privateKeyToAccount } from "viem/accounts";
-
-const buyer = privateKeyToAccount(process.env.PRIVATE_KEY);
-
-const client = Mppx.create({
-  methods: [tempo.charge({
-    account: buyer,
-    expectedChainId: 4217,                       // Tempo mainnet
-    rpcUrl: { 4217: "https://rpc.tempo.xyz" },
-  })],
-  polyfill: false,
-});
-
-const res = await client.fetch("https://api.getanyapi.com/v1/run/web.scrape", {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ url: "https://example.com" }),
-});
-
-const data = await res.json();
-console.log(data.provider, data.costUsd, data.output);
-
-// The settlement receipt carries the on-chain reference.
-const receipt = Receipt.fromResponse(res);
-if (receipt?.reference) console.log(`https://explore.tempo.xyz/tx/${receipt.reference}`);
-```
-</CodeGroup>
-
-The MPP challenge arrives as a `WWW-Authenticate: Payment` header
-(`method="tempo", intent="charge"`); you settle on Tempo (chain id `4217`) and replay the
-credential in `Authorization: Payment`. AnyAPI returns the result with a `Payment-Receipt`
-header.
-
-<Warning>
-  MPP settles the transfer before AnyAPI executes the request. If execution then fails, the
-  request returns an error, but the on-chain transfer cannot be reversed automatically. Keep
-  the request ID and transaction reference when contacting support.
-</Warning>
 
 ## What you pay
 
