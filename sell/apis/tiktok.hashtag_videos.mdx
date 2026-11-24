@@ -1,0 +1,344 @@
+---
+title: "TikTok Hashtag Videos"
+description: "Sell tiktok.hashtag_videos on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+List recent TikTok videos for a hashtag (creator, caption, views, likes, shares).
+
+This page is the seller-facing summary of one catalog API, `tiktok.hashtag_videos`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of videos. |
+| `hashtag` | string | yes | TikTok hashtag to fetch videos for, without the # prefix (e.g. booktok). |
+| `limit` | integer | no | Maximum number of results to return (1-20, default 20). |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `playCount`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. A source that returns only a rounded or shortened value for a field does not count as returning it. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.hashtag_videos.input.json",
+  "example": {
+    "hashtag": "cooking",
+    "limit": 3
+  },
+  "title": "TikTok hashtag videos input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "hashtag"
+  ],
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Maximum number of results to return (1-20, default 20)."
+    },
+    "hashtag": {
+      "type": "string",
+      "description": "TikTok hashtag to fetch videos for, without the # prefix (e.g. booktok)."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of videos."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "commentCount",
+          "likeCount",
+          "nextCursor",
+          "playCount",
+          "shareCount"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `playCount`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a video that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. A source that returns only a rounded or shortened value for a field does not count as returning it. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.items` | array | yes | Recent TikTok video records for the hashtag. |
+| `data.items[].authorFollowers` | integer or null | no | The author's follower count at the time of the request; the serving source may round large counts. Null when the serving source does not report it. |
+| `data.items[].authorHandle` | string | no | Username of the video's creator, without the @ prefix. Empty when the upstream omits it. |
+| `data.items[].authorImage` | string | no | Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.items[].authorName` | string | no | Author's display name. |
+| `data.items[].authorUserId` | string | no | Author's numeric TikTok user id. |
+| `data.items[].authorVerified` | boolean | no | Whether the author's account carries a TikTok verification badge. |
+| `data.items[].collectCount` | integer | no | Number of times the video was saved. |
+| `data.items[].commentCount` | integer | no | Number of comments on the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count. |
+| `data.items[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.items[].durationSeconds` | number | no | Video duration in seconds. |
+| `data.items[].hashtags` | array | no | Hashtags carried in the caption, without the leading #. Empty when the post uses none; @-mentions are excluded. |
+| `data.items[].id` | string | yes | The video's numeric TikTok ID, as a string. |
+| `data.items[].image` | string | no | URL of the video's cover/thumbnail image. Signed and short-lived, so the query string is load-bearing and kept intact. Empty when the upstream omits it. |
+| `data.items[].likeCount` | integer | no | Number of likes on the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count. |
+| `data.items[].playCount` | integer | no | Number of views/plays of the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count. |
+| `data.items[].shareCount` | integer | no | Number of shares of the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count. |
+| `data.items[].soundAuthor` | string or null | no | Credited author of the sound. Null when the serving source does not report it. |
+| `data.items[].soundClipId` | string or null | no | Id of the sound the video uses. Pass it to tiktok.song or tiktok.song_videos as clipId. Null when the serving source does not report it. |
+| `data.items[].soundTitle` | string or null | no | Name of the sound. "original sound" means the creator's own audio rather than a licensed track. Null when the serving source does not report it. |
+| `data.items[].text` | string | no | The video caption text. Empty for videos with no caption. |
+| `data.items[].url` | string | yes | Canonical tiktok.com URL of the video, with tracking query params stripped. |
+| `data.items[].videoUrl` | string | no | Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.nextCursor` | string or null | no | Opaque cursor for the next page of videos, or null when there are no more. Pass it back as cursor to continue. |
+| `found` | boolean | yes | Whether any videos were returned for the hashtag. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.hashtag_videos.output.json",
+  "title": "TikTok hashtag videos output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "Whether any videos were returned for the hashtag."
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Recent TikTok video records for the hashtag.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "url",
+                  "createdUtc"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "The video's numeric TikTok ID, as a string."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "The video caption text. Empty for videos with no caption."
+                  },
+                  "url": {
+                    "x-anyapi-domain": "tiktok.com",
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Canonical tiktok.com URL of the video, with tracking query params stripped."
+                  },
+                  "authorHandle": {
+                    "type": "string",
+                    "description": "Username of the video's creator, without the @ prefix. Empty when the upstream omits it."
+                  },
+                  "image": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "ibyteimg.com",
+                      "ibytedtos.com",
+                      "ttcdn-us.com",
+                      "lh3.googleusercontent.com"
+                    ],
+                    "type": "string",
+                    "description": "URL of the video's cover/thumbnail image. Signed and short-lived, so the query string is load-bearing and kept intact. Empty when the upstream omits it."
+                  },
+                  "playCount": {
+                    "type": "integer",
+                    "description": "Number of views/plays of the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count."
+                  },
+                  "likeCount": {
+                    "type": "integer",
+                    "description": "Number of likes on the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count."
+                  },
+                  "commentCount": {
+                    "type": "integer",
+                    "description": "Number of comments on the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count."
+                  },
+                  "shareCount": {
+                    "type": "integer",
+                    "description": "Number of shares of the video. Some sources round large counts (27.7M instead of 27,712,408); name the field in requireFields to be served only by a source that returns the exact count."
+                  },
+                  "createdUtc": {
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "collectCount": {
+                    "type": "integer",
+                    "description": "Number of times the video was saved."
+                  },
+                  "durationSeconds": {
+                    "type": "number",
+                    "description": "Video duration in seconds."
+                  },
+                  "videoUrl": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "tiktokv.com",
+                      "tiktokv.us",
+                      "tiktokv.eu",
+                      "tiktok.com",
+                      "tokcdn.com"
+                    ],
+                    "type": "string",
+                    "description": "Playable video URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  },
+                  "authorName": {
+                    "type": "string",
+                    "description": "Author's display name."
+                  },
+                  "authorUserId": {
+                    "type": "string",
+                    "description": "Author's numeric TikTok user id."
+                  },
+                  "authorImage": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "ibyteimg.com",
+                      "ibytedtos.com",
+                      "ttcdn-us.com",
+                      "lh3.googleusercontent.com"
+                    ],
+                    "type": "string",
+                    "description": "Author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  },
+                  "authorVerified": {
+                    "type": "boolean",
+                    "description": "Whether the author's account carries a TikTok verification badge."
+                  },
+                  "hashtags": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "description": "Hashtags carried in the caption, without the leading #. Empty when the post uses none; @-mentions are excluded.",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "soundTitle": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Name of the sound. \"original sound\" means the creator's own audio rather than a licensed track. Null when the serving source does not report it."
+                  },
+                  "soundAuthor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Credited author of the sound. Null when the serving source does not report it."
+                  },
+                  "soundClipId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Id of the sound the video uses. Pass it to tiktok.song or tiktok.song_videos as clipId. Null when the serving source does not report it."
+                  },
+                  "authorFollowers": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "The author's follower count at the time of the request; the serving source may round large counts. Null when the serving source does not report it."
+                  }
+                }
+              }
+            },
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of videos, or null when there are no more. Pass it back as cursor to continue."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `hashtags`
+- `id`
+- `items`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "hashtag": "cooking",
+  "limit": 3
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

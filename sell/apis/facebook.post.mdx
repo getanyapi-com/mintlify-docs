@@ -47,6 +47,7 @@ AnyAPI publishes this API from **$0.72 per 1,000 requests**. That is the price a
           "authorVerified",
           "feedbackId",
           "reactions",
+          "sharedPostText",
           "videoUrl",
           "views"
         ]
@@ -83,8 +84,9 @@ AnyAPI publishes this API from **$0.72 per 1,000 requests**. That is the price a
 | `data.reactions.love` | integer | no | Love reactions. |
 | `data.reactions.sad` | integer | no | Sad reactions. |
 | `data.reactions.wow` | integer | no | Wow reactions. |
+| `data.sharedPostText` | string or null | no | Text of the post this post shares. Null when the post shares nothing, when the shared post has no readable text, or when the serving source does not report it. To be served by a source that reports it, name `sharedPostText` in `requireFields`. |
 | `data.shares` | integer | yes |  |
-| `data.text` | string | yes |  |
+| `data.text` | string | yes | Text of the post. On a post that shares another post, some sources return the shared post's text here instead of the words its author added; name `sharedPostText` in `requireFields` to be served by a source that returns the author's own words here and the shared post's text in `sharedPostText`. |
 | `data.url` | string | no | Canonical Facebook URL of the post. |
 | `data.videoId` | string or null | no | Facebook video id of the post's reel or video, the id that appears in its /reel/&lt;id&gt; URL. Null when the post carries no video or this lane cannot read it. |
 | `data.videoUrl` | string or null | no | Playable video file URL of the post's reel or video. Null when the post carries no video or this source cannot read it. |
@@ -140,7 +142,8 @@ Extra fields are kept, missing declared fields fail.
             },
             "text": {
               "x-anyapi-must-populate": true,
-              "type": "string"
+              "type": "string",
+              "description": "Text of the post. On a post that shares another post, some sources return the shared post's text here instead of the words its author added; name `sharedPostText` in `requireFields` to be served by a source that returns the author's own words here and the shared post's text in `sharedPostText`."
             },
             "likes": {
               "type": "integer"
@@ -253,6 +256,13 @@ Extra fields are kept, missing declared fields fail.
                 "null"
               ],
               "description": "Facebook feedback id of the post; pass it to facebook.post_comments as feedbackId to fetch its comments. Null when this source cannot read it."
+            },
+            "sharedPostText": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Text of the post this post shares. Null when the post shares nothing, when the shared post has no readable text, or when the serving source does not report it. To be served by a source that reports it, name `sharedPostText` in `requireFields`."
             }
           }
         }

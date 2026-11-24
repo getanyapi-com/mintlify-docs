@@ -1,0 +1,238 @@
+---
+title: "TikTok Comment Replies"
+description: "Sell tiktok.comment_replies on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+List the replies to a TikTok comment with cursor pagination (text, author, likes).
+
+This page is the seller-facing summary of one catalog API, `tiktok.comment_replies`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.60 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `commentId` | string | yes | TikTok comment ID (the comment's cid from the comments endpoint). |
+| `cursor` | string | no | Pagination cursor from a previous response. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `authorUserId`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a reply that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
+| `url` | string | yes | TikTok video URL the comment belongs to, on tiktok.com: a video or photo post (https://www.tiktok.com/@&lt;user&gt;/video/&lt;id&gt; or /photo/&lt;id&gt;) or a vm.tiktok.com, vt.tiktok.com or tiktok.com/t/ share link. A /video/ or /photo/ link without the post's numeric id, a profile link (https://www.tiktok.com/@&lt;user&gt;), a /@&lt;user&gt;/&lt;id&gt; link without /video/, a video file link (tiktokcdn.com) or a link to any other site is refused as invalid input, with no charge. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.comment_replies.input.json",
+  "example": {
+    "commentId": "7623828115408274207",
+    "url": "https://www.tiktok.com/@stoolpresidente/video/7623818255903329566"
+  },
+  "title": "TikTok Comment Replies input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "commentId",
+    "url"
+  ],
+  "properties": {
+    "commentId": {
+      "type": "string",
+      "description": "TikTok comment ID (the comment's cid from the comments endpoint)."
+    },
+    "url": {
+      "type": "string",
+      "pattern": "^(?:[Hh][Tt][Tt][Pp][Ss]?://)?(?:[A-Za-z0-9-]+\\.)*[Tt][Ii][Kk][Tt][Oo][Kk]\\.[Cc][Oo][Mm]/(?:[^@]|@[^/?#]*/(?:video|photo)/(?:tt:)?[0-9]+(?:[/?#]|$))",
+      "description": "TikTok video URL the comment belongs to, on tiktok.com: a video or photo post (https://www.tiktok.com/@<user>/video/<id> or /photo/<id>) or a vm.tiktok.com, vt.tiktok.com or tiktok.com/t/ share link. A /video/ or /photo/ link without the post's numeric id, a profile link (https://www.tiktok.com/@<user>), a /@<user>/<id> link without /video/, a video file link (tiktokcdn.com) or a link to any other site is refused as invalid input, with no charge."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Pagination cursor from a previous response."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "authorUserId"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `authorUserId`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a reply that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.comments` | array | yes |  |
+| `data.comments[].author` | string | yes |  |
+| `data.comments[].authorImage` | string | no | Reply author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact. |
+| `data.comments[].authorName` | string | no | Reply author's display name. |
+| `data.comments[].authorUserId` | string or null | no | Reply author's numeric TikTok user id. Null when the serving source does not report it. |
+| `data.comments[].createdUtc` | number | yes | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.comments[].id` | string | yes |  |
+| `data.comments[].likes` | integer | yes |  |
+| `data.comments[].text` | string | yes |  |
+| `data.comments[].videoId` | string | no | Identifier of the video the reply belongs to. |
+| `data.nextCursor` | string or null | yes | Opaque cursor for the next page of comments, or null when this lane has no more. Pass it back as cursor to continue. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/tiktok.comment_replies.output.json",
+  "title": "TikTok Comment Replies output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "comments",
+            "nextCursor"
+          ],
+          "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of comments, or null when this lane has no more. Pass it back as cursor to continue."
+            },
+            "comments": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "text",
+                  "author",
+                  "likes",
+                  "createdUtc"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "text": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "author": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "likes": {
+                    "type": "integer"
+                  },
+                  "createdUtc": {
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "videoId": {
+                    "type": "string",
+                    "description": "Identifier of the video the reply belongs to."
+                  },
+                  "authorName": {
+                    "type": "string",
+                    "description": "Reply author's display name."
+                  },
+                  "authorImage": {
+                    "x-anyapi-domain": [
+                      "tiktokcdn.com",
+                      "tiktokcdn-us.com",
+                      "tiktokcdn-eu.com",
+                      "ibyteimg.com",
+                      "ibytedtos.com",
+                      "ttcdn-us.com",
+                      "lh3.googleusercontent.com"
+                    ],
+                    "type": "string",
+                    "description": "Reply author's avatar image URL. Signed and short-lived, so the query string is load-bearing and kept intact."
+                  },
+                  "authorUserId": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Reply author's numeric TikTok user id. Null when the serving source does not report it."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `author`
+- `id`
+- `text`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `comments` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "commentId": "7623828115408274207",
+  "url": "https://www.tiktok.com/@stoolpresidente/video/7623818255903329566"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

@@ -1,0 +1,623 @@
+---
+title: "LinkedIn Sales Navigator Lead Search"
+description: "Sell linkedin.search_leads on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+LinkedIn lead search with Sales Navigator's search and filters: one call returns a page of up to 25 people matching a keyword and Sales Navigator lead filters (location, job title, current and past company, school, seniority, function, company size, and more), or the results of a Sales Navigator lead-search URL you built yourself. Each lead comes with name, current positions, location, summary, and photo, and its url opens the profile and can be passed to linkedin.profile for the full record. For full profiles in one call use linkedin.search_profiles.
+
+This page is the seller-facing summary of one catalog API, `linkedin.search_leads`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$70.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+This API takes no input fields.
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.search_leads.input.json",
+  "example": {
+    "query": "engineer",
+    "currentCompanies": [
+      "Google"
+    ]
+  },
+  "title": "LinkedIn Sales Navigator lead search input",
+  "type": "object",
+  "additionalProperties": false,
+  "anyOf": [
+    {
+      "required": [
+        "query"
+      ]
+    },
+    {
+      "required": [
+        "salesNavUrl"
+      ]
+    }
+  ],
+  "properties": {
+    "page": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 1,
+      "description": "Which page of up to 25 leads to return, starting at 1 (1-100, default 1). Also pages through a salesNavUrl search. Each page is billed as one request."
+    },
+    "query": {
+      "type": "string",
+      "description": "Search keywords for LinkedIn leads: a role, name, or keywords (e.g. 'Marketing Manager'). Provide this or salesNavUrl."
+    },
+    "salesNavUrl": {
+      "type": "string",
+      "pattern": "^https://(?:www\\.)?linkedin\\.com/sales/",
+      "description": "Alternatively, a LinkedIn Sales Navigator lead-search URL you built in Sales Navigator (e.g. https://www.linkedin.com/sales/search/people?query=(keywords%3Aengineer)). When set it overrides query and every other filter on this request; only page still applies."
+    },
+    "location": {
+      "type": "string",
+      "pattern": "^[^,]*$",
+      "description": "Optional location filter (e.g. 'San Francisco'). Commas are not allowed in a value."
+    },
+    "jobTitle": {
+      "type": "string",
+      "pattern": "^[^,]*$",
+      "description": "Optional current job title filter (e.g. 'Software Engineer'). Commas are not allowed in a value."
+    },
+    "currentCompanies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 50,
+      "description": "Filter to people who currently work at any of these companies, by name (e.g. ['Google','Meta']). Multiple names widen the match (OR). Commas are not allowed in a value. Up to 50 values."
+    },
+    "pastCompanies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 50,
+      "description": "Filter to people who previously worked at any of these companies, by name. Commas are not allowed in a value. Up to 50 values."
+    },
+    "schools": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 50,
+      "description": "Filter to people who attended any of these schools, by name. Commas are not allowed in a value. Up to 50 values."
+    },
+    "pastJobTitles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 70,
+      "description": "Filter by a past job title the person held (e.g. ['Product Manager']). Commas are not allowed in a value. Up to 70 values."
+    },
+    "firstNames": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 70,
+      "description": "Filter to people whose first name matches any of these. Commas are not allowed in a value. Up to 70 values."
+    },
+    "lastNames": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 70,
+      "description": "Filter to people whose last name matches any of these. Commas are not allowed in a value. Up to 70 values."
+    },
+    "companyHeadquarterLocations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 70,
+      "description": "Filter by the location of the person's current company headquarters, by place name (e.g. ['United States']). Commas are not allowed in a value. Up to 70 values."
+    },
+    "recentlyChangedJobs": {
+      "type": "boolean",
+      "description": "When true, only return people who recently changed jobs (a strong sales/recruiting signal)."
+    },
+    "recentlyPostedOnLinkedIn": {
+      "type": "boolean",
+      "description": "When true, only return people who recently posted on LinkedIn (an activity signal)."
+    },
+    "seniorityLevelIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "100",
+          "110",
+          "120",
+          "130",
+          "200",
+          "210",
+          "220",
+          "300",
+          "310",
+          "320"
+        ]
+      },
+      "description": "Filter by seniority level. Codes: 100=In Training, 110=Entry Level, 120=Senior, 130=Strategic, 200=Entry Level Manager, 210=Experienced Manager, 220=Director, 300=Vice President, 310=CXO, 320=Owner/Partner."
+    },
+    "functionIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26"
+        ]
+      },
+      "description": "Filter by job function. Codes: 1=Accounting, 2=Administrative, 3=Arts and Design, 4=Business Development, 5=Community and Social Services, 6=Consulting, 7=Education, 8=Engineering, 9=Entrepreneurship, 10=Finance, 11=Healthcare Services, 12=Human Resources, 13=Information Technology, 14=Legal, 15=Marketing, 16=Media and Communication, 17=Military and Protective Services, 18=Operations, 19=Product Management, 20=Program and Project Management, 21=Purchasing, 22=Quality Assurance, 23=Real Estate, 24=Research, 25=Sales, 26=Customer Success and Support."
+    },
+    "yearsOfExperienceIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      "description": "Filter by total years of experience. Codes: 1=Less than 1 year, 2=1 to 2 years, 3=3 to 5 years, 4=6 to 10 years, 5=More than 10 years."
+    },
+    "yearsAtCurrentCompanyIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+        ]
+      },
+      "description": "Filter by tenure at the current company. Codes: 1=Less than 1 year, 2=1 to 2 years, 3=3 to 5 years, 4=6 to 10 years, 5=More than 10 years."
+    },
+    "companyHeadcount": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I"
+        ]
+      },
+      "description": "Filter by current company size (employee count). Codes: A=Self-Employed, B=1-10, C=11-50, D=51-200, E=201-500, F=501-1,000, G=1,001-5,000, H=5,001-10,000, I=10,001+."
+    },
+    "profileLanguages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Arabic",
+          "English",
+          "Spanish",
+          "Portuguese",
+          "Chinese",
+          "French",
+          "Italian",
+          "Russian",
+          "German",
+          "Dutch",
+          "Turkish",
+          "Tagalog",
+          "Polish",
+          "Korean",
+          "Japanese",
+          "Malay",
+          "Norwegian",
+          "Danish",
+          "Romanian",
+          "Swedish",
+          "Bahasa Indonesia",
+          "Czech"
+        ]
+      },
+      "description": "Filter by the profile's primary language."
+    },
+    "excludeLocations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 70,
+      "description": "Exclude people in any of these locations, by place name. Commas are not allowed in a value. Up to 70 values."
+    },
+    "excludeCurrentCompanies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 50,
+      "description": "Exclude people who currently work at any of these companies, by name. Commas are not allowed in a value. Up to 50 values."
+    },
+    "excludeCurrentJobTitles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 70,
+      "description": "Exclude people whose current job title matches any of these. Commas are not allowed in a value. Up to 70 values."
+    },
+    "excludePastCompanies": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 50,
+      "description": "Exclude people who previously worked at any of these companies, by name. Commas are not allowed in a value. Up to 50 values."
+    },
+    "excludeSchools": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 50,
+      "description": "Exclude people who attended any of these schools, by name. Commas are not allowed in a value. Up to 50 values."
+    },
+    "excludePastJobTitles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 70,
+      "description": "Exclude people who held any of these past job titles. Commas are not allowed in a value. Up to 70 values."
+    },
+    "excludeCompanyHeadquarterLocations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[^,]*$"
+      },
+      "maxItems": 70,
+      "description": "Exclude people whose current company is headquartered in any of these locations. Commas are not allowed in a value. Up to 70 values."
+    },
+    "excludeSeniorityLevelIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "100",
+          "110",
+          "120",
+          "130",
+          "200",
+          "210",
+          "220",
+          "300",
+          "310",
+          "320"
+        ]
+      },
+      "maxItems": 20,
+      "description": "Exclude these seniority levels (same codes as seniorityLevelIds). Up to 20 values."
+    },
+    "excludeFunctionIds": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17",
+          "18",
+          "19",
+          "20",
+          "21",
+          "22",
+          "23",
+          "24",
+          "25",
+          "26"
+        ]
+      },
+      "maxItems": 30,
+      "description": "Exclude these job functions (same codes as functionIds). Up to 30 values."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The results wrapper, or null when nothing matched. |
+| `data.items` | array | yes | Matching leads, up to 25 per page. |
+| `data.items[].about` | string | no | Profile summary text, when the member wrote one. |
+| `data.items[].currentPositions` | array | no | Current roles. |
+| `data.items[].currentPositions[].companyId` | string | no | LinkedIn company id. |
+| `data.items[].currentPositions[].companyLinkedinUrl` | string | no | LinkedIn company page URL. |
+| `data.items[].currentPositions[].companyName` | string | no | Company name. |
+| `data.items[].currentPositions[].startedOn` | object | no | When the role started, as `month` (1-12, when shown) and `year`. |
+| `data.items[].currentPositions[].tenureAtCompany` | object | no | Time at this company, as `numYears` and `numMonths`. |
+| `data.items[].currentPositions[].tenureAtPosition` | object | no | Time in this role, as `numYears` and `numMonths`. |
+| `data.items[].currentPositions[].title` | string | no | Job title. |
+| `data.items[].firstName` | string | no | Member's first name. |
+| `data.items[].id` | string | no | LinkedIn member id, the last segment of `url`. |
+| `data.items[].image` | string | no | Profile picture URL. The query string is a signed token, so keep the URL intact. |
+| `data.items[].lastName` | string | no | Member's last name. |
+| `data.items[].location` | string | no | Member's location as a single string (city, region, country). |
+| `data.items[].openProfile` | boolean | no | Whether the member accepts messages from people outside their network. |
+| `data.items[].premium` | boolean | no | Whether the member has a LinkedIn Premium subscription. |
+| `data.items[].url` | string | yes | LinkedIn profile URL in its member-id form (https://www.linkedin.com/in/ACwAAA...). It opens the profile on LinkedIn, and passing it as `url` to linkedin.profile returns the full record. |
+| `data.page` | integer | no | The page this response holds, starting at 1. |
+| `data.totalPages` | integer | no | How many pages of up to 25 leads the search has. |
+| `data.totalResults` | integer | no | How many leads match the search in total, across every page. |
+| `found` | boolean | yes | True when the page returned at least one lead. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/linkedin.search_leads.output.json",
+  "title": "LinkedIn Sales Navigator lead search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "True when the page returned at least one lead."
+    },
+    "data": {
+      "description": "The results wrapper, or null when nothing matched.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Matching leads, up to 25 per page.",
+              "items": {
+                "type": "object",
+                "description": "A LinkedIn lead: name, current positions, location, summary, and photo, plus a profile URL you can pass to linkedin.profile for the full record.",
+                "required": [
+                  "url"
+                ],
+                "properties": {
+                  "url": {
+                    "x-anyapi-domain": "linkedin.com",
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "LinkedIn profile URL in its member-id form (https://www.linkedin.com/in/ACwAAA...). It opens the profile on LinkedIn, and passing it as `url` to linkedin.profile returns the full record."
+                  },
+                  "id": {
+                    "type": "string",
+                    "description": "LinkedIn member id, the last segment of `url`."
+                  },
+                  "firstName": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Member's first name."
+                  },
+                  "lastName": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Member's last name."
+                  },
+                  "location": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Member's location as a single string (city, region, country)."
+                  },
+                  "about": {
+                    "type": "string",
+                    "description": "Profile summary text, when the member wrote one."
+                  },
+                  "image": {
+                    "x-anyapi-domain": "licdn.com",
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Profile picture URL. The query string is a signed token, so keep the URL intact."
+                  },
+                  "premium": {
+                    "type": "boolean",
+                    "description": "Whether the member has a LinkedIn Premium subscription."
+                  },
+                  "openProfile": {
+                    "type": "boolean",
+                    "description": "Whether the member accepts messages from people outside their network."
+                  },
+                  "currentPositions": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "description": "Current roles.",
+                    "items": {
+                      "type": "object",
+                      "description": "One current role.",
+                      "properties": {
+                        "title": {
+                          "type": "string",
+                          "description": "Job title."
+                        },
+                        "companyName": {
+                          "type": "string",
+                          "description": "Company name."
+                        },
+                        "companyId": {
+                          "type": "string",
+                          "description": "LinkedIn company id."
+                        },
+                        "companyLinkedinUrl": {
+                          "x-anyapi-domain": "linkedin.com",
+                          "type": "string",
+                          "description": "LinkedIn company page URL."
+                        },
+                        "startedOn": {
+                          "type": "object",
+                          "description": "When the role started, as `month` (1-12, when shown) and `year`."
+                        },
+                        "tenureAtPosition": {
+                          "type": "object",
+                          "description": "Time in this role, as `numYears` and `numMonths`."
+                        },
+                        "tenureAtCompany": {
+                          "type": "object",
+                          "description": "Time at this company, as `numYears` and `numMonths`."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "totalResults": {
+              "type": "integer",
+              "description": "How many leads match the search in total, across every page."
+            },
+            "totalPages": {
+              "type": "integer",
+              "description": "How many pages of up to 25 leads the search has."
+            },
+            "page": {
+              "type": "integer",
+              "description": "The page this response holds, starting at 1."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `currentPositions`
+- `firstName`
+- `image`
+- `items`
+- `lastName`
+- `location`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "engineer",
+  "currentCompanies": [
+    "Google"
+  ]
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

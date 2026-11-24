@@ -50,6 +50,7 @@ This API takes no input fields.
       "items": {
         "type": "string",
         "enum": [
+          "sharedPostText",
           "shares"
         ]
       },
@@ -101,8 +102,9 @@ This API takes no input fields.
 | `data.posts[].reactions.love` | integer | no | Love reactions. |
 | `data.posts[].reactions.sad` | integer | no | Sad reactions. |
 | `data.posts[].reactions.wow` | integer | no | Wow reactions. |
+| `data.posts[].sharedPostText` | string or null | no | Text of the post this post shares. Null when the post shares nothing, when the shared post has no readable text, or when the serving source does not report it. To be served by a source that reports it, name `sharedPostText` in `requireFields` from the first page. |
 | `data.posts[].shares` | integer or null | no | Number of times the post was shared. Null when this source does not report it. |
-| `data.posts[].text` | string | yes |  |
+| `data.posts[].text` | string | yes | Text of the post as the page or profile wrote it. On a post that shares another post, this is the words the sharer added. |
 | `data.posts[].url` | string | yes |  |
 | `found` | boolean | yes |  |
 
@@ -165,7 +167,8 @@ Extra fields are kept, missing declared fields fail.
                   },
                   "text": {
                     "x-anyapi-must-populate": true,
-                    "type": "string"
+                    "type": "string",
+                    "description": "Text of the post as the page or profile wrote it. On a post that shares another post, this is the words the sharer added."
                   },
                   "url": {
                     "x-anyapi-domain": "facebook.com",
@@ -284,6 +287,13 @@ Extra fields are kept, missing declared fields fail.
                       "null"
                     ],
                     "description": "Number of times the post was shared. Null when this source does not report it."
+                  },
+                  "sharedPostText": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Text of the post this post shares. Null when the post shares nothing, when the shared post has no readable text, or when the serving source does not report it. To be served by a source that reports it, name `sharedPostText` in `requireFields` from the first page."
                   }
                 }
               }
