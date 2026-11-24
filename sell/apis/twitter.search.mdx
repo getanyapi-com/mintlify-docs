@@ -18,6 +18,7 @@ AnyAPI publishes this API from **$0.48 per 1,000 requests**. That is the price a
 | `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page; pass it to fetch the next page of search results. |
 | `query` | string | yes | Search query using X (Twitter) advanced-search syntax. IMPORTANT: bare terms are ANDed - a tweet must contain EVERY word, so a list of loosely related keywords matches nothing; use one short phrase or OR between alternatives (e.g. 'anyapi OR getanyapi'). When an operator follows an OR list, put the list in parentheses, e.g. '(anyapi OR getanyapi) -filter:replies': without them X applies the operator to the last alternative only, so such a query still runs as X reads it and the response's hint carries the corrected query. You can embed X advanced-search operators directly in the query to filter results: from:username and to:username (author or recipient), since:YYYY-MM-DD and until:YYYY-MM-DD (date range), min_faves:N, min_retweets:N, min_replies:N (engagement floors), "exact phrase", -term to exclude, filter:media and filter:links and -filter:replies (content filters), lang:en, near:city, and geocode:lat,long,radius. Examples: 'from:OpenAI', 'AI agents min_faves:500 -filter:replies', 'nvidia since:2026-01-01 until:2026-03-01'. A query with no matches returns an empty items array; prefer the fewest words that identify the topic. |
 | `queryType` | string | no | Which posts to return: 'Latest' (newest first, the default), 'Top' (most popular), 'Photos' (newest posts with images), or 'Videos' (newest posts with video). Photos and Videos search your query as written with filter:images or filter:videos added after it, so they cost the same as a Latest search. One of: `Latest`, `Top`, `Photos`, `Videos`. Default `"Latest"`. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -57,6 +58,17 @@ AnyAPI publishes this API from **$0.48 per 1,000 requests**. That is the price a
     "query"
   ],
   "properties": {
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "nextCursor"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `nextCursor`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
+    },
     "query": {
       "type": "string",
       "description": "Search query using X (Twitter) advanced-search syntax. IMPORTANT: bare terms are ANDed - a tweet must contain EVERY word, so a list of loosely related keywords matches nothing; use one short phrase or OR between alternatives (e.g. 'anyapi OR getanyapi'). When an operator follows an OR list, put the list in parentheses, e.g. '(anyapi OR getanyapi) -filter:replies': without them X applies the operator to the last alternative only, so such a query still runs as X reads it and the response's hint carries the corrected query. You can embed X advanced-search operators directly in the query to filter results: from:username and to:username (author or recipient), since:YYYY-MM-DD and until:YYYY-MM-DD (date range), min_faves:N, min_retweets:N, min_replies:N (engagement floors), \"exact phrase\", -term to exclude, filter:media and filter:links and -filter:replies (content filters), lang:en, near:city, and geocode:lat,long,radius. Examples: 'from:OpenAI', 'AI agents min_faves:500 -filter:replies', 'nvidia since:2026-01-01 until:2026-03-01'. A query with no matches returns an empty items array; prefer the fewest words that identify the topic."
@@ -114,7 +126,7 @@ AnyAPI publishes this API from **$0.48 per 1,000 requests**. That is the price a
 | `data.items[].text` | string | yes |  |
 | `data.items[].url` | string | yes |  |
 | `data.items[].viewCount` | integer or null | no | Number of views. Null when the source does not report it, as for posts older than X view counts. |
-| `data.nextCursor` | string or null | no | Opaque cursor for the next page of search results, or null when there are no more. Pass it back as cursor to continue. |
+| `data.nextCursor` | string or null | no | Opaque cursor for the next page of search results. Pass it back as cursor to continue. Null when there are no more results, or when the source that served this call cannot continue the search; to be served only by a source that can, send requireFields: ["nextCursor"] on the first page. |
 | `found` | boolean | yes |  |
 
 Extra fields are kept, missing declared fields fail.
@@ -288,7 +300,7 @@ Extra fields are kept, missing declared fields fail.
                 "string",
                 "null"
               ],
-              "description": "Opaque cursor for the next page of search results, or null when there are no more. Pass it back as cursor to continue."
+              "description": "Opaque cursor for the next page of search results. Pass it back as cursor to continue. Null when there are no more results, or when the source that served this call cannot continue the search; to be served only by a source that can, send requireFields: [\"nextCursor\"] on the first page."
             }
           }
         }
