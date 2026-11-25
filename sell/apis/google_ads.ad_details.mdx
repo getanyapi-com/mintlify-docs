@@ -1,0 +1,248 @@
+---
+title: "Google Ads Ad Details"
+description: "Sell google_ads.ad_details on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Look up a single Google Ads Transparency Center creative by URL and get its format, run dates, impression range, regions, and creative variations as clean JSON.
+
+This page is the seller-facing summary of one catalog API, `google_ads.ad_details`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `url` | string | yes | Google Ads Transparency Center creative URL (e.g. "https://adstransparency.google.com/advertiser/AR.../creative/CR..."). |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/google_ads.ad_details.input.json",
+  "example": {
+    "url": "https://adstransparency.google.com/advertiser/AR13309761427309854721/creative/CR00826878176251609089"
+  },
+  "title": "Google Ads ad details input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "url"
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "description": "Google Ads Transparency Center creative URL (e.g. \"https://adstransparency.google.com/advertiser/AR.../creative/CR...\")."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.advertiserId` | string | yes |  |
+| `data.creativeId` | string | yes |  |
+| `data.firstShown` | string | yes | ISO 8601 date. |
+| `data.format` | string | yes |  |
+| `data.impressionsMax` | integer or null | yes | Upper bound of the impressions range. Null when Google does not publish one for this creative. |
+| `data.impressionsMin` | integer or null | yes | Lower bound of the impressions range. Null when Google does not publish one for this creative. |
+| `data.lastShown` | string | yes | ISO 8601 date. |
+| `data.regions` | array | yes | Regions where Google shows this creative. Empty when Google lists none. |
+| `data.regions[].code` | string | yes | Two-letter region code, e.g. US. |
+| `data.regions[].name` | string | yes | Region name, e.g. United States. |
+| `data.url` | string | no | Google Ads Transparency Center URL for the creative. |
+| `data.variations` | array | yes |  |
+| `data.variations[].allText` | string | yes |  |
+| `data.variations[].description` | string | yes |  |
+| `data.variations[].destinationUrl` | string | yes |  |
+| `data.variations[].headline` | string | yes |  |
+| `data.variations[].imageUrl` | string | yes |  |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/google_ads.ad_details.output.json",
+  "title": "Google Ads ad details output",
+  "x-anyapi-result-list": false,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "advertiserId",
+            "creativeId",
+            "format",
+            "firstShown",
+            "lastShown",
+            "impressionsMin",
+            "impressionsMax",
+            "regions",
+            "variations"
+          ],
+          "properties": {
+            "advertiserId": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "creativeId": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "format": {
+              "x-anyapi-must-populate": true,
+              "type": "string"
+            },
+            "firstShown": {
+              "type": "string",
+              "description": "ISO 8601 date."
+            },
+            "lastShown": {
+              "type": "string",
+              "description": "ISO 8601 date."
+            },
+            "impressionsMin": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Lower bound of the impressions range. Null when Google does not publish one for this creative."
+            },
+            "impressionsMax": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Upper bound of the impressions range. Null when Google does not publish one for this creative."
+            },
+            "url": {
+              "x-anyapi-domain": "adstransparency.google.com",
+              "type": "string",
+              "description": "Google Ads Transparency Center URL for the creative."
+            },
+            "regions": {
+              "type": "array",
+              "description": "Regions where Google shows this creative. Empty when Google lists none.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "code",
+                  "name"
+                ],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "Two-letter region code, e.g. US."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Region name, e.g. United States."
+                  }
+                }
+              }
+            },
+            "variations": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "headline",
+                  "description",
+                  "allText",
+                  "destinationUrl",
+                  "imageUrl"
+                ],
+                "properties": {
+                  "headline": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "allText": {
+                    "type": "string"
+                  },
+                  "destinationUrl": {
+                    "type": "string"
+                  },
+                  "imageUrl": {
+                    "x-anyapi-domain": "googlesyndication.com",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `advertiserId`
+- `creativeId`
+- `format`
+- `variations`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "url": "https://adstransparency.google.com/advertiser/AR13309761427309854721/creative/CR00826878176251609089"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

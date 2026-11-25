@@ -1,0 +1,218 @@
+---
+title: "YouTube Shorts Search"
+description: "Sell youtube.search_shorts on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Search YouTube Shorts by keyword and get matching Shorts (title, views, URL) with cursor pagination as normalized JSON.
+
+This page is the seller-facing summary of one catalog API, `youtube.search_shorts`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `cursor` | string | no | Continuation token from a previous response for pagination. |
+| `query` | string | yes | The keyword to search Shorts for. |
+| `sortBy` | string | no | Sort order: "relevance" (default) or "popular" (most-viewed). One of: `relevance`, `popular`. Default `"relevance"`. |
+| `uploadDate` | string | no | Filter by upload recency. Omit for any time. One of: `today`, `this_week`, `this_month`, `this_year`. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.search_shorts.input.json",
+  "example": {
+    "query": "cats"
+  },
+  "title": "YouTube Shorts Search input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "The keyword to search Shorts for."
+    },
+    "uploadDate": {
+      "type": "string",
+      "enum": [
+        "today",
+        "this_week",
+        "this_month",
+        "this_year"
+      ],
+      "description": "Filter by upload recency. Omit for any time."
+    },
+    "sortBy": {
+      "type": "string",
+      "enum": [
+        "relevance",
+        "popular"
+      ],
+      "default": "relevance",
+      "description": "Sort order: \"relevance\" (default) or \"popular\" (most-viewed)."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Continuation token from a previous response for pagination."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.nextCursor` | string or null | no | Opaque cursor for the next page of results, or null when there are no more. Pass it back as cursor to continue. |
+| `data.shorts` | array | yes |  |
+| `data.shorts[].contentType` | string | yes | Always "short": every row here comes from YouTube's Shorts shelf. |
+| `data.shorts[].id` | string | yes | YouTube video id of the Short. |
+| `data.shorts[].title` | string | yes | Title of the Short. |
+| `data.shorts[].url` | string | yes | Watch URL for the Short. |
+| `data.shorts[].views` | integer | yes | View count, or 0 when the source did not publish one. Read viewsAvailable before trusting a 0. Rounded as YouTube shows it on Shorts (8.9M, 875K), so counts of 1,000 or more are approximate. |
+| `data.shorts[].viewsAvailable` | boolean | yes | False when the source published no view count, so views is a placeholder rather than a measured zero. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.search_shorts.output.json",
+  "title": "YouTube Shorts Search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "shorts"
+          ],
+          "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of results, or null when there are no more. Pass it back as cursor to continue."
+            },
+            "shorts": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "url",
+                  "title",
+                  "views",
+                  "viewsAvailable",
+                  "contentType"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "YouTube video id of the Short."
+                  },
+                  "url": {
+                    "x-anyapi-domain": "youtube.com",
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Watch URL for the Short."
+                  },
+                  "title": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Title of the Short."
+                  },
+                  "views": {
+                    "type": "integer",
+                    "description": "View count, or 0 when the source did not publish one. Read viewsAvailable before trusting a 0. Rounded as YouTube shows it on Shorts (8.9M, 875K), so counts of 1,000 or more are approximate."
+                  },
+                  "viewsAvailable": {
+                    "type": "boolean",
+                    "description": "False when the source published no view count, so views is a placeholder rather than a measured zero."
+                  },
+                  "contentType": {
+                    "type": "string",
+                    "description": "Always \"short\": every row here comes from YouTube's Shorts shelf."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `id`
+- `shorts`
+- `title`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `shorts` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "cats"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

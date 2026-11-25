@@ -1,0 +1,263 @@
+---
+title: "YouTube Channel Shorts"
+description: "Sell youtube.channel_shorts on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+List a YouTube channel's Shorts by handle or channel ID with cursor pagination, views, and publish timestamps.
+
+This page is the seller-facing summary of one catalog API, `youtube.channel_shorts`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$1.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+This API takes no input fields.
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.channel_shorts.input.json",
+  "example": {
+    "handle": "@zachking",
+    "sort": "latest"
+  },
+  "title": "YouTube Channel Shorts input",
+  "type": "object",
+  "additionalProperties": false,
+  "x-aliases": {
+    "username": "handle"
+  },
+  "properties": {
+    "handle": {
+      "type": "string",
+      "description": "YouTube channel handle, including or omitting the leading @."
+    },
+    "channelId": {
+      "type": "string",
+      "description": "YouTube channel ID beginning with UC."
+    },
+    "sort": {
+      "type": "string",
+      "enum": [
+        "latest",
+        "newest",
+        "popular"
+      ],
+      "description": "Sort order for the Shorts feed. latest and newest are equivalent."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Continuation token from a previous response."
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "handle"
+      ]
+    },
+    {
+      "required": [
+        "channelId"
+      ]
+    }
+  ]
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The normalized Shorts page, or null when the channel was not found. |
+| `data.nextCursor` | string or null | yes | Opaque cursor for the next Shorts page, or null when no next page is available. |
+| `data.shorts` | array | yes | Short-form videos returned by the provider's dedicated YouTube Shorts endpoint. |
+| `data.shorts[].contentType` | string | yes | Explicit normalized provenance that this item came from a dedicated Shorts feed. One of: `short`. |
+| `data.shorts[].createdUtc` | number | no | UTC epoch timestamp in seconds when supplied by the upstream response. |
+| `data.shorts[].duration` | string | yes | Published duration when supplied by the upstream response. |
+| `data.shorts[].id` | string | yes | Unique YouTube video identifier. |
+| `data.shorts[].image` | string | no | URL of the short thumbnail image, tracking query parameters stripped. |
+| `data.shorts[].likes` | integer or null | yes | Public like count, or null when the serving source does not report it. |
+| `data.shorts[].title` | string | no | Public title or caption for the Short. |
+| `data.shorts[].url` | string | yes | Public YouTube URL for the Short. |
+| `data.shorts[].views` | integer | yes | Public view count when supplied by the upstream response. |
+| `data.shorts[].viewsAvailable` | boolean | yes | Whether views is backed by a public count in the upstream response. |
+| `found` | boolean | yes | Whether the channel Shorts feed was found. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/youtube.channel_shorts.output.json",
+  "title": "YouTube Channel Shorts output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "Whether the channel Shorts feed was found."
+    },
+    "data": {
+      "description": "The normalized Shorts page, or null when the channel was not found.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "shorts",
+            "nextCursor"
+          ],
+          "properties": {
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next Shorts page, or null when no next page is available."
+            },
+            "shorts": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Short-form videos returned by the provider's dedicated YouTube Shorts endpoint.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "url",
+                  "views",
+                  "viewsAvailable",
+                  "likes",
+                  "duration",
+                  "contentType"
+                ],
+                "properties": {
+                  "id": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Unique YouTube video identifier."
+                  },
+                  "url": {
+                    "x-anyapi-domain": [
+                      "youtube.com",
+                      "youtu.be"
+                    ],
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Public YouTube URL for the Short."
+                  },
+                  "title": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Public title or caption for the Short."
+                  },
+                  "views": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Public view count when supplied by the upstream response."
+                  },
+                  "viewsAvailable": {
+                    "type": "boolean",
+                    "description": "Whether views is backed by a public count in the upstream response."
+                  },
+                  "likes": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "description": "Public like count, or null when the serving source does not report it."
+                  },
+                  "duration": {
+                    "type": "string",
+                    "description": "Published duration when supplied by the upstream response."
+                  },
+                  "createdUtc": {
+                    "type": "number",
+                    "description": "UTC epoch timestamp in seconds when supplied by the upstream response."
+                  },
+                  "contentType": {
+                    "type": "string",
+                    "enum": [
+                      "short"
+                    ],
+                    "description": "Explicit normalized provenance that this item came from a dedicated Shorts feed."
+                  },
+                  "image": {
+                    "x-anyapi-domain": [
+                      "ytimg.com",
+                      "youtube.com",
+                      "lh3.googleusercontent.com"
+                    ],
+                    "type": "string",
+                    "description": "URL of the short thumbnail image, tracking query parameters stripped."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `id`
+- `shorts`
+- `title`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `shorts` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "handle": "@zachking",
+  "sort": "latest"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).
