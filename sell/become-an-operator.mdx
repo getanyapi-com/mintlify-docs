@@ -397,11 +397,19 @@ again, and you submit it for AnyAPI's approval again. A suspended account gets 4
 
 ## Retire an endpoint
 
-To stop selling on an endpoint for good, call `POST /v1/operator/endpoints/{id}/retire`.
-No paid request or check call reaches it again, and nothing brings it back. It stays in your
-endpoint list with status `retired`, and its earnings stay yours. Retiring it again answers
-409. A retired endpoint still counts as your endpoint for that API, so registering the same
-API again answers 409.
+To stop selling on an endpoint, call `POST /v1/operator/endpoints/{id}/retire`.
+No paid request or check call reaches it again. It stays in your endpoint list with status
+`retired`, and its earnings stay yours. Retiring it again answers 409. Pause and resume on a
+retired endpoint also answer 409 and change nothing.
+
+To bring a retired endpoint back, register the same API again, with its URL, price and a
+signing secret. The same endpoint comes back as a draft, with the same id. It must pass the
+registration tests and the real-request check again, and you submit it for AnyAPI's approval
+again. Its history stays with it: earlier check attempts, price changes and stops. A price
+you set when you register again counts toward the limit on price changes. If AnyAPI stopped
+the endpoint before you retired it and the stop was not cleared, that stop still applies: the
+registration tests also send again what it was stopped for, and a pass counts only from 24
+hours after the stop (the endpoint's `retestFrom`).
 
 ## What the statuses mean
 
@@ -415,7 +423,7 @@ API again answers 409.
 | Live | Serving and earning on real customer traffic. |
 | Paused (quality) | Paused by the automatic quality checks; re-tested and restored automatically when it passes. |
 | Stopped by AnyAPI | Stopped for answers that were wrong, by a person at AnyAPI or automatically: when its false "not found" or empty answers to different requests reached the limit, or for a field its answers never filled. It gets no requests. The reason is on the endpoint's page. Fix it and run the re-test (`POST /v1/operator/endpoints/{id}/retest`). You can re-test at any time to see the result, but a re-test can turn the endpoint back on only from 24 hours after the stop (the endpoint's `retestFrom`); one that passes before then does not, so run it again after that time. If it passes then and sent again at least one request your endpoint answered wrong before, the endpoint is turned back on by itself. If it was stopped for a field your answers never filled, a pass then turns it back on by itself, whether the re-test found the field filled or AnyAPI no longer requires it. Otherwise, a person at AnyAPI reviews the passing re-test and decides whether to turn it back on. When a lookup cannot be completed, answer with an error, not with "not found" or an empty answer. An error is unpaid but never counts as a wrong answer; many errors can pause the endpoint, but that pause has no 24-hour wait. |
-| Retired | Permanently removed from routing. |
+| Retired | Removed from routing; it gets no requests. Register the same API again to bring it back as a draft that must pass the registration tests and the real-request check again. A stop by AnyAPI that was in force when you retired it still applies. |
 
 ## Where to go next
 
