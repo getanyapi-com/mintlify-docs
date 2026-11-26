@@ -374,14 +374,33 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   as `requestsPerSecond` when you register, or change it on the endpoint's page or with the
   same `POST /v1/operator/endpoints/{id}/capacity`, for example `{"requestsPerSecond": 2}`.
   Send `capacity`, `requestsPerSecond` or both; a field you leave out stays as it is. The
-  value must be more than 0, and a fraction such as `0.5` means one request every two
-  seconds; 0 or below is refused with `400`. Once you declare it, AnyAPI never starts two
-  requests on your endpoint less than 1/r seconds apart, across all of its servers,
-  with no burst. Until you declare it, AnyAPI's default of 5 new requests a second applies,
-  and after a quiet spell several requests may start at once. `GET /v1/operator/endpoints/{id}`
-  returns `requestsPerSecond` and `requestsPerSecondDeclared`, which is `false` while the
-  default applies. A declared requests-per-second rate applies to every request AnyAPI sends
-  your endpoint, its registration tests and checks included, not only customer requests.
+  value must be a whole number; a fraction, 0 or below is refused with `400`. Once you declare
+  it, AnyAPI never starts two requests on your endpoint less than 1/r seconds apart, across
+  all of its servers, with no burst. Until you declare it, AnyAPI's default of 5 new requests
+  a second applies, and after a quiet spell several requests may start at once.
+  `GET /v1/operator/endpoints/{id}` returns `requestsPerSecond` and
+  `requestsPerSecondDeclared`, which is `false` while the default applies. A declared
+  requests-per-second rate applies to every request AnyAPI sends your endpoint, its
+  registration tests and checks included, not only customer requests.
+- **What your API needs.** <a id="what-your-api-needs"></a> Every API needs a least number of
+  new requests a second from each endpoint: the requests in its busy minutes (the 95th
+  percentile of every minute of the last 7 days, a minute with no request counting as none),
+  divided by 60 and rounded up, never under 2. An API with no traffic needs 2. Your endpoint
+  also needs at least that rate times its average answer time in seconds, rounded up, in
+  requests at once; until it has an answer time, only its rate is judged. Your figures are
+  judged as you declared them, or as the defaults (4 at once, 5 a second) where you declared
+  none; the 5 at once a new endpoint is held to while its share grows does not count against
+  you. Registration and a change of figures refuse a lower figure with `400`, naming what the
+  API needs and what you sent. `GET /v1/operator/endpoints/{id}` returns it as `minimum`
+  (`requestsPerSecond`, `capacityNeeded`, `meets`, `stopsReceivingAt`), and the endpoint's
+  page shows it.
+  As an API gets busier, its minimum can rise above your figures. AnyAPI checks every 30
+  minutes, and when your endpoint falls below it tells you once, with a `below_minimum` event
+  and an email giving your figures and what the API needs. 24 hours after that notice the
+  endpoint stops receiving requests until you raise its figures; once you do, it comes back at
+  the same share of traffic, with nothing recorded against it. When your endpoint is full,
+  answer `429` at once instead of holding the request: a `429` costs you nothing and the
+  customer moves on.
 - **Fields customers ask for.** <a id="fields-customers-ask-for"></a> Some APIs let a customer
   name output fields that must be filled, with `requireFields`. Tick the ones your endpoint
   fills when you register, or later on the endpoint's page; through the API, send
