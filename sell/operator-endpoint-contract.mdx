@@ -385,7 +385,9 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
 - **What your API needs.** <a id="what-your-api-needs"></a> Every API needs a least number of
   new requests a second from each endpoint: the requests in its busy minutes (the 95th
   percentile of every minute of the last 7 days, a minute with no request counting as none),
-  divided by 60 and rounded up, never under 2. An API with no traffic needs 2. Your endpoint
+  divided by 60 and rounded up, never under 2. An API with no traffic needs 2. On an API whose
+  seller endpoints serve only requests that name them, only the requests that name a seller's
+  source or continue a seller's cursor count. Your endpoint
   also needs at least that rate times its average answer time in seconds, rounded up, in
   requests at once; until it has an answer time, only its rate is judged. Your figures are
   judged as you declared them, or as the defaults (4 at once, 5 a second) where you declared
@@ -398,8 +400,8 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   `GET /v1/operator/endpoints/{id}` returns it as `minimum`: `settled` is `false`, and nothing
   else is sent, until AnyAPI has measured the API's minimum. Then come `requestsPerSecond`,
   `capacityNeeded` (absent while there is no average answer time to judge by, when only the
-  rate is judged), `meets` (absent when your rate covers the API and an earlier finding that
-  it was below waits for your average answer time), and `stopsReceivingAt` once we have told
+  rate is judged), `meets` (absent while your rate covers the minimum, an earlier notice is
+  still open, and AnyAPI has not finished loading answer-time records), and `stopsReceivingAt` once we have told
   you your figures fall short. The endpoint's page shows it.
   As an API gets busier, its minimum can rise above your figures. AnyAPI checks every 30
   minutes, and when your endpoint falls below it tells you once, with a `below_minimum` event
