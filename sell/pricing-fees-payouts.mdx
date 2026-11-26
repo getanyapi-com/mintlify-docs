@@ -10,8 +10,9 @@ registering an endpoint, are the full rules.
 ## You set the price
 
 When you register an endpoint you set the **customer list price in USD per 1,000
-requests** (minimum $0.01/1k). That price is what the customer pays when your endpoint
-serves.
+requests** (minimum $0.01/1k, in steps of $0.01 per 1,000). That price is what the
+customer pays when your endpoint serves. A price between two steps, such as $1.005, is
+refused with a 400 that names the two nearest prices ($1.00 and $1.01); it is never rounded.
 Each request goes to the cheapest source on the API first, whether it is yours, another
 seller's or one of AnyAPI's own, up to each endpoint's capacity. Price below one of AnyAPI's
 sources and you go ahead of it; at the same price, AnyAPI's goes first. Your price never
