@@ -23,11 +23,13 @@ Change it from the endpoint's page in the
 [dashboard](https://getanyapi.com/dashboard/sell/endpoints), or with
 `POST /v1/operator/endpoints/{id}/price` and the new price per 1,000 requests:
 `{"unit": "request", "usdPer1kUnits": 4.5}`. Each endpoint reports its price as
-`priceUnit` and `priceUsdPer1kUnits`, and a scheduled increase as
-`pendingPriceUsdPer1kUnits`.
+`priceUnit` and `priceUsdPer1kUnits`, and a scheduled change as
+`pendingPriceUsdPer1kUnits` with `priceEffectiveAt`, when it takes effect.
 
-- **Decreases apply immediately.**
+- **A price cut takes effect 24 hours after you make it.** Until then your endpoint keeps
+  its price and its place.
 - **Increases apply after a 3-day delay.**
+- A new change replaces a pending one. Sending your current price withdraws it.
 - At most **2 price changes per endpoint per rolling 24 hours**.
 
 ## The commission split
