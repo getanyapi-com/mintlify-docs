@@ -382,6 +382,14 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   returns `requestsPerSecond` and `requestsPerSecondDeclared`, which is `false` while the
   default applies. A declared requests-per-second rate applies to every request AnyAPI sends
   your endpoint, its registration tests and checks included, not only customer requests.
+- **Paged results by depth.** For an API that pages, `GET /v1/operator/endpoints/{id}` returns
+  `pageDepths`, your own customer pages counted by how deep in the results they were, as counts
+  since tracking began:
+  `[{depth, pagesServed, nextOffered, nextRequested, nextServed, nextServedByOther}]`. Of the
+  pages you served at each depth, `nextOffered` gave a next page, `nextRequested` is how many of
+  those next pages customers asked for, `nextServed` is how many of those you served, and
+  `nextServedByOther` is how many another source served for you. The field is absent
+  until you have served a page of paged results.
 - **Fields customers ask for.** <a id="fields-customers-ask-for"></a> Some APIs let a customer
   name output fields that must be filled, with `requireFields`. Tick the ones your endpoint
   fills when you register, or later on the endpoint's page; through the API, send
