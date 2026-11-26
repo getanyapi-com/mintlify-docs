@@ -391,12 +391,16 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   judged as you declared them, or as the defaults (4 at once, 5 a second) where you declared
   none; the 5 at once a new endpoint is held to while its share grows does not count against
   you. Registration and a change of figures refuse a lower figure or a fraction with `400`,
-  naming what the API needs and what you sent. While AnyAPI is still measuring an API's
-  minimum, or your endpoint's average answer time for a change of `capacity`, no figure can be
-  checked, and the request is refused with `503` `minimum_not_settled`; try again later.
-  `GET /v1/operator/endpoints/{id}` returns it as `minimum` (`settled`, `requestsPerSecond`,
-  `capacityNeeded`, `meets`, `stopsReceivingAt`; while `settled` is `false` nothing else is
-  sent), and the endpoint's page shows it.
+  naming what the API needs and what you sent. Until AnyAPI has counted a first full week of
+  traffic, any whole number of at least 1 is taken and none is held to a minimum; until it has
+  your endpoint's average answer time, a `capacity` is not held to the requests at once it
+  needs. The scheduled check judges both once they are known.
+  `GET /v1/operator/endpoints/{id}` returns it as `minimum`: `settled` is `false`, and nothing
+  else is sent, until AnyAPI has measured the API's minimum. Then come `requestsPerSecond`,
+  `capacityNeeded` (absent while there is no average answer time to judge by, when only the
+  rate is judged), `meets` (absent when your rate covers the API and an earlier finding that
+  it was below waits for your average answer time), and `stopsReceivingAt` once we have told
+  you your figures fall short. The endpoint's page shows it.
   As an API gets busier, its minimum can rise above your figures. AnyAPI checks every 30
   minutes, and when your endpoint falls below it tells you once, with a `below_minimum` event
   and an email giving your figures and what the API needs. From 24 hours after that notice the
@@ -404,8 +408,8 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   minimum needs no re-test and puts nothing on the endpoint's record. It does not switch on an
   endpoint that is switched off, paused or stopped for another reason; that has its own way
   back, shown on the endpoint's page. When your endpoint is full, answer `429` at once instead
-  of holding the request: a held request counts as a slow answer, which raises the requests at
-  once your endpoint needs.
+  of holding the request: a held request counts as a slow answer, which can raise the requests
+  at once your endpoint needs.
 - **Fields customers ask for.** <a id="fields-customers-ask-for"></a> Some APIs let a customer
   name output fields that must be filled, with `requireFields`. Tick the ones your endpoint
   fills when you register, or later on the endpoint's page; through the API, send
