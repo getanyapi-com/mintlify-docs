@@ -374,14 +374,45 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   as `requestsPerSecond` when you register, or change it on the endpoint's page or with the
   same `POST /v1/operator/endpoints/{id}/capacity`, for example `{"requestsPerSecond": 2}`.
   Send `capacity`, `requestsPerSecond` or both; a field you leave out stays as it is. The
-  value must be more than 0, and a fraction such as `0.5` means one request every two
-  seconds; 0 or below is refused with `400`. Once you declare it, AnyAPI never starts two
-  requests on your endpoint less than 1/r seconds apart, across all of its servers,
-  with no burst. Until you declare it, AnyAPI's default of 5 new requests a second applies,
-  and after a quiet spell several requests may start at once. `GET /v1/operator/endpoints/{id}`
-  returns `requestsPerSecond` and `requestsPerSecondDeclared`, which is `false` while the
-  default applies. A declared requests-per-second rate applies to every request AnyAPI sends
-  your endpoint, its registration tests and checks included, not only customer requests.
+  value must be a whole number; a fraction, 0 or below is refused with `400`. Once you declare
+  it, AnyAPI never starts two requests on your endpoint less than 1/r seconds apart, across
+  all of its servers, with no burst. Until you declare it, AnyAPI's default of 5 new requests
+  a second applies, and after a quiet spell several requests may start at once.
+  `GET /v1/operator/endpoints/{id}` returns `requestsPerSecond` and
+  `requestsPerSecondDeclared`, which is `false` while the default applies. A declared
+  requests-per-second rate applies to every request AnyAPI sends your endpoint, its
+  registration tests and checks included, not only customer requests.
+- **What your API needs.** <a id="what-your-api-needs"></a> Every API needs a least number of
+  new requests a second from each endpoint: the API's average requests a second over the last
+  7 days, rounded up, and never under 2. An API with no traffic needs 2. On an API whose
+  seller endpoints serve only requests that name them, only the requests that name a seller's
+  source or continue a seller's cursor count. Your endpoint
+  also needs at least that rate times its average answer time in seconds, rounded up, in
+  requests at once; until it has an answer time, only its rate is judged. Only a figure you
+  declared is judged: one you leave out gets AnyAPI's default (4 at once, 5 a second) and is
+  never held to the minimum, so it draws no notice. The 5 at once a new endpoint is held to
+  while its share grows does not count against you either. Registration and a change of
+  figures take a figure left out, and refuse a lower figure or a fraction with `400`, naming
+  what the API needs and what you sent. Until AnyAPI has counted a first full week of
+  traffic, any whole number of at least 1 is taken and none is held to a minimum; until it has
+  your endpoint's average answer time, a `capacity` is not held to the requests at once it
+  needs. The scheduled check judges each figure you declared once what it needs is known.
+  `GET /v1/operator/endpoints/{id}` returns it as `minimum`: `settled` is `false`, and nothing
+  else is sent, until AnyAPI has measured the API's minimum. Then come `requestsPerSecond`,
+  `requestsPerSecondDeclared` and `capacityDeclared` (whether you declared each figure),
+  `capacityNeeded` (absent while there is no average answer time to judge by, when only the
+  rate is judged), `meets` (whether your declared figures cover it; absent while your rate covers the minimum, an earlier notice is
+  still open, and AnyAPI has not finished loading answer-time records), and `stopsReceivingAt` once we have told
+  you a declared figure falls short. The endpoint's page shows it.
+  As an API gets busier, its minimum can rise above your figures. AnyAPI checks every 30
+  minutes, and when a figure you declared falls below it tells you once, with a `below_minimum` event
+  and an email giving your figures and what the API needs. From 24 hours after that notice the
+  endpoint can stop receiving requests until its figures cover what its API needs. Meeting the
+  minimum needs no re-test and puts nothing on the endpoint's record. It does not switch on an
+  endpoint that is switched off, paused or stopped for another reason; that has its own way
+  back, shown on the endpoint's page. When your endpoint is full, answer `429` at once instead
+  of holding the request: a held request counts as a slow answer, which can raise the requests
+  at once your endpoint needs.
 - **Paged results by depth.** For an API that pages, `GET /v1/operator/endpoints/{id}` returns
   `pageDepths`, your own customer pages counted by how deep in the results they were, as counts
   since tracking began:
