@@ -390,17 +390,22 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   requests at once; until it has an answer time, only its rate is judged. Your figures are
   judged as you declared them, or as the defaults (4 at once, 5 a second) where you declared
   none; the 5 at once a new endpoint is held to while its share grows does not count against
-  you. Registration and a change of figures refuse a lower figure with `400`, naming what the
-  API needs and what you sent. `GET /v1/operator/endpoints/{id}` returns it as `minimum`
-  (`requestsPerSecond`, `capacityNeeded`, `meets`, `stopsReceivingAt`), and the endpoint's
-  page shows it.
+  you. Registration and a change of figures refuse a lower figure or a fraction with `400`,
+  naming what the API needs and what you sent. While AnyAPI is still measuring an API's
+  minimum, or your endpoint's average answer time for a change of `capacity`, no figure can be
+  checked, and the request is refused with `503` `minimum_not_settled`; try again later.
+  `GET /v1/operator/endpoints/{id}` returns it as `minimum` (`settled`, `requestsPerSecond`,
+  `capacityNeeded`, `meets`, `stopsReceivingAt`; while `settled` is `false` nothing else is
+  sent), and the endpoint's page shows it.
   As an API gets busier, its minimum can rise above your figures. AnyAPI checks every 30
   minutes, and when your endpoint falls below it tells you once, with a `below_minimum` event
-  and an email giving your figures and what the API needs. 24 hours after that notice the
-  endpoint stops receiving requests until you raise its figures; once you do, it comes back at
-  the same share of traffic, with nothing recorded against it. When your endpoint is full,
-  answer `429` at once instead of holding the request: a `429` costs you nothing and the
-  customer moves on.
+  and an email giving your figures and what the API needs. From 24 hours after that notice the
+  endpoint can stop receiving requests until its figures cover what its API needs. Meeting the
+  minimum needs no re-test and puts nothing on the endpoint's record. It does not switch on an
+  endpoint that is switched off, paused or stopped for another reason; that has its own way
+  back, shown on the endpoint's page. When your endpoint is full, answer `429` at once instead
+  of holding the request: a held request counts as a slow answer, which raises the requests at
+  once your endpoint needs.
 - **Fields customers ask for.** <a id="fields-customers-ask-for"></a> Some APIs let a customer
   name output fields that must be filled, with `requireFields`. Tick the ones your endpoint
   fills when you register, or later on the endpoint's page; through the API, send
