@@ -90,6 +90,8 @@ routing, earnings, and payouts, and is never shown to buyers.
     comparison. Every answer must arrive within the API's time
     limit and under 8 MB. A failed test says why and which fields differed; fix your endpoint
     and run the tests again as often as you like. A passing run starts the real-request check.
+    Starting a run, or a re-test, answers 409 `endpoint_changed` when your base URL, path or
+    signing secret changed while the run was being started; start it again.
   </Step>
   <Step title="Pass the real-request check (free the first time)">
     AnyAPI replays real past customer requests for this API to your endpoint, up to 5 at
@@ -409,7 +411,11 @@ again. Its history stays with it: earlier check attempts, price changes and stop
 you set when you register again counts toward the limit on price changes. If AnyAPI stopped
 the endpoint before you retired it and the stop was not cleared, that stop still applies: the
 registration tests also send again what it was stopped for, and a pass counts only from 24
-hours after the stop (the endpoint's `retestFrom`).
+hours after the stop (the endpoint's `retestFrom`). If none of the requests it was stopped for
+can be sent again, a passing run does not clear the stop: the run's `awaitsDecision` is true,
+and a person at AnyAPI decides whether to lift the stop. Running the tests again does not
+change that. You are emailed when it is lifted; then run the tests again, and a pass starts the
+real-request check.
 
 ## What the statuses mean
 
