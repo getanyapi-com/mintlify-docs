@@ -355,8 +355,8 @@ endpoint goes ahead of one of AnyAPI's own sources only when your price is lower
 same price, AnyAPI's goes first. Your endpoint gets at most its **capacity** in requests at
 once; further requests go to the next cheapest source until one of yours finishes.
 
-A new endpoint starts with a share of that traffic, which grows as its spot checks stay
-clean: 5% of the requests it is the cheapest for, then 25%, then 50%, then all of them. Each
+An endpoint can receive a share of that traffic below all of it, which grows as its spot
+checks stay clean: 5% of the requests it is the cheapest for, then 25%, then 50%, then all of them. Each
 move up takes at least 24 hours at the current share and 299 clean spot checks in a row; a
 spot check that looks wrong restarts that count. An answer that was empty or said nothing was
 found, where AnyAPI's own answer had results and a second AnyAPI source confirmed them, always
@@ -512,7 +512,7 @@ starts from the beginning.
 A run
 where no test failed passes, and the real-request check judges the data AnyAPI could not compare. Each test
 result lists its fields with your value and AnyAPI's. A passing run starts the real-request check,
-and you can rerun without limit. A pass counts only while your base URL, path and signing
+unless AnyAPI did not require that check for the endpoint, and you can rerun without limit. A pass counts only while your base URL, path and signing
 secret are unchanged.
 
 ## How the real-request check works
