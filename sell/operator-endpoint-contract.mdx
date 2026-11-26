@@ -402,12 +402,18 @@ the endpoint gets at most 5 requests at once, whatever capacity it declared.
   `requestsPerSecondDeclared` and `capacityDeclared` (whether you declared each figure),
   `capacityNeeded` (absent while there is no average answer time to judge by, when only the
   rate is judged), `meets` (whether your declared figures cover it; absent while your rate covers the minimum, an earlier notice is
-  still open, and AnyAPI has not finished loading answer-time records), and `stopsReceivingAt` once we have told
-  you a declared figure falls short. The endpoint's page shows it.
+  still open, and AnyAPI has not finished loading answer-time records), `stopsReceivingAt` once we have told
+  you a declared figure falls short, and, once that time has passed and they still fall short,
+  `notReceivingRequests: true` with `figures`, what your endpoint takes and what its API needs.
+  The endpoint's page shows it.
   As an API gets busier, its minimum can rise above your figures. AnyAPI checks every 30
   minutes, and when a figure you declared falls below it tells you once, with a `below_minimum` event
   and an email giving your figures and what the API needs. From 24 hours after that notice the
-  endpoint can stop receiving requests until its figures cover what its API needs. Meeting the
+  endpoint receives no customer requests until its figures cover what its API needs. You are
+  told when that takes force (`below_minimum_stopped`) and when requests return
+  (`minimum_met`), by event and email. Raising your figures to cover the minimum ends it at
+  once, and the endpoint receives requests again at the share it had. Its status, its checks
+  and its record are unchanged, and AnyAPI's checks and your tests still reach it. Meeting the
   minimum needs no re-test and puts nothing on the endpoint's record. It does not switch on an
   endpoint that is switched off, paused or stopped for another reason; that has its own way
   back, shown on the endpoint's page. When your endpoint is full, answer `429` at once instead
