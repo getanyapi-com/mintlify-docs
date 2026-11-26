@@ -89,7 +89,8 @@ routing, earnings, and payouts, and is never shown to buyers.
     your next page is checked against the API's contract only, and the example keeps its own
     comparison. Every answer must arrive within the API's time
     limit and under 8 MB. A failed test says why and which fields differed; fix your endpoint
-    and run the tests again as often as you like. A passing run starts the real-request check.
+    and run the tests again as often as you like. A passing run starts the real-request check,
+    unless AnyAPI did not require that check for the endpoint.
   </Step>
   <Step title="Pass the real-request check (free the first time)">
     AnyAPI may not require this check for an endpoint. The dashboard then shows the step as
@@ -234,9 +235,9 @@ routing, earnings, and payouts, and is never shown to buyers.
     endpoint you have not submitted. Approval starts paid traffic at once, and AnyAPI sends
     your account one email listing every endpoint that went live. An approved endpoint serves real
     traffic in a monitored phase, and fully live while quality holds. You earn from the first
-    request you win. A new endpoint starts with a share of traffic that grows: it receives 5%
-    of the requests it is the cheapest for, then 25%, then 50%, then all of them, and the rest
-    are served elsewhere. Each move up takes at least 24 hours at the current share and 299
+    request you win. An endpoint can receive a share of the requests it is the cheapest for that
+    is below all of them, with the rest served elsewhere. That share grows step by step, 5%, then
+    25%, then 50%, then all of them. Each move up takes at least 24 hours at the current share and 299
     clean spot checks in a row; a spot check that looks wrong restarts that count. The
     endpoint's page shows its current share. If quality drops, the endpoint is paused automatically. An endpoint
     paused while fully live is re-tested until it recovers; one paused during its monitored phase comes back when a
@@ -414,7 +415,7 @@ API again answers 409.
 | Draft | Registered but not serving traffic. Run the registration tests when your endpoint is ready. |
 | Tests running | AnyAPI is verifying your responses match the API's schema. |
 | Check running | Real past customer requests are sent to you, and an AI reviewer compares each answer with AnyAPI's. |
-| Ready for approval | The checks AnyAPI requires are done; receives no traffic until you have verified your identity, connected PayPal and submitted it for approval, and AnyAPI has approved it. After you submit it, the dashboard shows **Submitted, waiting for approval**. |
+| Checks complete | The checks AnyAPI requires are done; receives no traffic until you have verified your identity, connected PayPal and submitted it for approval, and AnyAPI has approved it. After you submit it, the dashboard shows **Submitted, waiting for approval**. |
 | Live (monitored) | Serving and earning, with quality watched extra closely. A new endpoint starts with a share of traffic that grows while its spot checks stay clean. |
 | Live | Serving and earning on real customer traffic. |
 | Paused (quality) | Paused by the automatic quality checks; re-tested and restored automatically when it passes. |
