@@ -1,0 +1,557 @@
+---
+title: "AliExpress Product"
+description: "Sell aliexpress.product on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Look up one AliExpress product by id and get its price, original price, rating, reviews count, images, options, variants with stock, specifications, store, ship-from country and delivery estimate in one normalized response.
+
+This page is the seller-facing summary of one catalog API, `aliexpress.product`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.90 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `country` | string | no | Ship-to country as a 2-letter ISO code, e.g. US or DE. It changes prices, stock and the delivery estimate. Default `"US"`. |
+| `currency` | string | no | Price currency as a 3-letter ISO code, e.g. USD or EUR. Default `"USD"`. |
+| `productId` | string | yes | AliExpress product id, the number in the product URL (https://www.aliexpress.com/item/&lt;id&gt;.html), e.g. 3256807039224587. The AliExpress Search SKU returns it as productId. |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `video`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/aliexpress.product.input.json",
+  "example": {
+    "productId": "3256807039224587"
+  },
+  "title": "AliExpress product input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "productId"
+  ],
+  "properties": {
+    "productId": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "AliExpress product id, the number in the product URL (https://www.aliexpress.com/item/<id>.html), e.g. 3256807039224587. The AliExpress Search SKU returns it as productId."
+    },
+    "country": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "default": "US",
+      "description": "Ship-to country as a 2-letter ISO code, e.g. US or DE. It changes prices, stock and the delivery estimate."
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$",
+      "default": "USD",
+      "description": "Price currency as a 3-letter ISO code, e.g. USD or EUR."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "freeShipping",
+          "returnPolicy",
+          "video",
+          "wishlistCount"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `video`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | Product wrapper, or null when AliExpress has no product with that id. |
+| `data.items` | array | yes | Product detail records (one per requested product id). |
+| `data.items[].currency` | string or null | no | Price currency code, e.g. "USD", or null when no price is shown. |
+| `data.items[].deliveryDaysMax` | integer or null | no | Most days the default shipping option takes to the requested country, or null when not reported. |
+| `data.items[].deliveryDaysMin` | integer or null | no | Fewest days the default shipping option takes to the requested country, or null when not reported. |
+| `data.items[].freeShipping` | boolean or null | no | True when the default shipping option to the requested country costs nothing after AliExpress's buyer promotions, or null when the serving source does not report it. |
+| `data.items[].images` | array | no | Product image URLs, primary first. |
+| `data.items[].isTopRatedSeller` | boolean or null | no | True when AliExpress marks the store as a top-rated seller, or null when not reported. |
+| `data.items[].options` | array | no | The choices a buyer picks from, e.g. Color and Size, each with its values. |
+| `data.items[].options[].name` | string | no | Option name as AliExpress shows it, e.g. "Color". |
+| `data.items[].options[].values` | array | no | Values a buyer can pick, e.g. ["green", "Purple"]. |
+| `data.items[].originalPrice` | number or null | no | Price of the default variant before the current discount, or null when not shown. |
+| `data.items[].price` | number or null | no | Current price of the default variant in the requested currency (the lowest variant price when the page shows a range), or null when not shown. |
+| `data.items[].productId` | string | yes | AliExpress product id. |
+| `data.items[].quantityAvailable` | integer or null | no | Units in stock across all variants, or null when not reported. |
+| `data.items[].rating` | number or null | no | Average customer rating, 0-5, or null when the product is unrated. |
+| `data.items[].returnPolicy` | string or null | no | The returns promise AliExpress shows on the product, e.g. "Free returns within 90 days", or null when the serving source does not report it. |
+| `data.items[].reviewsCount` | integer or null | no | Number of customer reviews, or null when not reported. |
+| `data.items[].sellerCountry` | string or null | no | Country the store is registered in, as AliExpress names it, e.g. "China", or null when not reported. |
+| `data.items[].sellerFeedbackCount` | integer or null | no | Number of buyer feedback ratings the store has received, or null when not reported. |
+| `data.items[].sellerFeedbackPercent` | number or null | no | Share of the store's buyer feedback that is positive, as a percentage, e.g. 95.9, or null when not reported. |
+| `data.items[].sellerLevel` | string or null | no | The store's AliExpress seller level code, e.g. "25-s", or null when not reported. |
+| `data.items[].sellerOpenedUtc` | number or null | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. The day the store opened on AliExpress, as midnight UTC of that date; null when not reported. |
+| `data.items[].sellerScore` | integer or null | no | The store's AliExpress feedback score, the points AliExpress shows beside the store, or null when not reported. |
+| `data.items[].shipFrom` | string or null | no | Country the default shipping option ships from, as AliExpress names it, e.g. "China", or null when not reported. |
+| `data.items[].shippingCost` | number or null | no | Shipping cost of the default option to the requested country, in the requested currency, or null when not reported or the serving source does not report it in that currency. AliExpress applies buyer promotions to it, so sources can differ. |
+| `data.items[].soldCount` | integer or null | no | Units sold, read from AliExpress's rounded label, so "4,000+ sold" comes back as 4000; null when not shown. |
+| `data.items[].specifications` | array | no | The seller's specifications table, one name and value per row. |
+| `data.items[].specifications[].name` | string | no | Attribute name as the seller lists it, e.g. "Material". |
+| `data.items[].specifications[].value` | string | no | Attribute value as the seller lists it. |
+| `data.items[].storeId` | string or null | no | Storefront number of the store, the digits in https://www.aliexpress.com/store/&lt;id&gt;, or null when not reported. |
+| `data.items[].storeName` | string or null | no | Name of the store selling the product, or null when not reported. |
+| `data.items[].title` | string | yes | Product title. |
+| `data.items[].url` | string | yes | AliExpress product page URL with tracking query parameters removed. |
+| `data.items[].variants` | array | no | One entry per purchasable combination of options. |
+| `data.items[].variants[].attributes` | object or null | no | The option values that make up this variant, keyed by option name, e.g. &#123;"Color": "Purple", "Size": "XL"&#125;, or null when the serving source does not report them. |
+| `data.items[].variants[].image` | string or null | no | Picture of this variant, or null when it has none or the serving source does not report it. |
+| `data.items[].variants[].inStock` | boolean or null | no | True when this variant can be bought now, or null when not reported. |
+| `data.items[].variants[].originalPrice` | number or null | no | Price of this variant before the current discount, or null when not reported. |
+| `data.items[].variants[].price` | number or null | no | Current price of this variant, or null when the serving source does not report it. |
+| `data.items[].variants[].quantityAvailable` | integer or null | no | Units of this variant in stock, or null when not reported. |
+| `data.items[].variants[].skuId` | string | no | AliExpress id of this variant. |
+| `data.items[].video` | string or null | no | Product video URL (MP4), or null when the product has none or the serving source does not report it. |
+| `data.items[].wishlistCount` | integer or null | no | Number of shoppers who added the product to their wish list, or null when the serving source does not report it. |
+| `found` | boolean | yes | True when the product was found. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/aliexpress.product.output.json",
+  "title": "AliExpress product output",
+  "type": "object",
+  "x-anyapi-heavy": true,
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "True when the product was found."
+    },
+    "data": {
+      "description": "Product wrapper, or null when AliExpress has no product with that id.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Product detail records (one per requested product id).",
+              "items": {
+                "type": "object",
+                "required": [
+                  "productId",
+                  "title",
+                  "url"
+                ],
+                "properties": {
+                  "productId": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "AliExpress product id."
+                  },
+                  "title": {
+                    "x-anyapi-must-populate": true,
+                    "type": "string",
+                    "description": "Product title."
+                  },
+                  "url": {
+                    "x-anyapi-domain": "aliexpress.com",
+                    "type": "string",
+                    "description": "AliExpress product page URL with tracking query parameters removed."
+                  },
+                  "price": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Current price of the default variant in the requested currency (the lowest variant price when the page shows a range), or null when not shown."
+                  },
+                  "originalPrice": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Price of the default variant before the current discount, or null when not shown."
+                  },
+                  "currency": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Price currency code, e.g. \"USD\", or null when no price is shown."
+                  },
+                  "rating": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Average customer rating, 0-5, or null when the product is unrated."
+                  },
+                  "reviewsCount": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of customer reviews, or null when not reported."
+                  },
+                  "soldCount": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Units sold, read from AliExpress's rounded label, so \"4,000+ sold\" comes back as 4000; null when not shown."
+                  },
+                  "images": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "items": {
+                      "x-anyapi-domain": [
+                        "aliexpress-media.com",
+                        "alicdn.com"
+                      ],
+                      "type": "string"
+                    },
+                    "description": "Product image URLs, primary first."
+                  },
+                  "video": {
+                    "x-anyapi-domain": "aliexpress-media.com",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Product video URL (MP4), or null when the product has none or the serving source does not report it."
+                  },
+                  "options": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "description": "The choices a buyer picks from, e.g. Color and Size, each with its values.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Option name as AliExpress shows it, e.g. \"Color\"."
+                        },
+                        "values": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Values a buyer can pick, e.g. [\"green\", \"Purple\"]."
+                        }
+                      }
+                    }
+                  },
+                  "variants": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "description": "One entry per purchasable combination of options.",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "skuId": {
+                          "type": "string",
+                          "description": "AliExpress id of this variant."
+                        },
+                        "attributes": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "description": "The option values that make up this variant, keyed by option name, e.g. {\"Color\": \"Purple\", \"Size\": \"XL\"}, or null when the serving source does not report them."
+                        },
+                        "price": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "description": "Current price of this variant, or null when the serving source does not report it."
+                        },
+                        "originalPrice": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "description": "Price of this variant before the current discount, or null when not reported."
+                        },
+                        "quantityAvailable": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "description": "Units of this variant in stock, or null when not reported."
+                        },
+                        "inStock": {
+                          "type": [
+                            "boolean",
+                            "null"
+                          ],
+                          "description": "True when this variant can be bought now, or null when not reported."
+                        },
+                        "image": {
+                          "x-anyapi-domain": [
+                            "aliexpress-media.com",
+                            "alicdn.com"
+                          ],
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Picture of this variant, or null when it has none or the serving source does not report it."
+                        }
+                      }
+                    }
+                  },
+                  "quantityAvailable": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Units in stock across all variants, or null when not reported."
+                  },
+                  "specifications": {
+                    "x-anyapi-must-populate": true,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "description": "Attribute name as the seller lists it, e.g. \"Material\"."
+                        },
+                        "value": {
+                          "type": "string",
+                          "description": "Attribute value as the seller lists it."
+                        }
+                      }
+                    },
+                    "description": "The seller's specifications table, one name and value per row."
+                  },
+                  "storeName": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Name of the store selling the product, or null when not reported."
+                  },
+                  "storeId": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Storefront number of the store, the digits in https://www.aliexpress.com/store/<id>, or null when not reported."
+                  },
+                  "sellerFeedbackPercent": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Share of the store's buyer feedback that is positive, as a percentage, e.g. 95.9, or null when not reported."
+                  },
+                  "sellerFeedbackCount": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of buyer feedback ratings the store has received, or null when not reported."
+                  },
+                  "sellerScore": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "The store's AliExpress feedback score, the points AliExpress shows beside the store, or null when not reported."
+                  },
+                  "sellerLevel": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "The store's AliExpress seller level code, e.g. \"25-s\", or null when not reported."
+                  },
+                  "sellerOpenedUtc": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. The day the store opened on AliExpress, as midnight UTC of that date; null when not reported."
+                  },
+                  "isTopRatedSeller": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "True when AliExpress marks the store as a top-rated seller, or null when not reported."
+                  },
+                  "sellerCountry": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Country the store is registered in, as AliExpress names it, e.g. \"China\", or null when not reported."
+                  },
+                  "shipFrom": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Country the default shipping option ships from, as AliExpress names it, e.g. \"China\", or null when not reported."
+                  },
+                  "deliveryDaysMin": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Fewest days the default shipping option takes to the requested country, or null when not reported."
+                  },
+                  "deliveryDaysMax": {
+                    "x-anyapi-must-populate": true,
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Most days the default shipping option takes to the requested country, or null when not reported."
+                  },
+                  "shippingCost": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Shipping cost of the default option to the requested country, in the requested currency, or null when not reported or the serving source does not report it in that currency. AliExpress applies buyer promotions to it, so sources can differ."
+                  },
+                  "freeShipping": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ],
+                    "description": "True when the default shipping option to the requested country costs nothing after AliExpress's buyer promotions, or null when the serving source does not report it."
+                  },
+                  "wishlistCount": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Number of shoppers who added the product to their wish list, or null when the serving source does not report it."
+                  },
+                  "returnPolicy": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "The returns promise AliExpress shows on the product, e.g. \"Free returns within 90 days\", or null when the serving source does not report it."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `currency`
+- `deliveryDaysMax`
+- `deliveryDaysMin`
+- `images`
+- `isTopRatedSeller`
+- `items`
+- `options`
+- `originalPrice`
+- `price`
+- `productId`
+- `quantityAvailable`
+- `rating`
+- `reviewsCount`
+- `sellerCountry`
+- `sellerFeedbackCount`
+- `sellerFeedbackPercent`
+- `sellerLevel`
+- `sellerOpenedUtc`
+- `sellerScore`
+- `shipFrom`
+- `specifications`
+- `storeId`
+- `storeName`
+- `title`
+- `variants`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "productId": "3256807039224587"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

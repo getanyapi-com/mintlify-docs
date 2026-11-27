@@ -1,0 +1,238 @@
+---
+title: "Pinterest Search"
+description: "Sell pinterest.search on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Search Pinterest by keyword and get pin results with titles, images, and links.
+
+This page is the seller-facing summary of one catalog API, `pinterest.search`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `cursor` | string | no | Opaque pagination cursor from a previous response's nextCursor. Omit for the first page. |
+| `limit` | integer | no | Page size to ask for (1-20). Some sources return their whole page of about 20 pins whatever limit says: a page is never trimmed after the call, so nextCursor continues exactly where this response ended. |
+| `query` | string | yes | Keyword, topic, brand, or theme to search Pinterest for (e.g. mid-century living room). |
+| `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `description` or `videoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be null on a pin that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
+| `type` | string | no | Kind of results to return. Only all-pins is supported; leave type out for the same results. One of: `all-pins`. Default `"all-pins"`. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/pinterest.search.input.json",
+  "example": {
+    "query": "home decor",
+    "limit": 3
+  },
+  "title": "Pinterest search input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "query"
+  ],
+  "properties": {
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20,
+      "description": "Page size to ask for (1-20). Some sources return their whole page of about 20 pins whatever limit says: a page is never trimmed after the call, so nextCursor continues exactly where this response ended."
+    },
+    "query": {
+      "type": "string",
+      "description": "Keyword, topic, brand, or theme to search Pinterest for (e.g. mid-century living room)."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "all-pins"
+      ],
+      "default": "all-pins",
+      "description": "Kind of results to return. Only all-pins is supported; leave type out for the same results."
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Opaque pagination cursor from a previous response's nextCursor. Omit for the first page."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "description",
+          "videoUrl"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `description` or `videoUrl`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be null on a pin that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.items` | array | yes | Matching Pinterest records: pin or board title, description, image/video URL, creator, and link. |
+| `data.items[].author` | string | no | Username (handle) of the account that saved the pin. |
+| `data.items[].authorName` | string | no | Display name of the account that saved the pin. |
+| `data.items[].description` | string or null | no | The pin's full description text, or null when the source does not provide it. |
+| `data.items[].id` | string | yes |  |
+| `data.items[].image` | string | no | URL of the pin's full-size image; for a video pin, its cover image. |
+| `data.items[].title` | string | yes | Pin title, or the pin's description when the pin has no title. |
+| `data.items[].url` | string | yes |  |
+| `data.items[].videoUrl` | string or null | no | Streaming (HLS) URL of the pin's video, or null when the pin is not a video or the source does not provide it. |
+| `data.nextCursor` | string or null | no | Opaque cursor for the next page of results, or null/empty when there are no more. Pass it back as cursor to continue. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/pinterest.search.output.json",
+  "title": "Pinterest search output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "items"
+          ],
+          "properties": {
+            "items": {
+              "x-anyapi-must-populate": true,
+              "type": "array",
+              "description": "Matching Pinterest records: pin or board title, description, image/video URL, creator, and link.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "url",
+                  "title"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "x-anyapi-domain": "pinterest.com",
+                    "x-anyapi-must-populate": true,
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string",
+                    "description": "Pin title, or the pin's description when the pin has no title."
+                  },
+                  "description": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "The pin's full description text, or null when the source does not provide it."
+                  },
+                  "image": {
+                    "x-anyapi-domain": "pinimg.com",
+                    "type": "string",
+                    "description": "URL of the pin's full-size image; for a video pin, its cover image."
+                  },
+                  "videoUrl": {
+                    "x-anyapi-domain": "pinimg.com",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Streaming (HLS) URL of the pin's video, or null when the pin is not a video or the source does not provide it."
+                  },
+                  "author": {
+                    "type": "string",
+                    "description": "Username (handle) of the account that saved the pin."
+                  },
+                  "authorName": {
+                    "type": "string",
+                    "description": "Display name of the account that saved the pin."
+                  }
+                }
+              }
+            },
+            "nextCursor": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Opaque cursor for the next page of results, or null/empty when there are no more. Pass it back as cursor to continue."
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `items`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+An empty list is not a not-found: when the entity exists and has nothing to return, answer 2xx with `found: true` and an empty `items` array.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "query": "home decor",
+  "limit": 3
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

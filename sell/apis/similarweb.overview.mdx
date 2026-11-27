@@ -1,0 +1,448 @@
+---
+title: "Similarweb Website Traffic"
+description: "Sell similarweb.overview on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Get the Similarweb traffic overview for any website: estimated monthly visits and a three-month history, global, country, and category rank, bounce rate, pages per visit, visit duration, traffic sources including AI chatbots, top countries, and top search keywords - as normalized JSON.
+
+This page is the seller-facing summary of one catalog API, `similarweb.overview`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$0.82 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `domain` | string | yes | The website's domain, without a scheme or path (e.g. stripe.com). |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/similarweb.overview.input.json",
+  "example": {
+    "domain": "stripe.com"
+  },
+  "title": "Similarweb website traffic input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "domain"
+  ],
+  "properties": {
+    "domain": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The website's domain, without a scheme or path (e.g. stripe.com)."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes |  |
+| `data.avgVisitDurationSeconds` | number or null | yes | Average visit duration in seconds. |
+| `data.bounceRate` | number or null | yes | Share of visits that leave after one page, as a fraction from 0 to 1. |
+| `data.category` | string or null | yes | Similarweb's category slug for the website (e.g. finance, news_and_media). |
+| `data.categoryRank` | integer or null | yes | Rank by traffic within the website's category. Null for websites too small to rank. |
+| `data.countryCode` | string or null | yes | Two-letter code of the country countryRank is measured in, the website's top country. |
+| `data.countryRank` | integer or null | yes | Rank by traffic within countryCode. Null for websites too small to rank. |
+| `data.description` | string or null | yes | The website's meta description as Similarweb records it. |
+| `data.domain` | string | yes | The website's domain. |
+| `data.globalRank` | integer or null | yes | Similarweb global rank by traffic. Null for websites too small to rank. |
+| `data.image` | string or null | yes | Screenshot of the website's homepage. |
+| `data.monthlyVisits` | integer or null | yes | Estimated total visits in the snapshot month. |
+| `data.pagesPerVisit` | number or null | yes | Average pages viewed per visit. |
+| `data.snapshotUtc` | number or null | yes | The month the traffic figures describe: UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.title` | string or null | yes | The website's page title as Similarweb records it. |
+| `data.topCountries` | array | yes | Countries sending the most visits, up to five, largest first. |
+| `data.topCountries[].countryCode` | string | yes | Two-letter country code. |
+| `data.topCountries[].countryName` | string | no | Country name in English. |
+| `data.topCountries[].share` | number | no | Share of the website's visits, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.topKeywords` | array | yes | Search keywords sending the most visits, up to five. |
+| `data.topKeywords[].cpcUsd` | number or null | no | Average cost per click in USD. Null when Similarweb has no figure. |
+| `data.topKeywords[].estimatedValue` | number or null | no | Similarweb's estimated value of the keyword to this website, as Similarweb publishes it. |
+| `data.topKeywords[].keyword` | string | yes | The search keyword. |
+| `data.topKeywords[].searchVolume` | integer or null | no | Monthly search volume for the keyword. |
+| `data.trafficSources` | object | yes | Where the website's visits come from. Each value is a fraction from 0 to 1 of all visits. |
+| `data.trafficSources.affiliate` | number or null | no | Share of visits that arrive from affiliate and paid referral links, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.trafficSources.direct` | number or null | no | Share of visits that arrive from typing the address or bookmarks, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.trafficSources.displayAds` | number or null | no | Share of visits that arrive from display ads, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.trafficSources.genAi` | number or null | no | Share of visits that arrive from AI chatbots such as ChatGPT, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.trafficSources.mail` | number or null | no | Share of visits that arrive from email, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.trafficSources.referrals` | number or null | no | Share of visits that arrive from links on other websites, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.trafficSources.searchOrganic` | number or null | no | Share of visits that arrive from unpaid search results, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.trafficSources.searchPaid` | number or null | no | Share of visits that arrive from paid search ads, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.trafficSources.socialOrganic` | number or null | no | Share of visits that arrive from unpaid social media, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.trafficSources.socialPaid` | number or null | no | Share of visits that arrive from paid social media ads, as a fraction from 0 to 1 (0.25 means 25%). |
+| `data.visitsHistory` | array | yes | Estimated monthly visits for recent months, oldest first. |
+| `data.visitsHistory[].monthUtc` | number | yes | First day of the month: UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.visitsHistory[].visits` | integer | no | Estimated visits in that month. |
+| `found` | boolean | yes |  |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/similarweb.overview.output.json",
+  "title": "Similarweb website traffic output",
+  "x-anyapi-result-list": false,
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean"
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "domain",
+            "title",
+            "description",
+            "category",
+            "image",
+            "snapshotUtc",
+            "globalRank",
+            "countryCode",
+            "countryRank",
+            "categoryRank",
+            "monthlyVisits",
+            "bounceRate",
+            "pagesPerVisit",
+            "avgVisitDurationSeconds",
+            "visitsHistory",
+            "trafficSources",
+            "topCountries",
+            "topKeywords"
+          ],
+          "properties": {
+            "domain": {
+              "type": "string",
+              "description": "The website's domain.",
+              "x-anyapi-must-populate": true
+            },
+            "title": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The website's page title as Similarweb records it."
+            },
+            "description": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "The website's meta description as Similarweb records it."
+            },
+            "category": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Similarweb's category slug for the website (e.g. finance, news_and_media)."
+            },
+            "image": {
+              "x-anyapi-domain": "similarcdn.com",
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Screenshot of the website's homepage."
+            },
+            "snapshotUtc": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "The month the traffic figures describe: UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "globalRank": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Similarweb global rank by traffic. Null for websites too small to rank.",
+              "x-anyapi-must-populate": true
+            },
+            "countryCode": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Two-letter code of the country countryRank is measured in, the website's top country."
+            },
+            "countryRank": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Rank by traffic within countryCode. Null for websites too small to rank."
+            },
+            "categoryRank": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Rank by traffic within the website's category. Null for websites too small to rank."
+            },
+            "monthlyVisits": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "description": "Estimated total visits in the snapshot month.",
+              "x-anyapi-must-populate": true
+            },
+            "bounceRate": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Share of visits that leave after one page, as a fraction from 0 to 1."
+            },
+            "pagesPerVisit": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Average pages viewed per visit."
+            },
+            "avgVisitDurationSeconds": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "description": "Average visit duration in seconds."
+            },
+            "visitsHistory": {
+              "type": "array",
+              "x-anyapi-must-populate": true,
+              "description": "Estimated monthly visits for recent months, oldest first.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "monthUtc"
+                ],
+                "properties": {
+                  "monthUtc": {
+                    "type": "number",
+                    "description": "First day of the month: UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+                  },
+                  "visits": {
+                    "type": "integer",
+                    "description": "Estimated visits in that month."
+                  }
+                }
+              }
+            },
+            "trafficSources": {
+              "type": "object",
+              "x-anyapi-must-populate": true,
+              "description": "Where the website's visits come from. Each value is a fraction from 0 to 1 of all visits.",
+              "properties": {
+                "direct": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from typing the address or bookmarks, as a fraction from 0 to 1 (0.25 means 25%)."
+                },
+                "searchOrganic": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from unpaid search results, as a fraction from 0 to 1 (0.25 means 25%)."
+                },
+                "searchPaid": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from paid search ads, as a fraction from 0 to 1 (0.25 means 25%)."
+                },
+                "socialOrganic": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from unpaid social media, as a fraction from 0 to 1 (0.25 means 25%)."
+                },
+                "socialPaid": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from paid social media ads, as a fraction from 0 to 1 (0.25 means 25%)."
+                },
+                "referrals": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from links on other websites, as a fraction from 0 to 1 (0.25 means 25%)."
+                },
+                "mail": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from email, as a fraction from 0 to 1 (0.25 means 25%)."
+                },
+                "displayAds": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from display ads, as a fraction from 0 to 1 (0.25 means 25%)."
+                },
+                "affiliate": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from affiliate and paid referral links, as a fraction from 0 to 1 (0.25 means 25%)."
+                },
+                "genAi": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "Share of visits that arrive from AI chatbots such as ChatGPT, as a fraction from 0 to 1 (0.25 means 25%)."
+                }
+              }
+            },
+            "topCountries": {
+              "type": "array",
+              "x-anyapi-must-populate": true,
+              "description": "Countries sending the most visits, up to five, largest first.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "countryCode"
+                ],
+                "properties": {
+                  "countryCode": {
+                    "type": "string",
+                    "description": "Two-letter country code."
+                  },
+                  "countryName": {
+                    "type": "string",
+                    "description": "Country name in English."
+                  },
+                  "share": {
+                    "type": "number",
+                    "description": "Share of the website's visits, as a fraction from 0 to 1 (0.25 means 25%)."
+                  }
+                }
+              }
+            },
+            "topKeywords": {
+              "type": "array",
+              "x-anyapi-must-populate": true,
+              "description": "Search keywords sending the most visits, up to five.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "keyword"
+                ],
+                "properties": {
+                  "keyword": {
+                    "type": "string",
+                    "description": "The search keyword."
+                  },
+                  "searchVolume": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "description": "Monthly search volume for the keyword."
+                  },
+                  "cpcUsd": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Average cost per click in USD. Null when Similarweb has no figure."
+                  },
+                  "estimatedValue": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "description": "Similarweb's estimated value of the keyword to this website, as Similarweb publishes it."
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `domain`
+- `globalRank`
+- `monthlyVisits`
+- `topCountries`
+- `topKeywords`
+- `trafficSources`
+- `visitsHistory`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "domain": "stripe.com"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).

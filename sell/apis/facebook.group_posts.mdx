@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `facebook.group_posts
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$0.72 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.71 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -18,7 +18,7 @@ AnyAPI publishes this API from **$0.72 per 1,000 requests**. That is the price a
 | `cursor` | string | no | Pagination cursor from a previous response to fetch the next page. |
 | `requireFields` | array | no | Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `sharedPostText`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a post that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. |
 | `sort` | string | no | Ordering for the returned posts (e.g. TOP_POSTS). One of: `TOP_POSTS`, `RECENT_ACTIVITY`, `CHRONOLOGICAL`, `CHRONOLOGICAL_LISTINGS`. |
-| `url` | string | yes | The URL of a public Facebook group to fetch posts from (e.g. https://www.facebook.com/groups/instantpotcommunity/). |
+| `url` | string | yes | The URL of a public Facebook group to fetch posts from (e.g. https://www.facebook.com/groups/instantpotcommunity/). Any other Facebook link inside a group, such as a link to one post, a permalink, a member or the group's media, is read as that group's address. |
 
 <Accordion title="Full input JSON Schema">
 
@@ -32,13 +32,16 @@ AnyAPI publishes this API from **$0.72 per 1,000 requests**. That is the price a
   "title": "Facebook Group Posts input",
   "type": "object",
   "additionalProperties": false,
+  "x-anyapi-input-normalizers": {
+    "url": "facebook_group_post_to_group"
+  },
   "required": [
     "url"
   ],
   "properties": {
     "url": {
       "type": "string",
-      "description": "The URL of a public Facebook group to fetch posts from (e.g. https://www.facebook.com/groups/instantpotcommunity/)."
+      "description": "The URL of a public Facebook group to fetch posts from (e.g. https://www.facebook.com/groups/instantpotcommunity/). Any other Facebook link inside a group, such as a link to one post, a permalink, a member or the group's media, is read as that group's address."
     },
     "sort": {
       "type": "string",

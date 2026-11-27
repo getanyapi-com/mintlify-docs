@@ -389,6 +389,17 @@ This API takes no input fields.
       },
       "maxItems": 30,
       "description": "Exclude these job functions (same codes as functionIds). Up to 30 values."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "premium"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged. Name the output fields this request must be able to return, for example `premium`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on a lead who genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge."
     }
   }
 }
@@ -417,7 +428,7 @@ This API takes no input fields.
 | `data.items[].lastName` | string | no | Member's last name. |
 | `data.items[].location` | string | no | Member's location as a single string (city, region, country). |
 | `data.items[].openProfile` | boolean | no | Whether the member accepts messages from people outside their network. |
-| `data.items[].premium` | boolean | no | Whether the member has a LinkedIn Premium subscription. |
+| `data.items[].premium` | boolean | no | Whether the member has a LinkedIn Premium subscription. Absent when the serving source does not report it. |
 | `data.items[].url` | string | yes | LinkedIn profile URL in its member-id form (https://www.linkedin.com/in/ACwAAA...). It opens the profile on LinkedIn, and passing it as `url` to linkedin.profile returns the full record. |
 | `data.page` | integer | no | The page this response holds, starting at 1. |
 | `data.totalPages` | integer | no | How many pages of up to 25 leads the search has. |
@@ -505,7 +516,8 @@ Extra fields are kept, missing declared fields fail.
                   },
                   "premium": {
                     "type": "boolean",
-                    "description": "Whether the member has a LinkedIn Premium subscription."
+                    "x-anyapi-source-dependent": true,
+                    "description": "Whether the member has a LinkedIn Premium subscription. Absent when the serving source does not report it."
                   },
                   "openProfile": {
                     "type": "boolean",

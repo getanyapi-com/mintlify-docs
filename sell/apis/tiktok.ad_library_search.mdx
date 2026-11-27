@@ -9,7 +9,7 @@ This page is the seller-facing summary of one catalog API, `tiktok.ad_library_se
 
 ## The price you compete with
 
-AnyAPI publishes this API from **$1.20 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+AnyAPI publishes this API from **$0.80 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
 
 ## The request your endpoint receives
 
@@ -76,6 +76,18 @@ This API takes no input fields.
     "cursor": {
       "type": "string",
       "description": "Opaque cursor from a previous response's nextCursor. Omit it for the first page."
+    },
+    "requireFields": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "format",
+          "status"
+        ]
+      },
+      "description": "Optional; omit it and routing is unchanged, with the cheapest source serving. Name the output fields this request must be able to return, for example `status`, and it is served only by a source that returns every one of them. Fields you do not name are still returned whenever the serving source has them. This can raise your price: when the cheapest source cannot return a named field, a dearer source serves, and you are quoted and charged its price. A named field can still be absent on an ad that genuinely lacks it. Naming a combination that no single source returns together is refused as invalid input, with no charge. On a paginated walk it applies to the first page only; later pages stay with the source that page chose, at the price it was quoted."
     }
   }
 }
@@ -95,9 +107,9 @@ This API takes no input fields.
 | `data.ads[].coverUrl` | string | yes | Cover image URL of the ad's first video. |
 | `data.ads[].estimatedAudience` | string | yes | Audience size band TikTok publishes for the ad, for example "100K-200K". |
 | `data.ads[].firstShownUtc` | integer | no | UTC epoch timestamp in seconds (Unix time) when TikTok first showed the ad. Multiply by 1000 for a JS Date in milliseconds. |
-| `data.ads[].format` | string | no | TikTok's creative format code for the ad, as the ad library reports it. |
+| `data.ads[].format` | string or null | no | TikTok's creative format code for the ad, as the ad library reports it. Null when the serving source does not report it. |
 | `data.ads[].lastShownUtc` | integer | no | UTC epoch timestamp in seconds (Unix time) when TikTok last showed the ad. Multiply by 1000 for a JS Date in milliseconds. |
-| `data.ads[].status` | string | no | TikTok's audit status code for the ad, as the ad library reports it. |
+| `data.ads[].status` | string or null | no | TikTok's audit status code for the ad, as the ad library reports it. Null when the serving source does not report it. |
 | `data.ads[].url` | string | no | Link to the ad's detail page in TikTok's public Ads Library. |
 | `data.ads[].videoUrl` | string | yes | Playable URL of the ad's first video. |
 | `data.hasMore` | boolean | yes |  |
@@ -219,12 +231,18 @@ Extra fields are kept, missing declared fields fail.
                     "description": "Cover image URL of the ad's first video."
                   },
                   "status": {
-                    "type": "string",
-                    "description": "TikTok's audit status code for the ad, as the ad library reports it."
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "TikTok's audit status code for the ad, as the ad library reports it. Null when the serving source does not report it."
                   },
                   "format": {
-                    "type": "string",
-                    "description": "TikTok's creative format code for the ad, as the ad library reports it."
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "TikTok's creative format code for the ad, as the ad library reports it. Null when the serving source does not report it."
                   }
                 }
               }
