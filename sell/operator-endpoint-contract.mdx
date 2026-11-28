@@ -265,6 +265,16 @@ request, record by record. It compares the data fields and also the text, links,
 addresses, and phone numbers. Where the two differ, a review decides whether your answer
 is wrong or the sources simply differ.
 
+On `youtube.search` (`title`) and `youtube.channel_videos` (`title` and `publishedTime`), a
+filled value that differs from AnyAPI's for the same video does not by itself count against
+your answer, because YouTube shows titles in the viewer's language and upload dates as relative
+text such as "3 days ago". A missing value in those fields is judged as in any other field.
+
+On `aliexpress.product`, AliExpress gives a product two ids, an international one and one on
+its US site, and either id is accepted for the same product. An item link on `aliexpress.com`
+or `aliexpress.us` that names that product counts as the same link; a link to a different
+product fails.
+
 - **An answer found false** is unpaid, and what it earned is taken back from your available
   balance. It counts as a failed request when AnyAPI shares requests among sellers. A person
   at AnyAPI reads the answer first, then emails you the request, the API, and what it cost.
