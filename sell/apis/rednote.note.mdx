@@ -1,0 +1,268 @@
+---
+title: "RedNote (Xiaohongshu) Note"
+description: "Sell rednote.note on AnyAPI: the request your endpoint receives, the response it must return, and what the real-request check judges."
+---
+
+Look up a RedNote (Xiaohongshu) note by note ID and return normalized note details.
+
+This page is the seller-facing summary of one catalog API, `rednote.note`. The transport rules that apply to every API a seller serves - signed requests, the response envelope, timeouts, and body limits - are on [the operator endpoint contract](/sell/operator-endpoint-contract).
+
+## The price you compete with
+
+AnyAPI publishes this API from **$12.00 per 1,000 requests**. That is the price a buyer sees today, so it is the price your endpoint has to come in under to win traffic.
+
+## The request your endpoint receives
+
+| Field | Type | Required | What it means |
+| --- | --- | --- | --- |
+| `noteId` | string | yes | RedNote (Xiaohongshu) note ID. |
+
+<Accordion title="Full input JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/rednote.note.input.json",
+  "example": {
+    "noteId": "6a8fe7c20000000026003bbf"
+  },
+  "title": "RedNote (Xiaohongshu) Note input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "noteId"
+  ],
+  "properties": {
+    "noteId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "RedNote (Xiaohongshu) note ID."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## The response your endpoint must return
+
+| Field | Type | Always present | What it means |
+| --- | --- | --- | --- |
+| `data` | null or object | yes | The note record, or null when nothing was found. |
+| `data.authorImage` | string | no | URL of the author's avatar. |
+| `data.authorNickname` | string | no | Display name of the note author. |
+| `data.authorRedId` | string | no | Author's public RedNote ID. |
+| `data.authorUserId` | string | no | Identifier of the note author. |
+| `data.authorVerified` | boolean | no | Whether the author carries RedNote's official verification. |
+| `data.collectCount` | integer | no | Number of times the note was collected. |
+| `data.commentCount` | integer | no | Number of comments on the note. |
+| `data.createdUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.description` | string | no | Note body text. |
+| `data.image` | string | no | URL of the note cover image. |
+| `data.language` | string | no | Detected language of the note. |
+| `data.likeCount` | integer | no | Number of likes on the note. |
+| `data.location` | string | no | Location the note was posted from, as RedNote reports it. |
+| `data.noteId` | string | yes | Note identifier. |
+| `data.shareCount` | integer | no | Number of times the note was shared. |
+| `data.title` | string | no | Note title. |
+| `data.type` | string | no | Note type, e.g. "normal" or "video". |
+| `data.updatedUtc` | number | no | UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds. |
+| `data.url` | string | no | Canonical URL of the note. |
+| `found` | boolean | yes | True when the note was found; false when the lookup returned nothing. |
+
+Extra fields are kept, missing declared fields fail.
+
+<Accordion title="Full output JSON Schema">
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://getanyapi.com/schemas/rednote.note.output.json",
+  "title": "RedNote (Xiaohongshu) Note output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "found",
+    "data"
+  ],
+  "properties": {
+    "found": {
+      "type": "boolean",
+      "description": "True when the note was found; false when the lookup returned nothing."
+    },
+    "data": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "noteId"
+          ],
+          "properties": {
+            "noteId": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Note identifier."
+            },
+            "title": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Note title."
+            },
+            "description": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Note body text."
+            },
+            "type": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Note type, e.g. \"normal\" or \"video\"."
+            },
+            "image": {
+              "x-anyapi-domain": [
+                "xhscdn.com",
+                "rednotecdn.com"
+              ],
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "URL of the note cover image."
+            },
+            "likeCount": {
+              "type": "integer",
+              "description": "Number of likes on the note."
+            },
+            "commentCount": {
+              "type": "integer",
+              "description": "Number of comments on the note."
+            },
+            "collectCount": {
+              "type": "integer",
+              "description": "Number of times the note was collected."
+            },
+            "shareCount": {
+              "type": "integer",
+              "description": "Number of times the note was shared."
+            },
+            "createdUtc": {
+              "x-anyapi-must-populate": true,
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "updatedUtc": {
+              "x-anyapi-must-populate": true,
+              "type": "number",
+              "description": "UTC epoch timestamp in seconds (Unix time). Multiply by 1000 for a JS Date in milliseconds."
+            },
+            "authorUserId": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Identifier of the note author."
+            },
+            "authorNickname": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Display name of the note author."
+            },
+            "authorImage": {
+              "x-anyapi-domain": [
+                "xhscdn.com",
+                "rednotecdn.com"
+              ],
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "URL of the author's avatar."
+            },
+            "authorRedId": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Author's public RedNote ID."
+            },
+            "url": {
+              "x-anyapi-domain": [
+                "xiaohongshu.com",
+                "rednote.com",
+                "xhslink.com"
+              ],
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Canonical URL of the note."
+            },
+            "language": {
+              "x-anyapi-must-populate": true,
+              "type": "string",
+              "description": "Detected language of the note."
+            },
+            "location": {
+              "type": "string",
+              "description": "Location the note was posted from, as RedNote reports it."
+            },
+            "authorVerified": {
+              "type": "boolean",
+              "description": "Whether the author carries RedNote's official verification."
+            }
+          }
+        }
+      ],
+      "description": "The note record, or null when nothing was found."
+    }
+  }
+}
+```
+
+</Accordion>
+
+## Fields that must never come back empty
+
+- `authorImage`
+- `authorNickname`
+- `authorRedId`
+- `authorUserId`
+- `createdUtc`
+- `description`
+- `image`
+- `language`
+- `noteId`
+- `title`
+- `type`
+- `updatedUtc`
+- `url`
+
+The repository marks these fields as ones every source must be able to fill. An empty value is only correct when the entity itself genuinely has nothing there.
+
+## Not found, and how it differs from empty
+
+When the entity does not exist, answer 2xx with the not-found shape:
+
+```json
+{
+  "found": false,
+  "data": null
+}
+```
+
+This API says what comes back as not found:
+
+> True when the note was found; false when the lookup returned nothing.
+
+Follow that rule: where it calls a case not found, answer with the not-found shape above.
+
+This output schema declares no `reason` field, so `found: false` is the whole not-found answer.
+
+## Example request
+
+```json
+{
+  "noteId": "6a8fe7c20000000026003bbf"
+}
+```
+
+The registration tests send this example to your endpoint, with the API's other test inputs. After that, the real-request check sends your endpoint real past customer inputs, and an AI reviewer compares each answer with AnyAPI's own answer to the same input.
+
+## Next
+
+- [The operator endpoint contract](/sell/operator-endpoint-contract) for signing, budgets, and the real-request check.
+- [Every API open to sellers](/sell/apis/index).
+- Want to sell an API that is not on that list? Email [support@getanyapi.com](mailto:support@getanyapi.com).
